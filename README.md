@@ -1,50 +1,71 @@
-# Welcome to your Expo app 👋
+# El Point 🔥
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación móvil de descubrimiento gastronómico con gamificación social. Los usuarios rankean restaurantes, suben de nivel y compiten en una comunidad de comensales.
 
-## Get started
+## Stack
 
-1. Install dependencies
+- **Framework:** Expo SDK 54 / React Native
+- **Navegación:** Expo Router v6 (file-based)
+- **Base de datos / Auth:** Supabase
+- **Estilos:** NativeWind + tema custom (tokens en `lib/theme.ts`)
+- **Mapas:** `react-native-maps`
+- **Gestos:** `react-native-gesture-handler` + `@gorhom/bottom-sheet`
 
-   ```bash
-   npm install
-   ```
+## Estructura
 
-2. Start the app
+```
+app/
+├── (auth)/          # Login, registro cliente/owner
+├── (customer)/      # Home, Mapa, Búsqueda, Perfil (cliente)
+├── (owner)/         # Dashboard, Analytics, Settings (dueño)
+└── restaurant/      # Perfil de restaurante [id]
 
-   ```bash
-   npx expo start
-   ```
+components/ui/
+├── AppLogo             # Logo "el Point" con variantes
+├── ScreenHeader        # Header con safe area estandarizado
+├── SearchBar           # Barra de búsqueda unificada
+├── NotificationsSheet  # Dropdown de notificaciones
+├── StarBadge           # Badge de rating
+├── StarRow             # Fila de estrellas
+├── SectionTitle        # Título de sección con icono
+└── Card                # Card base neo-brutalist
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+lib/
+├── theme.ts         # Tokens de color, sombras, constantes de layout
+└── supabase.ts      # Cliente Supabase
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Roles
 
-## Learn more
+| Rol | Ruta |
+|-----|------|
+| Cliente | `/(customer)` — feed, mapa, búsqueda, perfil |
+| Dueño | `/(owner)` — dashboard, analytics, settings |
 
-To learn more about developing your project with Expo, look at the following resources:
+El rol se obtiene de `profiles.role` en Supabase al iniciar sesión.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Gamificación
 
-## Join the community
+Los clientes acumulan XP al dejar reseñas ("ranks"). Sistema de niveles con rangos progresivos:
 
-Join our community of developers creating universal apps.
+> Novato → Explorador → Comensal Experto → Crítico Local → Gurú Gastronómico
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Diseño
+
+Estética **neo-brutalist**: bordes sólidos `borderWidth: 2`, sombras duras, tipografía bold. Paleta naranja primario (`#ab3500`) con acentos dorados y rosados.
+
+Fuentes: `Outfit` (títulos) + `Plus Jakarta Sans` (cuerpo).
+
+## Setup
+
+```bash
+npm install
+npx expo start
+```
+
+Requiere variables de entorno de Supabase en `.env`:
+
+```
+EXPO_PUBLIC_SUPABASE_URL=...
+EXPO_PUBLIC_SUPABASE_ANON_KEY=...
+```
