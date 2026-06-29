@@ -26,7 +26,7 @@
       "predictiveBackGestureEnabled": false,
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyBHYtZ8BGjUHrLQrjs3tslM2jn94YPgimg"
+          "apiKey": "EXPO_PUBLIC_GOOGLE_MAPS_KEY"
         }
       }
     },
