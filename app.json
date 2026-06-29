@@ -1,5 +1,9 @@
 {
   "expo": {
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
     "name": "El-Point",
     "slug": "El-Point",
     "version": "1.0.0",
@@ -19,11 +23,12 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "predictiveBackGestureEnabled": false,
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBHYtZ8BGjUHrLQrjs3tslM2jn94YPgimg"
+        }
+      }
     },
     "plugins": [
       "expo-router",
@@ -38,11 +43,20 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-secure-store",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "38fff885-5f06-46f6-b050-fa4fd90e9954"
+      }
+    },
+    "owner": "enjeru1304"
   }
 }
