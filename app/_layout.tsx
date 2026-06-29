@@ -24,6 +24,7 @@ import 'react-native-reanimated';
 
 import { supabase } from '@/lib/supabase';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { AppThemeProvider } from '@/lib/ThemeContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -92,13 +93,15 @@ export default function RootLayout() {
   if (!ready || !fontsLoaded) return <View style={{ flex: 1, backgroundColor: '#fcf9f8' }} />;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <BottomSheetModalProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Slot />
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </BottomSheetModalProvider>
-    </GestureHandlerRootView>
+    <AppThemeProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <BottomSheetModalProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Slot />
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </BottomSheetModalProvider>
+      </GestureHandlerRootView>
+    </AppThemeProvider>
   );
 }

@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { C } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface Props {
   left?: ReactNode;
@@ -10,6 +10,7 @@ interface Props {
 }
 
 export function ScreenHeader({ left, right, border = true }: Props) {
+  const { C } = useTheme();
   const insets = useSafeAreaInsets();
   return (
     <View style={{

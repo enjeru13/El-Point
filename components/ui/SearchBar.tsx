@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { forwardRef } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
-import { C, shadow } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface Props {
   value: string;
@@ -20,6 +20,7 @@ export const SearchBar = forwardRef<TextInput, Props>(({
   placeholder = 'Buscar restaurantes, platos...',
   variant = 'default',
 }, ref) => {
+  const { C, shadow } = useTheme();
   const isFloating = variant === 'floating';
   const hasValue = value.length > 0;
 

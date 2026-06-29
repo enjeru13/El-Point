@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ReactNode } from 'react';
 import { Text, View } from 'react-native';
-import { C } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface Props {
   icon?: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
@@ -10,6 +10,7 @@ interface Props {
 }
 
 export function SectionTitle({ icon, label, action }: Props) {
+  const { C } = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>

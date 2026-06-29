@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { TextInput, TextInputProps, View, ViewStyle } from 'react-native';
-import { C } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface Props extends TextInputProps {
   containerStyle?: ViewStyle;
@@ -8,6 +8,7 @@ interface Props extends TextInputProps {
 }
 
 export function AppTextInput({ containerStyle, style, onFocus, onBlur, ...props }: Props) {
+  const { C } = useTheme();
   const [focused, setFocused] = useState(false);
 
   return (
@@ -33,7 +34,6 @@ export function AppTextInput({ containerStyle, style, onFocus, onBlur, ...props 
   );
 }
 
-/** Wrapper de campo — maneja borde naranja en focus */
 export function InputWrapper({
   focused,
   children,
@@ -43,6 +43,7 @@ export function InputWrapper({
   children: React.ReactNode;
   style?: ViewStyle;
 }) {
+  const { C } = useTheme();
   return (
     <View
       style={[

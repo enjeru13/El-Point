@@ -3,7 +3,7 @@ import { BottomTabBarProps, Tabs } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Animated, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { C, shadow } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
@@ -15,6 +15,7 @@ const TAB_ICONS: Record<string, { default: IconName; focused: IconName }> = {
 };
 
 function TabItem({ route, focused, onPress }: { route: any; focused: boolean; onPress: () => void }) {
+  const { C } = useTheme();
   const scale = useRef(new Animated.Value(focused ? 1.15 : 1)).current;
   const icons = TAB_ICONS[route.name] ?? { default: 'circle-outline', focused: 'circle' };
 
@@ -54,6 +55,7 @@ function TabItem({ route, focused, onPress }: { route: any; focused: boolean; on
 }
 
 function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
+  const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
 
   return (

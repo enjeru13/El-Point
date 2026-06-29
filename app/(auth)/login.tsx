@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { AppTextInput, InputWrapper } from '@/components/ui/AppTextInput';
 import { AppLogo } from '@/components/ui/AppLogo';
-import { C, shadow } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 
 const { width: W, height: H } = Dimensions.get('window');
 
@@ -78,6 +78,7 @@ function Field({ label, icon, focused, children, right }: {
   children: React.ReactNode;
   right?: React.ReactNode;
 }) {
+  const { C } = useTheme();
   return (
     <View style={{ gap: 8 }}>
       <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>{label}</Text>
@@ -96,6 +97,7 @@ const DEV_USERS = [
 ];
 
 export default function LoginScreen() {
+  const { C, shadow } = useTheme();
   const router = useRouter();
   const [email, setEmail]           = useState('');
   const [password, setPassword]     = useState('');

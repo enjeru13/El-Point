@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { C, shadow } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -58,20 +58,10 @@ const MOCK: Notif[] = [
   },
 ];
 
-const NOTIF_CONFIG: Record<NotifType, {
-  icon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
-  bg: string;
-  color: string;
-}> = {
-  like:         { icon: 'heart',           bg: C.primaryFixed,       color: C.primary },
-  reply:        { icon: 'reply',           bg: C.secondaryContainer, color: C.secondary },
-  levelup:      { icon: 'star-circle',     bg: C.primaryContainer,   color: '#fff' },
-  levelup_soon: { icon: 'trending-up',     bg: C.tertiaryContainer,  color: C.tertiary },
-};
-
 // ─── Dotted divider ───────────────────────────────────────────────────────────
 
 function DottedDivider({ label }: { label: string }) {
+  const { C } = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 14 }}>
       <View style={{ flex: 1, borderTopWidth: 2, borderStyle: 'dashed', borderColor: C.outlineVariant }} />
@@ -89,6 +79,13 @@ function DottedDivider({ label }: { label: string }) {
 // ─── Card ─────────────────────────────────────────────────────────────────────
 
 function NotifCard({ notif, onRead }: { notif: Notif; onRead: (id: string) => void }) {
+  const { C, shadow } = useTheme();
+  const NOTIF_CONFIG: Record<NotifType, { icon: React.ComponentProps<typeof MaterialCommunityIcons>['name']; bg: string; color: string }> = {
+    like:         { icon: 'heart',       bg: C.primaryFixed,       color: C.primary },
+    reply:        { icon: 'reply',       bg: C.secondaryContainer, color: C.secondary },
+    levelup:      { icon: 'star-circle', bg: C.primaryContainer,   color: '#fff' },
+    levelup_soon: { icon: 'trending-up', bg: C.tertiaryContainer,  color: C.tertiary },
+  };
   const cfg = NOTIF_CONFIG[notif.type];
 
   return (
@@ -156,6 +153,7 @@ export interface NotificationsHandle {
 }
 
 export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
+  const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const [visible, setVisible] = useState(false);
   const [notifs, setNotifs] = useState(MOCK);

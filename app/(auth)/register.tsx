@@ -12,11 +12,12 @@ import {
   View,
 } from 'react-native';
 import { AppTextInput } from '@/components/ui/AppTextInput';
-import { C, shadow } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
+import { ThemePicker } from '@/components/ui/ThemePicker';
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
 
-const STEPS = 4;
+const STEPS = 5;
 
 const CATEGORIES: {
   id: string;
@@ -38,6 +39,7 @@ const CATEGORIES: {
 // ─── Pantalla principal ───────────────────────────────────────────────────────
 
 export default function RegisterScreen() {
+  const { C, shadow } = useTheme();
   const router = useRouter();
   const [step, setStep] = useState(0);
 
@@ -74,6 +76,10 @@ export default function RegisterScreen() {
       return;
     }
     if (step === 3) {
+      setStep(4);
+      return;
+    }
+    if (step === 4) {
       // TODO: guardar radius en perfil
       router.replace('/(auth)/welcome');
       return;
@@ -85,7 +91,7 @@ export default function RegisterScreen() {
     step === 0 ? !!(username.trim() && email.trim()) :
     step === 1 ? true :
     step === 2 ? password.length >= 8 && password === confirm :
-    true; // step 3 skip ok
+    true; // steps 3 & 4 always ok
 
   async function requestLocation() {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -552,7 +558,22 @@ export default function RegisterScreen() {
             </>
           )}
 
-          {/* Botón continuar (steps 0, 2, 3) */}
+          {/* ════ STEP 4 — Tema ════ */}
+          {step === 4 && (
+            <>
+              <View className="mb-6">
+                <Text className="text-2xl mb-2" style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold' }}>
+                  Tu estilo visual
+                </Text>
+                <Text className="text-base" style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular' }}>
+                  Elige el tema que más va contigo. Puedes cambiarlo cuando quieras en tu perfil.
+                </Text>
+              </View>
+              <ThemePicker />
+            </>
+          )}
+
+          {/* Botón continuar (steps 0, 2, 3, 4) */}
           {step !== 1 && (
             <Pressable
               onPress={handleContinue}
@@ -572,10 +593,10 @@ export default function RegisterScreen() {
                   fontFamily: 'PlusJakartaSans_700Bold',
                 }}
               >
-                {step === 2 ? 'Crear cuenta' : step === 3 ? 'Empezar a explorar' : 'Continuar'}
+                {step === 2 ? 'Crear cuenta' : step === 4 ? 'Empezar a explorar' : 'Continuar'}
               </Text>
               <MaterialCommunityIcons
-                name={step === 3 ? 'rocket-launch-outline' : step === 2 ? 'check' : 'arrow-right'}
+                name={step === 4 ? 'rocket-launch-outline' : step === 2 ? 'check' : 'arrow-right'}
                 size={20}
                 color={canContinue ? '#fff' : C.outline}
               />
@@ -667,32 +688,15 @@ function InputField({
   onChangeText: (t: string) => void;
   keyboardType?: 'default' | 'email-address';
 }) {
+  const { C, shadow } = useTheme();
   return (
     <View className="gap-2">
-      <Text
-        className="text-sm ml-1"
-        style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold' }}
-      >
+      <Text className="text-sm ml-1" style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold' }}>
         {label}
       </Text>
-      <View
-        className="flex-row items-center rounded-2xl h-14 px-4 gap-3 border-2"
-        style={{
-          backgroundColor: C.surfaceContainerLow,
-          borderColor: C.border,
-          ...shadow.md,
-        }}
-      >
+      <View className="flex-row items-center rounded-2xl h-14 px-4 gap-3 border-2" style={{ backgroundColor: C.surfaceContainerLow, borderColor: C.border, ...shadow.md }}>
         <MaterialCommunityIcons name={icon} size={22} color={C.outline} />
-        <AppTextInput
-          className=""
-          placeholder={placeholder}
-          placeholderTextColor={C.outline + '66'}
-          autoCapitalize="none"
-          keyboardType={keyboardType}
-          value={value}
-          onChangeText={onChangeText}
-        />
+        <AppTextInput className="" placeholder={placeholder} placeholderTextColor={C.outline + '66'} autoCapitalize="none" keyboardType={keyboardType} value={value} onChangeText={onChangeText} />
       </View>
     </View>
   );
@@ -706,6 +710,7 @@ function PasswordField({
   value: string;
   onChangeText: (t: string) => void;
 }) {
+  const { C, shadow } = useTheme();
   const [show, setShow] = useState(false);
   return (
     <View className="gap-2">
@@ -753,6 +758,7 @@ function RoleCard({
   selected: boolean;
   onPress: () => void;
 }) {
+  const { C, shadow } = useTheme();
   return (
     <Pressable
       onPress={onPress}

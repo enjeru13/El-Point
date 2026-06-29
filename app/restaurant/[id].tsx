@@ -15,69 +15,16 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { C, shadow } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 import { StarRow } from '@/components/ui/StarRow';
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
-
-const RESTAURANT = {
-  id: '1',
-  name: 'Ruta 66',
-  category: 'Hamburguesas',
-  subcategory: 'Americana',
-  rating: 4.8,
-  reviewCount: 124,
-  distance: '1.2 km',
-  price: '$$',
-  isOpen: true,
-  closesAt: '11:00 PM',
-  address: 'Av. Principal 123, El Rosal',
-  phone: '+58 212 555 0123',
-  instagram: '@ruta66_ccs',
-  description:
-    'Nacimos del amor por las carreteras abiertas y la buena comida. Ruta 66 trae la auténtica experiencia de diner americano directo al barrio. Aplastamos nuestras hamburguesas a diario y creemos que cada comida debe sentirse como una parada en el mejor road trip de tu vida.',
-  icon: 'hamburger' as const,
-  iconBg: C.primaryFixed,
-  menuAvailable: true,
-};
-
-
-const REVIEWS = [
-  {
-    id: '1',
-    username: '@sofia_m',
-    rank: 'Comensal Experto',
-    rankColor: C.primaryContainer,
-    rating: 5,
-    comment: 'Las mejores smash burgers del barrio. La salsa secreta es increíble y las papas siempre crujientes. ¡Totalmente recomendado! 🔥',
-    helpful: 24,
-    date: 'Hace 2 días',
-  },
-  {
-    id: '2',
-    username: '@diego_r',
-    rank: 'Explorador',
-    rankColor: C.primaryFixed,
-    rating: 4,
-    comment: 'Buenísimo el servicio. La margarita de tamarindo es un must. Le quito una estrella porque había mucha gente, pero vale la pena la espera.',
-    helpful: 8,
-    date: 'Hace 1 semana',
-  },
-  {
-    id: '3',
-    username: '@carla_f',
-    rank: 'Novato',
-    rankColor: C.surfaceContainerHighest,
-    rating: 5,
-    comment: 'Primera vez que vengo y ya quiero volver. El ambiente es increíble, muy buena vibra.',
-    helpful: 3,
-    date: 'Hace 2 semanas',
-  },
-];
+// (defined inside RestaurantProfileScreen — see below)
 
 // ─── Componentes ──────────────────────────────────────────────────────────────
 
 function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const { C } = useTheme();
   return (
     <View style={{ flexDirection: 'row', gap: 6 }}>
       {[1, 2, 3, 4, 5].map(i => (
@@ -96,7 +43,6 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
 // ─── Review Modal ─────────────────────────────────────────────────────────────
 
 const RATING_LABELS = ['', 'Pésimo 😬', 'Regular 😐', 'Bueno 👍', 'Muy bueno 🔥', 'Excelente ⭐'];
-const RATING_COLORS = ['', C.error, C.outline, C.secondary, C.primaryContainer, C.secondary];
 
 function ReviewModal({
   visible,
@@ -107,6 +53,8 @@ function ReviewModal({
   onClose: () => void;
   restaurantName: string;
 }) {
+  const { C, shadow } = useTheme();
+  const RATING_COLORS = ['', C.error, C.outline, C.secondary, C.primaryContainer, C.secondary];
   const insets  = useSafeAreaInsets();
   const [rating, setRating]   = useState(0);
   const [comment, setComment] = useState('');
@@ -271,6 +219,35 @@ function ReviewModal({
 // ─── Pantalla ─────────────────────────────────────────────────────────────────
 
 export default function RestaurantProfileScreen() {
+  const { C, shadow } = useTheme();
+
+  const RESTAURANT = {
+    id: '1',
+    name: 'Ruta 66',
+    category: 'Hamburguesas',
+    subcategory: 'Americana',
+    rating: 4.8,
+    reviewCount: 124,
+    distance: '1.2 km',
+    price: '$$',
+    isOpen: true,
+    closesAt: '11:00 PM',
+    address: 'Av. Principal 123, El Rosal',
+    phone: '+58 212 555 0123',
+    instagram: '@ruta66_ccs',
+    description:
+      'Nacimos del amor por las carreteras abiertas y la buena comida. Ruta 66 trae la auténtica experiencia de diner americano directo al barrio. Aplastamos nuestras hamburguesas a diario y creemos que cada comida debe sentirse como una parada en el mejor road trip de tu vida.',
+    icon: 'hamburger' as const,
+    iconBg: C.primaryFixed,
+    menuAvailable: true,
+  };
+
+  const REVIEWS = [
+    { id: '1', username: '@sofia_m', rank: 'Comensal Experto', rankColor: C.primaryContainer,        rating: 5, comment: 'Las mejores smash burgers del barrio. La salsa secreta es increíble y las papas siempre crujientes. ¡Totalmente recomendado! 🔥', helpful: 24, date: 'Hace 2 días' },
+    { id: '2', username: '@diego_r', rank: 'Explorador',        rankColor: C.primaryFixed,             rating: 4, comment: 'Buenísimo el servicio. La margarita de tamarindo es un must. Le quito una estrella porque había mucha gente, pero vale la pena la espera.',      helpful: 8,  date: 'Hace 1 semana' },
+    { id: '3', username: '@carla_f', rank: 'Novato',            rankColor: C.surfaceContainerHighest,  rating: 5, comment: 'Primera vez que vengo y ya quiero volver. El ambiente es increíble, muy buena vibra.',                                                           helpful: 3,  date: 'Hace 2 semanas' },
+  ];
+
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();

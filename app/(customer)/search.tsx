@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { C, shadow } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 import { SearchBar } from '@/components/ui/SearchBar';
 
 type SortKey = 'rank' | 'near' | null;
@@ -31,44 +31,16 @@ const TRENDING: { label: string; count: string }[] = [
   { label: 'Pollo frito',          count: '510 búsquedas'  },
 ];
 
-const ALL_RESULTS: {
+type ResultItem = {
   id: string; name: string; category: string; rating: number;
   distance: string; price: string; isOpen: boolean; reviewCount: number;
   quote: string; icon: IconName; iconBg: string; reviewers: string[];
-}[] = [
-  {
-    id: '1', name: 'Ruta 66', category: 'Burgers', rating: 4.8,
-    distance: '1.2 km', price: '$$', isOpen: true, reviewCount: 42,
-    quote: 'Las mejores smash burgers del barrio. La salsa secreta es increíble y las papas siempre crujientes.',
-    icon: 'hamburger', iconBg: C.primaryFixed,
-    reviewers: ['AL', 'MR', 'SC'],
-  },
-  {
-    id: '2', name: 'Big Kahuna', category: 'Burgers', rating: 5.0,
-    distance: '1.9 km', price: '$', isOpen: true, reviewCount: 28,
-    quote: 'Jugosa y perfecta. La piña le da el toque exacto.',
-    icon: 'food', iconBg: C.secondaryContainer,
-    reviewers: ['PG', 'LT'],
-  },
-  {
-    id: '3', name: 'The Patty Lab', category: 'Burgers', rating: 4.9,
-    distance: '0.8 km', price: '$$$', isOpen: false, reviewCount: 67,
-    quote: 'Sabores experimentales que funcionan. La mayo trufa es top.',
-    icon: 'chef-hat', iconBg: C.tertiaryContainer,
-    reviewers: ['KA', 'BN', 'RP'],
-  },
-  {
-    id: '4', name: 'Sizzle & Bun', category: 'Burgers', rating: 4.7,
-    distance: '3.3 km', price: '$', isOpen: true, reviewCount: 19,
-    quote: 'Clásica, sin complicaciones. Siempre consistente.',
-    icon: 'fire', iconBg: C.primaryContainer,
-    reviewers: ['JM'],
-  },
-];
+};
 
 // ─── Components ───────────────────────────────────────────────────────────────
 
 function ReviewerStack({ initials, total }: { initials: string[]; total: number }) {
+  const { C } = useTheme();
   const shown = initials.slice(0, 3);
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
@@ -104,6 +76,7 @@ function ReviewerStack({ initials, total }: { initials: string[]; total: number 
 }
 
 function StarBadgeInline({ rating }: { rating: number }) {
+  const { C } = useTheme();
   const bg = rating >= 5.0 ? C.secondary : rating >= 4.8 ? C.primaryContainer : C.secondaryContainer;
   const text = rating >= 5.0 ? '#fff' : C.onSurface;
   return (
@@ -119,7 +92,8 @@ function StarBadgeInline({ rating }: { rating: number }) {
 }
 
 // Hero card — mejor coincidencia
-function BestMatchCard({ item, onPress }: { item: typeof ALL_RESULTS[0]; onPress: () => void }) {
+function BestMatchCard({ item, onPress }: { item: ResultItem; onPress: () => void }) {
+  const { C, shadow } = useTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -211,7 +185,8 @@ function BestMatchCard({ item, onPress }: { item: typeof ALL_RESULTS[0]; onPress
 }
 
 // Card pequeña — grid resultado
-function ResultCard({ item, onPress }: { item: typeof ALL_RESULTS[0]; onPress: () => void }) {
+function ResultCard({ item, onPress }: { item: ResultItem; onPress: () => void }) {
+  const { C, shadow } = useTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -256,6 +231,7 @@ function ResultCard({ item, onPress }: { item: typeof ALL_RESULTS[0]; onPress: (
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function SearchScreen() {
+  const { C, shadow } = useTheme();
   const insets   = useSafeAreaInsets();
   const [query, setQuery]         = useState('');
   const [showResults, setShow]    = useState(false);
@@ -265,6 +241,13 @@ export default function SearchScreen() {
   const [price, setPrice]         = useState<PriceKey>(null);
   const inputRef = useRef<TextInput>(null);
   const router   = useRouter();
+
+  const ALL_RESULTS: ResultItem[] = [
+    { id: '1', name: 'Ruta 66',       category: 'Burgers', rating: 4.8, distance: '1.2 km', price: '$$',  isOpen: true,  reviewCount: 42, quote: 'Las mejores smash burgers del barrio. La salsa secreta es increíble y las papas siempre crujientes.', icon: 'hamburger', iconBg: C.primaryFixed,       reviewers: ['AL', 'MR', 'SC'] },
+    { id: '2', name: 'Big Kahuna',    category: 'Burgers', rating: 5.0, distance: '1.9 km', price: '$',   isOpen: true,  reviewCount: 28, quote: 'Jugosa y perfecta. La piña le da el toque exacto.',                                                     icon: 'food',      iconBg: C.secondaryContainer, reviewers: ['PG', 'LT'] },
+    { id: '3', name: 'The Patty Lab', category: 'Burgers', rating: 4.9, distance: '0.8 km', price: '$$$', isOpen: false, reviewCount: 67, quote: 'Sabores experimentales que funcionan. La mayo trufa es top.',                                             icon: 'chef-hat',  iconBg: C.tertiaryContainer,  reviewers: ['KA', 'BN', 'RP'] },
+    { id: '4', name: 'Sizzle & Bun', category: 'Burgers', rating: 4.7, distance: '3.3 km', price: '$',   isOpen: true,  reviewCount: 19, quote: 'Clásica, sin complicaciones. Siempre consistente.',                                                       icon: 'fire',      iconBg: C.primaryContainer,   reviewers: ['JM'] },
+  ];
 
   const hasActiveFilters = onlyOpen || sort !== null || price !== null;
 
@@ -282,7 +265,7 @@ export default function SearchScreen() {
   const rest = results.slice(1);
 
   // Agrupar en pares para el grid 2 columnas
-  const pairs: (typeof ALL_RESULTS)[] = [];
+  const pairs: ResultItem[][] = [];
   for (let i = 0; i < rest.length; i += 2) pairs.push(rest.slice(i, i + 2));
 
   function go(label: string) { setQuery(label); setShow(true); }

@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { View } from 'react-native';
-import { C } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface Props {
   rating: number;
@@ -8,6 +8,7 @@ interface Props {
 }
 
 export function StarRow({ rating, size = 14 }: Props) {
+  const { C } = useTheme();
   return (
     <View style={{ flexDirection: 'row', gap: 2 }}>
       {[1, 2, 3, 4, 5].map(i => (

@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import { C } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 
 type Props = {
   size?: 'sm' | 'md' | 'lg';
@@ -7,6 +7,7 @@ type Props = {
 };
 
 export function AppLogo({ size = 'md', variant = 'light' }: Props) {
+  const { C } = useTheme();
   const scale = size === 'sm' ? 0.75 : size === 'lg' ? 1.8 : 1;
   const isDark = variant === 'dark';
 

@@ -12,23 +12,19 @@ import {
 } from 'react-native';
 import MapView, { Callout, Circle, Marker } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { C, FLOATING_NAV_H, shadow } from '@/lib/theme';
+import { FLOATING_NAV_H } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { StarRow } from '@/components/ui/StarRow';
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
-const MOCK_BASE = [
-  { id: '1', name: 'La Smasheria',    category: 'Burgers',  icon: 'hamburger' as const,   rating: 4.8, hot: true,  hotPct: 85, iconBg: C.primaryFixed,       dLat:  0.0018, dLng:  0.0000 },
-  { id: '2', name: 'Pizza Mágica',    category: 'Pizza',    icon: 'pizza' as const,        rating: 4.2, hot: false, hotPct: 40, iconBg: C.tertiaryContainer,  dLat:  0.0032, dLng:  0.0026 },
-  { id: '3', name: 'El Perrero Loco', category: 'Hot Dogs', icon: 'food-hot-dog' as const, rating: 5.0, hot: true,  hotPct: 95, iconBg: C.secondaryContainer, dLat: -0.0016, dLng: -0.0019 },
-  { id: '4', name: 'Arepa & Co.',     category: 'Arepas',   icon: 'corn' as const,         rating: 4.6, hot: false, hotPct: 60, iconBg: C.primaryFixed,       dLat:  0.0029, dLng: -0.0034 },
-];
+type MockBase = { id: string; name: string; category: string; icon: React.ComponentProps<typeof MaterialCommunityIcons>['name']; rating: number; hot: boolean; hotPct: number; iconBg: string; dLat: number; dLng: number };
 
 const DEFAULT_ORIGIN = { latitude: 10.4806, longitude: -66.9036 };
 
-function buildRestaurants(origin: { latitude: number; longitude: number }) {
-  return MOCK_BASE.map(r => {
+function buildRestaurants(mockBase: MockBase[], origin: { latitude: number; longitude: number }) {
+  return mockBase.map(r => {
     const lat = origin.latitude  + r.dLat;
     const lng = origin.longitude + r.dLng;
     const distM = Math.round(
@@ -75,6 +71,7 @@ function SelectedCard({
   onClose: () => void;
   onViewProfile: () => void;
 }) {
+  const { C, shadow } = useTheme();
   if (!restaurant) return null;
   return (
     <Animated.View
@@ -189,6 +186,15 @@ function SelectedCard({
 // ─── Pantalla ─────────────────────────────────────────────────────────────────
 
 export default function MapScreen() {
+  const { C, shadow } = useTheme();
+
+  const MOCK_BASE: MockBase[] = [
+    { id: '1', name: 'La Smasheria',    category: 'Burgers',  icon: 'hamburger',   rating: 4.8, hot: true,  hotPct: 85, iconBg: C.primaryFixed,       dLat:  0.0018, dLng:  0.0000 },
+    { id: '2', name: 'Pizza Mágica',    category: 'Pizza',    icon: 'pizza',        rating: 4.2, hot: false, hotPct: 40, iconBg: C.tertiaryContainer,  dLat:  0.0032, dLng:  0.0026 },
+    { id: '3', name: 'El Perrero Loco', category: 'Hot Dogs', icon: 'food-hot-dog', rating: 5.0, hot: true,  hotPct: 95, iconBg: C.secondaryContainer, dLat: -0.0016, dLng: -0.0019 },
+    { id: '4', name: 'Arepa & Co.',     category: 'Arepas',   icon: 'corn',         rating: 4.6, hot: false, hotPct: 60, iconBg: C.primaryFixed,       dLat:  0.0029, dLng: -0.0034 },
+  ];
+
   const router   = useRouter();
   const insets   = useSafeAreaInsets();
 
@@ -242,7 +248,7 @@ export default function MapScreen() {
   }
 
   const origin = userLocation ?? DEFAULT_ORIGIN;
-  const restaurants = buildRestaurants(origin);
+  const restaurants = buildRestaurants(MOCK_BASE, origin);
 
   const region = {
     latitude: origin.latitude,

@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { C, shadow } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 import { AppLogo } from '@/components/ui/AppLogo';
 import { NotificationsSheet } from '@/components/ui/NotificationsSheet';
 import { SearchBar } from '@/components/ui/SearchBar';
@@ -31,69 +31,25 @@ const CATEGORIES: {
   { id: 'desserts', label: 'Postres',   icon: 'ice-cream' },
 ];
 
-const MOCK_REVIEWS = [
-  {
-    id: '1',
-    restaurant: 'La Smasheria',
-    category: 'Burgers',
-    rating: 4.8,
-    quote: '¡Las mejores smash burgers de la zona, crujientes por fuera y jugosas por dentro!',
-    reviewer: '@burgerking99',
-    rank: 'Master Eater',
-    imageBg: C.primaryFixed,
-    imageIcon: 'hamburger' as const,
-    imageIconColor: C.primary,
-  },
-  {
-    id: '2',
-    restaurant: 'Pizza Mágica',
-    category: 'Pizza',
-    rating: 4.2,
-    quote: 'Masa fina, ingredientes frescos. Le faltó un poco de salsa pero muy buena.',
-    reviewer: '@pizzalover_x',
-    rank: 'Local Guide',
-    imageBg: C.tertiaryContainer,
-    imageIcon: 'pizza' as const,
-    imageIconColor: C.onTertiaryContainer,
-  },
-  {
-    id: '3',
-    restaurant: 'El Perrero Loco',
-    category: 'Hot Dogs',
-    rating: 5.0,
-    quote: '¡Una explosión de sabor! El pan es súper suave y las salsas de otro nivel.',
-    reviewer: '@streetfood_guru',
-    rank: 'Master Eater',
-    imageBg: C.secondaryContainer,
-    imageIcon: 'food-hot-dog' as const,
-    imageIconColor: C.secondary,
-  },
-  {
-    id: '4',
-    restaurant: 'Arepa & Co.',
-    category: 'Arepas',
-    rating: 4.6,
-    quote: 'Las arepas de choclo con queso son pecado. No puedo dejar de pedir.',
-    reviewer: '@arepafanatic',
-    rank: 'Explorador',
-    imageBg: '#fff3c4',
-    imageIcon: 'corn' as const,
-    imageIconColor: '#b45309',
-  },
-];
-
-const RANK_COLORS: Record<string, { bg: string; text: string }> = {
-  'Novato':       { bg: C.surfaceContainerHighest, text: C.onSurfaceVariant },
-  'Explorador':   { bg: C.primaryFixed,            text: C.primary },
-  'Local Guide':  { bg: C.secondaryContainer,      text: C.secondary },
-  'Master Eater': { bg: C.primary,                  text: '#fff' },
-  'Food Legend':  { bg: C.tertiary,                 text: '#fff' },
+type MockReview = {
+  id: string; restaurant: string; category: string; rating: number; quote: string;
+  reviewer: string; rank: string; imageBg: string;
+  imageIcon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+  imageIconColor: string;
 };
 
 // ─── Review card ──────────────────────────────────────────────────────────────
 
-function ReviewCard({ item }: { item: typeof MOCK_REVIEWS[0] }) {
-  const rankStyle = RANK_COLORS[item.rank] ?? RANK_COLORS['Novato'];
+function ReviewCard({ item }: { item: MockReview }) {
+  const { C, shadow } = useTheme();
+  const rankColors: Record<string, { bg: string; text: string }> = {
+    'Novato':       { bg: C.surfaceContainerHighest, text: C.onSurfaceVariant },
+    'Explorador':   { bg: C.primaryFixed,            text: C.primary },
+    'Local Guide':  { bg: C.secondaryContainer,      text: C.secondary },
+    'Master Eater': { bg: C.primary,                  text: '#fff' },
+    'Food Legend':  { bg: C.tertiary,                 text: '#fff' },
+  };
+  const rankStyle = rankColors[item.rank] ?? rankColors['Novato'];
   const router = useRouter();
   return (
     <Pressable
@@ -228,6 +184,15 @@ function ReviewCard({ item }: { item: typeof MOCK_REVIEWS[0] }) {
 // ─── Pantalla ─────────────────────────────────────────────────────────────────
 
 export default function HomeScreen() {
+  const { C, shadow } = useTheme();
+
+  const MOCK_REVIEWS: MockReview[] = [
+    { id: '1', restaurant: 'La Smasheria',    category: 'Burgers',   rating: 4.8, quote: '¡Las mejores smash burgers de la zona, crujientes por fuera y jugosas por dentro!', reviewer: '@burgerking99',   rank: 'Master Eater', imageBg: C.primaryFixed,       imageIcon: 'hamburger',   imageIconColor: C.primary },
+    { id: '2', restaurant: 'Pizza Mágica',    category: 'Pizza',     rating: 4.2, quote: 'Masa fina, ingredientes frescos. Le faltó un poco de salsa pero muy buena.',          reviewer: '@pizzalover_x',  rank: 'Local Guide',  imageBg: C.tertiaryContainer,  imageIcon: 'pizza',       imageIconColor: C.onTertiaryContainer },
+    { id: '3', restaurant: 'El Perrero Loco', category: 'Hot Dogs',  rating: 5.0, quote: '¡Una explosión de sabor! El pan es súper suave y las salsas de otro nivel.',         reviewer: '@streetfood_guru', rank: 'Master Eater', imageBg: C.secondaryContainer, imageIcon: 'food-hot-dog', imageIconColor: C.secondary },
+    { id: '4', restaurant: 'Arepa & Co.',     category: 'Arepas',   rating: 4.6, quote: 'Las arepas de choclo con queso son pecado. No puedo dejar de pedir.',                 reviewer: '@arepafanatic',  rank: 'Explorador',   imageBg: '#fff3c4',            imageIcon: 'corn',        imageIconColor: '#b45309' },
+  ];
+
   const [activeCategory, setActiveCategory] = useState('all');
   const [activeTab, setActiveTab]           = useState<'ranks' | 'favorites'>('ranks');
   const [search, setSearch]                 = useState('');

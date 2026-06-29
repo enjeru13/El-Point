@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { StyleProp, View, ViewStyle } from 'react-native';
-import { C, shadow } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface Props {
   children: ReactNode;
@@ -10,6 +10,7 @@ interface Props {
 }
 
 export function Card({ children, style, elevation = 'md', radius = 20 }: Props) {
+  const { C, shadow } = useTheme();
   return (
     <View style={[
       {

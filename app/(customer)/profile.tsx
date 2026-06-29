@@ -1,6 +1,8 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useEffect, useRef } from 'react';
+import { useRouter } from 'expo-router';
 import { NotificationsSheet, NotificationsHandle } from '@/components/ui/NotificationsSheet';
+import { THEMES, THEME_META } from '@/lib/themes';
 import {
   Animated,
   Easing,
@@ -9,7 +11,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { C, shadow } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 import { AppLogo } from '@/components/ui/AppLogo';
 import { supabase } from '@/lib/supabase';
 import { StarRow } from '@/components/ui/StarRow';
@@ -29,44 +31,11 @@ const USER = {
   reviewPower: 9.8,
 };
 
-const FAVORITES = [
-  { id: '1', name: 'Neon Noodle Bar', category: 'Asian Fusion', rating: 4.9, icon: 'noodles' as const, bg: C.tertiaryContainer },
-  { id: '2', name: 'Taco Stand',      category: 'Tacos',        rating: 4.7, icon: 'taco' as const,   bg: C.primaryFixed },
-  { id: '3', name: 'Brew & Bake',     category: 'Café',         rating: 4.8, icon: 'coffee' as const, bg: C.secondaryContainer },
-];
-
-const REVIEWS = [
-  {
-    id: '1',
-    restaurant: 'Burger Joint',
-    rating: 4,
-    comment: '"Increíbles sabores. La salsa secreta es de otro mundo. Definitivamente mi nuevo spot favorito."',
-    date: 'Hace 2 días',
-    icon: 'hamburger' as const,
-    iconBg: C.primaryFixed,
-  },
-  {
-    id: '2',
-    restaurant: 'Green Bowl Oasis',
-    rating: 5,
-    comment: '"Perfecta comida post-entreno. Ingredientes súper frescos y servicio rápido incluso lleno."',
-    date: 'Hace 1 semana',
-    icon: 'leaf' as const,
-    iconBg: C.secondaryContainer,
-  },
-];
-
-const RANK_COLORS: Record<string, string> = {
-  'Novato':              C.surfaceContainerHighest,
-  'Explorador':          C.primaryFixed,
-  'Comensal Experto':    C.primaryContainer,
-  'Crítico Local':       C.secondary,
-  'Gurú Gastronómico':   C.tertiary,
-};
 
 // ─── Componentes ──────────────────────────────────────────────────────────────
 
 function XPBar({ xp, xpNext }: { xp: number; xpNext: number }) {
+  const { C } = useTheme();
   const width = useRef(new Animated.Value(0)).current;
   const pct = xp / xpNext;
 
@@ -95,7 +64,28 @@ function XPBar({ xp, xpNext }: { xp: number; xpNext: number }) {
 // ─── Pantalla ─────────────────────────────────────────────────────────────────
 
 export default function ProfileScreen() {
+  const { C, shadow, themeName } = useTheme();
+  const router = useRouter();
   const notifsRef = useRef<NotificationsHandle>(null);
+
+  const FAVORITES = [
+    { id: '1', name: 'Neon Noodle Bar', category: 'Asian Fusion', rating: 4.9, icon: 'noodles' as const, bg: C.tertiaryContainer },
+    { id: '2', name: 'Taco Stand',      category: 'Tacos',        rating: 4.7, icon: 'taco' as const,   bg: C.primaryFixed },
+    { id: '3', name: 'Brew & Bake',     category: 'Café',         rating: 4.8, icon: 'coffee' as const, bg: C.secondaryContainer },
+  ];
+
+  const REVIEWS = [
+    { id: '1', restaurant: 'Burger Joint', rating: 4, comment: '"Increíbles sabores. La salsa secreta es de otro mundo. Definitivamente mi nuevo spot favorito."', date: 'Hace 2 días', icon: 'hamburger' as const, iconBg: C.primaryFixed },
+    { id: '2', restaurant: 'Green Bowl Oasis', rating: 5, comment: '"Perfecta comida post-entreno. Ingredientes súper frescos y servicio rápido incluso lleno."', date: 'Hace 1 semana', icon: 'leaf' as const, iconBg: C.secondaryContainer },
+  ];
+
+  const RANK_COLORS: Record<string, string> = {
+    'Novato':              C.surfaceContainerHighest,
+    'Explorador':          C.primaryFixed,
+    'Comensal Experto':    C.primaryContainer,
+    'Crítico Local':       C.secondary,
+    'Gurú Gastronómico':   C.tertiary,
+  };
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -370,6 +360,39 @@ export default function ProfileScreen() {
             </View>
           ))}
         </View>
+
+        {/* ── Configuración ── */}
+        <Pressable
+          onPress={() => router.push('/(customer)/settings')}
+          style={{
+            flexDirection: 'row', alignItems: 'center', gap: 14,
+            padding: 16, borderRadius: 20,
+            backgroundColor: C.surface,
+            borderWidth: 2, borderColor: C.border,
+            ...shadow.sm,
+          }}
+        >
+          {/* Icono engranaje */}
+          <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+            <MaterialCommunityIcons name="cog-outline" size={24} color={C.primary} />
+          </View>
+          {/* Dot bicolor del tema activo */}
+          <View style={{ width: 28, height: 28, borderRadius: 14, borderWidth: 2, borderColor: C.border, marginLeft: -6 }}>
+            <View style={{ flex: 1, borderRadius: 12, overflow: 'hidden', flexDirection: 'row' }}>
+              <View style={{ width: 12, height: 24, backgroundColor: THEMES[themeName].primary }} />
+              <View style={{ width: 12, height: 24, backgroundColor: THEMES[themeName].secondary }} />
+            </View>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16 }}>
+              Configuración
+            </Text>
+            <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, marginTop: 1 }}>
+              Tema: {THEME_META[themeName].label}
+            </Text>
+          </View>
+          <MaterialCommunityIcons name="chevron-right" size={22} color={C.outline} />
+        </Pressable>
 
         {/* ── Cerrar sesión ── */}
         <Pressable

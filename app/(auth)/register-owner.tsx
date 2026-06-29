@@ -15,7 +15,7 @@ import {
   View,
 } from 'react-native';
 import { AppTextInput } from '@/components/ui/AppTextInput';
-import { C, shadow } from '@/lib/theme';
+import { useTheme } from '@/lib/ThemeContext';
 
 const CATEGORIES = [
   { id: 1,  label: 'Pizza',        icon: 'pizza' },
@@ -35,6 +35,7 @@ const CATEGORIES = [
 const STEPS = 3;
 
 export default function RegisterOwnerScreen() {
+  const { C, shadow } = useTheme();
   const router = useRouter();
   const [step, setStep] = useState(0);
 
