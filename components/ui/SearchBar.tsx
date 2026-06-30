@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '@/components/ui/Icon';
 import { forwardRef } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 import { useTheme } from '@/lib/ThemeContext';
@@ -37,7 +37,7 @@ export const SearchBar = forwardRef<TextInput, Props>(({
         ...shadow.sm,
       }}
     >
-      <MaterialCommunityIcons name="magnify" size={20} color={C.outline} />
+      <Icon name="magnify" size={20} color={C.outline} />
       <TextInput
         ref={ref}
         value={value}
@@ -60,7 +60,7 @@ export const SearchBar = forwardRef<TextInput, Props>(({
           onPress={() => { onChangeText(''); onClear?.(); }}
           hitSlop={8}
         >
-          <MaterialCommunityIcons name="close-circle" size={18} color={C.outline} />
+          <Icon name="close-circle" size={18} color={C.outline} />
         </Pressable>
       )}
     </View>

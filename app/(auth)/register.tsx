@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '@/components/ui/Icon';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
@@ -22,7 +22,7 @@ const STEPS = 5;
 const CATEGORIES: {
   id: string;
   label: string;
-  icon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+  icon: string;
 }[] = [
   { id: 'pizza',      label: 'Pizza',        icon: 'pizza' },
   { id: 'burgers',    label: 'Hamburguesas', icon: 'hamburger' },
@@ -110,7 +110,7 @@ export default function RegisterScreen() {
           onPress={() => step > 0 ? setStep(step - 1) : router.back()}
           className="w-10 h-10 items-center justify-center"
         >
-          <MaterialCommunityIcons name="arrow-left" size={24} color={C.onSurfaceVariant} />
+          <Icon name="arrow-left" size={24} color={C.onSurfaceVariant} />
         </Pressable>
 
         {/* Step dots */}
@@ -154,7 +154,7 @@ export default function RegisterScreen() {
                   className="p-4 rounded-3xl mb-4"
                   style={{ backgroundColor: C.secondaryContainer + '4d' }}
                 >
-                  <MaterialCommunityIcons name="party-popper" size={40} color={C.secondary} />
+                  <Icon name="party-popper" size={40} color={C.secondary} />
                 </View>
                 <Text
                   className="text-2xl text-center mb-2"
@@ -226,7 +226,7 @@ export default function RegisterScreen() {
                   className="w-12 h-12 rounded-full items-center justify-center mb-3"
                   style={{ backgroundColor: C.tertiaryContainer }}
                 >
-                  <MaterialCommunityIcons name="storefront-outline" size={24} color="#fff" />
+                  <Icon name="storefront-outline" size={24} color="#fff" />
                 </View>
                 <Text
                   className="text-base text-center mb-1"
@@ -294,7 +294,7 @@ export default function RegisterScreen() {
                       {/* Check badge */}
                       {isSelected && (
                         <View className="absolute top-3 right-3">
-                          <MaterialCommunityIcons name="check-circle" size={18} color={C.secondary} />
+                          <Icon name="check-circle" size={18} color={C.secondary} />
                         </View>
                       )}
 
@@ -302,7 +302,7 @@ export default function RegisterScreen() {
                         className="w-12 h-12 rounded-full items-center justify-center"
                         style={{ backgroundColor: isSelected ? C.secondary : C.primaryFixed }}
                       >
-                        <MaterialCommunityIcons
+                        <Icon
                           name={cat.icon}
                           size={26}
                           color={isSelected ? C.onSecondary : C.primary}
@@ -332,7 +332,7 @@ export default function RegisterScreen() {
                   className="p-4 rounded-3xl mb-4"
                   style={{ backgroundColor: C.primaryFixed + '66' }}
                 >
-                  <MaterialCommunityIcons name="shield-lock-outline" size={40} color={C.primary} />
+                  <Icon name="shield-lock-outline" size={40} color={C.primary} />
                 </View>
                 <Text
                   className="text-2xl text-center mb-2"
@@ -429,7 +429,7 @@ export default function RegisterScreen() {
                         ...shadow.primary,
                       }}
                     >
-                      <MaterialCommunityIcons name="map-marker" size={28} color="#fff" />
+                      <Icon name="map-marker" size={28} color="#fff" />
                     </View>
                   </View>
                 </View>
@@ -437,7 +437,7 @@ export default function RegisterScreen() {
                 {/* Badge ubicación */}
                 {locGranted ? (
                   <View className="absolute top-4 left-4 flex-row items-center gap-2 bg-white/80 px-3 py-2 rounded-full">
-                    <MaterialCommunityIcons name="check-circle" size={16} color={C.primary} />
+                    <Icon name="check-circle" size={16} color={C.primary} />
                     <Text
                       className="text-xs"
                       style={{ color: C.primary, fontFamily: 'PlusJakartaSans_600SemiBold' }}
@@ -450,7 +450,7 @@ export default function RegisterScreen() {
                     onPress={requestLocation}
                     className="absolute top-4 left-4 flex-row items-center gap-2 bg-white/80 px-3 py-2 rounded-full"
                   >
-                    <MaterialCommunityIcons name="crosshairs-gps" size={16} color={C.primary} />
+                    <Icon name="crosshairs-gps" size={16} color={C.primary} />
                     <Text
                       className="text-xs"
                       style={{ color: C.primary, fontFamily: 'PlusJakartaSans_600SemiBold' }}
@@ -525,7 +525,7 @@ export default function RegisterScreen() {
                       className="w-12 h-12 rounded-full items-center justify-center border-2"
                       style={{ borderColor: C.outlineVariant }}
                     >
-                      <MaterialCommunityIcons name="minus" size={22} color={C.onSurfaceVariant} />
+                      <Icon name="minus" size={22} color={C.onSurfaceVariant} />
                     </Pressable>
                     <View className="items-center">
                       <Text
@@ -550,7 +550,7 @@ export default function RegisterScreen() {
                       className="w-12 h-12 rounded-full items-center justify-center border-2"
                       style={{ borderColor: C.outlineVariant }}
                     >
-                      <MaterialCommunityIcons name="plus" size={22} color={C.onSurfaceVariant} />
+                      <Icon name="plus" size={22} color={C.onSurfaceVariant} />
                     </Pressable>
                   </View>
                 </View>
@@ -595,7 +595,7 @@ export default function RegisterScreen() {
               >
                 {step === 2 ? 'Crear cuenta' : step === 4 ? 'Empezar a explorar' : 'Continuar'}
               </Text>
-              <MaterialCommunityIcons
+              <Icon
                 name={step === 4 ? 'rocket-launch-outline' : step === 2 ? 'check' : 'arrow-right'}
                 size={20}
                 color={canContinue ? '#fff' : C.outline}
@@ -682,7 +682,7 @@ function InputField({
   label, icon, placeholder, value, onChangeText, keyboardType = 'default',
 }: {
   label: string;
-  icon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+  icon: string;
   placeholder: string;
   value: string;
   onChangeText: (t: string) => void;
@@ -695,7 +695,7 @@ function InputField({
         {label}
       </Text>
       <View className="flex-row items-center rounded-2xl h-14 px-4 gap-3 border-2" style={{ backgroundColor: C.surfaceContainerLow, borderColor: C.border, ...shadow.md }}>
-        <MaterialCommunityIcons name={icon} size={22} color={C.outline} />
+        <Icon name={icon} size={22} color={C.outline} />
         <AppTextInput className="" placeholder={placeholder} placeholderTextColor={C.outline + '66'} autoCapitalize="none" keyboardType={keyboardType} value={value} onChangeText={onChangeText} />
       </View>
     </View>
@@ -728,7 +728,7 @@ function PasswordField({
           ...shadow.md,
         }}
       >
-        <MaterialCommunityIcons name="lock-outline" size={22} color={C.outline} />
+        <Icon name="lock-outline" size={22} color={C.outline} />
         <AppTextInput
           className=""
           placeholder={placeholder}
@@ -738,7 +738,7 @@ function PasswordField({
           onChangeText={onChangeText}
         />
         <Pressable onPress={() => setShow(!show)}>
-          <MaterialCommunityIcons
+          <Icon
             name={show ? 'eye-off-outline' : 'eye-outline'}
             size={22}
             color={C.outline}
@@ -752,7 +752,7 @@ function PasswordField({
 function RoleCard({
   icon, title, description, selected, onPress,
 }: {
-  icon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+  icon: string;
   title: string;
   description: string;
   selected: boolean;
@@ -773,7 +773,7 @@ function RoleCard({
         className="w-14 h-14 rounded-2xl items-center justify-center"
         style={{ backgroundColor: selected ? C.primary : C.surfaceContainerHighest }}
       >
-        <MaterialCommunityIcons name={icon} size={28} color={selected ? '#fff' : C.onSurfaceVariant} />
+        <Icon name={icon} size={28} color={selected ? '#fff' : C.onSurfaceVariant} />
       </View>
       <View className="flex-1">
         <Text
@@ -790,7 +790,7 @@ function RoleCard({
         </Text>
       </View>
       {selected && (
-        <MaterialCommunityIcons name="check-circle" size={24} color={C.primary} />
+        <Icon name="check-circle" size={24} color={C.primary} />
       )}
     </Pressable>
   );

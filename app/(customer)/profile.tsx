@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '@/components/ui/Icon';
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { NotificationsSheet, NotificationsHandle } from '@/components/ui/NotificationsSheet';
@@ -103,7 +103,7 @@ export default function ProfileScreen() {
         left={<AppLogo />}
         right={
           <Pressable onPress={() => notifsRef.current?.present()} style={{ width:40, height:40, borderRadius:20, alignItems:'center', justifyContent:'center', borderWidth:2, borderColor:C.border, backgroundColor:C.surface }}>
-            <MaterialCommunityIcons name="bell-outline" size={22} color={C.onSurface} />
+            <Icon name="bell-outline" size={22} color={C.onSurface} />
             <View style={{ position:'absolute', top:6, right:6, width:8, height:8, borderRadius:4, backgroundColor:C.primaryContainer, borderWidth:1.5, borderColor:C.surface }} />
           </Pressable>
         }
@@ -134,7 +134,7 @@ export default function ProfileScreen() {
                 borderWidth: 3, borderColor: C.border,
               }}
             >
-              <MaterialCommunityIcons name="account" size={48} color={C.primary} />
+              <Icon name="account" size={48} color={C.primary} />
             </View>
             {/* Badge estrella */}
             <View
@@ -146,7 +146,7 @@ export default function ProfileScreen() {
                 borderWidth: 2, borderColor: C.border,
               }}
             >
-              <MaterialCommunityIcons name="star" size={14} color={C.onPrimaryContainer} />
+              <Icon name="star" size={14} color={C.onPrimaryContainer} />
             </View>
           </View>
 
@@ -168,7 +168,7 @@ export default function ProfileScreen() {
               alignSelf: 'stretch', justifyContent: 'center',
             }}
           >
-            <MaterialCommunityIcons name="pencil-outline" size={16} color={C.primary} />
+            <Icon name="pencil-outline" size={16} color={C.primary} />
             <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
               Editar perfil
             </Text>
@@ -193,7 +193,7 @@ export default function ProfileScreen() {
                   {USER.rank}
                 </Text>
                 <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-                  <MaterialCommunityIcons name="fire" size={20} color={C.primaryContainer} />
+                  <Icon name="fire" size={20} color={C.primaryContainer} />
                 </Animated.View>
               </View>
             </View>
@@ -237,7 +237,7 @@ export default function ProfileScreen() {
                 ...shadow.sm,
               }}
             >
-              <MaterialCommunityIcons name={stat.icon} size={28} color={stat.color} />
+              <Icon name={stat.icon} size={28} color={stat.color} />
               <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24 }}>
                 {stat.value}
               </Text>
@@ -264,7 +264,7 @@ export default function ProfileScreen() {
                 ...shadow.md,
               }}
             >
-              <MaterialCommunityIcons name={FAVORITES[0].icon} size={64} color={C.onSurface} style={{ opacity: 0.4 }} />
+              <Icon name={FAVORITES[0].icon} size={64} color={C.onSurface} style={{ opacity: 0.4 }} />
               <View
                 style={{
                   position: 'absolute', bottom: 0, left: 0, right: 0,
@@ -275,7 +275,7 @@ export default function ProfileScreen() {
                   {FAVORITES[0].name}
                 </Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                  <MaterialCommunityIcons name="star" size={12} color={C.secondaryContainer} />
+                  <Icon name="star" size={12} color={C.secondaryContainer} />
                   <Text style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
                     {FAVORITES[0].rating}
                   </Text>
@@ -296,7 +296,7 @@ export default function ProfileScreen() {
                     overflow: 'hidden',
                   }}
                 >
-                  <MaterialCommunityIcons name={fav.icon} size={28} color={C.onSurface} style={{ opacity: 0.4 }} />
+                  <Icon name={fav.icon} size={28} color={C.onSurface} style={{ opacity: 0.4 }} />
                   <View
                     style={{
                       position: 'absolute', bottom: 0, left: 0, right: 0,
@@ -307,7 +307,7 @@ export default function ProfileScreen() {
                       {fav.name}
                     </Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                      <MaterialCommunityIcons name="star" size={10} color={C.secondaryContainer} />
+                      <Icon name="star" size={10} color={C.secondaryContainer} />
                       <Text style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
                         {fav.rating}
                       </Text>
@@ -341,7 +341,7 @@ export default function ProfileScreen() {
                   borderWidth: 2, borderColor: C.border, flexShrink: 0,
                 }}
               >
-                <MaterialCommunityIcons name={r.icon} size={28} color={C.primary} />
+                <Icon name={r.icon} size={28} color={C.primary} />
               </View>
               <View style={{ flex: 1, gap: 6 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -373,25 +373,27 @@ export default function ProfileScreen() {
           }}
         >
           {/* Icono engranaje */}
-          <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
-            <MaterialCommunityIcons name="cog-outline" size={24} color={C.primary} />
-          </View>
-          {/* Dot bicolor del tema activo */}
-          <View style={{ width: 28, height: 28, borderRadius: 14, borderWidth: 2, borderColor: C.border, marginLeft: -6 }}>
-            <View style={{ flex: 1, borderRadius: 12, overflow: 'hidden', flexDirection: 'row' }}>
-              <View style={{ width: 12, height: 24, backgroundColor: THEMES[themeName].primary }} />
-              <View style={{ width: 12, height: 24, backgroundColor: THEMES[themeName].secondary }} />
-            </View>
+          <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
+            <Icon name="cog-outline" size={24} color={C.onPrimary} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16 }}>
               Configuración
             </Text>
-            <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, marginTop: 1 }}>
-              Tema: {THEME_META[themeName].label}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+              {/* Dot bicolor */}
+              <View style={{ width: 14, height: 14, borderRadius: 7, borderWidth: 1.5, borderColor: C.border, marginRight: 5 }}>
+                <View style={{ flex: 1, borderRadius: 5, overflow: 'hidden', flexDirection: 'row' }}>
+                  <View style={{ width: 5, height: 11, backgroundColor: THEMES[themeName].primary }} />
+                  <View style={{ width: 5, height: 11, backgroundColor: THEMES[themeName].secondary }} />
+                </View>
+              </View>
+              <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13 }}>
+                {THEME_META[themeName].label}
+              </Text>
+            </View>
           </View>
-          <MaterialCommunityIcons name="chevron-right" size={22} color={C.outline} />
+          <Icon name="chevron-right" size={22} color={C.outline} />
         </Pressable>
 
         {/* ── Cerrar sesión ── */}
@@ -405,7 +407,7 @@ export default function ProfileScreen() {
             marginTop: 8,
           }}
         >
-          <MaterialCommunityIcons name="logout" size={18} color={C.error} />
+          <Icon name="logout" size={18} color={C.error} />
           <Text style={{ color: C.error, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
             Cerrar sesión
           </Text>

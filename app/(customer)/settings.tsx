@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -37,7 +37,7 @@ function ToggleRow({
   value,
   onChange,
 }: {
-  icon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+  icon: string;
   label: string;
   sublabel?: string;
   value: boolean;
@@ -60,7 +60,7 @@ function ToggleRow({
           flexShrink: 0,
         }}
       >
-        <MaterialCommunityIcons name={icon} size={20} color={C.primary} />
+        <Icon name={icon} size={20} color={C.primary} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
@@ -166,7 +166,7 @@ export default function SettingsScreen() {
             ...shadow.sm,
           }}
         >
-          <MaterialCommunityIcons name="arrow-left" size={20} color={C.onSurface} />
+          <Icon name="arrow-left" size={20} color={C.onSurface} />
         </Pressable>
         <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 22, flex: 1 }}>
           Configuración
@@ -312,30 +312,30 @@ export default function SettingsScreen() {
               style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
             >
               <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
-                <MaterialCommunityIcons name="lock-outline" size={20} color={C.primary} />
+                <Icon name="lock-outline" size={20} color={C.primary} />
               </View>
               <Text style={{ flex: 1, color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Cambiar contraseña</Text>
-              <MaterialCommunityIcons name="chevron-right" size={20} color={C.outline} />
+              <Icon name="chevron-right" size={20} color={C.outline} />
             </Pressable>
             <Divider />
             <Pressable
               style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
             >
               <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
-                <MaterialCommunityIcons name="shield-outline" size={20} color={C.primary} />
+                <Icon name="shield-outline" size={20} color={C.primary} />
               </View>
               <Text style={{ flex: 1, color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Privacidad</Text>
-              <MaterialCommunityIcons name="chevron-right" size={20} color={C.outline} />
+              <Icon name="chevron-right" size={20} color={C.outline} />
             </Pressable>
             <Divider />
             <Pressable
               style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
             >
               <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
-                <MaterialCommunityIcons name="delete-outline" size={20} color={C.error} />
+                <Icon name="delete-outline" size={20} color={C.error} />
               </View>
               <Text style={{ flex: 1, color: C.error, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Eliminar cuenta</Text>
-              <MaterialCommunityIcons name="chevron-right" size={20} color={C.outline} />
+              <Icon name="chevron-right" size={20} color={C.outline} />
             </Pressable>
           </SectionCard>
         </View>

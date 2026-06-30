@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
@@ -19,7 +19,7 @@ import { SectionTitle } from '@/components/ui/SectionTitle';
 const CATEGORIES: {
   id: string;
   label: string;
-  icon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+  icon: string;
 }[] = [
   { id: 'all',      label: 'Todo',      icon: 'silverware-fork-knife' },
   { id: 'burgers',  label: 'Burgers',   icon: 'hamburger' },
@@ -34,7 +34,7 @@ const CATEGORIES: {
 type MockReview = {
   id: string; restaurant: string; category: string; rating: number; quote: string;
   reviewer: string; rank: string; imageBg: string;
-  imageIcon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+  imageIcon: string;
   imageIconColor: string;
 };
 
@@ -70,7 +70,7 @@ function ReviewCard({ item }: { item: MockReview }) {
           alignItems: 'center', justifyContent: 'center',
         }}
       >
-        <MaterialCommunityIcons name={item.imageIcon} size={80} color={item.imageIconColor} style={{ opacity: 0.55 }} />
+        <Icon name={item.imageIcon} size={80} color={item.imageIconColor} style={{ opacity: 0.55 }} />
 
         {/* Rating */}
         <View
@@ -82,7 +82,7 @@ function ReviewCard({ item }: { item: MockReview }) {
             borderWidth: 2, borderColor: C.border,
           }}
         >
-          <MaterialCommunityIcons name="star" size={14} color={C.secondary} />
+          <Icon name="star" size={14} color={C.secondary} />
           <Text style={{ color: C.secondary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
             {item.rating.toFixed(1)}
           </Text>
@@ -142,7 +142,7 @@ function ReviewCard({ item }: { item: MockReview }) {
                 borderWidth: 2, borderColor: C.border,
               }}
             >
-              <MaterialCommunityIcons name="account" size={20} color={C.primary} />
+              <Icon name="account" size={20} color={C.primary} />
             </View>
             <View>
               <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
@@ -170,7 +170,7 @@ function ReviewCard({ item }: { item: MockReview }) {
               borderWidth: 2, borderColor: C.border,
             }}
           >
-            <MaterialCommunityIcons name="heart-outline" size={14} color={C.primary} />
+            <Icon name="heart-outline" size={14} color={C.primary} />
             <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
               Me sirve
             </Text>
@@ -212,7 +212,7 @@ export default function HomeScreen() {
         left={<AppLogo />}
         right={
           <Pressable onPress={() => notifsRef.current?.present()} style={{ width:40, height:40, borderRadius:20, alignItems:'center', justifyContent:'center', borderWidth:2, borderColor:C.border, backgroundColor:C.surface }}>
-            <MaterialCommunityIcons name="bell-outline" size={22} color={C.onSurface} />
+            <Icon name="bell-outline" size={22} color={C.onSurface} />
             <View style={{ position:'absolute', top:6, right:6, width:8, height:8, borderRadius:4, backgroundColor:C.primaryContainer, borderWidth:1.5, borderColor:C.surface }} />
           </Pressable>
         }
@@ -260,7 +260,7 @@ export default function HomeScreen() {
                   ...(active ? shadow.primary : {}),
                 }}
               >
-                <MaterialCommunityIcons
+                <Icon
                   name={cat.icon}
                   size={16}
                   color={active ? '#fff' : C.onSurfaceVariant}
@@ -312,7 +312,7 @@ export default function HomeScreen() {
         <View style={{ paddingHorizontal: 20 }}>
           {activeTab === 'favorites' ? (
             <View style={{ alignItems: 'center', paddingVertical: 48, gap: 12 }}>
-              <MaterialCommunityIcons name="heart-outline" size={48} color={C.outline} />
+              <Icon name="heart-outline" size={48} color={C.outline} />
               <Text style={{ color: C.onSurfaceVariant, fontFamily: 'Outfit_700Bold', fontSize: 18 }}>
                 Sin favoritos aún
               </Text>
@@ -324,7 +324,7 @@ export default function HomeScreen() {
             filtered.map(item => <ReviewCard key={item.id} item={item} />)
           ) : (
             <View style={{ alignItems: 'center', paddingVertical: 48, gap: 12 }}>
-              <MaterialCommunityIcons name="food-off-outline" size={48} color={C.outline} />
+              <Icon name="food-off-outline" size={48} color={C.outline} />
               <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 }}>
                 Sin reseñas en esta categoría aún.
               </Text>

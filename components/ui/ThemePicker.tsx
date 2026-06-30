@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '@/components/ui/Icon';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useTheme } from '@/lib/ThemeContext';
 import { THEME_META, ThemeName } from '@/lib/themes';
@@ -57,7 +57,7 @@ export function ThemePicker() {
                 {meta.label}
               </Text>
               {isSelected && (
-                <MaterialCommunityIcons name="check-circle" size={18} color={C.primary} />
+                <Icon name="check-circle" size={18} color={C.primary} />
               )}
             </View>
           </Pressable>

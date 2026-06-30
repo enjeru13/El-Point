@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
@@ -17,7 +17,7 @@ type PriceKey = '$' | '$$' | '$$$' | null;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+type IconName = string;
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -85,7 +85,7 @@ function StarBadgeInline({ rating }: { rating: number }) {
       paddingHorizontal: 8, paddingVertical: 4, borderRadius: 99,
       backgroundColor: bg, borderWidth: 2, borderColor: C.border,
     }}>
-      <MaterialCommunityIcons name="star" size={13} color={text} />
+      <Icon name="star" size={13} color={text} />
       <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: text }}>{rating.toFixed(1)}</Text>
     </View>
   );
@@ -107,7 +107,7 @@ function BestMatchCard({ item, onPress }: { item: ResultItem; onPress: () => voi
     >
       {/* Imagen */}
       <View style={{ height: 200, backgroundColor: item.iconBg, alignItems: 'center', justifyContent: 'center' }}>
-        <MaterialCommunityIcons name={item.icon} size={100} color={C.onSurface} style={{ opacity: 0.12 }} />
+        <Icon name={item.icon} size={100} color={C.onSurface} style={{ opacity: 0.12 }} />
 
         {/* Abierto/cerrado */}
         <View style={{
@@ -176,7 +176,7 @@ function BestMatchCard({ item, onPress }: { item: ResultItem; onPress: () => voi
             }}
           >
             <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: C.onSurface }}>Ver lugar</Text>
-            <MaterialCommunityIcons name="arrow-right" size={15} color={C.onSurface} />
+            <Icon name="arrow-right" size={15} color={C.onSurface} />
           </Pressable>
         </View>
       </View>
@@ -200,7 +200,7 @@ function ResultCard({ item, onPress }: { item: ResultItem; onPress: () => void }
     >
       {/* Imagen */}
       <View style={{ height: 110, backgroundColor: item.iconBg, alignItems: 'center', justifyContent: 'center' }}>
-        <MaterialCommunityIcons name={item.icon} size={48} color={C.onSurface} style={{ opacity: 0.18 }} />
+        <Icon name={item.icon} size={48} color={C.onSurface} style={{ opacity: 0.18 }} />
         <View style={{ position: 'absolute', top: 8, right: 8 }}>
           <StarBadgeInline rating={item.rating} />
         </View>
@@ -310,7 +310,7 @@ export default function SearchScreen() {
             ...((filterOpen || hasActiveFilters) ? shadow.primary : {}),
           }}
         >
-          <MaterialCommunityIcons
+          <Icon
             name="tune-variant" size={20}
             color={(filterOpen || hasActiveFilters) ? '#fff' : C.onSurfaceVariant}
           />
@@ -349,7 +349,7 @@ export default function SearchScreen() {
                       borderWidth: 2, borderColor: active ? C.border : C.outlineVariant,
                     }}
                   >
-                    <MaterialCommunityIcons name={opt.icon as any} size={14} color={active ? '#fff' : C.onSurfaceVariant} />
+                    <Icon name={opt.icon as any} size={14} color={active ? '#fff' : C.onSurfaceVariant} />
                     <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: active ? '#fff' : C.onSurfaceVariant }}>
                       {opt.label}
                     </Text>
@@ -410,7 +410,7 @@ export default function SearchScreen() {
           {/* Reset */}
           {hasActiveFilters && (
             <Pressable onPress={resetFilters} style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <MaterialCommunityIcons name="close-circle-outline" size={14} color={C.outline} />
+              <Icon name="close-circle-outline" size={14} color={C.outline} />
               <Text style={{ fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13, color: C.outline }}>
                 Limpiar filtros
               </Text>
@@ -434,7 +434,7 @@ export default function SearchScreen() {
                 alignItems: 'center', justifyContent: 'center',
                 borderWidth: 2, borderColor: C.outlineVariant,
               }}>
-                <MaterialCommunityIcons name="food-off-outline" size={32} color={C.outline} />
+                <Icon name="food-off-outline" size={32} color={C.outline} />
               </View>
               <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 20, color: C.onSurface }}>Sin resultados</Text>
               <Text style={{ fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: C.outline, textAlign: 'center', maxWidth: 240 }}>
@@ -491,7 +491,7 @@ export default function SearchScreen() {
           <View style={{ paddingHorizontal: 16, paddingTop: 24 }}>
             {/* Título sección */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-              <MaterialCommunityIcons name="trending-up" size={18} color={C.primary} />
+              <Icon name="trending-up" size={18} color={C.primary} />
               <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 18, color: C.onSurface, marginLeft: 6 }}>
                 Tendencias
               </Text>
@@ -539,7 +539,7 @@ export default function SearchScreen() {
                   </View>
 
                   {/* Icono */}
-                  <MaterialCommunityIcons
+                  <Icon
                     name={i < 3 ? 'fire' : 'arrow-top-right'}
                     size={i < 3 ? 18 : 15}
                     color={i < 3 ? C.primaryContainer : C.outlineVariant}

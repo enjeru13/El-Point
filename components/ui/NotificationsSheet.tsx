@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '@/components/ui/Icon';
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
 import {
   Animated,
@@ -80,7 +80,7 @@ function DottedDivider({ label }: { label: string }) {
 
 function NotifCard({ notif, onRead }: { notif: Notif; onRead: (id: string) => void }) {
   const { C, shadow } = useTheme();
-  const NOTIF_CONFIG: Record<NotifType, { icon: React.ComponentProps<typeof MaterialCommunityIcons>['name']; bg: string; color: string }> = {
+  const NOTIF_CONFIG: Record<NotifType, { icon: string; bg: string; color: string }> = {
     like:         { icon: 'heart',       bg: C.primaryFixed,       color: C.primary },
     reply:        { icon: 'reply',       bg: C.secondaryContainer, color: C.secondary },
     levelup:      { icon: 'star-circle', bg: C.primaryContainer,   color: '#fff' },
@@ -110,7 +110,7 @@ function NotifCard({ notif, onRead }: { notif: Notif; onRead: (id: string) => vo
           alignItems: 'center', justifyContent: 'center',
           borderWidth: 1.5, borderColor: C.border,
         }}>
-          <MaterialCommunityIcons name={cfg.icon} size={12} color={cfg.color} />
+          <Icon name={cfg.icon} size={12} color={cfg.color} />
         </View>
         <Text style={{
           fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 11,
@@ -160,7 +160,9 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
   const translateY = useRef(new Animated.Value(-20)).current;
   const opacity    = useRef(new Animated.Value(0)).current;
 
-  const unreadCount = notifs.filter(n => !n.read).length;
+  const unread = notifs.filter(n => !n.read);
+  const read   = notifs.filter(n => n.read);
+  const unreadCount = unread.length;
 
   const open = useCallback(() => {
     setVisible(true);
@@ -254,17 +256,17 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
           bounces={false}
         >
           <View style={{ gap: 12 }}>
-            {notifs.filter(n => !n.read).map(n => (
+            {unread.map(n => (
               <NotifCard key={n.id} notif={n} onRead={markRead} />
             ))}
           </View>
 
-          {notifs.filter(n => !n.read).length > 0 && notifs.filter(n => n.read).length > 0 && (
+          {unread.length > 0 && read.length > 0 && (
             <DottedDivider label="ANTERIORES" />
           )}
 
           <View style={{ gap: 12 }}>
-            {notifs.filter(n => n.read).map(n => (
+            {read.map(n => (
               <NotifCard key={n.id} notif={n} onRead={markRead} />
             ))}
           </View>

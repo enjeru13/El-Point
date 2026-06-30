@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '@/components/ui/Icon';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -29,7 +29,7 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
     <View style={{ flexDirection: 'row', gap: 6 }}>
       {[1, 2, 3, 4, 5].map(i => (
         <Pressable key={i} onPress={() => onChange(i)}>
-          <MaterialCommunityIcons
+          <Icon
             name={i <= value ? 'star' : 'star-outline'}
             size={36}
             color={i <= value ? C.secondary : C.outlineVariant}
@@ -137,7 +137,7 @@ function ReviewModal({
                 borderWidth: 2, borderColor: C.border,
               }}
             >
-              <MaterialCommunityIcons name="close" size={18} color={C.onSurface} />
+              <Icon name="close" size={18} color={C.onSurface} />
             </Pressable>
           </View>
 
@@ -203,7 +203,7 @@ function ReviewModal({
                 ...(canSubmit ? shadow.primary : {}),
               }}
             >
-              <MaterialCommunityIcons name="fire" size={18} color={canSubmit ? C.onPrimary : C.outline} />
+              <Icon name="fire" size={18} color={canSubmit ? C.onPrimary : C.outline} />
               <Text style={{ color: canSubmit ? C.onPrimary : C.outline, fontFamily: 'Outfit_700Bold', fontSize: 16 }}>
                 Publicar Rank
               </Text>
@@ -282,7 +282,7 @@ export default function RestaurantProfileScreen() {
             borderBottomWidth: 2, borderBottomColor: C.border,
           }}
         >
-          <MaterialCommunityIcons name={restaurant.icon} size={120} color={C.onSurface} style={{ opacity: 0.2 }} />
+          <Icon name={restaurant.icon} size={120} color={C.onSurface} style={{ opacity: 0.2 }} />
 
           {/* Gradient overlay bottom */}
           <View
@@ -325,13 +325,13 @@ export default function RestaurantProfileScreen() {
 
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <MaterialCommunityIcons name="star" size={16} color={C.secondaryContainer} />
+                <Icon name="star" size={16} color={C.secondaryContainer} />
                 <Text style={{ color: '#fff', fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
                   {restaurant.rating} ({restaurant.reviewCount})
                 </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <MaterialCommunityIcons name="map-marker" size={16} color="rgba(255,255,255,0.7)" />
+                <Icon name="map-marker" size={16} color="rgba(255,255,255,0.7)" />
                 <Text style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 }}>
                   {restaurant.distance} • {restaurant.price}
                 </Text>
@@ -356,7 +356,7 @@ export default function RestaurantProfileScreen() {
                 ...shadow.primary,
               }}
             >
-              <MaterialCommunityIcons name="fire" size={20} color={C.onPrimary} />
+              <Icon name="fire" size={20} color={C.onPrimary} />
               <Text style={{ color: C.onPrimary, fontFamily: 'Outfit_700Bold', fontSize: 16 }}>
                 Rankear
               </Text>
@@ -373,7 +373,7 @@ export default function RestaurantProfileScreen() {
                 ...shadow.sm,
               }}
             >
-              <MaterialCommunityIcons name="navigation-variant" size={18} color={C.secondary} />
+              <Icon name="navigation-variant" size={18} color={C.secondary} />
               <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 15 }}>
                 Ir
               </Text>
@@ -405,7 +405,7 @@ export default function RestaurantProfileScreen() {
                   alignItems: 'center', justifyContent: 'center',
                 }}
               >
-                <MaterialCommunityIcons
+                <Icon
                   name="clock-outline"
                   size={18}
                   color={restaurant.isOpen ? '#16a34a' : C.error}
@@ -419,7 +419,7 @@ export default function RestaurantProfileScreen() {
                   Cierra a las {restaurant.closesAt}
                 </Text>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={18} color={C.outline} />
+              <Icon name="chevron-right" size={18} color={C.outline} />
             </Pressable>
 
             {/* Dirección */}
@@ -438,14 +438,14 @@ export default function RestaurantProfileScreen() {
                   alignItems: 'center', justifyContent: 'center',
                 }}
               >
-                <MaterialCommunityIcons name="map-marker-outline" size={18} color={C.primary} />
+                <Icon name="map-marker-outline" size={18} color={C.primary} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
                   {restaurant.address}
                 </Text>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={18} color={C.outline} />
+              <Icon name="chevron-right" size={18} color={C.outline} />
             </Pressable>
 
             {/* Teléfono */}
@@ -464,12 +464,12 @@ export default function RestaurantProfileScreen() {
                   alignItems: 'center', justifyContent: 'center',
                 }}
               >
-                <MaterialCommunityIcons name="phone-outline" size={18} color={C.secondary} />
+                <Icon name="phone-outline" size={18} color={C.secondary} />
               </View>
               <Text style={{ flex: 1, color: C.secondary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
                 {restaurant.phone}
               </Text>
-              <MaterialCommunityIcons name="chevron-right" size={18} color={C.outline} />
+              <Icon name="chevron-right" size={18} color={C.outline} />
             </Pressable>
 
             {/* Instagram */}
@@ -486,12 +486,12 @@ export default function RestaurantProfileScreen() {
                   alignItems: 'center', justifyContent: 'center',
                 }}
               >
-                <MaterialCommunityIcons name="instagram" size={18} color={C.tertiary} />
+                <Icon name="instagram" size={18} color={C.tertiary} />
               </View>
               <Text style={{ flex: 1, color: C.tertiary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
                 {restaurant.instagram}
               </Text>
-              <MaterialCommunityIcons name="chevron-right" size={18} color={C.outline} />
+              <Icon name="chevron-right" size={18} color={C.outline} />
             </Pressable>
           </View>
 
@@ -512,7 +512,7 @@ export default function RestaurantProfileScreen() {
                 alignItems: 'center', justifyContent: 'center',
                 borderWidth: 2, borderColor: C.border,
               }}>
-                <MaterialCommunityIcons name="file-pdf-box" size={26} color={C.onSurface} />
+                <Icon name="file-pdf-box" size={26} color={C.onSurface} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 17 }}>
@@ -522,7 +522,7 @@ export default function RestaurantProfileScreen() {
                   Descarga el menú en PDF
                 </Text>
               </View>
-              <MaterialCommunityIcons name="arrow-right" size={20} color={C.primary} />
+              <Icon name="arrow-right" size={20} color={C.primary} />
             </Pressable>
           )}
 
@@ -536,7 +536,7 @@ export default function RestaurantProfileScreen() {
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <MaterialCommunityIcons name="book-open-outline" size={18} color={C.tertiary} />
+              <Icon name="book-open-outline" size={18} color={C.tertiary} />
               <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 18 }}>
                 Nuestra historia
               </Text>
@@ -550,7 +550,7 @@ export default function RestaurantProfileScreen() {
           <View style={{ gap: 12 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <MaterialCommunityIcons name="comment-text-multiple" size={20} color={C.primary} />
+                <Icon name="comment-text-multiple" size={20} color={C.primary} />
                 <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 20 }}>
                   Comunidad
                 </Text>
@@ -588,7 +588,7 @@ export default function RestaurantProfileScreen() {
                       <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, width: 8 }}>
                         {star}
                       </Text>
-                      <MaterialCommunityIcons name="star" size={10} color={C.secondary} />
+                      <Icon name="star" size={10} color={C.secondary} />
                       <View style={{ flex: 1, height: 6, borderRadius: 99, backgroundColor: C.surfaceContainerHigh, overflow: 'hidden' }}>
                         <View style={{ width: `${pct * 100}%`, height: '100%', borderRadius: 99, backgroundColor: C.secondary }} />
                       </View>
@@ -617,12 +617,12 @@ export default function RestaurantProfileScreen() {
                   borderWidth: 2, borderColor: C.border,
                 }}
               >
-                <MaterialCommunityIcons name="account" size={20} color={C.primary} />
+                <Icon name="account" size={20} color={C.primary} />
               </View>
               <Text style={{ flex: 1, color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 }}>
                 ¿Qué tal estuvo? Deja tu rank...
               </Text>
-              <MaterialCommunityIcons name="fire" size={20} color={C.primary} />
+              <Icon name="fire" size={20} color={C.primary} />
             </Pressable>
 
             {/* Lista reviews */}
@@ -645,7 +645,7 @@ export default function RestaurantProfileScreen() {
                       borderWidth: 2, borderColor: C.border,
                     }}
                   >
-                    <MaterialCommunityIcons name="account" size={22} color={C.primary} />
+                    <Icon name="account" size={22} color={C.primary} />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
@@ -682,7 +682,7 @@ export default function RestaurantProfileScreen() {
                   onPress={() => setHelpfulMap(m => ({ ...m, [r.id]: !m[r.id] }))}
                   style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' }}
                 >
-                  <MaterialCommunityIcons
+                  <Icon
                     name={helpfulMap[r.id] ? 'thumb-up' : 'thumb-up-outline'}
                     size={16}
                     color={helpfulMap[r.id] ? C.secondary : C.outline}
@@ -713,7 +713,7 @@ export default function RestaurantProfileScreen() {
             onPress={() => router.back()}
             style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
           >
-            <MaterialCommunityIcons name="arrow-left" size={22} color={C.onSurface} />
+            <Icon name="arrow-left" size={22} color={C.onSurface} />
           </Pressable>
         </Animated.View>
 
@@ -734,7 +734,7 @@ export default function RestaurantProfileScreen() {
               onPress={() => setSaved(s => !s)}
               style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
             >
-              <MaterialCommunityIcons
+              <Icon
                 name={saved ? 'star' : 'star-outline'}
                 size={20}
                 color={saved ? C.secondary : C.onSurface}
@@ -746,7 +746,7 @@ export default function RestaurantProfileScreen() {
             <Pressable
               style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
             >
-              <MaterialCommunityIcons name="share-variant-outline" size={20} color={C.onSurface} />
+              <Icon name="share-variant-outline" size={20} color={C.onSurface} />
             </Pressable>
           </Animated.View>
         </View>

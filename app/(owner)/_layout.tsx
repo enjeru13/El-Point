@@ -1,22 +1,22 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '@/components/ui/Icon';
 import { BottomTabBarProps, Tabs } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Animated, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 
-type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+type IconName = string;
 
-const TAB_ICONS: Record<string, { default: IconName; focused: IconName }> = {
-  index:     { default: 'storefront-outline',     focused: 'storefront' },
-  analytics: { default: 'chart-bar',              focused: 'chart-bar' },
-  settings:  { default: 'account-circle-outline', focused: 'account-circle' },
+const TAB_ICONS: Record<string, IconName> = {
+  index:     'store',
+  analytics: 'analytics',
+  settings:  'cog-outline',
 };
 
 function TabItem({ route, focused, onPress }: { route: any; focused: boolean; onPress: () => void }) {
   const { C } = useTheme();
   const scale = useRef(new Animated.Value(focused ? 1.15 : 1)).current;
-  const icons = TAB_ICONS[route.name] ?? { default: 'circle-outline', focused: 'circle' };
+  const iconName = TAB_ICONS[route.name] ?? 'circle';
 
   useEffect(() => {
     Animated.spring(scale, {
@@ -43,8 +43,9 @@ function TabItem({ route, focused, onPress }: { route: any; focused: boolean; on
       })}
     >
       <Animated.View style={{ transform: [{ scale }] }}>
-        <MaterialCommunityIcons
-          name={focused ? icons.focused : icons.default}
+        <Icon
+          name={iconName}
+            fill={focused ? C.primaryFixed : 'none'}
           size={27}
           color={focused ? C.primary : C.outline}
         />

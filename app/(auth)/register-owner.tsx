@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '@/components/ui/Icon';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
@@ -109,7 +109,7 @@ export default function RegisterOwnerScreen() {
           onPress={() => step > 0 ? setStep(step - 1) : router.back()}
           style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
         >
-          <MaterialCommunityIcons name="arrow-left" size={24} color={C.onSurfaceVariant} />
+          <Icon name="arrow-left" size={24} color={C.onSurfaceVariant} />
         </Pressable>
 
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -153,7 +153,7 @@ export default function RegisterOwnerScreen() {
                       ...shadow.sm,
                     }}
                   >
-                    <MaterialCommunityIcons name="storefront-outline" size={28} color={C.primary} />
+                    <Icon name="storefront-outline" size={28} color={C.primary} />
                   </View>
                   <View>
                     <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24 }}>
@@ -184,7 +184,7 @@ export default function RegisterOwnerScreen() {
                       ...shadow.sm,
                     }}
                   >
-                    <MaterialCommunityIcons name="store-outline" size={22} color={C.outline} />
+                    <Icon name="store-outline" size={22} color={C.outline} />
                     <AppTextInput
                       placeholder="Ej. Flame & Fork Bistro"
                       value={name}
@@ -216,7 +216,7 @@ export default function RegisterOwnerScreen() {
                             backgroundColor: sel ? C.secondaryContainer : C.surface,
                           }}
                         >
-                          <MaterialCommunityIcons
+                          <Icon
                             name={cat.icon as any}
                             size={16}
                             color={sel ? C.secondary : C.onSurfaceVariant}
@@ -243,7 +243,7 @@ export default function RegisterOwnerScreen() {
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <MaterialCommunityIcons name="trending-up" size={22} color={C.secondary} />
+                  <Icon name="trending-up" size={22} color={C.secondary} />
                   <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, flex: 1 }}>
                     Obtén el badge "Local Heat" 🔥
                   </Text>
@@ -288,7 +288,7 @@ export default function RegisterOwnerScreen() {
                       ...shadow.sm,
                     }}
                   >
-                    <MaterialCommunityIcons name="map-marker-outline" size={22} color={C.outline} />
+                    <Icon name="map-marker-outline" size={22} color={C.outline} />
                     <AppTextInput
                       placeholder="Calle y ciudad"
                       value={address}
@@ -305,7 +305,7 @@ export default function RegisterOwnerScreen() {
                       backgroundColor: coords ? C.secondaryContainer + '20' : C.surface,
                     }}
                   >
-                    <MaterialCommunityIcons
+                    <Icon
                       name={coords ? 'check-circle' : 'crosshairs-gps'}
                       size={20}
                       color={coords ? C.secondary : C.outline}
@@ -336,7 +336,7 @@ export default function RegisterOwnerScreen() {
                       ...shadow.sm,
                     }}
                   >
-                    <MaterialCommunityIcons name="whatsapp" size={22} color="#25D366" />
+                    <Icon name="whatsapp" size={22} color="#25D366" />
                     <AppTextInput
                       placeholder="+1 234 567 8900"
                       keyboardType="phone-pad"
@@ -361,7 +361,7 @@ export default function RegisterOwnerScreen() {
                       ...shadow.sm,
                     }}
                   >
-                    <MaterialCommunityIcons name="instagram" size={22} color="#E1306C" />
+                    <Icon name="instagram" size={22} color="#E1306C" />
                     <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 16 }}>@</Text>
                     <AppTextInput
                       placeholder="tu_restaurante"
@@ -407,7 +407,7 @@ export default function RegisterOwnerScreen() {
                     ) : (
                       <View style={{ alignItems: 'center', gap: 8 }}>
                         <View style={{ padding: 12, borderRadius: 16, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
-                          <MaterialCommunityIcons name="image-plus" size={28} color={C.primary} />
+                          <Icon name="image-plus" size={28} color={C.primary} />
                         </View>
                         <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>Subir logo</Text>
                         <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 }}>PNG, JPG · máx 10MB</Text>
@@ -440,7 +440,7 @@ export default function RegisterOwnerScreen() {
                     ) : (
                       <View style={{ alignItems: 'center', gap: 8 }}>
                         <View style={{ padding: 16, borderRadius: 16, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
-                          <MaterialCommunityIcons name="camera-plus-outline" size={36} color={C.primary} />
+                          <Icon name="camera-plus-outline" size={36} color={C.primary} />
                         </View>
                         <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>Sube tu mejor foto de plato</Text>
                         <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 }}>PNG, JPG · máx 10MB</Text>
@@ -472,7 +472,7 @@ export default function RegisterOwnerScreen() {
                         borderWidth: 2, borderColor: C.border,
                       }}
                     >
-                      <MaterialCommunityIcons
+                      <Icon
                         name={menuPdfName ? 'file-check' : 'file-pdf-box'}
                         size={26}
                         color={menuPdfName ? '#fff' : C.primary}
@@ -511,7 +511,7 @@ export default function RegisterOwnerScreen() {
             }}>
               {step === STEPS - 1 ? 'Registrar mi restaurante' : 'Continuar'}
             </Text>
-            <MaterialCommunityIcons
+            <Icon
               name={step === STEPS - 1 ? 'storefront' : 'arrow-right'}
               size={20}
               color={canContinue ? '#fff' : C.outline}

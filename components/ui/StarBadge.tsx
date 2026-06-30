@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '@/components/ui/Icon';
 import { Text, View } from 'react-native';
 import { useTheme } from '@/lib/ThemeContext';
 
@@ -18,7 +18,7 @@ export function StarBadge({ rating, size = 'md' }: Props) {
       borderRadius: 99, backgroundColor: bg,
       borderWidth: 2, borderColor: C.border,
     }}>
-      <MaterialCommunityIcons name="star" size={lg ? 13 : 11} color={C.onSurface} />
+      <Icon name="star" size={lg ? 13 : 11} color={C.onSurface} fill={C.onSurface} />
       <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: lg ? 13 : 11 }}>
         {rating.toFixed(1)}
       </Text>

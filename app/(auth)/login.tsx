@@ -1,5 +1,5 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { Icon } from '@/components/ui/Icon';
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import {
@@ -19,7 +19,7 @@ import { useTheme } from '@/lib/ThemeContext';
 const { width: W, height: H } = Dimensions.get('window');
 
 const FOOD_ICONS: {
-  name: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+  name: string;
   size: number; top: number; left: number;
   rotation: number; opacity: number; duration: number; delay: number; floatY: number;
 }[] = [
@@ -66,14 +66,14 @@ function FloatingIcon({ icon }: { icon: typeof FOOD_ICONS[0] }) {
       opacity: icon.opacity,
       transform: [{ translateY }, { rotate: rotate.interpolate({ inputRange: [0,1], outputRange: [`${icon.rotation}deg`, `${icon.rotation+15}deg`] }) }],
     }}>
-      <MaterialCommunityIcons name={icon.name} size={icon.size} color="#fff" />
+      <Icon name={icon.name} size={icon.size} color="#fff" />
     </Animated.View>
   );
 }
 
 function Field({ label, icon, focused, children, right }: {
   label: string;
-  icon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+  icon: string;
   focused: boolean;
   children: React.ReactNode;
   right?: React.ReactNode;
@@ -83,7 +83,7 @@ function Field({ label, icon, focused, children, right }: {
     <View style={{ gap: 8 }}>
       <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>{label}</Text>
       <InputWrapper focused={focused}>
-        <MaterialCommunityIcons name={icon} size={22} color={focused ? C.primary : C.outline} />
+        <Icon name={icon} size={22} color={focused ? C.primary : C.outline} />
         {children}
         {right}
       </InputWrapper>
@@ -160,7 +160,7 @@ export default function LoginScreen() {
 
           <Field label="Contraseña" icon="lock-outline" focused={focusPw} right={
             <Pressable onPress={() => setShowPw(!showPw)}>
-              <MaterialCommunityIcons name={showPw ? 'eye-off-outline' : 'eye-outline'} size={22} color={C.outline} />
+              <Icon name={showPw ? 'eye-off-outline' : 'eye-outline'} size={22} color={C.outline} />
             </Pressable>
           }>
             <AppTextInput
@@ -192,7 +192,7 @@ export default function LoginScreen() {
             <Text style={{ color: '#fff', fontFamily: 'Outfit_700Bold', fontSize: 16 }}>
               {loading ? 'Ingresando...' : 'Ingresar'}
             </Text>
-            {!loading && <MaterialCommunityIcons name="arrow-right" size={20} color="#fff" />}
+            {!loading && <Icon name="arrow-right" size={20} color="#fff" />}
           </Pressable>
 
           {/* Divisor */}
@@ -210,7 +210,7 @@ export default function LoginScreen() {
             borderWidth: 2, borderColor: C.border,
             ...shadow.sm,
           }}>
-            <MaterialCommunityIcons name="google" size={22} color="#EA4335" />
+            <Icon name="google" size={22} color="#EA4335" />
             <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Continuar con Google</Text>
           </Pressable>
 
@@ -242,7 +242,7 @@ export default function LoginScreen() {
                       borderWidth: 2, borderColor: C.border,
                     }}
                   >
-                    <MaterialCommunityIcons name={u.icon} size={16} color={C.onSurfaceVariant} />
+                    <Icon name={u.icon} size={16} color={C.onSurfaceVariant} />
                     <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
                       {u.label}
                     </Text>

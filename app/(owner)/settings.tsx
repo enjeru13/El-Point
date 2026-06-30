@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '@/components/ui/Icon';
 import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '@/lib/ThemeContext';
 import { supabase } from '@/lib/supabase';
@@ -25,7 +25,7 @@ export default function OwnerProfileScreen() {
           ...shadow.sm,
         }}
       >
-        <MaterialCommunityIcons name="logout" size={18} color={C.error} />
+        <Icon name="logout" size={18} color={C.error} />
         <Text style={{ color: C.error, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
           Cerrar sesión
         </Text>

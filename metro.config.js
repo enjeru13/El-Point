@@ -3,6 +3,10 @@ const { withNativeWind } = require("nativewind/metro");
 
 const config = getDefaultConfig(__dirname);
 
+// Allow Metro to resolve .mjs files (needed for lucide-react-native)
+config.resolver.sourceExts = [...config.resolver.sourceExts, 'mjs'];
+config.resolver.unstable_enablePackageExports = true;
+
 const nativeWindConfig = withNativeWind(config, { input: "./global.css" });
 
 // Applied after withNativeWind so it isn't overwritten
