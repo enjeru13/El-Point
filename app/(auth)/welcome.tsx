@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useTheme } from '@/lib/ThemeContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: W, height: H } = Dimensions.get('window');
 const CONFETTI_COUNT = 36;
@@ -55,6 +56,7 @@ function ConfettiParticle({ x, color, size, delay, duration, rotation }: {
 
 export default function WelcomeScreen() {
   const { C, shadow } = useTheme();
+  const insets = useSafeAreaInsets();
   const router  = useRouter();
   const { role } = useLocalSearchParams<{ role?: string }>();
   const isOwner = role === 'owner';
@@ -97,13 +99,9 @@ export default function WelcomeScreen() {
         {confetti.map(p => <ConfettiParticle key={p.id} {...p} />)}
       </View>
 
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 56, paddingBottom: 40 }}>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: insets.top + 16, paddingBottom: 40 }}>
 
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          {Array.from({ length: isOwner ? 3 : 4 }).map((_, i, arr) => (
-            <View key={i} style={{ height: 6, borderRadius: 99, width: 48, backgroundColor: i === arr.length - 1 ? C.primary : C.primaryFixed }} />
-          ))}
-        </View>
+        <View style={{ height: 6 }} />
 
         <Animated.View style={{ alignItems: 'center', justifyContent: 'center', transform: [{ translateY: floatY }] }}>
           <View style={{ position: 'absolute', width: 240, height: 240, borderRadius: 120, backgroundColor: isOwner ? C.secondary : C.primary, opacity: 0.08, transform: [{ scaleX: 1.3 }] }} />

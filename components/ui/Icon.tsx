@@ -59,6 +59,7 @@ const MAP: Record<string, LucideIcon> = {
   'store-outline':        Store,
   'storefront-outline':   Store,
   'analytics':            BarChart2,
+  'cog':                  Settings,
   'cog-outline':          Settings,
   'settings':             Settings,
   // Gamification

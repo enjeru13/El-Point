@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Icon } from '@/components/ui/Icon';
 import { useEffect, useRef, useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
 import {
   Animated,
@@ -98,6 +99,7 @@ const DEV_USERS = [
 
 export default function LoginScreen() {
   const { C, shadow } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const [email, setEmail]           = useState('');
   const [password, setPassword]     = useState('');
@@ -123,7 +125,7 @@ export default function LoginScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.primary }}>
+    <View style={{ flex: 1, backgroundColor: C.primary, paddingTop: insets.top }}>
       {/* Fondo animado */}
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
         {FOOD_ICONS.map((icon, i) => <FloatingIcon key={i} icon={icon} />)}
@@ -217,7 +219,7 @@ export default function LoginScreen() {
           {/* Registro */}
           <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 4 }}>
             <Text style={{ color: C.onSurfaceVariant, fontSize: 15, fontFamily: 'PlusJakartaSans_400Regular' }}>¿No tienes cuenta?</Text>
-            <Pressable onPress={() => router.push('/(auth)/register-customer')}>
+            <Pressable onPress={() => router.push('/(auth)/register')}>
               <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Regístrate</Text>
             </Pressable>
           </View>

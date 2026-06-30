@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { useTheme } from '@/lib/ThemeContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const CATEGORIES = [
   { id: 1,  label: 'Pizza',        icon: 'pizza' },
@@ -36,6 +37,7 @@ const STEPS = 3;
 
 export default function RegisterOwnerScreen() {
   const { C, shadow } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const [step, setStep] = useState(0);
 
@@ -101,7 +103,7 @@ export default function RegisterOwnerScreen() {
         style={{
           position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50,
           flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-          paddingHorizontal: 20, height: 64,
+          paddingHorizontal: 20, paddingTop: insets.top, height: insets.top + 56,
           backgroundColor: C.surface + 'e0',
         }}
       >
@@ -134,7 +136,7 @@ export default function RegisterOwnerScreen() {
       >
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingTop: 88, paddingBottom: 40, paddingHorizontal: 20 }}
+          contentContainerStyle={{ paddingTop: insets.top + 70, paddingBottom: 120, paddingHorizontal: 20 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -492,40 +494,39 @@ export default function RegisterOwnerScreen() {
             </>
           )}
 
-          {/* Botón continuar */}
-          <Pressable
-            onPress={handleContinue}
-            disabled={!canContinue}
-            style={{
-              height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center',
-              flexDirection: 'row', gap: 8, marginTop: 32,
-              backgroundColor: canContinue ? C.primary : C.surfaceContainerHighest,
-              borderWidth: 2,
-              borderColor: canContinue ? C.border : C.outlineVariant,
-              ...(canContinue ? shadow.primary : {}),
-            }}
-          >
-            <Text style={{
-              fontFamily: 'Outfit_700Bold', fontSize: 16,
-              color: canContinue ? '#fff' : C.outline,
-            }}>
-              {step === STEPS - 1 ? 'Registrar mi restaurante' : 'Continuar'}
-            </Text>
-            <Icon
-              name={step === STEPS - 1 ? 'storefront' : 'arrow-right'}
-              size={20}
-              color={canContinue ? '#fff' : C.outline}
-            />
-          </Pressable>
-
-          {step === STEPS - 1 && (
-            <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, textAlign: 'center', marginTop: 16, lineHeight: 18 }}>
-              Al registrarte, aceptas los{' '}
-              <Text style={{ textDecorationLine: 'underline', color: C.primary }}>Términos de Socio</Text> de El Point.
-            </Text>
-          )}
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* ── Barra fija inferior ── */}
+      <View style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        paddingHorizontal: 20, paddingTop: 12,
+        paddingBottom: insets.bottom + 16,
+        backgroundColor: C.surface + 'f0',
+      }}>
+        <Pressable
+          onPress={handleContinue}
+          disabled={!canContinue}
+          style={{
+            height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center',
+            flexDirection: 'row', gap: 8,
+            backgroundColor: canContinue ? C.primary : C.surfaceContainerHighest,
+            borderWidth: 2, borderColor: canContinue ? C.border : C.outlineVariant,
+            ...(canContinue ? shadow.primary : {}),
+          }}
+        >
+          <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 16, color: canContinue ? '#fff' : C.outline }}>
+            {step === STEPS - 1 ? 'Registrar mi restaurante' : 'Continuar'}
+          </Text>
+          <Icon name={step === STEPS - 1 ? 'storefront' : 'arrow-right'} size={20} color={canContinue ? '#fff' : C.outline} />
+        </Pressable>
+        {step === STEPS - 1 && (
+          <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, textAlign: 'center', marginTop: 10, lineHeight: 18 }}>
+            Al registrarte, aceptas los{' '}
+            <Text style={{ textDecorationLine: 'underline', color: C.primary }}>Términos de Socio</Text> de El Point.
+          </Text>
+        )}
+      </View>
     </View>
   );
 }

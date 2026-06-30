@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { THEMES, THEME_META, ThemeName } from '@/lib/themes';
 import { FLOATING_NAV_H } from '@/lib/theme';
+import { supabase } from '@/lib/supabase';
 
 // ─── Dot bicolor ──────────────────────────────────────────────────────────────
 
@@ -209,17 +210,6 @@ export default function SettingsScreen() {
                       >
                         <ThemeDot name={name} size={40} />
                       </View>
-                      <Text
-                        style={{
-                          color: active ? C.primary : C.onSurfaceVariant,
-                          fontFamily: active ? 'PlusJakartaSans_700Bold' : 'PlusJakartaSans_400Regular',
-                          fontSize: 10,
-                          textAlign: 'center',
-                        }}
-                        numberOfLines={1}
-                      >
-                        {meta.label}
-                      </Text>
                     </Pressable>
                   );
                 })}
@@ -339,6 +329,22 @@ export default function SettingsScreen() {
             </Pressable>
           </SectionCard>
         </View>
+
+        {/* ── Cerrar sesión ── */}
+        <Pressable
+          onPress={() => supabase.auth.signOut()}
+          style={{
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+            paddingVertical: 14, borderRadius: 99,
+            backgroundColor: C.surface,
+            borderWidth: 2, borderColor: C.border,
+          }}
+        >
+          <Icon name="logout" size={18} color={C.error} />
+          <Text style={{ color: C.error, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
+            Cerrar sesión
+          </Text>
+        </Pressable>
 
         {/* ── Version ── */}
         <Text style={{ textAlign: 'center', color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12 }}>

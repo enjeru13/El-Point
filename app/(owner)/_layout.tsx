@@ -1,22 +1,31 @@
-import { Icon } from '@/components/ui/Icon';
-import { BottomTabBarProps, Tabs } from 'expo-router';
-import { useEffect, useRef } from 'react';
-import { Animated, Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '@/lib/ThemeContext';
+import { Icon } from "@/components/ui/Icon";
+import { useTheme } from "@/lib/ThemeContext";
+import { BottomTabBarProps, Tabs } from "expo-router";
+import { useEffect, useRef } from "react";
+import { Animated, Pressable, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type IconName = string;
 
 const TAB_ICONS: Record<string, IconName> = {
-  index:     'store',
-  analytics: 'analytics',
-  settings:  'cog-outline',
+  index: "store-outline",
+  analytics: "analytics",
+  profile: "account",
+  settings: "settings",
 };
 
-function TabItem({ route, focused, onPress }: { route: any; focused: boolean; onPress: () => void }) {
+function TabItem({
+  route,
+  focused,
+  onPress,
+}: {
+  route: any;
+  focused: boolean;
+  onPress: () => void;
+}) {
   const { C } = useTheme();
   const scale = useRef(new Animated.Value(focused ? 1.15 : 1)).current;
-  const iconName = TAB_ICONS[route.name] ?? 'circle';
+  const iconName = TAB_ICONS[route.name] ?? "circle";
 
   useEffect(() => {
     Animated.spring(scale, {
@@ -31,21 +40,24 @@ function TabItem({ route, focused, onPress }: { route: any; focused: boolean; on
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 56, height: 40,
+        alignItems: "center",
+        justifyContent: "center",
+        width: 56,
+        height: 40,
         borderRadius: 20,
         backgroundColor: focused
           ? C.primaryFixed
-          : pressed ? C.surfaceContainerHigh : 'transparent',
+          : pressed
+            ? C.surfaceContainerHigh
+            : "transparent",
         borderWidth: focused ? 2 : 0,
-        borderColor: focused ? C.border : 'transparent',
+        borderColor: focused ? C.border : "transparent",
       })}
     >
       <Animated.View style={{ transform: [{ scale }] }}>
         <Icon
           name={iconName}
-            fill={focused ? C.primaryFixed : 'none'}
+          fill={focused ? C.primaryFixed : "none"}
           size={27}
           color={focused ? C.primary : C.outline}
         />
@@ -61,19 +73,24 @@ function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
   return (
     <View
       pointerEvents="box-none"
-      style={{ position: 'absolute', bottom: insets.bottom, left: 40, right: 40 }}
+      style={{
+        position: "absolute",
+        bottom: insets.bottom,
+        left: 40,
+        right: 40,
+      }}
     >
       <View
         style={{
-          flexDirection: 'row',
+          flexDirection: "row",
           backgroundColor: C.surface,
           borderRadius: 32,
           borderWidth: 2,
           borderColor: C.border,
           paddingVertical: 14,
           paddingHorizontal: 8,
-          alignItems: 'center',
-          justifyContent: 'space-around',
+          alignItems: "center",
+          justifyContent: "space-around",
           ...shadow.md,
         }}
       >
@@ -93,12 +110,13 @@ function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
 export default function OwnerLayout() {
   return (
     <Tabs
-      tabBar={props => <FloatingTabBar {...props} />}
+      tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={{ headerShown: false }}
     >
-      <Tabs.Screen name="index"     options={{ title: 'Mi Local' }} />
-      <Tabs.Screen name="analytics" options={{ title: 'Estadísticas' }} />
-      <Tabs.Screen name="settings"  options={{ title: 'Perfil' }} />
+      <Tabs.Screen name="index" options={{ title: "Mi Local" }} />
+      <Tabs.Screen name="analytics" options={{ title: "Métricas" }} />
+      <Tabs.Screen name="profile" options={{ title: "Perfil" }} />
+      <Tabs.Screen name="settings" options={{ title: "Ajustes" }} />
     </Tabs>
   );
 }

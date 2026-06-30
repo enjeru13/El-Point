@@ -14,6 +14,7 @@ import {
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { useTheme } from '@/lib/ThemeContext';
 import { ThemePicker } from '@/components/ui/ThemePicker';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
 
@@ -40,6 +41,7 @@ const CATEGORIES: {
 
 export default function RegisterScreen() {
   const { C, shadow } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const [step, setStep] = useState(0);
 
@@ -103,8 +105,8 @@ export default function RegisterScreen() {
 
       {/* ── Header ── */}
       <View
-        className="absolute top-0 left-0 right-0 z-50 flex-row items-center justify-between px-5 h-16"
-        style={{ backgroundColor: C.surface + 'e0' }}
+        className="absolute top-0 left-0 right-0 z-50 flex-row items-center justify-between px-5"
+        style={{ backgroundColor: C.surface + 'e0', paddingTop: insets.top, height: insets.top + 56 }}
       >
         <Pressable
           onPress={() => step > 0 ? setStep(step - 1) : router.back()}
@@ -138,8 +140,8 @@ export default function RegisterScreen() {
         <ScrollView
           className="flex-1"
           contentContainerStyle={{
-            paddingTop: 88,
-            paddingBottom: step === 1 ? 120 : 40,
+            paddingTop: insets.top + 70,
+            paddingBottom: 120,
             paddingHorizontal: 20,
           }}
           showsVerticalScrollIndicator={false}
@@ -573,105 +575,62 @@ export default function RegisterScreen() {
             </>
           )}
 
-          {/* Botón continuar (steps 0, 2, 3, 4) */}
-          {step !== 1 && (
-            <Pressable
-              onPress={handleContinue}
-              disabled={!canContinue}
-              className="h-14 rounded-2xl items-center justify-center flex-row gap-2 mt-8 active:scale-95"
-              style={{
-                backgroundColor: canContinue ? C.primary : C.surfaceContainerHighest,
-                borderWidth: 2,
-                borderColor: C.border,
-                ...(canContinue ? shadow.primary : {}),
-              }}
-            >
-              <Text
-                className="text-base"
-                style={{
-                  color: canContinue ? '#fff' : C.outline,
-                  fontFamily: 'PlusJakartaSans_700Bold',
-                }}
-              >
-                {step === 2 ? 'Crear cuenta' : step === 4 ? 'Empezar a explorar' : 'Continuar'}
-              </Text>
-              <Icon
-                name={step === 4 ? 'rocket-launch-outline' : step === 2 ? 'check' : 'arrow-right'}
-                size={20}
-                color={canContinue ? '#fff' : C.outline}
-              />
-            </Pressable>
-          )}
-
-          {/* Términos */}
-          {step === 0 && (
-            <Text
-              className="text-xs text-center mt-6 leading-5"
-              style={{
-                color: C.onSurfaceVariant + '80',
-                fontFamily: 'PlusJakartaSans_400Regular',
-              }}
-            >
-              Al continuar, aceptas nuestros{' '}
-              <Text className="underline">Términos de Servicio</Text> y{' '}
-              <Text className="underline">Política de Privacidad</Text>.
-            </Text>
-          )}
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* ── Barra fija inferior solo en step 1 (sabores) ── */}
-      {step === 1 && (
-        <View
-          className="absolute bottom-0 left-0 right-0 px-5 pb-8 pt-4 gap-3"
-          style={{ backgroundColor: C.surface + 'eb' }}
-        >
-          {/* Barra progreso */}
-          <View
-            className="h-2 rounded-full overflow-hidden"
-            style={{ backgroundColor: C.surfaceContainerHighest }}
-          >
-            <View
-              className="h-full rounded-full"
-              style={{
-                width: `${(selected.size / CATEGORIES.length) * 100}%`,
-                backgroundColor: C.primary,
-              }}
-            />
-          </View>
-
-          <View className="flex-row gap-3 items-center">
+      {/* ── Barra fija inferior ── */}
+      <View style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        paddingHorizontal: 20,
+        paddingTop: 12,
+        paddingBottom: insets.bottom + 16,
+        backgroundColor: C.surface + 'f0',
+      }}>
+        {step === 1 ? (
+          <>
+            <View style={{ height: 8, borderRadius: 99, overflow: 'hidden', backgroundColor: C.surfaceContainerHighest, marginBottom: 12 }}>
+              <View style={{ height: '100%', borderRadius: 99, width: `${(selected.size / CATEGORIES.length) * 100}%`, backgroundColor: C.primary }} />
+            </View>
+            <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+              <Pressable onPress={handleContinue} style={{ flex: 1, height: 56, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 14 }}>Omitir</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleContinue}
+                style={{ flex: 2, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: C.primary, borderWidth: 2, borderColor: C.border, ...shadow.primary }}
+              >
+                <Text style={{ color: '#fff', fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16 }}>
+                  {selected.size > 0 ? `Continuar (${selected.size})` : 'Continuar'}
+                </Text>
+              </Pressable>
+            </View>
+          </>
+        ) : (
+          <>
             <Pressable
               onPress={handleContinue}
-              className="flex-1 h-14 items-center justify-center"
-            >
-              <Text
-                className="text-sm"
-                style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold' }}
-              >
-                Omitir
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={handleContinue}
-              className="flex-[2] h-14 rounded-full items-center justify-center active:scale-95"
+              disabled={!canContinue}
               style={{
-                backgroundColor: C.primary,
-                borderWidth: 2,
-                borderColor: C.border,
-                ...shadow.primary,
+                height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center',
+                flexDirection: 'row', gap: 8,
+                backgroundColor: canContinue ? C.primary : C.surfaceContainerHighest,
+                borderWidth: 2, borderColor: C.border,
+                ...(canContinue ? shadow.primary : {}),
               }}
             >
-              <Text
-                className="text-base"
-                style={{ color: '#fff', fontFamily: 'PlusJakartaSans_700Bold' }}
-              >
-                {selected.size > 0 ? `Continuar (${selected.size})` : 'Continuar'}
+              <Text style={{ color: canContinue ? '#fff' : C.outline, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16 }}>
+                {step === 2 ? 'Crear cuenta' : step === 4 ? 'Empezar a explorar' : 'Continuar'}
               </Text>
+              <Icon name={step === 4 ? 'rocket-launch-outline' : step === 2 ? 'check' : 'arrow-right'} size={20} color={canContinue ? '#fff' : C.outline} />
             </Pressable>
-          </View>
-        </View>
-      )}
+            {step === 0 && (
+              <Text style={{ color: C.onSurfaceVariant + '80', fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, textAlign: 'center', marginTop: 10, lineHeight: 18 }}>
+                Al continuar, aceptas nuestros <Text style={{ textDecorationLine: 'underline' }}>Términos de Servicio</Text> y <Text style={{ textDecorationLine: 'underline' }}>Política de Privacidad</Text>.
+              </Text>
+            )}
+          </>
+        )}
+      </View>
     </View>
   );
 }

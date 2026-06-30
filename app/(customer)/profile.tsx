@@ -361,57 +361,7 @@ export default function ProfileScreen() {
           ))}
         </View>
 
-        {/* ── Configuración ── */}
-        <Pressable
-          onPress={() => router.push('/(customer)/settings')}
-          style={{
-            flexDirection: 'row', alignItems: 'center', gap: 14,
-            padding: 16, borderRadius: 20,
-            backgroundColor: C.surface,
-            borderWidth: 2, borderColor: C.border,
-            ...shadow.sm,
-          }}
-        >
-          {/* Icono engranaje */}
-          <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
-            <Icon name="cog-outline" size={24} color={C.onPrimary} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16 }}>
-              Configuración
-            </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
-              {/* Dot bicolor */}
-              <View style={{ width: 14, height: 14, borderRadius: 7, borderWidth: 1.5, borderColor: C.border, marginRight: 5 }}>
-                <View style={{ flex: 1, borderRadius: 5, overflow: 'hidden', flexDirection: 'row' }}>
-                  <View style={{ width: 5, height: 11, backgroundColor: THEMES[themeName].primary }} />
-                  <View style={{ width: 5, height: 11, backgroundColor: THEMES[themeName].secondary }} />
-                </View>
-              </View>
-              <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13 }}>
-                {THEME_META[themeName].label}
-              </Text>
-            </View>
-          </View>
-          <Icon name="chevron-right" size={22} color={C.outline} />
-        </Pressable>
 
-        {/* ── Cerrar sesión ── */}
-        <Pressable
-          onPress={() => supabase.auth.signOut()}
-          style={{
-            flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-            paddingVertical: 14, borderRadius: 99,
-            backgroundColor: C.surface,
-            borderWidth: 2, borderColor: C.border,
-            marginTop: 8,
-          }}
-        >
-          <Icon name="logout" size={18} color={C.error} />
-          <Text style={{ color: C.error, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
-            Cerrar sesión
-          </Text>
-        </Pressable>
 
       </View>
       </ScrollView>
