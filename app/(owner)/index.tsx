@@ -1,6 +1,7 @@
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { AppText } from '@/components/ui/AppText';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { FLOATING_NAV_H } from '@/lib/theme';
@@ -39,8 +40,8 @@ function StatCard({ icon, label, value, color }: { icon: string; label: string; 
       <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: color + '22', alignItems: 'center', justifyContent: 'center' }}>
         <Icon name={icon} size={18} color={color} />
       </View>
-      <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 22 }}>{value}</Text>
-      <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12 }}>{label}</Text>
+      <AppText variant="title" style={{ fontSize: 22, lineHeight: 27 }}>{value}</AppText>
+      <AppText variant="caption" color={C.onSurfaceVariant} style={{ fontSize: 12 }}>{label}</AppText>
     </View>
   );
 }
@@ -57,18 +58,18 @@ function ReviewRow({ review }: { review: Review }) {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
         <Avatar uri={review.author?.avatar_url} size={36} />
         <View style={{ flex: 1 }}>
-          <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14 }}>{authorLabel(review.author)}</Text>
+          <AppText variant="bodyStrong" style={{ fontSize: 14 }}>{authorLabel(review.author)}</AppText>
           <View style={{ flexDirection: 'row', gap: 2, marginTop: 2 }}>
             {[1, 2, 3, 4, 5].map(s => (
               <Icon key={s} name="star" size={11} color={s <= review.rating ? C.primary : C.outlineVariant} fill={s <= review.rating ? C.primary : 'none'} />
             ))}
           </View>
         </View>
-        <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12 }}>{timeAgo(review.created_at)}</Text>
+        <AppText variant="caption" color={C.outline} style={{ fontSize: 12 }}>{timeAgo(review.created_at)}</AppText>
       </View>
-      <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, lineHeight: 19 }} numberOfLines={3}>
+      <AppText variant="bodySm" color={C.onSurfaceVariant} numberOfLines={3}>
         {review.body}
-      </Text>
+      </AppText>
     </View>
   );
 }
@@ -116,8 +117,8 @@ export default function OwnerHomeScreen() {
       }}>
         <Avatar uri={restaurant.logo_url ?? restaurant.cover_url} size={44} icon={restaurant.categories[0]?.icon ?? 'store-outline'} />
         <View style={{ flex: 1 }}>
-          <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13 }}>Bienvenido</Text>
-          <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 22 }} numberOfLines={1}>{restaurant.name}</Text>
+          <AppText variant="label" color={C.onSurfaceVariant}>Bienvenido</AppText>
+          <AppText variant="title" style={{ fontSize: 22, lineHeight: 27 }} numberOfLines={1}>{restaurant.name}</AppText>
         </View>
         <NotificationBell />
       </View>
@@ -139,12 +140,12 @@ export default function OwnerHomeScreen() {
             <Icon name="store-outline" size={24} color="#fff" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
+            <AppText variant="bodyStrong">
               {restaurant.is_active ? 'Tu local está activo' : 'Tu local está oculto'}
-            </Text>
-            <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, marginTop: 2 }}>
+            </AppText>
+            <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 2 }}>
               {restaurant.is_active ? 'Visible para todos los comensales' : 'No aparece en el mapa ni en búsquedas'}
-            </Text>
+            </AppText>
           </View>
           <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: restaurant.is_active ? '#22c55e' : C.outline, borderWidth: 2, borderColor: C.border }} />
         </View>
@@ -158,15 +159,15 @@ export default function OwnerHomeScreen() {
             borderWidth: 2, borderColor: C.border, borderLeftWidth: 6,
           }}>
             <Icon name="tag" size={18} color={C.onSurface} />
-            <Text style={{ flex: 1, color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14 }} numberOfLines={2}>
+            <AppText variant="bodyStrong" style={{ flex: 1, fontSize: 14 }} numberOfLines={2}>
               {restaurant.promo_text}
-            </Text>
+            </AppText>
           </View>
         )}
 
         {/* Stats */}
         <View style={{ gap: 8 }}>
-          <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 17 }}>Resumen</Text>
+          <AppText variant="heading" style={{ fontSize: 17 }}>Resumen</AppText>
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <StatCard icon="star"         label="Calificación"   value={restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : '–'} color={C.primary} />
             <StatCard icon="comment-text" label="Reseñas hoy"    value={String(reviewsToday)} color={C.secondary} />
@@ -176,7 +177,7 @@ export default function OwnerHomeScreen() {
 
         {/* Acciones rápidas */}
         <View style={{ gap: 8 }}>
-          <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 17 }}>Acciones rápidas</Text>
+          <AppText variant="heading" style={{ fontSize: 17 }}>Acciones rápidas</AppText>
           <View style={{ flexDirection: 'row', gap: 10 }}>
             {[
               { icon: 'pencil-outline', label: 'Editar perfil', onPress: () => router.push('/(owner)/profile') },
@@ -195,7 +196,7 @@ export default function OwnerHomeScreen() {
                 })}
               >
                 <Icon name={a.icon} size={22} color={C.primary} />
-                <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, textAlign: 'center' }}>{a.label}</Text>
+                <AppText variant="caption" align="center" style={{ fontSize: 12 }}>{a.label}</AppText>
               </Pressable>
             ))}
           </View>
@@ -203,15 +204,15 @@ export default function OwnerHomeScreen() {
 
         {/* Reseñas recientes */}
         <View style={{ gap: 12 }}>
-          <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 17 }}>Reseñas recientes</Text>
+          <AppText variant="heading" style={{ fontSize: 17 }}>Reseñas recientes</AppText>
           {reviewsQ.isLoading ? (
             <View style={{ paddingVertical: 24 }}><ActivityIndicator color={C.primary} /></View>
           ) : reviews.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 24, gap: 8 }}>
               <Icon name="comment-text-multiple" size={32} color={C.outlineVariant} />
-              <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, textAlign: 'center' }}>
+              <AppText variant="bodySm" color={C.outline} align="center">
                 Aún no tienes reseñas. Comparte tu local para recibir las primeras.
-              </Text>
+              </AppText>
             </View>
           ) : (
             reviews.slice(0, 5).map(r => <ReviewRow key={r.id} review={r} />)

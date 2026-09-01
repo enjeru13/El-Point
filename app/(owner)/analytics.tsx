@@ -1,8 +1,9 @@
 import { Icon } from '@/components/ui/Icon';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
+import { AppText } from '@/components/ui/AppText';
 import { FLOATING_NAV_H } from '@/lib/theme';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews } from '@/lib/queries/reviews';
@@ -67,8 +68,8 @@ function MetricCard({ icon, label, value, color }: { icon: string; label: string
       <View style={{ width: 32, height: 32, borderRadius: 9, backgroundColor: color + '22', alignItems: 'center', justifyContent: 'center' }}>
         <Icon name={icon} size={16} color={color} />
       </View>
-      <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 20, marginTop: 4 }}>{value}</Text>
-      <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 11 }}>{label}</Text>
+      <AppText variant="heading" style={{ fontSize: 20, lineHeight: 24, marginTop: 4 }}>{value}</AppText>
+      <AppText variant="caption" color={C.onSurfaceVariant}>{label}</AppText>
     </View>
   );
 }
@@ -108,9 +109,9 @@ export default function AnalyticsScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24 }}>
         <Icon name="analytics" size={44} color={C.outline} />
-        <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 16, textAlign: 'center' }}>
+        <AppText variant="heading" align="center" style={{ fontSize: 16 }}>
           No hay un local registrado
-        </Text>
+        </AppText>
       </View>
     );
   }
@@ -120,8 +121,8 @@ export default function AnalyticsScreen() {
 
       {/* Header */}
       <View style={{ paddingTop: insets.top + 10, paddingBottom: 14, paddingHorizontal: 20 }}>
-        <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24 }}>Métricas</Text>
-        <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, marginTop: 2 }}>{restaurant.name}</Text>
+        <AppText variant="title">Métricas</AppText>
+        <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 2 }}>{restaurant.name}</AppText>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: FLOATING_NAV_H + 20, gap: 20 }}>
@@ -139,7 +140,7 @@ export default function AnalyticsScreen() {
                 borderColor: C.border,
               }}
             >
-              <Text style={{ color: period === p ? '#fff' : C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14 }}>{p}</Text>
+              <AppText variant="bodyStrong" color={period === p ? '#fff' : C.onSurfaceVariant} style={{ fontSize: 14 }}>{p}</AppText>
             </Pressable>
           ))}
         </View>
@@ -156,9 +157,9 @@ export default function AnalyticsScreen() {
 
         {/* Bar chart - reseñas */}
         <View style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, gap: 16, ...shadow.sm }}>
-          <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Reseñas por período</Text>
+          <AppText variant="bodyStrong">Reseñas por período</AppText>
           {total === 0 ? (
-            <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13 }}>Aún no hay datos.</Text>
+            <AppText variant="bodySm" color={C.outline}>Aún no hay datos.</AppText>
           ) : (
             <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: BAR_H + 24 }}>
               {bars.map((b, i) => {
@@ -166,13 +167,13 @@ export default function AnalyticsScreen() {
                 const isLast = i === bars.length - 1;
                 return (
                   <View key={i} style={{ flex: 1, alignItems: 'center', gap: 4 }}>
-                    <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 10 }}>{b.value}</Text>
+                    <AppText variant="caption" color={C.onSurfaceVariant} style={{ fontSize: 10 }}>{b.value}</AppText>
                     <View style={{
                       width: '100%', height: h, borderRadius: 8,
                       backgroundColor: b.value === 0 ? C.surfaceContainerHighest : isLast ? C.primary : C.primaryFixed,
                       borderWidth: 1.5, borderColor: C.border,
                     }} />
-                    <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 10 }}>{b.label}</Text>
+                    <AppText variant="caption" color={C.outline} style={{ fontSize: 10 }}>{b.label}</AppText>
                   </View>
                 );
               })}
@@ -182,9 +183,9 @@ export default function AnalyticsScreen() {
 
         {/* Distribución de estrellas */}
         <View style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, gap: 14, ...shadow.sm }}>
-          <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Distribución de estrellas</Text>
+          <AppText variant="bodyStrong">Distribución de estrellas</AppText>
           {total === 0 ? (
-            <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13 }}>Aún no hay reseñas.</Text>
+            <AppText variant="bodySm" color={C.outline}>Aún no hay reseñas.</AppText>
           ) : (
             [5, 4, 3, 2, 1].map((star, idx) => {
               const count = dist[idx];
@@ -199,7 +200,7 @@ export default function AnalyticsScreen() {
                   <View style={{ flex: 1, height: 10, borderRadius: 99, overflow: 'hidden', backgroundColor: C.surfaceContainerHighest }}>
                     <View style={{ height: '100%', width: `${pct}%`, borderRadius: 99, backgroundColor: star >= 4 ? C.primary : star === 3 ? C.secondary : C.error }} />
                   </View>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, width: 44, textAlign: 'right' }}>{count} · {pct}%</Text>
+                  <AppText variant="caption" color={C.onSurfaceVariant} align="right" style={{ fontSize: 12, width: 44 }}>{count} · {pct}%</AppText>
                 </View>
               );
             })
