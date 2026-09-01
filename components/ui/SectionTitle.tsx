@@ -1,6 +1,7 @@
 import { Icon } from '@/components/ui/Icon';
+import { AppText } from '@/components/ui/AppText';
 import { ReactNode } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import { useTheme } from '@/lib/ThemeContext';
 
 interface Props {
@@ -15,9 +16,7 @@ export function SectionTitle({ icon, label, action }: Props) {
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         {icon && <Icon name={icon} size={18} color={C.primary} />}
-        <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 18 }}>
-          {label}
-        </Text>
+        <AppText variant="heading">{label}</AppText>
       </View>
       {action}
     </View>

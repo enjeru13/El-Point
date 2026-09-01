@@ -1,4 +1,5 @@
 import { AppLogo } from "@/components/ui/AppLogo";
+import { AppText } from "@/components/ui/AppText";
 import { Field } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
@@ -12,7 +13,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -120,16 +120,9 @@ export default function ForgotPasswordScreen() {
       >
         <View style={{ alignItems: "center", marginBottom: 28 }}>
           <AppLogo size="lg" variant="dark" />
-          <Text
-            style={{
-              color: "rgba(255,255,255,0.9)",
-              fontFamily: "PlusJakartaSans_600SemiBold",
-              fontSize: 15,
-              marginTop: 6,
-            }}
-          >
+          <AppText variant="subtitle" color="rgba(255,255,255,0.9)" style={{ marginTop: 6 }}>
             {step === "email" ? "Recupera tu acceso" : "Revisa tu correo"}
-          </Text>
+          </AppText>
         </View>
 
         <View
@@ -146,17 +139,10 @@ export default function ForgotPasswordScreen() {
         >
           {step === "email" ? (
             <>
-              <Text
-                style={{
-                  color: C.onSurfaceVariant,
-                  fontFamily: "PlusJakartaSans_400Regular",
-                  fontSize: 15,
-                  lineHeight: 21,
-                }}
-              >
+              <AppText variant="body" color={C.onSurfaceVariant}>
                 Escribe tu correo y te enviaremos un código para crear una
                 contraseña nueva.
-              </Text>
+              </AppText>
               <Field
                 label="Correo electrónico"
                 icon="email-outline"
@@ -176,25 +162,13 @@ export default function ForgotPasswordScreen() {
             </>
           ) : (
             <>
-              <Text
-                style={{
-                  color: C.onSurfaceVariant,
-                  fontFamily: "PlusJakartaSans_400Regular",
-                  fontSize: 15,
-                  lineHeight: 21,
-                }}
-              >
+              <AppText variant="body" color={C.onSurfaceVariant}>
                 Enviamos un código a{" "}
-                <Text
-                  style={{
-                    fontFamily: "PlusJakartaSans_700Bold",
-                    color: C.onSurface,
-                  }}
-                >
+                <AppText variant="bodyStrong" color={C.onSurface}>
                   {email.trim()}
-                </Text>
+                </AppText>
                 . Pégalo aquí y elige tu nueva contraseña.
-              </Text>
+              </AppText>
 
               <Field
                 label="Código"

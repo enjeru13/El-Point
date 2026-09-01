@@ -1,5 +1,6 @@
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import { Icon } from '@/components/ui/Icon';
+import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 import { useTheme } from '@/lib/ThemeContext';
 
@@ -33,22 +34,13 @@ export function EmptyState({
       >
         <Icon name={icon} size={30} color={C.outline} />
       </View>
-      <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 18, textAlign: 'center' }}>
+      <AppText variant="heading" align="center">
         {title}
-      </Text>
+      </AppText>
       {body && (
-        <Text
-          style={{
-            color: C.outline,
-            fontFamily: 'PlusJakartaSans_400Regular',
-            fontSize: 14,
-            textAlign: 'center',
-            maxWidth: 260,
-            lineHeight: 20,
-          }}
-        >
+        <AppText variant="bodySm" color={C.outline} align="center" style={{ maxWidth: 260 }}>
           {body}
-        </Text>
+        </AppText>
       )}
       {actionLabel && onAction && (
         <Button label={actionLabel} onPress={onAction} variant="secondary" size="sm" fullWidth={false} style={{ marginTop: 6 }} />

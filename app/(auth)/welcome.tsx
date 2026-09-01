@@ -6,10 +6,10 @@ import {
   Dimensions,
   Easing,
   Pressable,
-  Text,
   View,
 } from 'react-native';
 import { useTheme } from '@/lib/ThemeContext';
+import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -115,15 +115,15 @@ export default function WelcomeScreen() {
         </Animated.View>
 
         <Animated.View style={{ alignItems: 'center', gap: 12, opacity: fadeIn, transform: [{ translateY: slideUp }] }}>
-          <Text style={{ color: C.primary, fontFamily: 'Outfit_800ExtraBold', fontSize: 32, lineHeight: 38, textAlign: 'center' }}>
+          <AppText variant="display" color={C.primary} align="center">
             {isOwner ? '¡Tu local está en El Point!' : '¡Bienvenido a El Point!'}
-          </Text>
-          <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, textAlign: 'center', lineHeight: 24, maxWidth: 280 }}>
+          </AppText>
+          <AppText variant="body" color={C.onSurfaceVariant} align="center" style={{ lineHeight: 24, maxWidth: 280 }}>
             {isOwner
               ? 'Tu restaurante ya está visible. Empieza a recibir reseñas y conectar con tu comunidad.'
-              : <><Text>Todo listo, </Text><Text style={{ fontFamily: 'PlusJakartaSans_700Bold', color: C.onSurface }}>Comensal</Text><Text>. Los mejores sabores de tu barrio te esperan.</Text></>
+              : <>Todo listo, <AppText variant="bodyStrong" color={C.onSurface}>Comensal</AppText>. Los mejores sabores de tu barrio te esperan.</>
             }
-          </Text>
+          </AppText>
         </Animated.View>
 
         <Animated.View style={{ width: '100%', padding: 20, borderRadius: 28, flexDirection: 'row', alignItems: 'center', gap: 16, backgroundColor: C.surfaceContainerLow, borderWidth: 2, borderColor: C.border, ...shadow.md, opacity: fadeIn, transform: [{ translateY: slideUp }] }}>
@@ -131,15 +131,15 @@ export default function WelcomeScreen() {
             <Icon name={isOwner ? 'chart-line' : 'star'} size={24} color={isOwner ? C.primary : C.secondary} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, marginBottom: 6 }}>
+            <AppText variant="bodyStrong" style={{ marginBottom: 6 }}>
               {isOwner ? 'Rango: Local Nuevo 🏪' : 'Nivel 1 · Novato'}
-            </Text>
+            </AppText>
             <View style={{ height: 10, borderRadius: 99, overflow: 'hidden', backgroundColor: isOwner ? C.primaryFixed : C.secondaryContainer }}>
               <Animated.View style={{ height: '100%', borderRadius: 99, backgroundColor: isOwner ? C.primary : C.secondary, width: xpWidth.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }} />
             </View>
-            <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, marginTop: 4 }}>
+            <AppText variant="body" color={C.onSurfaceVariant} style={{ marginTop: 4 }}>
               {isOwner ? '¡Consigue tu primera reseña para subir de rango!' : '¡Haz tu primera reseña para subir de nivel!'}
-            </Text>
+            </AppText>
           </View>
         </Animated.View>
 
@@ -149,9 +149,9 @@ export default function WelcomeScreen() {
             onPress={() => router.replace(isOwner ? '/(owner)' : '/(customer)')}
             iconTrailing="arrow-right"
           />
-          <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, textAlign: 'center' }}>
+          <AppText variant="body" color={C.outline} align="center">
             {isOwner ? '¿Listo para recibir a tus primeros clientes?' : '¿Listo para encontrar tu nuevo lugar favorito?'}
-          </Text>
+          </AppText>
         </Animated.View>
 
       </View>

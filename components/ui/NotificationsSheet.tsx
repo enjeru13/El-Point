@@ -1,4 +1,5 @@
 import { Icon } from '@/components/ui/Icon';
+import { AppText } from '@/components/ui/AppText';
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -6,7 +7,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  Text,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -37,9 +37,7 @@ function DottedDivider({ label }: { label: string }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 14 }}>
       <View style={{ flex: 1, borderTopWidth: 2, borderStyle: 'dashed', borderColor: C.outlineVariant }} />
-      <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, color: C.outline, letterSpacing: 1.5 }}>
-        {label}
-      </Text>
+      <AppText variant="overline" color={C.outline}>{label}</AppText>
       <View style={{ flex: 1, borderTopWidth: 2, borderStyle: 'dashed', borderColor: C.outlineVariant }} />
     </View>
   );
@@ -76,21 +74,25 @@ function NotifCard({ notif, onRead }: { notif: AppNotification; onRead: (id: str
         <View style={{ width: 22, height: 22, borderRadius: 8, backgroundColor: cfg.bg, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: C.border }}>
           <Icon name={cfg.icon} size={12} color={cfg.color} />
         </View>
-        <Text style={{ fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 11, color: C.outline, flex: 1 }}>
+        <AppText variant="caption" color={C.outline} style={{ flex: 1 }}>
           {timeAgo(notif.created_at)}
-        </Text>
+        </AppText>
         {!notif.read && (
           <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: C.primaryContainer, borderWidth: 1.5, borderColor: C.border }} />
         )}
       </View>
 
-      <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: notif.read ? C.onSurfaceVariant : C.onSurface, lineHeight: 19, marginBottom: 3 }}>
+      <AppText
+        variant="bodyStrong"
+        color={notif.read ? C.onSurfaceVariant : C.onSurface}
+        style={{ fontSize: 14, lineHeight: 19, marginBottom: 3 }}
+      >
         {notif.title}
-      </Text>
+      </AppText>
       {notif.body && (
-        <Text style={{ fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, color: C.onSurfaceVariant, lineHeight: 18 }}>
+        <AppText variant="bodySm" color={C.onSurfaceVariant}>
           {notif.body}
-        </Text>
+        </AppText>
       )}
     </Pressable>
   );
@@ -171,16 +173,16 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
           borderBottomWidth: 2, borderBottomColor: C.outlineVariant,
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 18, color: C.onSurface }}>Notificaciones</Text>
+            <AppText variant="heading">Notificaciones</AppText>
             {unreadCount > 0 && (
               <View style={{ paddingHorizontal: 7, paddingVertical: 1, borderRadius: 99, backgroundColor: C.primaryContainer, borderWidth: 2, borderColor: C.border }}>
-                <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: C.onSurface }}>{unreadCount}</Text>
+                <AppText variant="caption" style={{ fontSize: 12 }}>{unreadCount}</AppText>
               </View>
             )}
           </View>
           {unreadCount > 0 && (
             <Pressable onPress={() => markAll.mutate()}>
-              <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: C.primary }}>Marcar todas</Text>
+              <AppText variant="label" color={C.primary}>Marcar todas</AppText>
             </Pressable>
           )}
         </View>
@@ -192,9 +194,9 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
           ) : notifs.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 32, gap: 8 }}>
               <Icon name="bell-outline" size={32} color={C.outlineVariant} />
-              <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, textAlign: 'center' }}>
+              <AppText variant="bodySm" color={C.outline} align="center">
                 No tienes notificaciones todavía.
-              </Text>
+              </AppText>
             </View>
           ) : (
             <>
