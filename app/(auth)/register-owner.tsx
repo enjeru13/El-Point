@@ -1,4 +1,4 @@
-import { AppTextInput } from "@/components/ui/AppTextInput";
+import { Field } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
 import { uploadRestaurantImage, uploadRestaurantMenu } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
@@ -48,7 +48,6 @@ export default function RegisterOwnerScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [name, setName] = useState("");
@@ -333,152 +332,34 @@ export default function RegisterOwnerScreen() {
 
               <View style={{ gap: 20 }}>
                 {/* Correo */}
-                <View style={{ gap: 8 }}>
-                  <Text
-                    style={{
-                      color: C.onSurfaceVariant,
-                      fontFamily: "PlusJakartaSans_600SemiBold",
-                      fontSize: 15,
-                      marginLeft: 4,
-                    }}
-                  >
-                    Correo electrónico *
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      borderRadius: 16,
-                      height: 56,
-                      paddingHorizontal: 16,
-                      gap: 12,
-                      backgroundColor: C.surfaceContainerLow,
-                      borderWidth: 2,
-                      borderColor: C.border,
-                      ...shadow.sm,
-                    }}
-                  >
-                    <Icon name="email-outline" size={22} color={C.outline} />
-                    <AppTextInput
-                      placeholder="tucorreo@ejemplo.com"
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      value={email}
-                      onChangeText={setEmail}
-                    />
-                  </View>
-                  {email.trim().length > 0 && !emailValid && (
-                    <Text
-                      style={{
-                        color: C.error,
-                        fontFamily: "PlusJakartaSans_400Regular",
-                        fontSize: 15,
-                        marginLeft: 4,
-                      }}
-                    >
-                      Usa solo letras sin tildes ni ñ (ej. dueno@gmail.com).
-                    </Text>
-                  )}
-                </View>
-
-                {/* Contraseña */}
-                <View style={{ gap: 8 }}>
-                  <Text
-                    style={{
-                      color: C.onSurfaceVariant,
-                      fontFamily: "PlusJakartaSans_600SemiBold",
-                      fontSize: 15,
-                      marginLeft: 4,
-                    }}
-                  >
-                    Contraseña *{" "}
-                    <Text
-                      style={{
-                        color: C.outline,
-                        fontFamily: "PlusJakartaSans_400Regular",
-                      }}
-                    >
-                      (mín. 8)
-                    </Text>
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      borderRadius: 16,
-                      height: 56,
-                      paddingHorizontal: 16,
-                      gap: 12,
-                      backgroundColor: C.surfaceContainerLow,
-                      borderWidth: 2,
-                      borderColor: C.border,
-                      ...shadow.sm,
-                    }}
-                  >
-                    <Icon name="lock-outline" size={22} color={C.outline} />
-                    <AppTextInput
-                      placeholder="••••••••"
-                      secureTextEntry={!showPw}
-                      value={password}
-                      onChangeText={setPassword}
-                    />
-                    <Pressable onPress={() => setShowPw((v) => !v)}>
-                      <Icon
-                        name={showPw ? "eye-off-outline" : "eye-outline"}
-                        size={22}
-                        color={C.outline}
-                      />
-                    </Pressable>
-                  </View>
-                </View>
-
-                {/* Confirmar */}
-                <View style={{ gap: 8 }}>
-                  <Text
-                    style={{
-                      color: C.onSurfaceVariant,
-                      fontFamily: "PlusJakartaSans_600SemiBold",
-                      fontSize: 15,
-                      marginLeft: 4,
-                    }}
-                  >
-                    Confirmar contraseña *
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      borderRadius: 16,
-                      height: 56,
-                      paddingHorizontal: 16,
-                      gap: 12,
-                      backgroundColor: C.surfaceContainerLow,
-                      borderWidth: 2,
-                      borderColor: C.border,
-                      ...shadow.sm,
-                    }}
-                  >
-                    <Icon name="lock-outline" size={22} color={C.outline} />
-                    <AppTextInput
-                      placeholder="••••••••"
-                      secureTextEntry={!showPw}
-                      value={confirm}
-                      onChangeText={setConfirm}
-                    />
-                  </View>
-                  {confirm.length > 0 && password !== confirm && (
-                    <Text
-                      style={{
-                        color: C.error,
-                        fontFamily: "PlusJakartaSans_400Regular",
-                        fontSize: 15,
-                        marginLeft: 4,
-                      }}
-                    >
-                      Las contraseñas no coinciden.
-                    </Text>
-                  )}
-                </View>
+                <Field
+                  label="Correo electrónico *"
+                  icon="email-outline"
+                  placeholder="tucorreo@ejemplo.com"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
+                  error={email.trim().length > 0 && !emailValid ? 'Usa solo letras sin tildes ni ñ (ej. dueno@gmail.com).' : null}
+                />
+                <Field
+                  label="Contraseña *"
+                  icon="lock-outline"
+                  placeholder="••••••••"
+                  secure
+                  value={password}
+                  onChangeText={setPassword}
+                  hint="Mínimo 8 caracteres"
+                />
+                <Field
+                  label="Confirmar contraseña *"
+                  icon="lock-outline"
+                  placeholder="••••••••"
+                  secure
+                  value={confirm}
+                  onChangeText={setConfirm}
+                  error={confirm.length > 0 && password !== confirm ? 'Las contraseñas no coinciden.' : null}
+                />
               </View>
             </>
           )}
@@ -547,40 +428,13 @@ export default function RegisterOwnerScreen() {
               </View>
 
               <View style={{ gap: 20 }}>
-                {/* Nombre */}
-                <View style={{ gap: 8 }}>
-                  <Text
-                    style={{
-                      color: C.onSurfaceVariant,
-                      fontFamily: "PlusJakartaSans_600SemiBold",
-                      fontSize: 15,
-                      marginLeft: 4,
-                    }}
-                  >
-                    Nombre del restaurante *
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      borderRadius: 16,
-                      height: 56,
-                      paddingHorizontal: 16,
-                      gap: 12,
-                      backgroundColor: C.surfaceContainerLow,
-                      borderWidth: 2,
-                      borderColor: C.border,
-                      ...shadow.sm,
-                    }}
-                  >
-                    <Icon name="store-outline" size={22} color={C.outline} />
-                    <AppTextInput
-                      placeholder="Ej. Flame & Fork Bistro"
-                      value={name}
-                      onChangeText={setName}
-                    />
-                  </View>
-                </View>
+                <Field
+                  label="Nombre del restaurante *"
+                  icon="store-outline"
+                  placeholder="Ej. Flame & Fork Bistro"
+                  value={name}
+                  onChangeText={setName}
+                />
 
                 {/* Categorías */}
                 <View style={{ gap: 12 }}>
@@ -749,41 +603,13 @@ export default function RegisterOwnerScreen() {
               <View style={{ gap: 20 }}>
                 {/* Dirección + GPS */}
                 <View style={{ gap: 8 }}>
-                  <Text
-                    style={{
-                      color: C.onSurfaceVariant,
-                      fontFamily: "PlusJakartaSans_600SemiBold",
-                      fontSize: 15,
-                      marginLeft: 4,
-                    }}
-                  >
-                    Dirección *
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      borderRadius: 16,
-                      height: 56,
-                      paddingHorizontal: 16,
-                      gap: 12,
-                      backgroundColor: C.surfaceContainerLow,
-                      borderWidth: 2,
-                      borderColor: C.border,
-                      ...shadow.sm,
-                    }}
-                  >
-                    <Icon
-                      name="map-marker-outline"
-                      size={22}
-                      color={C.outline}
-                    />
-                    <AppTextInput
-                      placeholder="Calle y ciudad"
-                      value={address}
-                      onChangeText={setAddress}
-                    />
-                  </View>
+                  <Field
+                    label="Dirección *"
+                    icon="map-marker-outline"
+                    placeholder="Calle y ciudad"
+                    value={address}
+                    onChangeText={setAddress}
+                  />
                   <Pressable
                     onPress={detectLocation}
                     style={{
@@ -820,102 +646,23 @@ export default function RegisterOwnerScreen() {
                   </Pressable>
                 </View>
 
-                {/* WhatsApp */}
-                <View style={{ gap: 8 }}>
-                  <Text
-                    style={{
-                      color: C.onSurfaceVariant,
-                      fontFamily: "PlusJakartaSans_600SemiBold",
-                      fontSize: 15,
-                      marginLeft: 4,
-                    }}
-                  >
-                    WhatsApp{" "}
-                    <Text
-                      style={{
-                        color: C.outline,
-                        fontFamily: "PlusJakartaSans_400Regular",
-                      }}
-                    >
-                      (opcional)
-                    </Text>
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      borderRadius: 16,
-                      height: 56,
-                      paddingHorizontal: 16,
-                      gap: 12,
-                      backgroundColor: C.surfaceContainerLow,
-                      borderWidth: 2,
-                      borderColor: C.border,
-                      ...shadow.sm,
-                    }}
-                  >
-                    <Icon name="whatsapp" size={22} color="#25D366" />
-                    <AppTextInput
-                      placeholder="+1 234 567 8900"
-                      keyboardType="phone-pad"
-                      value={whatsapp}
-                      onChangeText={setWhatsapp}
-                    />
-                  </View>
-                </View>
+                <Field
+                  label="WhatsApp (opcional)"
+                  icon="whatsapp"
+                  placeholder="+58 412 000 0000"
+                  keyboardType="phone-pad"
+                  value={whatsapp}
+                  onChangeText={setWhatsapp}
+                />
 
-                {/* Instagram */}
-                <View style={{ gap: 8 }}>
-                  <Text
-                    style={{
-                      color: C.onSurfaceVariant,
-                      fontFamily: "PlusJakartaSans_600SemiBold",
-                      fontSize: 15,
-                      marginLeft: 4,
-                    }}
-                  >
-                    Instagram{" "}
-                    <Text
-                      style={{
-                        color: C.outline,
-                        fontFamily: "PlusJakartaSans_400Regular",
-                      }}
-                    >
-                      (opcional)
-                    </Text>
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      borderRadius: 16,
-                      height: 56,
-                      paddingHorizontal: 16,
-                      gap: 8,
-                      backgroundColor: C.surfaceContainerLow,
-                      borderWidth: 2,
-                      borderColor: C.border,
-                      ...shadow.sm,
-                    }}
-                  >
-                    <Icon name="instagram" size={22} color="#E1306C" />
-                    <Text
-                      style={{
-                        color: C.outline,
-                        fontFamily: "PlusJakartaSans_400Regular",
-                        fontSize: 16,
-                      }}
-                    >
-                      @
-                    </Text>
-                    <AppTextInput
-                      placeholder="tu_restaurante"
-                      autoCapitalize="none"
-                      value={instagram}
-                      onChangeText={setInstagram}
-                    />
-                  </View>
-                </View>
+                <Field
+                  label="Instagram (opcional)"
+                  icon="instagram"
+                  placeholder="tu_restaurante"
+                  autoCapitalize="none"
+                  value={instagram}
+                  onChangeText={(t) => setInstagram(t.replace(/^@/, ''))}
+                />
               </View>
             </>
           )}
