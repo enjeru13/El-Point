@@ -357,6 +357,48 @@ export type Database = {
           },
         ]
       }
+      review_replies: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          review_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          review_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          review_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_replies_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_replies_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: true
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           author_id: string
@@ -602,6 +644,10 @@ export type Database = {
             }
             Returns: string
           }
+      award_xp: {
+        Args: { p_amount: number; p_user: string }
+        Returns: undefined
+      }
       create_owner_restaurant: {
         Args: {
           p_address?: string
@@ -747,6 +793,7 @@ export type Database = {
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
       gettransactionid: { Args: never; Returns: unknown }
+      level_for_xp: { Args: { p_xp: number }; Returns: number }
       longtransactionsenabled: { Args: never; Returns: boolean }
       nearby_restaurants: {
         Args: {
@@ -770,6 +817,7 @@ export type Database = {
         }[]
       }
       owns_restaurant_path: { Args: { object_name: string }; Returns: boolean }
+      owns_review_path: { Args: { object_name: string }; Returns: boolean }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
         | { Args: { use_typmod?: boolean }; Returns: string }
@@ -810,6 +858,7 @@ export type Database = {
       }
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
+      rank_for_level: { Args: { p_level: number }; Returns: string }
       st_3dclosestpoint: {
         Args: { geom1: unknown; geom2: unknown }
         Returns: unknown
@@ -1402,6 +1451,7 @@ export type Database = {
         }
         Returns: string
       }
+      xp_for_level: { Args: { p_level: number }; Returns: number }
     }
     Enums: {
       [_ in never]: never
