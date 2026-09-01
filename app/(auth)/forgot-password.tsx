@@ -1,5 +1,6 @@
 import { AppLogo } from "@/components/ui/AppLogo";
 import { AppText } from "@/components/ui/AppText";
+import { FoodBackdrop } from "@/components/ui/FoodBackdrop";
 import { Field } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
@@ -87,27 +88,30 @@ export default function ForgotPasswordScreen() {
     <View
       style={{ flex: 1, backgroundColor: C.primary, paddingTop: insets.top }}
     >
+      <FoodBackdrop seed={4} />
       <View
         style={{
           position: "absolute",
           inset: 0,
-          backgroundColor: "rgba(0,0,0,0.15)",
+          backgroundColor: "rgba(94,20,0,0.28)",
         }}
       />
 
-      <View style={{ paddingHorizontal: 20, paddingTop: 8 }}>
-        <Pressable
-          onPress={() => (step === "code" ? setStep("email") : router.back())}
-          style={{
-            width: 40,
-            height: 40,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Icon name="arrow-left" size={24} color="#fff" />
-        </Pressable>
-      </View>
+      <Pressable
+        onPress={() => (step === "code" ? setStep("email") : router.back())}
+        style={{
+          position: "absolute",
+          top: insets.top + 8,
+          left: 12,
+          width: 40,
+          height: 40,
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 10,
+        }}
+      >
+        <Icon name="arrow-left" size={24} color="#fff" />
+      </Pressable>
 
       <KeyboardAvoidingView
         style={{
