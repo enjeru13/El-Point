@@ -2,6 +2,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Image } from 'expo-image';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -65,6 +66,7 @@ function Field({
 export default function OwnerProfileScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const restaurantQ = useMyRestaurant();
   const restaurant = restaurantQ.data ?? null;
@@ -215,17 +217,25 @@ export default function OwnerProfileScreen() {
             </Pressable>
           </View>
         ) : (
-          <Pressable
-            onPress={() => setEditing(true)}
-            style={{
-              flexDirection: 'row', alignItems: 'center', gap: 6,
-              paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
-              backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, ...shadow.sm,
-            }}
-          >
-            <Icon name="pencil-outline" size={15} color={C.primary} />
-            <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13 }}>Editar</Text>
-          </Pressable>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Pressable
+              onPress={() => setEditing(true)}
+              style={{
+                flexDirection: 'row', alignItems: 'center', gap: 6,
+                paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+                backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, ...shadow.sm,
+              }}
+            >
+              <Icon name="pencil-outline" size={15} color={C.primary} />
+              <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13 }}>Editar</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => router.push('/settings')}
+              style={{ width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border, backgroundColor: C.surface, ...shadow.sm }}
+            >
+              <Icon name="settings" size={18} color={C.onSurface} />
+            </Pressable>
+          </View>
         )}
       </View>
 
@@ -234,11 +244,19 @@ export default function OwnerProfileScreen() {
         {/* Hero card */}
         <View style={{ borderRadius: 24, overflow: 'hidden', borderWidth: 2, borderColor: C.border, ...shadow.md }}>
           <View style={{ height: 110, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center' }}>
-            <Icon name={restaurant.categories[0]?.icon ?? 'store-outline'} size={48} color={C.primary} />
+            {restaurant.cover_url ? (
+              <Image source={{ uri: restaurant.cover_url }} style={{ position: 'absolute', width: '100%', height: '100%' }} contentFit="cover" transition={150} />
+            ) : (
+              <Icon name={restaurant.categories[0]?.icon ?? 'store-outline'} size={48} color={C.primary} />
+            )}
           </View>
           <View style={{ paddingHorizontal: 20, paddingBottom: 20, backgroundColor: C.surface }}>
-            <View style={{ marginTop: -28, marginBottom: 12, width: 64, height: 64, borderRadius: 20, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: C.surface }}>
-              <Icon name={restaurant.categories[0]?.icon ?? 'store-outline'} size={30} color="#fff" />
+            <View style={{ marginTop: -28, marginBottom: 12, width: 64, height: 64, borderRadius: 20, overflow: 'hidden', backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: C.surface }}>
+              {restaurant.logo_url ? (
+                <Image source={{ uri: restaurant.logo_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={150} />
+              ) : (
+                <Icon name={restaurant.categories[0]?.icon ?? 'store-outline'} size={30} color="#fff" />
+              )}
             </View>
 
             {editing ? (

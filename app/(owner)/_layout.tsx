@@ -12,7 +12,6 @@ const TAB_ICONS: Record<string, IconName> = {
   index: "store-outline",
   analytics: "analytics",
   profile: "account",
-  settings: "settings",
 };
 
 function TabItem({
@@ -117,7 +116,6 @@ export default function OwnerLayout() {
       <Tabs.Screen name="index" options={{ title: "Mi Local" }} />
       <Tabs.Screen name="analytics" options={{ title: "Métricas" }} />
       <Tabs.Screen name="profile" options={{ title: "Perfil" }} />
-      <Tabs.Screen name="settings" options={{ title: "Ajustes" }} />
     </Tabs>
   );
 }

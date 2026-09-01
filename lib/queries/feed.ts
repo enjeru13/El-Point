@@ -19,7 +19,12 @@ export type FeedItem = {
   body: string;
   created_at: string;
   restaurant: FeedRestaurant;
-  author: { username: string | null; full_name: string | null; level: number } | null;
+  author: {
+    username: string | null;
+    full_name: string | null;
+    avatar_url: string | null;
+    level: number;
+  } | null;
 };
 
 function mapCategories(rc: any): RestaurantCategory[] {
@@ -37,7 +42,7 @@ async function fetchFeed(): Promise<FeedItem[]> {
          id, name, address, rating_avg, rating_count, promo_text, cover_url,
          restaurant_categories ( categories ( slug, label, icon ) )
        ),
-       author:profiles!author_id ( username, full_name, level )`,
+       author:profiles!author_id ( username, full_name, avatar_url, level )`,
     )
     .order('created_at', { ascending: false })
     .limit(60);

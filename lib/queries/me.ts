@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 
 export type MyProfile = {
   id: string;
+  role: 'customer' | 'restaurant_owner';
   username: string | null;
   full_name: string | null;
   avatar_url: string | null;
@@ -22,7 +23,7 @@ async function fetchMyProfile(): Promise<MyProfile | null> {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, username, full_name, avatar_url, bio, level, xp, search_radius_km, settings, favorite_categories, created_at')
+    .select('id, role, username, full_name, avatar_url, bio, level, xp, search_radius_km, settings, favorite_categories, created_at')
     .eq('id', uid)
     .maybeSingle();
 

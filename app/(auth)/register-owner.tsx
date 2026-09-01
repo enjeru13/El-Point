@@ -1,9 +1,13 @@
-import { Icon } from '@/components/ui/Icon';
-import * as DocumentPicker from 'expo-document-picker';
-import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { AppTextInput } from "@/components/ui/AppTextInput";
+import { Icon } from "@/components/ui/Icon";
+import { uploadRestaurantImage, uploadRestaurantMenu } from "@/lib/storage";
+import { supabase } from "@/lib/supabase";
+import { useTheme } from "@/lib/ThemeContext";
+import * as DocumentPicker from "expo-document-picker";
+import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
   Alert,
   Image,
@@ -13,26 +17,22 @@ import {
   ScrollView,
   Text,
   View,
-} from 'react-native';
-import { AppTextInput } from '@/components/ui/AppTextInput';
-import { supabase } from '@/lib/supabase';
-import { uploadRestaurantImage, uploadRestaurantMenu } from '@/lib/storage';
-import { useTheme } from '@/lib/ThemeContext';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CATEGORIES = [
-  { id: 1,  label: 'Pizza',        icon: 'pizza' },
-  { id: 2,  label: 'Hamburguesas', icon: 'hamburger' },
-  { id: 3,  label: 'Sushi',        icon: 'fish' },
-  { id: 4,  label: 'Tacos',        icon: 'taco' },
-  { id: 5,  label: 'Vegano',       icon: 'leaf' },
-  { id: 6,  label: 'Café',         icon: 'coffee' },
-  { id: 7,  label: 'Postres',      icon: 'ice-cream' },
-  { id: 8,  label: 'Alta Cocina',  icon: 'silverware-fork-knife' },
-  { id: 9,  label: 'BBQ',          icon: 'grill' },
-  { id: 10, label: 'Pasta',        icon: 'noodles' },
-  { id: 11, label: 'Mariscos',     icon: 'shaker-outline' },
-  { id: 12, label: 'Comida rápida',icon: 'food-variant' },
+  { id: 1, label: "Pizza", icon: "pizza" },
+  { id: 2, label: "Hamburguesas", icon: "hamburger" },
+  { id: 3, label: "Sushi", icon: "fish" },
+  { id: 4, label: "Tacos", icon: "taco" },
+  { id: 5, label: "Vegano", icon: "leaf" },
+  { id: 6, label: "Café", icon: "coffee" },
+  { id: 7, label: "Postres", icon: "ice-cream" },
+  { id: 8, label: "Alta Cocina", icon: "silverware-fork-knife" },
+  { id: 9, label: "BBQ", icon: "grill" },
+  { id: 10, label: "Pasta", icon: "noodles" },
+  { id: 11, label: "Mariscos", icon: "shaker-outline" },
+  { id: 12, label: "Comida rápida", icon: "food-variant" },
 ] as const;
 
 const STEPS = 4;
@@ -44,27 +44,29 @@ export default function RegisterOwnerScreen() {
   const [step, setStep] = useState(0);
 
   // Step 0 — cuenta
-  const [email, setEmail]       = useState('');
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm]   = useState('');
-  const [showPw, setShowPw]     = useState(false);
-  const [loading, setLoading]   = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [name, setName]               = useState('');
+  const [name, setName] = useState("");
   const [selectedCats, setSelectedCats] = useState<Set<number>>(new Set());
 
-  const [address, setAddress]         = useState('');
-  const [coords, setCoords]           = useState<{ lat: number; lng: number } | null>(null);
-  const [whatsapp, setWhatsapp]       = useState('');
-  const [instagram, setInstagram]     = useState('');
+  const [address, setAddress] = useState("");
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    null,
+  );
+  const [whatsapp, setWhatsapp] = useState("");
+  const [instagram, setInstagram] = useState("");
 
-  const [logoUri, setLogoUri]         = useState<string | null>(null);
-  const [coverUri, setCoverUri]       = useState<string | null>(null);
+  const [logoUri, setLogoUri] = useState<string | null>(null);
+  const [coverUri, setCoverUri] = useState<string | null>(null);
   const [menuPdfName, setMenuPdfName] = useState<string | null>(null);
-  const [menuPdfUri, setMenuPdfUri]   = useState<string | null>(null);
+  const [menuPdfUri, setMenuPdfUri] = useState<string | null>(null);
 
   function toggleCat(id: number) {
-    setSelectedCats(prev => {
+    setSelectedCats((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
@@ -73,16 +75,22 @@ export default function RegisterOwnerScreen() {
 
   async function detectLocation() {
     const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') { Alert.alert('Permiso denegado'); return; }
+    if (status !== "granted") {
+      Alert.alert("Permiso denegado");
+      return;
+    }
     const loc = await Location.getCurrentPositionAsync({});
     setCoords({ lat: loc.coords.latitude, lng: loc.coords.longitude });
     const [place] = await Location.reverseGeocodeAsync(loc.coords);
-    if (place) setAddress(`${place.street ?? ''} ${place.streetNumber ?? ''}, ${place.city ?? ''}`.trim());
+    if (place)
+      setAddress(
+        `${place.street ?? ""} ${place.streetNumber ?? ""}, ${place.city ?? ""}`.trim(),
+      );
   }
 
   async function pickImage(setter: (uri: string) => void) {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ["images"],
       allowsEditing: true,
       quality: 0.85,
     });
@@ -90,7 +98,9 @@ export default function RegisterOwnerScreen() {
   }
 
   async function pickPdf() {
-    const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "application/pdf",
+    });
     if (!result.canceled) {
       setMenuPdfName(result.assets[0].name);
       setMenuPdfUri(result.assets[0].uri);
@@ -98,17 +108,25 @@ export default function RegisterOwnerScreen() {
   }
 
   // GoTrue rechaza correos con caracteres no-ASCII (p. ej. la ñ)
-  const emailValid = /^[\x00-\x7F]+@[\x00-\x7F]+\.[\x00-\x7F]{2,}$/.test(email.trim());
+  const emailValid = /^[\x00-\x7F]+@[\x00-\x7F]+\.[\x00-\x7F]{2,}$/.test(
+    email.trim(),
+  );
 
   const canContinue =
-    step === 0 ? emailValid && password.length >= 8 && password === confirm :
-    step === 1 ? !!(name.trim() && selectedCats.size > 0) :
-    step === 2 ? !!(address.trim() && coords) :
-    true;
+    step === 0
+      ? emailValid && password.length >= 8 && password === confirm
+      : step === 1
+        ? !!(name.trim() && selectedCats.size > 0)
+        : step === 2
+          ? !!(address.trim() && coords)
+          : true;
 
   function handleContinue() {
     if (loading) return;
-    if (step < STEPS - 1) { setStep(step + 1); return; }
+    if (step < STEPS - 1) {
+      setStep(step + 1);
+      return;
+    }
     handleRegister();
   }
 
@@ -118,22 +136,22 @@ export default function RegisterOwnerScreen() {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
-      options: { data: { role: 'restaurant_owner' } },
+      options: { data: { role: "restaurant_owner" } },
     });
 
     if (error) {
       setLoading(false);
-      Alert.alert('No se pudo crear la cuenta', error.message);
+      Alert.alert("No se pudo crear la cuenta", error.message);
       return;
     }
 
     if (!data.session) {
       setLoading(false);
       Alert.alert(
-        'Confirma tu correo',
-        'Te enviamos un correo. Al confirmar, inicia sesión y completa el registro de tu local.',
+        "Confirma tu correo",
+        "Te enviamos un correo. Al confirmar, inicia sesión y completa el registro de tu local.",
       );
-      router.replace('/(auth)/login');
+      router.replace("/(auth)/login");
       return;
     }
 
@@ -150,29 +168,42 @@ export default function RegisterOwnerScreen() {
       p_category_ids: Array.from(selectedCats),
     };
     if (address.trim()) rpcArgs.p_address = address.trim();
-    if (coords) { rpcArgs.p_lat = coords.lat; rpcArgs.p_lng = coords.lng; }
+    if (coords) {
+      rpcArgs.p_lat = coords.lat;
+      rpcArgs.p_lng = coords.lng;
+    }
     if (whatsapp.trim()) rpcArgs.p_whatsapp = whatsapp.trim();
     if (instagram.trim()) rpcArgs.p_instagram = instagram.trim();
 
-    const { data: newId, error: rpcError } = await supabase.rpc('create_owner_restaurant', rpcArgs);
+    const { data: newId, error: rpcError } = await supabase.rpc(
+      "create_owner_restaurant",
+      rpcArgs,
+    );
 
     if (rpcError || !newId) {
       setLoading(false);
       Alert.alert(
-        'Cuenta creada, pero…',
-        'No pudimos registrar el local ahora. Puedes hacerlo desde tu panel.',
+        "Cuenta creada, pero…",
+        "No pudimos registrar el local ahora. Puedes hacerlo desde tu panel.",
       );
       return;
     }
 
     // Subir media elegida (best-effort; no bloquea el registro)
     try {
-      const patch: { logo_url?: string; cover_url?: string; menu_pdf_url?: string } = {};
-      if (logoUri) patch.logo_url = await uploadRestaurantImage(newId, 'logo', logoUri);
-      if (coverUri) patch.cover_url = await uploadRestaurantImage(newId, 'cover', coverUri);
-      if (menuPdfUri) patch.menu_pdf_url = await uploadRestaurantMenu(newId, menuPdfUri);
+      const patch: {
+        logo_url?: string;
+        cover_url?: string;
+        menu_pdf_url?: string;
+      } = {};
+      if (logoUri)
+        patch.logo_url = await uploadRestaurantImage(newId, "logo", logoUri);
+      if (coverUri)
+        patch.cover_url = await uploadRestaurantImage(newId, "cover", coverUri);
+      if (menuPdfUri)
+        patch.menu_pdf_url = await uploadRestaurantMenu(newId, menuPdfUri);
       if (Object.keys(patch).length > 0) {
-        await supabase.from('restaurants').update(patch).eq('id', newId);
+        await supabase.from("restaurants").update(patch).eq("id", newId);
       }
     } catch {
       // se puede reintentar desde el panel
@@ -184,31 +215,49 @@ export default function RegisterOwnerScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: C.surface }}>
-
       {/* Header */}
       <View
         style={{
-          position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50,
-          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-          paddingHorizontal: 20, paddingTop: insets.top, height: insets.top + 56,
-          backgroundColor: C.surface + 'e0',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingHorizontal: 20,
+          paddingTop: insets.top,
+          height: insets.top + 56,
+          backgroundColor: C.surface + "e0",
         }}
       >
         <Pressable
-          onPress={() => step > 0 ? setStep(step - 1) : router.back()}
-          style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+          onPress={() => (step > 0 ? setStep(step - 1) : router.back())}
+          style={{
+            width: 40,
+            height: 40,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
           <Icon name="arrow-left" size={24} color={C.onSurfaceVariant} />
         </Pressable>
 
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           {Array.from({ length: STEPS }).map((_, i) => (
             <View
               key={i}
               style={{
-                height: 8, borderRadius: 99,
+                height: 8,
+                borderRadius: 99,
                 width: i === step ? 28 : 8,
-                backgroundColor: i === step ? C.primary : i < step ? C.primary : C.surfaceContainerHighest,
+                backgroundColor:
+                  i === step
+                    ? C.primary
+                    : i < step
+                      ? C.primary
+                      : C.surfaceContainerHighest,
               }}
             />
           ))}
@@ -219,36 +268,62 @@ export default function RegisterOwnerScreen() {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingTop: insets.top + 70, paddingBottom: 120, paddingHorizontal: 20 }}
+          contentContainerStyle={{
+            paddingTop: insets.top + 70,
+            paddingBottom: 120,
+            paddingHorizontal: 20,
+          }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-
           {/* ════ STEP 0 — Tu cuenta ════ */}
           {step === 0 && (
             <>
               <View style={{ marginBottom: 24 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 12,
+                    marginBottom: 12,
+                  }}
+                >
                   <View
                     style={{
-                      width: 52, height: 52, borderRadius: 16,
-                      alignItems: 'center', justifyContent: 'center',
+                      width: 52,
+                      height: 52,
+                      borderRadius: 16,
+                      alignItems: "center",
+                      justifyContent: "center",
                       backgroundColor: C.primaryFixed,
-                      borderWidth: 2, borderColor: C.border,
+                      borderWidth: 2,
+                      borderColor: C.border,
                       ...shadow.sm,
                     }}
                   >
                     <Icon name="account" size={28} color={C.primary} />
                   </View>
                   <View>
-                    <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24 }}>
+                    <Text
+                      style={{
+                        color: C.onSurface,
+                        fontFamily: "Outfit_700Bold",
+                        fontSize: 24,
+                      }}
+                    >
                       Tu cuenta
                     </Text>
-                    <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 }}>
+                    <Text
+                      style={{
+                        color: C.onSurfaceVariant,
+                        fontFamily: "PlusJakartaSans_400Regular",
+                        fontSize: 15,
+                      }}
+                    >
                       Para administrar tu local
                     </Text>
                   </View>
@@ -258,15 +333,30 @@ export default function RegisterOwnerScreen() {
               <View style={{ gap: 20 }}>
                 {/* Correo */}
                 <View style={{ gap: 8 }}>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>
+                  <Text
+                    style={{
+                      color: C.onSurfaceVariant,
+                      fontFamily: "PlusJakartaSans_600SemiBold",
+                      fontSize: 15,
+                      marginLeft: 4,
+                    }}
+                  >
                     Correo electrónico *
                   </Text>
-                  <View style={{
-                    flexDirection: 'row', alignItems: 'center',
-                    borderRadius: 16, height: 56, paddingHorizontal: 16, gap: 12,
-                    backgroundColor: C.surfaceContainerLow,
-                    borderWidth: 2, borderColor: C.border, ...shadow.sm,
-                  }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      borderRadius: 16,
+                      height: 56,
+                      paddingHorizontal: 16,
+                      gap: 12,
+                      backgroundColor: C.surfaceContainerLow,
+                      borderWidth: 2,
+                      borderColor: C.border,
+                      ...shadow.sm,
+                    }}
+                  >
                     <Icon name="email-outline" size={22} color={C.outline} />
                     <AppTextInput
                       placeholder="tucorreo@ejemplo.com"
@@ -277,7 +367,14 @@ export default function RegisterOwnerScreen() {
                     />
                   </View>
                   {email.trim().length > 0 && !emailValid && (
-                    <Text style={{ color: C.error, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, marginLeft: 4 }}>
+                    <Text
+                      style={{
+                        color: C.error,
+                        fontFamily: "PlusJakartaSans_400Regular",
+                        fontSize: 15,
+                        marginLeft: 4,
+                      }}
+                    >
                       Usa solo letras sin tildes ni ñ (ej. dueno@gmail.com).
                     </Text>
                   )}
@@ -285,16 +382,38 @@ export default function RegisterOwnerScreen() {
 
                 {/* Contraseña */}
                 <View style={{ gap: 8 }}>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>
-                    Contraseña *{' '}
-                    <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular' }}>(mín. 8)</Text>
+                  <Text
+                    style={{
+                      color: C.onSurfaceVariant,
+                      fontFamily: "PlusJakartaSans_600SemiBold",
+                      fontSize: 15,
+                      marginLeft: 4,
+                    }}
+                  >
+                    Contraseña *{" "}
+                    <Text
+                      style={{
+                        color: C.outline,
+                        fontFamily: "PlusJakartaSans_400Regular",
+                      }}
+                    >
+                      (mín. 8)
+                    </Text>
                   </Text>
-                  <View style={{
-                    flexDirection: 'row', alignItems: 'center',
-                    borderRadius: 16, height: 56, paddingHorizontal: 16, gap: 12,
-                    backgroundColor: C.surfaceContainerLow,
-                    borderWidth: 2, borderColor: C.border, ...shadow.sm,
-                  }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      borderRadius: 16,
+                      height: 56,
+                      paddingHorizontal: 16,
+                      gap: 12,
+                      backgroundColor: C.surfaceContainerLow,
+                      borderWidth: 2,
+                      borderColor: C.border,
+                      ...shadow.sm,
+                    }}
+                  >
                     <Icon name="lock-outline" size={22} color={C.outline} />
                     <AppTextInput
                       placeholder="••••••••"
@@ -302,23 +421,42 @@ export default function RegisterOwnerScreen() {
                       value={password}
                       onChangeText={setPassword}
                     />
-                    <Pressable onPress={() => setShowPw(v => !v)}>
-                      <Icon name={showPw ? 'eye-off-outline' : 'eye-outline'} size={22} color={C.outline} />
+                    <Pressable onPress={() => setShowPw((v) => !v)}>
+                      <Icon
+                        name={showPw ? "eye-off-outline" : "eye-outline"}
+                        size={22}
+                        color={C.outline}
+                      />
                     </Pressable>
                   </View>
                 </View>
 
                 {/* Confirmar */}
                 <View style={{ gap: 8 }}>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>
+                  <Text
+                    style={{
+                      color: C.onSurfaceVariant,
+                      fontFamily: "PlusJakartaSans_600SemiBold",
+                      fontSize: 15,
+                      marginLeft: 4,
+                    }}
+                  >
                     Confirmar contraseña *
                   </Text>
-                  <View style={{
-                    flexDirection: 'row', alignItems: 'center',
-                    borderRadius: 16, height: 56, paddingHorizontal: 16, gap: 12,
-                    backgroundColor: C.surfaceContainerLow,
-                    borderWidth: 2, borderColor: C.border, ...shadow.sm,
-                  }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      borderRadius: 16,
+                      height: 56,
+                      paddingHorizontal: 16,
+                      gap: 12,
+                      backgroundColor: C.surfaceContainerLow,
+                      borderWidth: 2,
+                      borderColor: C.border,
+                      ...shadow.sm,
+                    }}
+                  >
                     <Icon name="lock-outline" size={22} color={C.outline} />
                     <AppTextInput
                       placeholder="••••••••"
@@ -328,7 +466,14 @@ export default function RegisterOwnerScreen() {
                     />
                   </View>
                   {confirm.length > 0 && password !== confirm && (
-                    <Text style={{ color: C.error, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, marginLeft: 4 }}>
+                    <Text
+                      style={{
+                        color: C.error,
+                        fontFamily: "PlusJakartaSans_400Regular",
+                        fontSize: 15,
+                        marginLeft: 4,
+                      }}
+                    >
                       Las contraseñas no coinciden.
                     </Text>
                   )}
@@ -341,28 +486,61 @@ export default function RegisterOwnerScreen() {
           {step === 1 && (
             <>
               <View style={{ marginBottom: 24 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 12,
+                    marginBottom: 12,
+                  }}
+                >
                   <View
                     style={{
-                      width: 52, height: 52, borderRadius: 16,
-                      alignItems: 'center', justifyContent: 'center',
+                      width: 52,
+                      height: 52,
+                      borderRadius: 16,
+                      alignItems: "center",
+                      justifyContent: "center",
                       backgroundColor: C.primaryFixed,
-                      borderWidth: 2, borderColor: C.border,
+                      borderWidth: 2,
+                      borderColor: C.border,
                       ...shadow.sm,
                     }}
                   >
-                    <Icon name="storefront-outline" size={28} color={C.primary} />
+                    <Icon
+                      name="storefront-outline"
+                      size={28}
+                      color={C.primary}
+                    />
                   </View>
                   <View>
-                    <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24 }}>
+                    <Text
+                      style={{
+                        color: C.onSurface,
+                        fontFamily: "Outfit_700Bold",
+                        fontSize: 24,
+                      }}
+                    >
                       Tu restaurante
                     </Text>
-                    <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 }}>
+                    <Text
+                      style={{
+                        color: C.onSurfaceVariant,
+                        fontFamily: "PlusJakartaSans_400Regular",
+                        fontSize: 15,
+                      }}
+                    >
                       Datos principales
                     </Text>
                   </View>
                 </View>
-                <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 }}>
+                <Text
+                  style={{
+                    color: C.onSurfaceVariant,
+                    fontFamily: "PlusJakartaSans_400Regular",
+                    fontSize: 15,
+                  }}
+                >
                   Únete a la comunidad gastronómica más vibrante del barrio.
                 </Text>
               </View>
@@ -370,15 +548,27 @@ export default function RegisterOwnerScreen() {
               <View style={{ gap: 20 }}>
                 {/* Nombre */}
                 <View style={{ gap: 8 }}>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>
+                  <Text
+                    style={{
+                      color: C.onSurfaceVariant,
+                      fontFamily: "PlusJakartaSans_600SemiBold",
+                      fontSize: 15,
+                      marginLeft: 4,
+                    }}
+                  >
                     Nombre del restaurante *
                   </Text>
                   <View
                     style={{
-                      flexDirection: 'row', alignItems: 'center',
-                      borderRadius: 16, height: 56, paddingHorizontal: 16, gap: 12,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      borderRadius: 16,
+                      height: 56,
+                      paddingHorizontal: 16,
+                      gap: 12,
                       backgroundColor: C.surfaceContainerLow,
-                      borderWidth: 2, borderColor: C.border,
+                      borderWidth: 2,
+                      borderColor: C.border,
                       ...shadow.sm,
                     }}
                   >
@@ -393,25 +583,45 @@ export default function RegisterOwnerScreen() {
 
                 {/* Categorías */}
                 <View style={{ gap: 12 }}>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>
-                    Categorías *{' '}
-                    <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular' }}>
+                  <Text
+                    style={{
+                      color: C.onSurfaceVariant,
+                      fontFamily: "PlusJakartaSans_600SemiBold",
+                      fontSize: 15,
+                      marginLeft: 4,
+                    }}
+                  >
+                    Categorías *{" "}
+                    <Text
+                      style={{
+                        color: C.outline,
+                        fontFamily: "PlusJakartaSans_400Regular",
+                      }}
+                    >
                       ({selectedCats.size} seleccionadas)
                     </Text>
                   </Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                    {CATEGORIES.map(cat => {
+                  <View
+                    style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}
+                  >
+                    {CATEGORIES.map((cat) => {
                       const sel = selectedCats.has(cat.id);
                       return (
                         <Pressable
                           key={cat.id}
                           onPress={() => toggleCat(cat.id)}
                           style={{
-                            flexDirection: 'row', alignItems: 'center', gap: 6,
-                            paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 6,
+                            paddingHorizontal: 14,
+                            paddingVertical: 8,
+                            borderRadius: 99,
                             borderWidth: 2,
                             borderColor: sel ? C.secondary : C.outlineVariant,
-                            backgroundColor: sel ? C.secondaryContainer : C.surface,
+                            backgroundColor: sel
+                              ? C.secondaryContainer
+                              : C.surface,
                           }}
                         >
                           <Icon
@@ -419,10 +629,13 @@ export default function RegisterOwnerScreen() {
                             size={16}
                             color={sel ? C.secondary : C.onSurfaceVariant}
                           />
-                          <Text style={{
-                            fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15,
-                            color: sel ? C.secondary : C.onSurfaceVariant,
-                          }}>
+                          <Text
+                            style={{
+                              fontFamily: "PlusJakartaSans_600SemiBold",
+                              fontSize: 15,
+                              color: sel ? C.secondary : C.onSurfaceVariant,
+                            }}
+                          >
                             {cat.label}
                           </Text>
                         </Pressable>
@@ -435,24 +648,72 @@ export default function RegisterOwnerScreen() {
               {/* Badge gamificación */}
               <View
                 style={{
-                  marginTop: 32, padding: 20, borderRadius: 20,
+                  marginTop: 32,
+                  padding: 20,
+                  borderRadius: 20,
                   backgroundColor: C.secondaryContainer,
-                  borderWidth: 2, borderColor: C.border,
+                  borderWidth: 2,
+                  borderColor: C.border,
                 }}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 10,
+                    marginBottom: 8,
+                  }}
+                >
                   <Icon name="trending-up" size={22} color={C.secondary} />
-                  <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, flex: 1 }}>
+                  <Text
+                    style={{
+                      color: C.onSurface,
+                      fontFamily: "PlusJakartaSans_700Bold",
+                      fontSize: 15,
+                      flex: 1,
+                    }}
+                  >
                     Obtén el badge "Local Heat" 🔥
                   </Text>
                 </View>
-                <Text style={{ color: C.onSecondaryContainer, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, lineHeight: 20, marginBottom: 12 }}>
-                  Completa tu perfil hoy y recibe 2 semanas de boost en búsquedas locales.
+                <Text
+                  style={{
+                    color: C.onSecondaryContainer,
+                    fontFamily: "PlusJakartaSans_400Regular",
+                    fontSize: 15,
+                    lineHeight: 20,
+                    marginBottom: 12,
+                  }}
+                >
+                  Completa tu perfil hoy y recibe 2 semanas de boost en
+                  búsquedas locales.
                 </Text>
-                <View style={{ height: 8, borderRadius: 99, overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.12)' }}>
-                  <View style={{ height: '100%', borderRadius: 99, width: '35%', backgroundColor: C.secondary }} />
+                <View
+                  style={{
+                    height: 8,
+                    borderRadius: 99,
+                    overflow: "hidden",
+                    backgroundColor: "rgba(0,0,0,0.12)",
+                  }}
+                >
+                  <View
+                    style={{
+                      height: "100%",
+                      borderRadius: 99,
+                      width: "35%",
+                      backgroundColor: C.secondary,
+                    }}
+                  />
                 </View>
-                <Text style={{ color: C.secondary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, marginTop: 6, letterSpacing: 1 }}>
+                <Text
+                  style={{
+                    color: C.secondary,
+                    fontFamily: "PlusJakartaSans_700Bold",
+                    fontSize: 15,
+                    marginTop: 6,
+                    letterSpacing: 1,
+                  }}
+                >
                   35% COMPLETADO
                 </Text>
               </View>
@@ -463,10 +724,23 @@ export default function RegisterOwnerScreen() {
           {step === 2 && (
             <>
               <View style={{ marginBottom: 24 }}>
-                <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24, marginBottom: 8 }}>
+                <Text
+                  style={{
+                    color: C.onSurface,
+                    fontFamily: "Outfit_700Bold",
+                    fontSize: 24,
+                    marginBottom: 8,
+                  }}
+                >
                   Ubicación y contacto
                 </Text>
-                <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 }}>
+                <Text
+                  style={{
+                    color: C.onSurfaceVariant,
+                    fontFamily: "PlusJakartaSans_400Regular",
+                    fontSize: 15,
+                  }}
+                >
                   Ayuda a tus clientes a encontrarte y conectar contigo.
                 </Text>
               </View>
@@ -474,19 +748,35 @@ export default function RegisterOwnerScreen() {
               <View style={{ gap: 20 }}>
                 {/* Dirección + GPS */}
                 <View style={{ gap: 8 }}>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>
+                  <Text
+                    style={{
+                      color: C.onSurfaceVariant,
+                      fontFamily: "PlusJakartaSans_600SemiBold",
+                      fontSize: 15,
+                      marginLeft: 4,
+                    }}
+                  >
                     Dirección *
                   </Text>
                   <View
                     style={{
-                      flexDirection: 'row', alignItems: 'center',
-                      borderRadius: 16, height: 56, paddingHorizontal: 16, gap: 12,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      borderRadius: 16,
+                      height: 56,
+                      paddingHorizontal: 16,
+                      gap: 12,
                       backgroundColor: C.surfaceContainerLow,
-                      borderWidth: 2, borderColor: C.border,
+                      borderWidth: 2,
+                      borderColor: C.border,
                       ...shadow.sm,
                     }}
                   >
-                    <Icon name="map-marker-outline" size={22} color={C.outline} />
+                    <Icon
+                      name="map-marker-outline"
+                      size={22}
+                      color={C.outline}
+                    />
                     <AppTextInput
                       placeholder="Calle y ciudad"
                       value={address}
@@ -496,41 +786,70 @@ export default function RegisterOwnerScreen() {
                   <Pressable
                     onPress={detectLocation}
                     style={{
-                      flexDirection: 'row', alignItems: 'center', gap: 8,
-                      paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16,
-                      borderWidth: 2, borderStyle: 'dashed',
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                      paddingHorizontal: 16,
+                      paddingVertical: 12,
+                      borderRadius: 16,
+                      borderWidth: 2,
+                      borderStyle: "dashed",
                       borderColor: coords ? C.secondary : C.outlineVariant,
-                      backgroundColor: coords ? C.secondaryContainer + '20' : C.surface,
+                      backgroundColor: coords
+                        ? C.secondaryContainer + "20"
+                        : C.surface,
                     }}
                   >
                     <Icon
-                      name={coords ? 'check-circle' : 'crosshairs-gps'}
+                      name={coords ? "check-circle" : "crosshairs-gps"}
                       size={20}
                       color={coords ? C.secondary : C.outline}
                     />
-                    <Text style={{
-                      fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15,
-                      color: coords ? C.secondary : C.onSurfaceVariant,
-                    }}>
+                    <Text
+                      style={{
+                        fontFamily: "PlusJakartaSans_600SemiBold",
+                        fontSize: 15,
+                        color: coords ? C.secondary : C.onSurfaceVariant,
+                      }}
+                    >
                       {coords
                         ? `GPS capturado (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`
-                        : 'Detectar ubicación GPS automáticamente'}
+                        : "Detectar ubicación GPS automáticamente"}
                     </Text>
                   </Pressable>
                 </View>
 
                 {/* WhatsApp */}
                 <View style={{ gap: 8 }}>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>
-                    WhatsApp{' '}
-                    <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular' }}>(opcional)</Text>
+                  <Text
+                    style={{
+                      color: C.onSurfaceVariant,
+                      fontFamily: "PlusJakartaSans_600SemiBold",
+                      fontSize: 15,
+                      marginLeft: 4,
+                    }}
+                  >
+                    WhatsApp{" "}
+                    <Text
+                      style={{
+                        color: C.outline,
+                        fontFamily: "PlusJakartaSans_400Regular",
+                      }}
+                    >
+                      (opcional)
+                    </Text>
                   </Text>
                   <View
                     style={{
-                      flexDirection: 'row', alignItems: 'center',
-                      borderRadius: 16, height: 56, paddingHorizontal: 16, gap: 12,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      borderRadius: 16,
+                      height: 56,
+                      paddingHorizontal: 16,
+                      gap: 12,
                       backgroundColor: C.surfaceContainerLow,
-                      borderWidth: 2, borderColor: C.border,
+                      borderWidth: 2,
+                      borderColor: C.border,
                       ...shadow.sm,
                     }}
                   >
@@ -546,21 +865,48 @@ export default function RegisterOwnerScreen() {
 
                 {/* Instagram */}
                 <View style={{ gap: 8 }}>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>
-                    Instagram{' '}
-                    <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular' }}>(opcional)</Text>
+                  <Text
+                    style={{
+                      color: C.onSurfaceVariant,
+                      fontFamily: "PlusJakartaSans_600SemiBold",
+                      fontSize: 15,
+                      marginLeft: 4,
+                    }}
+                  >
+                    Instagram{" "}
+                    <Text
+                      style={{
+                        color: C.outline,
+                        fontFamily: "PlusJakartaSans_400Regular",
+                      }}
+                    >
+                      (opcional)
+                    </Text>
                   </Text>
                   <View
                     style={{
-                      flexDirection: 'row', alignItems: 'center',
-                      borderRadius: 16, height: 56, paddingHorizontal: 16, gap: 8,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      borderRadius: 16,
+                      height: 56,
+                      paddingHorizontal: 16,
+                      gap: 8,
                       backgroundColor: C.surfaceContainerLow,
-                      borderWidth: 2, borderColor: C.border,
+                      borderWidth: 2,
+                      borderColor: C.border,
                       ...shadow.sm,
                     }}
                   >
                     <Icon name="instagram" size={22} color="#E1306C" />
-                    <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 16 }}>@</Text>
+                    <Text
+                      style={{
+                        color: C.outline,
+                        fontFamily: "PlusJakartaSans_400Regular",
+                        fontSize: 16,
+                      }}
+                    >
+                      @
+                    </Text>
                     <AppTextInput
                       placeholder="tu_restaurante"
                       autoCapitalize="none"
@@ -577,38 +923,95 @@ export default function RegisterOwnerScreen() {
           {step === 3 && (
             <>
               <View style={{ marginBottom: 24 }}>
-                <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24, marginBottom: 8 }}>
+                <Text
+                  style={{
+                    color: C.onSurface,
+                    fontFamily: "Outfit_700Bold",
+                    fontSize: 24,
+                    marginBottom: 8,
+                  }}
+                >
                   Muestra tu cocina ✨
                 </Text>
-                <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 }}>
-                  Fotos de calidad aumentan el engagement 40%. Todo es opcional pero recomendado.
+                <Text
+                  style={{
+                    color: C.onSurfaceVariant,
+                    fontFamily: "PlusJakartaSans_400Regular",
+                    fontSize: 15,
+                  }}
+                >
+                  Fotos de calidad aumentan el engagement 40%. Todo es opcional
+                  pero recomendado.
                 </Text>
               </View>
 
               <View style={{ gap: 20 }}>
                 {/* Logo */}
                 <View style={{ gap: 8 }}>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>
+                  <Text
+                    style={{
+                      color: C.onSurfaceVariant,
+                      fontFamily: "PlusJakartaSans_600SemiBold",
+                      fontSize: 15,
+                      marginLeft: 4,
+                    }}
+                  >
                     Logo del restaurante
                   </Text>
                   <Pressable
                     onPress={() => pickImage(setLogoUri)}
                     style={{
-                      height: 120, borderRadius: 16, overflow: 'hidden',
-                      borderWidth: 2, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center',
+                      height: 120,
+                      borderRadius: 16,
+                      overflow: "hidden",
+                      borderWidth: 2,
+                      borderStyle: "dashed",
+                      alignItems: "center",
+                      justifyContent: "center",
                       borderColor: logoUri ? C.primary : C.outlineVariant,
-                      backgroundColor: logoUri ? C.primaryFixed + '20' : C.surfaceContainerLow,
+                      backgroundColor: logoUri
+                        ? C.primaryFixed + "20"
+                        : C.surfaceContainerLow,
                     }}
                   >
                     {logoUri ? (
-                      <Image source={{ uri: logoUri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                      <Image
+                        source={{ uri: logoUri }}
+                        style={{ width: "100%", height: "100%" }}
+                        resizeMode="cover"
+                      />
                     ) : (
-                      <View style={{ alignItems: 'center', gap: 8 }}>
-                        <View style={{ padding: 12, borderRadius: 16, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
+                      <View style={{ alignItems: "center", gap: 8 }}>
+                        <View
+                          style={{
+                            padding: 12,
+                            borderRadius: 16,
+                            backgroundColor: C.primaryFixed,
+                            borderWidth: 2,
+                            borderColor: C.border,
+                            ...shadow.sm,
+                          }}
+                        >
                           <Icon name="image-plus" size={28} color={C.primary} />
                         </View>
-                        <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>Subir logo</Text>
-                        <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 }}>PNG, JPG · máx 10MB</Text>
+                        <Text
+                          style={{
+                            color: C.onSurfaceVariant,
+                            fontFamily: "PlusJakartaSans_600SemiBold",
+                            fontSize: 15,
+                          }}
+                        >
+                          Subir logo
+                        </Text>
+                        <Text
+                          style={{
+                            color: C.outline,
+                            fontFamily: "PlusJakartaSans_400Regular",
+                            fontSize: 15,
+                          }}
+                        >
+                          PNG, JPG · máx 10MB
+                        </Text>
                       </View>
                     )}
                   </Pressable>
@@ -616,32 +1019,103 @@ export default function RegisterOwnerScreen() {
 
                 {/* Foto de portada */}
                 <View style={{ gap: 8 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginLeft: 4 }}>
-                    <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      marginLeft: 4,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: C.onSurfaceVariant,
+                        fontFamily: "PlusJakartaSans_600SemiBold",
+                        fontSize: 15,
+                      }}
+                    >
                       Foto de portada
                     </Text>
-                    <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99, backgroundColor: C.secondaryContainer, borderWidth: 1, borderColor: C.secondary }}>
-                      <Text style={{ color: C.secondary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, letterSpacing: 0.5 }}>RECOMENDADO</Text>
+                    <View
+                      style={{
+                        paddingHorizontal: 8,
+                        paddingVertical: 2,
+                        borderRadius: 99,
+                        backgroundColor: C.secondaryContainer,
+                        borderWidth: 1,
+                        borderColor: C.secondary,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: C.secondary,
+                          fontFamily: "PlusJakartaSans_700Bold",
+                          fontSize: 15,
+                          letterSpacing: 0.5,
+                        }}
+                      >
+                        RECOMENDADO
+                      </Text>
                     </View>
                   </View>
                   <Pressable
                     onPress={() => pickImage(setCoverUri)}
                     style={{
-                      height: 180, borderRadius: 16, overflow: 'hidden',
-                      borderWidth: 2, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center',
+                      height: 180,
+                      borderRadius: 16,
+                      overflow: "hidden",
+                      borderWidth: 2,
+                      borderStyle: "dashed",
+                      alignItems: "center",
+                      justifyContent: "center",
                       borderColor: coverUri ? C.primary : C.outlineVariant,
-                      backgroundColor: coverUri ? C.primaryFixed + '20' : C.surfaceContainerLow,
+                      backgroundColor: coverUri
+                        ? C.primaryFixed + "20"
+                        : C.surfaceContainerLow,
                     }}
                   >
                     {coverUri ? (
-                      <Image source={{ uri: coverUri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                      <Image
+                        source={{ uri: coverUri }}
+                        style={{ width: "100%", height: "100%" }}
+                        resizeMode="cover"
+                      />
                     ) : (
-                      <View style={{ alignItems: 'center', gap: 8 }}>
-                        <View style={{ padding: 16, borderRadius: 16, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
-                          <Icon name="camera-plus-outline" size={36} color={C.primary} />
+                      <View style={{ alignItems: "center", gap: 8 }}>
+                        <View
+                          style={{
+                            padding: 16,
+                            borderRadius: 16,
+                            backgroundColor: C.primaryFixed,
+                            borderWidth: 2,
+                            borderColor: C.border,
+                            ...shadow.sm,
+                          }}
+                        >
+                          <Icon
+                            name="camera-plus-outline"
+                            size={36}
+                            color={C.primary}
+                          />
                         </View>
-                        <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>Sube tu mejor foto de plato</Text>
-                        <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 }}>PNG, JPG · máx 10MB</Text>
+                        <Text
+                          style={{
+                            color: C.onSurfaceVariant,
+                            fontFamily: "PlusJakartaSans_600SemiBold",
+                            fontSize: 15,
+                          }}
+                        >
+                          Sube tu mejor foto de plato
+                        </Text>
+                        <Text
+                          style={{
+                            color: C.outline,
+                            fontFamily: "PlusJakartaSans_400Regular",
+                            fontSize: 15,
+                          }}
+                        >
+                          PNG, JPG · máx 10MB
+                        </Text>
                       </View>
                     )}
                   </Pressable>
@@ -649,39 +1123,73 @@ export default function RegisterOwnerScreen() {
 
                 {/* Menú PDF */}
                 <View style={{ gap: 8 }}>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>
+                  <Text
+                    style={{
+                      color: C.onSurfaceVariant,
+                      fontFamily: "PlusJakartaSans_600SemiBold",
+                      fontSize: 15,
+                      marginLeft: 4,
+                    }}
+                  >
                     Menú en PDF
                   </Text>
                   <Pressable
                     onPress={pickPdf}
                     style={{
-                      flexDirection: 'row', alignItems: 'center', gap: 16,
-                      padding: 20, borderRadius: 16,
-                      borderWidth: 2, borderStyle: 'dashed',
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 16,
+                      padding: 20,
+                      borderRadius: 16,
+                      borderWidth: 2,
+                      borderStyle: "dashed",
                       borderColor: menuPdfName ? C.primary : C.outlineVariant,
-                      backgroundColor: menuPdfName ? C.primaryFixed + '15' : C.surfaceContainerLow,
+                      backgroundColor: menuPdfName
+                        ? C.primaryFixed + "15"
+                        : C.surfaceContainerLow,
                     }}
                   >
                     <View
                       style={{
-                        width: 48, height: 48, borderRadius: 16,
-                        alignItems: 'center', justifyContent: 'center',
-                        backgroundColor: menuPdfName ? C.primary : C.primaryFixed,
-                        borderWidth: 2, borderColor: C.border,
+                        width: 48,
+                        height: 48,
+                        borderRadius: 16,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: menuPdfName
+                          ? C.primary
+                          : C.primaryFixed,
+                        borderWidth: 2,
+                        borderColor: C.border,
                       }}
                     >
                       <Icon
-                        name={menuPdfName ? 'file-check' : 'file-pdf-box'}
+                        name={menuPdfName ? "file-check" : "file-pdf-box"}
                         size={26}
-                        color={menuPdfName ? '#fff' : C.primary}
+                        color={menuPdfName ? "#fff" : C.primary}
                       />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
-                        {menuPdfName ?? 'Subir menú PDF'}
+                      <Text
+                        style={{
+                          color: C.onSurface,
+                          fontFamily: "PlusJakartaSans_600SemiBold",
+                          fontSize: 15,
+                        }}
+                      >
+                        {menuPdfName ?? "Subir menú PDF"}
                       </Text>
-                      <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, marginTop: 2 }}>
-                        {menuPdfName ? 'Toca para cambiar' : 'Tus clientes lo verán en tu perfil'}
+                      <Text
+                        style={{
+                          color: C.outline,
+                          fontFamily: "PlusJakartaSans_400Regular",
+                          fontSize: 15,
+                          marginTop: 2,
+                        }}
+                      >
+                        {menuPdfName
+                          ? "Toca para cambiar"
+                          : "Tus clientes lo verán en tu perfil"}
                       </Text>
                     </View>
                   </Pressable>
@@ -689,37 +1197,76 @@ export default function RegisterOwnerScreen() {
               </View>
             </>
           )}
-
         </ScrollView>
       </KeyboardAvoidingView>
 
       {/* ── Barra fija inferior ── */}
-      <View style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        paddingHorizontal: 20, paddingTop: 12,
-        paddingBottom: insets.bottom + 16,
-        backgroundColor: C.surface + 'f0',
-      }}>
+      <View
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          paddingHorizontal: 20,
+          paddingTop: 12,
+          paddingBottom: insets.bottom + 16,
+          backgroundColor: C.surface + "f0",
+        }}
+      >
         <Pressable
           onPress={handleContinue}
           disabled={!canContinue || loading}
           style={{
-            height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center',
-            flexDirection: 'row', gap: 8,
-            backgroundColor: canContinue && !loading ? C.primary : C.surfaceContainerHighest,
-            borderWidth: 2, borderColor: canContinue && !loading ? C.border : C.outlineVariant,
+            height: 56,
+            borderRadius: 28,
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "row",
+            gap: 8,
+            backgroundColor:
+              canContinue && !loading ? C.primary : C.surfaceContainerHighest,
+            borderWidth: 2,
+            borderColor: canContinue && !loading ? C.border : C.outlineVariant,
             ...(canContinue && !loading ? shadow.primary : {}),
           }}
         >
-          <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 16, color: canContinue && !loading ? '#fff' : C.outline }}>
-            {loading ? 'Creando…' : step === STEPS - 1 ? 'Registrar mi restaurante' : 'Continuar'}
+          <Text
+            style={{
+              fontFamily: "Outfit_700Bold",
+              fontSize: 16,
+              color: canContinue && !loading ? "#fff" : C.outline,
+            }}
+          >
+            {loading
+              ? "Creando…"
+              : step === STEPS - 1
+                ? "Registrar mi restaurante"
+                : "Continuar"}
           </Text>
-          {!loading && <Icon name={step === STEPS - 1 ? 'storefront' : 'arrow-right'} size={20} color={canContinue ? '#fff' : C.outline} />}
+          {!loading && (
+            <Icon
+              name={step === STEPS - 1 ? "storefront" : "arrow-right"}
+              size={20}
+              color={canContinue ? "#fff" : C.outline}
+            />
+          )}
         </Pressable>
         {step === STEPS - 1 && (
-          <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, textAlign: 'center', marginTop: 10, lineHeight: 18 }}>
-            Al registrarte, aceptas los{' '}
-            <Text style={{ textDecorationLine: 'underline', color: C.primary }}>Términos de Socio</Text> de El Point.
+          <Text
+            style={{
+              color: C.outline,
+              fontFamily: "PlusJakartaSans_400Regular",
+              fontSize: 12,
+              textAlign: "center",
+              marginTop: 10,
+              lineHeight: 18,
+            }}
+          >
+            Al registrarte, aceptas los{" "}
+            <Text style={{ textDecorationLine: "underline", color: C.primary }}>
+              Términos de Socio
+            </Text>{" "}
+            de El Point.
           </Text>
         )}
       </View>

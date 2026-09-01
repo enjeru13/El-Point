@@ -13,7 +13,6 @@ const TAB_ICONS: Record<string, IconName> = {
   map: "map-marker",
   search: "search",
   profile: "account",
-  settings: "settings",
 };
 
 function TabItem({
@@ -119,7 +118,6 @@ export default function CustomerLayout() {
       <Tabs.Screen name="map" options={{ title: "Mapa" }} />
       <Tabs.Screen name="search" options={{ title: "Explorar" }} />
       <Tabs.Screen name="profile" options={{ title: "Mi Perfil" }} />
-      <Tabs.Screen name="settings" options={{ title: "Ajustes" }} />
     </Tabs>
   );
 }

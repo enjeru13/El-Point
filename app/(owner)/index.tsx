@@ -7,6 +7,7 @@ import { FLOATING_NAV_H } from '@/lib/theme';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews, type Review } from '@/lib/queries/reviews';
 import { NotificationBell } from '@/components/ui/NotificationBell';
+import { Avatar } from '@/components/ui/Avatar';
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -53,9 +54,7 @@ function ReviewRow({ review }: { review: Review }) {
       gap: 8, ...shadow.sm,
     }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-        <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
-          <Icon name="account" size={20} color={C.primary} />
-        </View>
+        <Avatar uri={review.author?.avatar_url} size={36} />
         <View style={{ flex: 1 }}>
           <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14 }}>{authorLabel(review.author)}</Text>
           <View style={{ flexDirection: 'row', gap: 2, marginTop: 2 }}>
@@ -118,8 +117,9 @@ export default function OwnerHomeScreen() {
       <View style={{
         paddingTop: insets.top + 10, paddingBottom: 14,
         paddingHorizontal: 20,
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+        flexDirection: 'row', alignItems: 'center', gap: 12,
       }}>
+        <Avatar uri={restaurant.logo_url ?? restaurant.cover_url} size={44} icon={restaurant.categories[0]?.icon ?? 'store-outline'} />
         <View style={{ flex: 1 }}>
           <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13 }}>Bienvenido</Text>
           <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 22 }} numberOfLines={1}>{restaurant.name}</Text>
