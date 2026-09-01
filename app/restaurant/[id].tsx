@@ -3,6 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Icon } from "@/components/ui/Icon";
 import { StarRow } from "@/components/ui/StarRow";
 import { Avatar } from "@/components/ui/Avatar";
+import { AppText } from "@/components/ui/AppText";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { RankBadge } from "@/components/ui/RankBadge";
@@ -30,7 +31,6 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Text,
   TextInput,
   View,
 } from "react-native";
@@ -250,25 +250,12 @@ function ReviewModal({
               }}
             >
               <View style={{ gap: 2 }}>
-                <Text
-                  style={{
-                    color: C.onSurfaceVariant,
-                    fontFamily: "PlusJakartaSans_600SemiBold",
-                    fontSize: 12,
-                    letterSpacing: 1,
-                  }}
-                >
+                <AppText variant="overline" color={C.onSurfaceVariant}>
                   RANKEAR
-                </Text>
-                <Text
-                  style={{
-                    color: C.onSurface,
-                    fontFamily: "Outfit_700Bold",
-                    fontSize: 22,
-                  }}
-                >
+                </AppText>
+                <AppText variant="title" style={{ fontSize: 22, lineHeight: 27 }}>
                   {restaurantName}
-                </Text>
+                </AppText>
               </View>
               <Pressable
                 onPress={onClose}
@@ -302,26 +289,14 @@ function ReviewModal({
                       borderColor: C.outlineVariant,
                     }}
                   >
-                    <Text
-                      style={{
-                        fontFamily: "PlusJakartaSans_700Bold",
-                        fontSize: 15,
-                        color: RATING_COLORS[rating],
-                      }}
-                    >
+                    <AppText variant="bodyStrong" color={RATING_COLORS[rating]}>
                       {RATING_LABELS[rating]}
-                    </Text>
+                    </AppText>
                   </View>
                 ) : (
-                  <Text
-                    style={{
-                      color: C.outline,
-                      fontFamily: "PlusJakartaSans_400Regular",
-                      fontSize: 14,
-                    }}
-                  >
+                  <AppText variant="bodySm" color={C.outline}>
                     ¿Cuántas estrellas le das?
-                  </Text>
+                  </AppText>
                 )}
               </View>
 
@@ -337,25 +312,23 @@ function ReviewModal({
                   placeholder="Cuéntale a la comunidad qué tal estuvo…"
                   multiline
                 />
-                <Text
-                  style={{
-                    color: comment.trim().length < 10 ? C.error : C.outline,
-                    fontFamily: "PlusJakartaSans_600SemiBold",
-                    fontSize: 12,
-                    textAlign: "right",
-                  }}
+                <AppText
+                  variant="caption"
+                  color={comment.trim().length < 10 ? C.error : C.outline}
+                  align="right"
+                  style={{ fontSize: 12 }}
                 >
                   {comment.length < 10
                     ? `Mínimo 10 caracteres · ${comment.length} / 500`
                     : `${comment.length} / 500`}
-                </Text>
+                </AppText>
               </View>
 
               {/* Fotos */}
               <View style={{ gap: 8 }}>
-                <Text style={{ color: C.onSurfaceVariant, fontFamily: "PlusJakartaSans_700Bold", fontSize: 12, letterSpacing: 1 }}>
+                <AppText variant="overline" color={C.onSurfaceVariant}>
                   FOTOS (OPCIONAL)
-                </Text>
+                </AppText>
                 <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
                   {photos.map((uri, i) => (
                     <View key={uri + i} style={{ width: 64, height: 64, borderRadius: 12, overflow: "hidden", borderWidth: 2, borderColor: C.border }}>
@@ -380,15 +353,9 @@ function ReviewModal({
               </View>
 
               {errorMessage && (
-                <Text
-                  style={{
-                    color: C.error,
-                    fontFamily: "PlusJakartaSans_600SemiBold",
-                    fontSize: 13,
-                  }}
-                >
+                <AppText variant="label" color={C.error}>
                   {errorMessage}
-                </Text>
+                </AppText>
               )}
 
               {/* Submit */}
@@ -486,16 +453,9 @@ export default function RestaurantProfileScreen() {
         }}
       >
         <Icon name="food-off-outline" size={48} color={C.outline} />
-        <Text
-          style={{
-            color: C.onSurface,
-            fontFamily: "Outfit_700Bold",
-            fontSize: 18,
-            textAlign: "center",
-          }}
-        >
+        <AppText variant="heading" align="center">
           No pudimos cargar este lugar
-        </Text>
+        </AppText>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <Button label="Reintentar" onPress={() => restaurantQ.refetch()} size="sm" fullWidth={false} />
           <Button label="Volver" onPress={() => router.back()} variant="secondary" size="sm" fullWidth={false} />
@@ -592,30 +552,17 @@ export default function RestaurantProfileScreen() {
                       borderColor: C.border,
                     }}
                   >
-                    <Text
-                      style={{
-                        color: C.onSurface,
-                        fontFamily: "PlusJakartaSans_700Bold",
-                        fontSize: 15,
-                      }}
-                    >
+                    <AppText variant="caption" style={{ fontSize: 12 }}>
                       {c.label.toUpperCase()}
-                    </Text>
+                    </AppText>
                   </View>
                 ))}
               </View>
             )}
 
-            <Text
-              style={{
-                color: "#fff",
-                fontFamily: "Outfit_800ExtraBold",
-                fontSize: 36,
-                lineHeight: 40,
-              }}
-            >
+            <AppText variant="display" color="#fff" style={{ fontSize: 36, lineHeight: 40 }}>
               {restaurant.name}
-            </Text>
+            </AppText>
 
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
@@ -624,17 +571,11 @@ export default function RestaurantProfileScreen() {
                 style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
               >
                 <Icon name="star" size={16} color={C.secondaryContainer} />
-                <Text
-                  style={{
-                    color: "#fff",
-                    fontFamily: "PlusJakartaSans_700Bold",
-                    fontSize: 15,
-                  }}
-                >
+                <AppText variant="bodyStrong" color="#fff">
                   {restaurant.rating_count > 0
                     ? `${restaurant.rating_avg} (${restaurant.rating_count})`
                     : "Sin ranks aún"}
-                </Text>
+                </AppText>
               </View>
               {(restaurant.address || priceStr) && (
                 <View
@@ -645,15 +586,9 @@ export default function RestaurantProfileScreen() {
                     size={16}
                     color="rgba(255,255,255,0.7)"
                   />
-                  <Text
-                    style={{
-                      color: "rgba(255,255,255,0.85)",
-                      fontFamily: "PlusJakartaSans_400Regular",
-                      fontSize: 15,
-                    }}
-                  >
+                  <AppText variant="body" color="rgba(255,255,255,0.85)">
                     {[priceStr].filter(Boolean).join(" • ") || "Ver ubicación"}
-                  </Text>
+                  </AppText>
                 </View>
               )}
             </View>
@@ -680,25 +615,10 @@ export default function RestaurantProfileScreen() {
             >
               <Icon name="tag" size={20} color={C.onSurface} />
               <View style={{ flex: 1 }}>
-                <Text
-                  style={{
-                    color: C.onSurface,
-                    fontFamily: "Outfit_700Bold",
-                    fontSize: 13,
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  PROMOS
-                </Text>
-                <Text
-                  style={{
-                    color: C.onSurface,
-                    fontFamily: "PlusJakartaSans_700Bold",
-                    fontSize: 15,
-                  }}
-                >
+                <AppText variant="overline">PROMOS</AppText>
+                <AppText variant="bodyStrong">
                   {restaurant.promo_text}
-                </Text>
+                </AppText>
               </View>
             </View>
           )}
@@ -756,12 +676,12 @@ export default function RestaurantProfileScreen() {
                       <Icon name="clock-outline" size={18} color={os.open ? "#16a34a" : C.error} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ color: os.open ? "#16a34a" : C.error, fontFamily: "PlusJakartaSans_700Bold", fontSize: 15 }}>
+                      <AppText variant="bodyStrong" color={os.open ? "#16a34a" : C.error}>
                         {os.open ? "Abierto ahora" : "Cerrado"}
-                      </Text>
-                      <Text style={{ color: C.onSurfaceVariant, fontFamily: "PlusJakartaSans_400Regular", fontSize: 14 }}>
+                      </AppText>
+                      <AppText variant="bodySm" color={C.onSurfaceVariant}>
                         {os.label.replace(/^(Abierto|Cerrado)( ·)? ?/, "")}
-                      </Text>
+                      </AppText>
                     </View>
                     {canExpand && (
                       <Icon name={hoursOpen ? "chevron-right" : "chevron-right"} size={18} color={C.outline} style={{ transform: [{ rotate: hoursOpen ? "90deg" : "0deg" }] }} />
@@ -774,12 +694,12 @@ export default function RestaurantProfileScreen() {
                         const today = new Date().getDay() === dow;
                         return (
                           <View key={dow} style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                            <Text style={{ color: today ? C.primary : C.onSurfaceVariant, fontFamily: today ? "PlusJakartaSans_700Bold" : "PlusJakartaSans_600SemiBold", fontSize: 13 }}>
+                            <AppText variant={today ? "label" : "bodySm"} color={today ? C.primary : C.onSurfaceVariant} style={today ? { fontFamily: "PlusJakartaSans_700Bold" } : undefined}>
                               {DAY_LABELS_LONG[dow]}
-                            </Text>
-                            <Text style={{ color: today ? C.primary : C.onSurfaceVariant, fontFamily: today ? "PlusJakartaSans_700Bold" : "PlusJakartaSans_400Regular", fontSize: 13 }}>
+                            </AppText>
+                            <AppText variant="bodySm" color={today ? C.primary : C.onSurfaceVariant} style={today ? { fontFamily: "PlusJakartaSans_700Bold" } : undefined}>
                               {formatRange(d)}
-                            </Text>
+                            </AppText>
                           </View>
                         );
                       })}
@@ -819,15 +739,9 @@ export default function RestaurantProfileScreen() {
                   <Icon name="map-marker-outline" size={18} color={C.primary} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text
-                    style={{
-                      color: C.onSurface,
-                      fontFamily: "PlusJakartaSans_700Bold",
-                      fontSize: 15,
-                    }}
-                  >
+                  <AppText variant="bodyStrong">
                     {restaurant.address}
-                  </Text>
+                  </AppText>
                 </View>
                 <Icon name="chevron-right" size={18} color={C.outline} />
               </Pressable>
@@ -858,16 +772,9 @@ export default function RestaurantProfileScreen() {
                 >
                   <Icon name="phone-outline" size={18} color={C.secondary} />
                 </View>
-                <Text
-                  style={{
-                    flex: 1,
-                    color: C.secondary,
-                    fontFamily: "PlusJakartaSans_700Bold",
-                    fontSize: 15,
-                  }}
-                >
+                <AppText variant="bodyStrong" color={C.secondary} style={{ flex: 1 }}>
                   {restaurant.phone}
-                </Text>
+                </AppText>
                 <Icon name="chevron-right" size={18} color={C.outline} />
               </Pressable>
             )}
@@ -901,16 +808,9 @@ export default function RestaurantProfileScreen() {
                 >
                   <Icon name="whatsapp" size={18} color={C.secondary} />
                 </View>
-                <Text
-                  style={{
-                    flex: 1,
-                    color: C.secondary,
-                    fontFamily: "PlusJakartaSans_700Bold",
-                    fontSize: 15,
-                  }}
-                >
+                <AppText variant="bodyStrong" color={C.secondary} style={{ flex: 1 }}>
                   {restaurant.whatsapp}
-                </Text>
+                </AppText>
                 <Icon name="chevron-right" size={18} color={C.outline} />
               </Pressable>
             )}
@@ -942,18 +842,11 @@ export default function RestaurantProfileScreen() {
                 >
                   <Icon name="instagram" size={18} color={C.tertiary} />
                 </View>
-                <Text
-                  style={{
-                    flex: 1,
-                    color: C.tertiary,
-                    fontFamily: "PlusJakartaSans_700Bold",
-                    fontSize: 15,
-                  }}
-                >
+                <AppText variant="bodyStrong" color={C.tertiary} style={{ flex: 1 }}>
                   {restaurant.instagram.startsWith("@")
                     ? restaurant.instagram
                     : `@${restaurant.instagram}`}
-                </Text>
+                </AppText>
                 <Icon name="chevron-right" size={18} color={C.outline} />
               </Pressable>
             )}
@@ -990,25 +883,12 @@ export default function RestaurantProfileScreen() {
                 <Icon name="file-pdf-box" size={26} color={C.onSurface} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text
-                  style={{
-                    color: C.onSurface,
-                    fontFamily: "Outfit_700Bold",
-                    fontSize: 17,
-                  }}
-                >
+                <AppText variant="heading" style={{ fontSize: 17 }}>
                   Ver menú completo
-                </Text>
-                <Text
-                  style={{
-                    color: C.onSurfaceVariant,
-                    fontFamily: "PlusJakartaSans_400Regular",
-                    fontSize: 13,
-                    marginTop: 2,
-                  }}
-                >
+                </AppText>
+                <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 2 }}>
                   Abre el menú en PDF
-                </Text>
+                </AppText>
               </View>
               <Icon name="arrow-right" size={20} color={C.primary} />
             </Pressable>
@@ -1031,27 +911,11 @@ export default function RestaurantProfileScreen() {
                 style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
               >
                 <Icon name="book-open-outline" size={18} color={C.tertiary} />
-                <Text
-                  style={{
-                    color: C.onSurface,
-                    fontFamily: "Outfit_700Bold",
-                    fontSize: 18,
-                  }}
-                >
-                  Nuestra historia
-                </Text>
+                <AppText variant="heading">Nuestra historia</AppText>
               </View>
-              <Text
-                style={{
-                  color: C.onSurface,
-                  fontFamily: "PlusJakartaSans_400Regular",
-                  fontSize: 15,
-                  lineHeight: 22,
-                  opacity: 0.85,
-                }}
-              >
+              <AppText variant="body" style={{ lineHeight: 22, opacity: 0.85 }}>
                 {restaurant.description}
-              </Text>
+              </AppText>
             </View>
           )}
 
@@ -1072,15 +936,9 @@ export default function RestaurantProfileScreen() {
                   size={20}
                   color={C.primary}
                 />
-                <Text
-                  style={{
-                    color: C.onSurface,
-                    fontFamily: "Outfit_700Bold",
-                    fontSize: 20,
-                  }}
-                >
+                <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>
                   Comunidad
-                </Text>
+                </AppText>
               </View>
             </View>
 
@@ -1099,27 +957,14 @@ export default function RestaurantProfileScreen() {
               }}
             >
               <View style={{ alignItems: "center", gap: 4 }}>
-                <Text
-                  style={{
-                    color: C.primary,
-                    fontFamily: "Outfit_800ExtraBold",
-                    fontSize: 48,
-                    lineHeight: 52,
-                  }}
-                >
+                <AppText variant="display" color={C.primary} style={{ fontSize: 48, lineHeight: 52 }}>
                   {restaurant.rating_count > 0 ? restaurant.rating_avg : "–"}
-                </Text>
+                </AppText>
                 <StarRow rating={Math.round(restaurant.rating_avg)} size={14} />
-                <Text
-                  style={{
-                    color: C.outline,
-                    fontFamily: "PlusJakartaSans_600SemiBold",
-                    fontSize: 15,
-                  }}
-                >
+                <AppText variant="label" color={C.outline}>
                   {restaurant.rating_count}{" "}
                   {restaurant.rating_count === 1 ? "rank" : "ranks"}
-                </Text>
+                </AppText>
               </View>
               <View style={{ flex: 1, gap: 5 }}>
                 {[5, 4, 3, 2, 1].map((star, idx) => {
@@ -1134,16 +979,9 @@ export default function RestaurantProfileScreen() {
                         gap: 6,
                       }}
                     >
-                      <Text
-                        style={{
-                          color: C.outline,
-                          fontFamily: "PlusJakartaSans_600SemiBold",
-                          fontSize: 15,
-                          width: 8,
-                        }}
-                      >
+                      <AppText variant="label" color={C.outline} style={{ fontSize: 15, width: 8 }}>
                         {star}
-                      </Text>
+                      </AppText>
                       <Icon name="star" size={10} color={C.secondary} />
                       <View
                         style={{
@@ -1198,16 +1036,9 @@ export default function RestaurantProfileScreen() {
               >
                 <Icon name="account" size={20} color={C.primary} />
               </View>
-              <Text
-                style={{
-                  flex: 1,
-                  color: C.outline,
-                  fontFamily: "PlusJakartaSans_400Regular",
-                  fontSize: 15,
-                }}
-              >
+              <AppText variant="body" color={C.outline} style={{ flex: 1 }}>
                 ¿Qué tal estuvo? Deja tu rank...
-              </Text>
+              </AppText>
               <Icon name="fire" size={20} color={C.primary} />
             </Pressable>
 
@@ -1225,16 +1056,9 @@ export default function RestaurantProfileScreen() {
                   size={36}
                   color={C.outlineVariant}
                 />
-                <Text
-                  style={{
-                    color: C.outline,
-                    fontFamily: "PlusJakartaSans_400Regular",
-                    fontSize: 14,
-                    textAlign: "center",
-                  }}
-                >
+                <AppText variant="bodySm" color={C.outline} align="center">
                   Todavía nadie rankea este lugar. Sé el primero.
-                </Text>
+                </AppText>
               </View>
             ) : (
               reviews.map((r) => (
@@ -1260,44 +1084,25 @@ export default function RestaurantProfileScreen() {
                   >
                     <Avatar uri={r.author?.avatar_url} size={40} />
                     <View style={{ flex: 1 }}>
-                      <Text
-                        style={{
-                          color: C.onSurface,
-                          fontFamily: "PlusJakartaSans_700Bold",
-                          fontSize: 15,
-                        }}
-                      >
+                      <AppText variant="bodyStrong">
                         {authorName(r.author)}
-                      </Text>
+                      </AppText>
                       <View style={{ marginTop: 3 }}>
                         <RankBadge level={r.author?.level ?? 1} />
                       </View>
                     </View>
                     <View style={{ alignItems: "flex-end", gap: 2 }}>
                       <StarRow rating={r.rating} size={12} />
-                      <Text
-                        style={{
-                          color: C.outline,
-                          fontFamily: "PlusJakartaSans_600SemiBold",
-                          fontSize: 15,
-                        }}
-                      >
+                      <AppText variant="label" color={C.outline}>
                         {timeAgo(r.created_at)}
-                      </Text>
+                      </AppText>
                     </View>
                   </View>
 
                   {/* Comment */}
-                  <Text
-                    style={{
-                      color: C.onSurfaceVariant,
-                      fontFamily: "PlusJakartaSans_400Regular",
-                      fontSize: 15,
-                      lineHeight: 21,
-                    }}
-                  >
+                  <AppText variant="body" color={C.onSurfaceVariant}>
                     {r.body}
-                  </Text>
+                  </AppText>
 
                   {/* Fotos */}
                   {r.photos.length > 0 && (
@@ -1331,12 +1136,12 @@ export default function RestaurantProfileScreen() {
                         gap: 4,
                       }}
                     >
-                      <Text style={{ color: C.secondary, fontFamily: "PlusJakartaSans_700Bold", fontSize: 12, letterSpacing: 0.5 }}>
+                      <AppText variant="caption" color={C.secondary} style={{ fontSize: 12 }}>
                         RESPUESTA DEL LOCAL · {timeAgo(r.reply.created_at)}
-                      </Text>
-                      <Text style={{ color: C.onSurface, fontFamily: "PlusJakartaSans_400Regular", fontSize: 14, lineHeight: 20 }}>
+                      </AppText>
+                      <AppText variant="bodySm" style={{ fontSize: 14, lineHeight: 20 }}>
                         {r.reply.body}
-                      </Text>
+                      </AppText>
                     </View>
                   ) : isOwnerHere && replyingId === r.id ? (
                     <View style={{ gap: 8 }}>
@@ -1379,7 +1184,7 @@ export default function RestaurantProfileScreen() {
                       style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start" }}
                     >
                       <Icon name="reply" size={15} color={C.secondary} />
-                      <Text style={{ color: C.secondary, fontFamily: "PlusJakartaSans_700Bold", fontSize: 14 }}>Responder</Text>
+                      <AppText variant="bodyStrong" color={C.secondary} style={{ fontSize: 14 }}>Responder</AppText>
                     </Pressable>
                   ) : null}
 
@@ -1407,17 +1212,9 @@ export default function RestaurantProfileScreen() {
                       size={16}
                       color={r.viewer_marked_helpful ? C.secondary : C.outline}
                     />
-                    <Text
-                      style={{
-                        color: r.viewer_marked_helpful
-                          ? C.secondary
-                          : C.outline,
-                        fontFamily: "PlusJakartaSans_600SemiBold",
-                        fontSize: 15,
-                      }}
-                    >
+                    <AppText variant="label" color={r.viewer_marked_helpful ? C.secondary : C.outline}>
                       {r.helpful_count} útil
-                    </Text>
+                    </AppText>
                   </Pressable>
                 </View>
               ))
