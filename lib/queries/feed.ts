@@ -40,11 +40,11 @@ async function fetchFeed(): Promise<FeedItem[]> {
        author:profiles!author_id ( username, full_name, level )`,
     )
     .order('created_at', { ascending: false })
-    .limit(30);
+    .limit(60);
 
   if (error) throw error;
 
-  return (data ?? [])
+  const mapped: FeedItem[] = (data ?? [])
     .filter((r: any) => r.restaurant)
     .map((r: any) => ({
       id: r.id,
@@ -63,6 +63,14 @@ async function fetchFeed(): Promise<FeedItem[]> {
         categories: mapCategories(r.restaurant.restaurant_categories),
       },
     }));
+
+  // Una card por local: el rank más reciente (data ya viene ordenada desc).
+  const seen = new Set<string>();
+  return mapped.filter((item) => {
+    if (seen.has(item.restaurant.id)) return false;
+    seen.add(item.restaurant.id);
+    return true;
+  });
 }
 
 export function useHomeFeed() {
