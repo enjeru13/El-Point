@@ -1,5 +1,6 @@
 import { AppLogo } from "@/components/ui/AppLogo";
 import { AppTextInput } from "@/components/ui/AppTextInput";
+import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { supabase } from "@/lib/supabase";
 import { useTheme } from "@/lib/ThemeContext";
@@ -81,13 +82,6 @@ export default function ForgotPasswordScreen() {
     Alert.alert("Listo", "Tu contraseña fue actualizada. Inicia sesión.");
     router.replace("/(auth)/login");
   }
-
-  const canSend = emailValid(email) && !loading;
-  const canSubmit =
-    code.trim().length >= 6 &&
-    password.length >= 8 &&
-    password === confirm &&
-    !loading;
 
   return (
     <View
@@ -197,43 +191,13 @@ export default function ForgotPasswordScreen() {
                   />
                 </View>
               </View>
-              <Pressable
+              <Button
+                label={loading ? "Enviando…" : "Enviar código"}
                 onPress={sendCode}
-                disabled={!canSend}
-                style={{
-                  height: 56,
-                  borderRadius: 28,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "row",
-                  gap: 8,
-                  backgroundColor: canSend
-                    ? C.primary
-                    : C.surfaceContainerHighest,
-                  borderWidth: 2,
-                  borderColor: C.border,
-                  ...(canSend ? shadow.primary : {}),
-                }}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Icon
-                    name="arrow-right"
-                    size={20}
-                    color={canSend ? "#fff" : C.outline}
-                  />
-                )}
-                <Text
-                  style={{
-                    color: canSend ? "#fff" : C.outline,
-                    fontFamily: "Outfit_700Bold",
-                    fontSize: 16,
-                  }}
-                >
-                  {loading ? "Enviando…" : "Enviar código"}
-                </Text>
-              </Pressable>
+                disabled={!emailValid(email)}
+                loading={loading}
+                iconTrailing="arrow-right"
+              />
             </>
           ) : (
             <>
@@ -384,59 +348,23 @@ export default function ForgotPasswordScreen() {
                 )}
               </View>
 
-              <Pressable
+              <Button
+                label={loading ? "Guardando…" : "Cambiar contraseña"}
                 onPress={submitNewPassword}
-                disabled={!canSubmit}
-                style={{
-                  height: 56,
-                  borderRadius: 28,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "row",
-                  gap: 8,
-                  backgroundColor: canSubmit
-                    ? C.primary
-                    : C.surfaceContainerHighest,
-                  borderWidth: 2,
-                  borderColor: C.border,
-                  ...(canSubmit ? shadow.primary : {}),
-                }}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Icon
-                    name="check"
-                    size={20}
-                    color={canSubmit ? "#fff" : C.outline}
-                  />
-                )}
-                <Text
-                  style={{
-                    color: canSubmit ? "#fff" : C.outline,
-                    fontFamily: "Outfit_700Bold",
-                    fontSize: 16,
-                  }}
-                >
-                  {loading ? "Guardando…" : "Cambiar contraseña"}
-                </Text>
-              </Pressable>
+                disabled={code.trim().length < 6 || password.length < 8 || password !== confirm}
+                loading={loading}
+                icon="check"
+              />
 
-              <Pressable
+              <Button
+                label="Reenviar código"
                 onPress={sendCode}
                 disabled={loading}
+                variant="ghost"
+                size="sm"
+                fullWidth={false}
                 style={{ alignSelf: "center" }}
-              >
-                <Text
-                  style={{
-                    color: C.primary,
-                    fontFamily: "PlusJakartaSans_700Bold",
-                    fontSize: 15,
-                  }}
-                >
-                  Reenviar código
-                </Text>
-              </Pressable>
+              />
             </>
           )}
         </View>
