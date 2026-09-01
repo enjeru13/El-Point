@@ -16,6 +16,7 @@ import { useTheme } from '@/lib/ThemeContext';
 import { useToast } from '@/lib/toast';
 import { FLOATING_NAV_H } from '@/lib/theme';
 import { AppText } from '@/components/ui/AppText';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { useMyRestaurant, useUpdateMyRestaurant } from '@/lib/queries/owner';
 import { uploadRestaurantImage, uploadRestaurantMenu } from '@/lib/storage';
@@ -183,8 +184,11 @@ export default function OwnerProfileScreen() {
 
   if (restaurantQ.isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" color={C.primary} />
+      <View style={{ flex: 1, backgroundColor: C.surface, paddingTop: insets.top + 20, paddingHorizontal: 20, gap: 20 }}>
+        <Skeleton width={120} height={24} />
+        <Skeleton height={220} radius={24} />
+        <Skeleton height={260} radius={22} />
+        <Skeleton height={180} radius={22} />
       </View>
     );
   }

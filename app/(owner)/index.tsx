@@ -1,7 +1,8 @@
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
+import { Skeleton, SkeletonList } from '@/components/ui/Skeleton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { FLOATING_NAV_H } from '@/lib/theme';
@@ -89,8 +90,21 @@ export default function OwnerHomeScreen() {
 
   if (restaurantQ.isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" color={C.primary} />
+      <View style={{ flex: 1, backgroundColor: C.surface, paddingTop: insets.top + 20, paddingHorizontal: 20, gap: 20 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <Skeleton width={44} height={44} radius={22} />
+          <View style={{ gap: 6 }}>
+            <Skeleton width={80} height={13} />
+            <Skeleton width={160} height={22} />
+          </View>
+        </View>
+        <Skeleton height={80} radius={20} />
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <Skeleton height={92} radius={18} style={{ flex: 1 }} />
+          <Skeleton height={92} radius={18} style={{ flex: 1 }} />
+          <Skeleton height={92} radius={18} style={{ flex: 1 }} />
+        </View>
+        <SkeletonList count={2} kind="row" />
       </View>
     );
   }
@@ -206,7 +220,7 @@ export default function OwnerHomeScreen() {
         <View style={{ gap: 12 }}>
           <AppText variant="heading" style={{ fontSize: 17 }}>Reseñas recientes</AppText>
           {reviewsQ.isLoading ? (
-            <View style={{ paddingVertical: 24 }}><ActivityIndicator color={C.primary} /></View>
+            <SkeletonList count={3} kind="row" />
           ) : reviews.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 24, gap: 8 }}>
               <Icon name="comment-text-multiple" size={32} color={C.outlineVariant} />

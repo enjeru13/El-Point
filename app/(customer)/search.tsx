@@ -3,7 +3,6 @@ import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   TextInput,
@@ -12,6 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { AppText } from '@/components/ui/AppText';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { useRestaurantSearch, type SearchResult } from '@/lib/queries/search';
 import { isOpenNow } from '@/lib/hours';
@@ -348,8 +348,16 @@ export default function SearchScreen() {
       )}
 
       {searchQ.isLoading ? (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <ActivityIndicator size="large" color={C.primary} />
+        <View style={{ padding: 16, gap: 12 }}>
+          <Skeleton height={260} radius={24} />
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <Skeleton height={150} radius={20} style={{ flex: 1 }} />
+            <Skeleton height={150} radius={20} style={{ flex: 1 }} />
+          </View>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <Skeleton height={150} radius={20} style={{ flex: 1 }} />
+            <Skeleton height={150} radius={20} style={{ flex: 1 }} />
+          </View>
         </View>
       ) : showResults ? (
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 24, paddingBottom: 100 }}>

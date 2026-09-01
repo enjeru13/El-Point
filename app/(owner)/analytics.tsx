@@ -1,9 +1,10 @@
 import { Icon } from '@/components/ui/Icon';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { AppText } from '@/components/ui/AppText';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { FLOATING_NAV_H } from '@/lib/theme';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews } from '@/lib/queries/reviews';
@@ -99,8 +100,15 @@ export default function AnalyticsScreen() {
 
   if (restaurantQ.isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" color={C.primary} />
+      <View style={{ flex: 1, backgroundColor: C.surface, paddingTop: insets.top + 20, paddingHorizontal: 20, gap: 20 }}>
+        <Skeleton width={140} height={24} />
+        <Skeleton height={48} radius={20} />
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <Skeleton height={90} radius={18} style={{ flex: 1 }} />
+          <Skeleton height={90} radius={18} style={{ flex: 1 }} />
+        </View>
+        <Skeleton height={180} radius={22} />
+        <Skeleton height={200} radius={22} />
       </View>
     );
   }

@@ -21,12 +21,12 @@ import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   View,
 } from "react-native";
 import { AppText } from "@/components/ui/AppText";
+import { SkeletonList } from "@/components/ui/Skeleton";
 
 // ─── Categorías (slug = id, alineado con la DB) ──────────────────────────────
 
@@ -503,9 +503,7 @@ export default function HomeScreen() {
         <View style={{ paddingHorizontal: 20 }}>
           {activeTab === "favorites" ? (
             favoritesQ.isLoading ? (
-              <View style={{ paddingVertical: 48 }}>
-                <ActivityIndicator color={C.primary} />
-              </View>
+              <SkeletonList count={4} kind="row" />
             ) : (favoritesQ.data ?? []).length === 0 ? (
               <View
                 style={{ alignItems: "center", paddingVertical: 48, gap: 12 }}
@@ -533,9 +531,7 @@ export default function HomeScreen() {
               ))
             )
           ) : feedQ.isLoading ? (
-            <View style={{ paddingVertical: 48 }}>
-              <ActivityIndicator size="large" color={C.primary} />
-            </View>
+            <SkeletonList count={3} kind="card" />
           ) : feedQ.isError ? (
             <View style={{ alignItems: "center", paddingVertical: 48, gap: 8 }}>
               <Icon name="food-off-outline" size={48} color={C.outline} />

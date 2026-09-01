@@ -1,12 +1,13 @@
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Pressable, ScrollView, Switch, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/ThemeContext';
 import { THEMES, THEME_META, ThemeName } from '@/lib/themes';
 import { useMyProfile, useUpdateSettings } from '@/lib/queries/me';
 import { AppText } from '@/components/ui/AppText';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 
 const THEME_NAMES = Object.keys(THEME_META) as ThemeName[];
@@ -103,8 +104,11 @@ export default function SettingsScreen() {
       </View>
 
       {profileQ.isLoading ? (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <ActivityIndicator size="large" color={C.primary} />
+        <View style={{ padding: 20, gap: 16 }}>
+          <Skeleton width={100} height={14} />
+          <Skeleton height={120} radius={24} />
+          <Skeleton height={180} radius={24} />
+          <Skeleton height={140} radius={24} />
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ padding: 20, gap: 24, paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>

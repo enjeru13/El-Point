@@ -14,6 +14,7 @@ import {
 import { useTheme } from '@/lib/ThemeContext';
 import { AppLogo } from '@/components/ui/AppLogo';
 import { AppText } from '@/components/ui/AppText';
+import { Skeleton, SkeletonList } from '@/components/ui/Skeleton';
 import { Field } from '@/components/ui/Field';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { StarRow } from '@/components/ui/StarRow';
@@ -141,8 +142,19 @@ export default function ProfileScreen() {
       />
 
       {profileQ.isLoading ? (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <ActivityIndicator size="large" color={C.primary} />
+        <View style={{ padding: 20, gap: 20 }}>
+          <View style={{ alignItems: 'center', gap: 12, backgroundColor: C.surface, borderRadius: 28, padding: 24, borderWidth: 2, borderColor: C.border, ...shadow.md }}>
+            <Skeleton width={88} height={88} radius={44} />
+            <Skeleton width={140} height={22} />
+            <Skeleton width={200} height={14} />
+            <Skeleton width={130} height={40} radius={20} />
+          </View>
+          <Skeleton height={116} radius={28} />
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <Skeleton height={110} radius={24} style={{ flex: 1 }} />
+            <Skeleton height={110} radius={24} style={{ flex: 1 }} />
+          </View>
+          <SkeletonList count={2} kind="row" />
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
@@ -234,7 +246,7 @@ export default function ProfileScreen() {
             <View style={{ gap: 12 }}>
               <SectionTitle icon="heart" label="Favoritos" />
               {favoritesQ.isLoading ? (
-                <View style={{ paddingVertical: 24 }}><ActivityIndicator color={C.primary} /></View>
+                <SkeletonList count={2} kind="row" />
               ) : favorites.length === 0 ? (
                 <AppText variant="bodySm" color={C.outline}>
                   Marca "Me sirve" en las reseñas para guardar lugares aquí.
@@ -274,7 +286,7 @@ export default function ProfileScreen() {
             <View style={{ gap: 12 }}>
               <SectionTitle icon="comment-text" label="Mis reseñas" />
               {reviewsQ.isLoading ? (
-                <View style={{ paddingVertical: 24 }}><ActivityIndicator color={C.primary} /></View>
+                <SkeletonList count={2} kind="row" />
               ) : reviews.length === 0 ? (
                 <AppText variant="bodySm" color={C.outline}>
                   Aún no has rankeado ningún lugar.

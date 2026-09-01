@@ -4,6 +4,7 @@ import { Icon } from "@/components/ui/Icon";
 import { StarRow } from "@/components/ui/StarRow";
 import { Avatar } from "@/components/ui/Avatar";
 import { AppText } from "@/components/ui/AppText";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { RankBadge } from "@/components/ui/RankBadge";
@@ -427,15 +428,15 @@ export default function RestaurantProfileScreen() {
   // ── Loading / error ──────────────────────────────────────────────────────────
   if (restaurantQ.isLoading) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: C.surface,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <ActivityIndicator size="large" color={C.primary} />
+      <View style={{ flex: 1, backgroundColor: C.surface }}>
+        <Skeleton height={HERO_H} radius={0} />
+        <View style={{ padding: 16, gap: 16 }}>
+          <Skeleton height={48} radius={16} />
+          <Skeleton height={140} radius={20} />
+          <Skeleton width="50%" height={20} />
+          <Skeleton height={90} radius={20} />
+          <Skeleton height={90} radius={20} />
+        </View>
       </View>
     );
   }
