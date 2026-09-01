@@ -19,6 +19,7 @@ import { FLOATING_NAV_H } from '@/lib/theme';
 import { useTheme } from '@/lib/ThemeContext';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { Chip } from '@/components/ui/Chip';
+import { Button } from '@/components/ui/Button';
 import { useNearby, useRestaurantIcons, type NearbyRestaurant } from '@/lib/queries/nearby';
 import { useCategories } from '@/lib/queries/categories';
 
@@ -130,6 +131,8 @@ const RestaurantMarker = memo(function RestaurantMarker({
 
 // ─── Bottom card ──────────────────────────────────────────────────────────────
 
+const CARD_H = 196;
+
 function RestaurantCard({
   restaurant,
   onViewProfile,
@@ -138,13 +141,16 @@ function RestaurantCard({
   onViewProfile: () => void;
 }) {
   const { C } = useTheme();
+  const meta = [priceLabel(restaurant.price_level), restaurant.distanceLabel]
+    .filter(Boolean)
+    .join('  ·  ');
 
   return (
-    <Pressable onPress={onViewProfile} style={{ paddingHorizontal: 16, paddingBottom: 16, paddingTop: 4 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        {/* Thumbnail 58x58 */}
+    <View style={{ paddingHorizontal: 16, paddingBottom: 16, paddingTop: 2, gap: 12 }}>
+      {/* top row */}
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         <View style={{
-          width: 58, height: 58, borderRadius: 14, overflow: 'hidden',
+          width: 60, height: 60, borderRadius: 14, overflow: 'hidden',
           backgroundColor: C.primaryFixed,
           alignItems: 'center', justifyContent: 'center',
           borderWidth: 2, borderColor: C.border,
@@ -156,16 +162,12 @@ function RestaurantCard({
           )}
         </View>
 
-        {/* Info */}
-        <View style={{ flex: 1, paddingHorizontal: 12 }}>
+        <View style={{ flex: 1, justifyContent: 'center', gap: 3 }}>
           <AppText variant="heading" style={{ fontSize: 17, lineHeight: 21 }} numberOfLines={1}>
             {restaurant.name}
           </AppText>
-          <AppText variant="caption" color={C.onSurfaceVariant}>
-            {[priceLabel(restaurant.price_level), restaurant.distanceLabel].filter(Boolean).join(' · ')}
-          </AppText>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
-            {[1,2,3,4,5].map(i => (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            {[1, 2, 3, 4, 5].map(i => (
               <Icon
                 key={i}
                 name={i <= Math.round(restaurant.rating_avg) ? 'star' : 'star-outline'}
@@ -173,23 +175,33 @@ function RestaurantCard({
                 color={C.secondary}
               />
             ))}
-            <AppText variant="caption" style={{ marginLeft: 4 }}>
-              {restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : 'Sin ranks'}
+            <AppText variant="caption" color={C.onSurfaceVariant} style={{ marginLeft: 2 }}>
+              {restaurant.rating_count > 0
+                ? `${restaurant.rating_avg.toFixed(1)} (${restaurant.rating_count})`
+                : 'Sin ranks'}
             </AppText>
           </View>
-        </View>
-
-        {/* Flecha */}
-        <View style={{
-          width: 40, height: 40, borderRadius: 20,
-          backgroundColor: C.primary,
-          alignItems: 'center', justifyContent: 'center',
-          borderWidth: 2, borderColor: C.border,
-        }}>
-          <Icon name="arrow-right" size={20} color={C.onPrimary} />
+          {!!meta && (
+            <AppText variant="caption" color={C.outline}>{meta}</AppText>
+          )}
         </View>
       </View>
-    </Pressable>
+
+      {/* address */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        <Icon name="map-marker-outline" size={14} color={C.outline} />
+        <AppText variant="bodySm" color={C.onSurfaceVariant} numberOfLines={1} style={{ flex: 1 }}>
+          {restaurant.address ?? 'Ubicación en el mapa'}
+        </AppText>
+      </View>
+
+      <Button
+        label="Ver restaurante"
+        onPress={onViewProfile}
+        size="sm"
+        iconTrailing="arrow-right"
+      />
+    </View>
   );
 }
 
@@ -211,7 +223,7 @@ export default function MapScreen() {
   const gpsY     = useRef(new Animated.Value(0)).current;
   const pingAnim = useRef(new Animated.Value(1)).current;
   const mapRef   = useRef<MapView>(null);
-  const sheetSnap = useMemo(() => [168], []);
+  const sheetSnap = useMemo(() => [CARD_H], []);
 
   const origin = userLocation ?? DEFAULT_ORIGIN;
   const nearbyQ = useNearby(origin, RADIUS_KM, activeCategory === 'all' ? null : activeCategory);
@@ -255,7 +267,7 @@ export default function MapScreen() {
     mapRef.current?.animateToRegion({ ...coords, latitudeDelta: 0.03, longitudeDelta: 0.03 }, 800);
   }
 
-  const GPS_LIFT = 168 + 24;
+  const GPS_LIFT = CARD_H + 20;
 
   function liftGps(up: boolean) {
     gpsY.stopAnimation();
@@ -370,7 +382,8 @@ export default function MapScreen() {
 
       {/* ── GPS button ── */}
       <Animated.View style={{
-        position: 'absolute', right: 14, bottom: FLOATING_NAV_H + 16,
+        position: 'absolute', right: 14,
+        bottom: Math.max(insets.bottom, 12) + 84,
         transform: [{ translateY: gpsY }],
       }}>
         <Pressable

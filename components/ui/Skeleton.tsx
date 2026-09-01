@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react';
-import { Animated, Easing, View } from 'react-native';
-import type { DimensionValue, ViewStyle } from 'react-native';
-import { useTheme } from '@/lib/ThemeContext';
+import { useTheme } from "@/lib/ThemeContext";
+import { useEffect, useRef } from "react";
+import type { DimensionValue, ViewStyle } from "react-native";
+import { Animated, Easing, View } from "react-native";
 
 /** Single pulsing placeholder block. */
 export function Skeleton({
-  width = '100%',
+  width = "100%",
   height = 14,
   radius = 8,
   style,
@@ -21,8 +21,18 @@ export function Skeleton({
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 1, duration: 700, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0.4, duration: 700, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 700,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 0.4,
+          duration: 700,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
       ]),
     );
     loop.start();
@@ -53,7 +63,7 @@ export function ReviewCardSkeleton() {
         borderRadius: 24,
         borderWidth: 2,
         borderColor: C.border,
-        overflow: 'hidden',
+        overflow: "hidden",
         marginBottom: 16,
         ...shadow.sm,
       }}
@@ -62,7 +72,14 @@ export function ReviewCardSkeleton() {
       <View style={{ padding: 16, gap: 12 }}>
         <Skeleton width="70%" height={20} />
         <Skeleton height={56} radius={12} />
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 10 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+            paddingTop: 10,
+          }}
+        >
           <Skeleton width={36} height={36} radius={18} />
           <View style={{ gap: 6 }}>
             <Skeleton width={120} height={13} />
@@ -80,8 +97,8 @@ export function ListRowSkeleton() {
   return (
     <View
       style={{
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         gap: 12,
         padding: 12,
         borderRadius: 18,
@@ -105,12 +122,12 @@ export function ListRowSkeleton() {
 /** N stacked skeletons of a given kind. */
 export function SkeletonList({
   count = 3,
-  kind = 'card',
+  kind = "card",
 }: {
   count?: number;
-  kind?: 'card' | 'row';
+  kind?: "card" | "row";
 }) {
-  const Item = kind === 'card' ? ReviewCardSkeleton : ListRowSkeleton;
+  const Item = kind === "card" ? ReviewCardSkeleton : ListRowSkeleton;
   return (
     <>
       {Array.from({ length: count }, (_, i) => (
