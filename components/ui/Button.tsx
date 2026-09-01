@@ -36,9 +36,9 @@ export function Button({
 
   const palette: Record<Variant, { bg: string; fg: string; border: string }> = {
     primary: { bg: C.primary, fg: '#fff', border: C.border },
-    secondary: { bg: C.surface, fg: C.onSurface, border: C.border },
+    secondary: { bg: C.primaryFixed, fg: C.onSurface, border: C.border },
     ghost: { bg: 'transparent', fg: C.primary, border: 'transparent' },
-    danger: { bg: C.surface, fg: C.error, border: C.border },
+    danger: { bg: C.error, fg: '#fff', border: C.border },
   };
   const p = palette[variant];
   const bg = off ? C.surfaceContainerHighest : p.bg;

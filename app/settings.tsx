@@ -200,7 +200,6 @@ export default function SettingsScreen() {
             onPress={() => supabase.auth.signOut()}
             variant="danger"
             icon="logout"
-            iconColor={C.error}
           />
 
           <Text style={{ textAlign: 'center', color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12 }}>
