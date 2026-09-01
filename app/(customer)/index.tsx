@@ -11,6 +11,8 @@ import {
   useToggleFavorite,
   type FeedItem,
 } from "@/lib/queries/feed";
+import { useCategories } from "@/lib/queries/categories";
+import { useMyProfile } from "@/lib/queries/me";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
@@ -457,6 +459,8 @@ export default function HomeScreen() {
   const favIdsQ = useFavoriteIds();
   const favoritesQ = useFavorites();
   const toggleFav = useToggleFavorite();
+  const profileQ = useMyProfile();
+  const categoriesQ = useCategories();
 
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeTab, setActiveTab] = useState<"ranks" | "favorites">("ranks");
@@ -466,24 +470,38 @@ export default function HomeScreen() {
   const favIds = favIdsQ.data ?? new Set<string>();
   const feed = feedQ.data ?? [];
 
-  const filtered = feed.filter((item) => {
-    if (activeCategory === "promo") {
-      if (!item.restaurant.promo_text) return false;
-    } else if (
-      activeCategory !== "all" &&
-      !item.restaurant.categories.some((c) => c.slug === activeCategory)
-    ) {
-      return false;
-    }
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      return (
-        item.restaurant.name.toLowerCase().includes(q) ||
-        item.body.toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
+  // Categorías favoritas del usuario (ids -> slugs) para ordenar el feed.
+  const prefIds = new Set(profileQ.data?.favorite_categories ?? []);
+  const prefSlugs = new Set(
+    (categoriesQ.data ?? []).filter((c) => prefIds.has(c.id)).map((c) => c.slug),
+  );
+
+  const filtered = feed
+    .filter((item) => {
+      if (activeCategory === "promo") {
+        if (!item.restaurant.promo_text) return false;
+      } else if (
+        activeCategory !== "all" &&
+        !item.restaurant.categories.some((c) => c.slug === activeCategory)
+      ) {
+        return false;
+      }
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        return (
+          item.restaurant.name.toLowerCase().includes(q) ||
+          item.body.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      // Solo re-ordena en "Todo" y sin búsqueda; respeta recencia dentro de cada grupo.
+      if (activeCategory !== "all" || search.trim() || prefSlugs.size === 0) return 0;
+      const am = a.restaurant.categories.some((c) => prefSlugs.has(c.slug)) ? 0 : 1;
+      const bm = b.restaurant.categories.some((c) => prefSlugs.has(c.slug)) ? 0 : 1;
+      return am - bm;
+    });
 
   return (
     <View style={{ flex: 1, backgroundColor: C.surface }}>

@@ -98,9 +98,22 @@ export default function RegisterScreen() {
     }
 
     // Sesión activa → completar perfil (el trigger ya creó la fila)
+    let favoriteCategories: number[] = [];
+    if (selected.size > 0) {
+      const { data: cats } = await supabase
+        .from('categories')
+        .select('id, slug')
+        .in('slug', Array.from(selected));
+      favoriteCategories = (cats ?? []).map((c) => c.id);
+    }
+
     await supabase
       .from('profiles')
-      .update({ username: username.trim() || null, search_radius_km: radius })
+      .update({
+        username: username.trim() || null,
+        search_radius_km: radius,
+        favorite_categories: favoriteCategories,
+      })
       .eq('id', data.user!.id);
 
     setLoading(false);

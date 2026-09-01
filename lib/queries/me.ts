@@ -11,6 +11,7 @@ export type MyProfile = {
   xp: number;
   search_radius_km: number;
   settings: Record<string, boolean>;
+  favorite_categories: number[];
   created_at: string;
 };
 
@@ -21,13 +22,17 @@ async function fetchMyProfile(): Promise<MyProfile | null> {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, username, full_name, avatar_url, bio, level, xp, search_radius_km, settings, created_at')
+    .select('id, username, full_name, avatar_url, bio, level, xp, search_radius_km, settings, favorite_categories, created_at')
     .eq('id', uid)
     .maybeSingle();
 
   if (error) throw error;
   if (!data) return null;
-  return { ...(data as any), settings: ((data as any).settings ?? {}) as Record<string, boolean> };
+  return {
+    ...(data as any),
+    settings: ((data as any).settings ?? {}) as Record<string, boolean>,
+    favorite_categories: ((data as any).favorite_categories ?? []) as number[],
+  };
 }
 
 export function useMyProfile() {
