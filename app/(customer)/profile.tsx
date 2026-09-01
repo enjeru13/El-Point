@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { useTheme } from '@/lib/ThemeContext';
 import { AppLogo } from '@/components/ui/AppLogo';
-import { AppTextInput } from '@/components/ui/AppTextInput';
+import { Field } from '@/components/ui/Field';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { StarRow } from '@/components/ui/StarRow';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
@@ -176,16 +176,9 @@ export default function ProfileScreen() {
 
               {editing ? (
                 <View style={{ alignSelf: 'stretch', gap: 10 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 14, height: 48, paddingHorizontal: 14, borderWidth: 2, borderColor: C.border, backgroundColor: C.surfaceContainerLow }}>
-                    <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16 }}>@</Text>
-                    <AppTextInput value={username} onChangeText={setUsername} placeholder="usuario" autoCapitalize="none" style={{ fontSize: 15 }} />
-                  </View>
-                  <View style={{ borderRadius: 14, height: 48, paddingHorizontal: 14, justifyContent: 'center', borderWidth: 2, borderColor: C.border, backgroundColor: C.surfaceContainerLow }}>
-                    <AppTextInput value={fullName} onChangeText={setFullName} placeholder="Nombre" style={{ fontSize: 15 }} />
-                  </View>
-                  <View style={{ borderRadius: 14, minHeight: 64, padding: 14, borderWidth: 2, borderColor: C.border, backgroundColor: C.surfaceContainerLow }}>
-                    <AppTextInput value={bio} onChangeText={setBio} placeholder="Cuéntanos sobre ti…" multiline style={{ fontSize: 15, textAlignVertical: 'top' }} />
-                  </View>
+                  <Field icon="account" placeholder="usuario" autoCapitalize="none" value={username} onChangeText={(t) => setUsername(t.replace(/[^a-z0-9_.]/gi, ''))} />
+                  <Field icon="pencil-outline" placeholder="Nombre" value={fullName} onChangeText={setFullName} />
+                  <Field placeholder="Cuéntanos sobre ti…" multiline value={bio} onChangeText={setBio} />
                 </View>
               ) : (
                 <View style={{ alignItems: 'center', gap: 4 }}>

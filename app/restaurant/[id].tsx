@@ -4,6 +4,7 @@ import { Icon } from "@/components/ui/Icon";
 import { StarRow } from "@/components/ui/StarRow";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { Field } from "@/components/ui/Field";
 import { RankBadge } from "@/components/ui/RankBadge";
 import { useRestaurant } from "@/lib/queries/restaurants";
 import {
@@ -328,35 +329,12 @@ function ReviewModal({
 
               {/* Comentario */}
               <View style={{ gap: 8 }}>
-                <Text
-                  style={{
-                    color: C.onSurfaceVariant,
-                    fontFamily: "PlusJakartaSans_700Bold",
-                    fontSize: 12,
-                    letterSpacing: 1,
-                  }}
-                >
-                  TU EXPERIENCIA
-                </Text>
-                <TextInput
+                <Field
+                  label="TU EXPERIENCIA"
                   value={comment}
                   onChangeText={(t) => setComment(t.slice(0, 500))}
-                  placeholder="Cuéntale a la comunidad qué tal estuvo..."
-                  placeholderTextColor={C.outline}
+                  placeholder="Cuéntale a la comunidad qué tal estuvo…"
                   multiline
-                  style={{
-                    backgroundColor: C.surfaceContainerLow,
-                    borderWidth: 2,
-                    borderColor:
-                      comment.length > 0 ? C.border : C.outlineVariant,
-                    borderRadius: 16,
-                    padding: 14,
-                    fontFamily: "PlusJakartaSans_400Regular",
-                    fontSize: 15,
-                    color: C.onSurface,
-                    textAlignVertical: "top",
-                    minHeight: 110,
-                  }}
                 />
                 <Text
                   style={{
@@ -1354,18 +1332,11 @@ export default function RestaurantProfileScreen() {
                     </View>
                   ) : isOwnerHere && replyingId === r.id ? (
                     <View style={{ gap: 8 }}>
-                      <TextInput
+                      <Field
                         value={replyText}
                         onChangeText={(t) => setReplyText(t.slice(0, 500))}
                         placeholder="Responde a este cliente…"
-                        placeholderTextColor={C.outline}
                         multiline
-                        style={{
-                          backgroundColor: C.surfaceContainerLow,
-                          borderWidth: 2, borderColor: C.outlineVariant, borderRadius: 12,
-                          padding: 12, minHeight: 70, textAlignVertical: "top",
-                          fontFamily: "PlusJakartaSans_400Regular", fontSize: 14, color: C.onSurface,
-                        }}
                       />
                       <View style={{ flexDirection: "row", gap: 8 }}>
                         <Button
