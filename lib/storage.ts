@@ -45,3 +45,19 @@ async function uploadToBucket(bucket: string, path: string, uri: string, content
 export function uploadAvatar(userId: string, uri: string) {
   return uploadToBucket('avatars', `${userId}/avatar`, uri, imageContentType(uri));
 }
+
+/** Returns the bucket-relative storage path (not a URL). */
+export async function uploadReviewPhoto(reviewId: string, index: number, uri: string): Promise<string> {
+  const path = `${reviewId}/${index}`;
+  const res = await fetch(uri);
+  const buf = await res.arrayBuffer();
+  const { error } = await supabase.storage
+    .from('review-photos')
+    .upload(path, buf, { contentType: imageContentType(uri), upsert: true });
+  if (error) throw error;
+  return path;
+}
+
+export function reviewPhotoUrl(storagePath: string): string {
+  return supabase.storage.from('review-photos').getPublicUrl(storagePath).data.publicUrl;
+}

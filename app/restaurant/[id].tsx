@@ -1,4 +1,5 @@
 import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { Icon } from "@/components/ui/Icon";
 import { StarRow } from "@/components/ui/StarRow";
 import { Avatar } from "@/components/ui/Avatar";
@@ -21,6 +22,7 @@ import {
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   View,
@@ -102,7 +104,7 @@ function ReviewModal({
   restaurantName: string;
   submitting: boolean;
   errorMessage: string | null;
-  onSubmit: (rating: number, body: string) => void;
+  onSubmit: (rating: number, body: string, photoUris: string[]) => void;
 }) {
   const { C, shadow } = useTheme();
   const RATING_COLORS = [
@@ -116,7 +118,19 @@ function ReviewModal({
   const insets = useSafeAreaInsets();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  async function addPhotos() {
+    const r = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsMultipleSelection: true,
+      selectionLimit: 4,
+      quality: 0.8,
+    });
+    if (r.canceled) return;
+    setPhotos((prev) => [...prev, ...r.assets.map((a) => a.uri)].slice(0, 4));
+  }
   const scaleAnim = useRef(new Animated.Value(0.94)).current;
 
   useEffect(() => {
@@ -137,6 +151,7 @@ function ReviewModal({
     } else {
       setRating(0);
       setComment("");
+      setPhotos([]);
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 0,
@@ -352,6 +367,34 @@ function ReviewModal({
                 </Text>
               </View>
 
+              {/* Fotos */}
+              <View style={{ gap: 8 }}>
+                <Text style={{ color: C.onSurfaceVariant, fontFamily: "PlusJakartaSans_700Bold", fontSize: 12, letterSpacing: 1 }}>
+                  FOTOS (OPCIONAL)
+                </Text>
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                  {photos.map((uri, i) => (
+                    <View key={uri + i} style={{ width: 64, height: 64, borderRadius: 12, overflow: "hidden", borderWidth: 2, borderColor: C.border }}>
+                      <Image source={{ uri }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+                      <Pressable
+                        onPress={() => setPhotos((p) => p.filter((_, idx) => idx !== i))}
+                        style={{ position: "absolute", top: 2, right: 2, width: 18, height: 18, borderRadius: 9, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center" }}
+                      >
+                        <Icon name="close" size={12} color="#fff" />
+                      </Pressable>
+                    </View>
+                  ))}
+                  {photos.length < 4 && (
+                    <Pressable
+                      onPress={addPhotos}
+                      style={{ width: 64, height: 64, borderRadius: 12, borderWidth: 2, borderStyle: "dashed", borderColor: C.outlineVariant, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceContainerLow }}
+                    >
+                      <Icon name="camera-plus-outline" size={22} color={C.primary} />
+                    </Pressable>
+                  )}
+                </View>
+              </View>
+
               {errorMessage && (
                 <Text
                   style={{
@@ -367,7 +410,7 @@ function ReviewModal({
               {/* Submit */}
               <Pressable
                 disabled={!canSubmit}
-                onPress={() => onSubmit(rating, comment.trim())}
+                onPress={() => onSubmit(rating, comment.trim(), photos)}
                 style={{
                   paddingVertical: 15,
                   borderRadius: 99,
@@ -550,9 +593,9 @@ export default function RestaurantProfileScreen() {
   );
   const totalRated = reviews.length || restaurant.rating_count;
 
-  function handleSubmit(rating: number, body: string) {
+  function handleSubmit(rating: number, body: string, photoUris: string[]) {
     submitReview.mutate(
-      { rating, body },
+      { rating, body, photoUris },
       { onSuccess: () => setReviewModalOpen(false) },
     );
   }
@@ -1340,6 +1383,25 @@ export default function RestaurantProfileScreen() {
                   >
                     {r.body}
                   </Text>
+
+                  {/* Fotos */}
+                  {r.photos.length > 0 && (
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={{ gap: 8 }}
+                    >
+                      {r.photos.map((uri) => (
+                        <Image
+                          key={uri}
+                          source={{ uri }}
+                          style={{ width: 96, height: 96, borderRadius: 12, borderWidth: 2, borderColor: C.border }}
+                          contentFit="cover"
+                          transition={150}
+                        />
+                      ))}
+                    </ScrollView>
+                  )}
 
                   {/* Helpful */}
                   <Pressable
