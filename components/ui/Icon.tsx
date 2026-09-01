@@ -98,6 +98,7 @@ const MAP: Record<string, LucideIcon> = {
   'camera-plus-outline':  Camera,
   'image-plus':           ImagePlus,
   'file-pdf-box':         FileText,
+  'file-check':           FileText,
   'book-open-outline':    BookOpen,
   // Settings
   'vibrate':              Vibrate,

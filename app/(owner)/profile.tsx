@@ -1,4 +1,7 @@
 import { Icon } from '@/components/ui/Icon';
+import { Image } from 'expo-image';
+import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -14,6 +17,7 @@ import { useTheme } from '@/lib/ThemeContext';
 import { FLOATING_NAV_H } from '@/lib/theme';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { useMyRestaurant, useUpdateMyRestaurant } from '@/lib/queries/owner';
+import { uploadRestaurantImage, uploadRestaurantMenu } from '@/lib/storage';
 
 function Divider() {
   const { C } = useTheme();
@@ -76,6 +80,42 @@ export default function OwnerProfileScreen() {
   const [promo, setPromo]         = useState('');
   const [priceLevel, setPriceLevel] = useState<number | null>(null);
   const [isActive, setIsActive]   = useState(true);
+  const [uploading, setUploading] = useState<'logo' | 'cover' | 'menu' | null>(null);
+
+  async function pickPhoto(kind: 'logo' | 'cover') {
+    if (!restaurant) return;
+    const r = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: kind === 'cover' ? [16, 9] : [1, 1],
+      quality: 0.85,
+    });
+    if (r.canceled) return;
+    setUploading(kind);
+    try {
+      const url = await uploadRestaurantImage(restaurant.id, kind, r.assets[0].uri);
+      updateMut.mutate(kind === 'logo' ? { logo_url: url } : { cover_url: url });
+    } catch (e: any) {
+      Alert.alert('No se pudo subir la imagen', e?.message ?? 'Intenta de nuevo');
+    } finally {
+      setUploading(null);
+    }
+  }
+
+  async function pickMenu() {
+    if (!restaurant) return;
+    const r = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
+    if (r.canceled) return;
+    setUploading('menu');
+    try {
+      const url = await uploadRestaurantMenu(restaurant.id, r.assets[0].uri);
+      updateMut.mutate({ menu_pdf_url: url });
+    } catch (e: any) {
+      Alert.alert('No se pudo subir el menú', e?.message ?? 'Intenta de nuevo');
+    } finally {
+      setUploading(null);
+    }
+  }
 
   useEffect(() => {
     if (!restaurant) return;
@@ -346,16 +386,89 @@ export default function OwnerProfileScreen() {
           />
         </View>
 
-        {/* Fotos — pendiente Storage */}
+        {/* Fotos y menú */}
         <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
           <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
-            <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Fotos del local</Text>
+            <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Fotos y menú</Text>
           </View>
-          <View style={{ padding: 18, alignItems: 'center', gap: 8 }}>
-            <Icon name="image-plus" size={28} color={C.outlineVariant} />
-            <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, textAlign: 'center' }}>
-              La carga de fotos estará disponible pronto.
-            </Text>
+          <View style={{ padding: 18, gap: 14 }}>
+
+            {/* Portada */}
+            <Pressable
+              onPress={() => pickPhoto('cover')}
+              disabled={uploading !== null}
+              style={{
+                height: 150, borderRadius: 16, overflow: 'hidden',
+                borderWidth: 2, borderColor: C.border, borderStyle: restaurant.cover_url ? 'solid' : 'dashed',
+                alignItems: 'center', justifyContent: 'center',
+                backgroundColor: C.surfaceContainerLow,
+              }}
+            >
+              {restaurant.cover_url ? (
+                <Image source={{ uri: restaurant.cover_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+              ) : (
+                <View style={{ alignItems: 'center', gap: 6 }}>
+                  <Icon name="camera-plus-outline" size={30} color={C.primary} />
+                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13 }}>Subir foto de portada</Text>
+                </View>
+              )}
+              {uploading === 'cover' && (
+                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.35)', alignItems: 'center', justifyContent: 'center' }}>
+                  <ActivityIndicator color="#fff" />
+                </View>
+              )}
+            </Pressable>
+
+            <View style={{ flexDirection: 'row', gap: 14 }}>
+              {/* Logo */}
+              <Pressable
+                onPress={() => pickPhoto('logo')}
+                disabled={uploading !== null}
+                style={{
+                  width: 88, height: 88, borderRadius: 16, overflow: 'hidden',
+                  borderWidth: 2, borderColor: C.border, borderStyle: restaurant.logo_url ? 'solid' : 'dashed',
+                  alignItems: 'center', justifyContent: 'center',
+                  backgroundColor: C.surfaceContainerLow,
+                }}
+              >
+                {restaurant.logo_url ? (
+                  <Image source={{ uri: restaurant.logo_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+                ) : (
+                  <Icon name="image-plus" size={24} color={C.primary} />
+                )}
+                {uploading === 'logo' && (
+                  <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.35)', alignItems: 'center', justifyContent: 'center' }}>
+                    <ActivityIndicator color="#fff" size="small" />
+                  </View>
+                )}
+              </Pressable>
+
+              {/* Menú PDF */}
+              <Pressable
+                onPress={pickMenu}
+                disabled={uploading !== null}
+                style={{
+                  flex: 1, borderRadius: 16, padding: 14,
+                  borderWidth: 2, borderColor: C.border, borderStyle: restaurant.menu_pdf_url ? 'solid' : 'dashed',
+                  backgroundColor: C.surfaceContainerLow,
+                  flexDirection: 'row', alignItems: 'center', gap: 12,
+                }}
+              >
+                <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: restaurant.menu_pdf_url ? C.primary : C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+                  {uploading === 'menu'
+                    ? <ActivityIndicator size="small" color={restaurant.menu_pdf_url ? '#fff' : C.primary} />
+                    : <Icon name={restaurant.menu_pdf_url ? 'file-check' : 'file-pdf-box'} size={22} color={restaurant.menu_pdf_url ? '#fff' : C.primary} />}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14 }}>
+                    {restaurant.menu_pdf_url ? 'Menú cargado' : 'Subir menú PDF'}
+                  </Text>
+                  <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, marginTop: 1 }}>
+                    {restaurant.menu_pdf_url ? 'Toca para reemplazar' : 'Tus clientes lo verán en tu perfil'}
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
           </View>
         </View>
 

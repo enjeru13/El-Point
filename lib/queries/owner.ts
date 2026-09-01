@@ -66,6 +66,9 @@ export type OwnerRestaurantPatch = Partial<{
   price_level: number | null;
   promo_text: string | null;
   is_active: boolean;
+  logo_url: string | null;
+  cover_url: string | null;
+  menu_pdf_url: string | null;
 }>;
 
 export function useUpdateMyRestaurant(restaurantId: string | undefined) {
