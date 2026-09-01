@@ -31,6 +31,7 @@ import {
   Modal,
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   TextInput,
   View,
@@ -396,7 +397,17 @@ export default function RestaurantProfileScreen() {
   const [replyingId, setReplyingId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [hoursOpen, setHoursOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
+
+  async function onRefresh() {
+    setRefreshing(true);
+    try {
+      await Promise.all([restaurantQ.refetch(), reviewsQ.refetch()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   const HERO_H = 320;
   const headerBg = scrollY.interpolate({
@@ -498,6 +509,15 @@ export default function RestaurantProfileScreen() {
           { useNativeDriver: false },
         )}
         scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            progressViewOffset={insets.top + 8}
+            tintColor="#fff"
+            colors={[C.primary]}
+          />
+        }
       >
         {/* ── Hero ── */}
         <View

@@ -121,6 +121,11 @@ export function useSubmitReview(restaurantId: string) {
       qc.invalidateQueries({ queryKey: ['my-profile'] });
       qc.invalidateQueries({ queryKey: ['my-reviews'] });
       qc.invalidateQueries({ queryKey: ['notifications'] });
+      // rating_avg changed → refresh every surface that shows it
+      qc.invalidateQueries({ queryKey: ['home-feed'] });
+      qc.invalidateQueries({ queryKey: ['favorites'] });
+      qc.invalidateQueries({ queryKey: ['nearby'] });
+      qc.invalidateQueries({ queryKey: ['restaurant-search'] });
     },
   });
 }

@@ -22,6 +22,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Pressable,
+  RefreshControl,
   ScrollView,
   View,
 } from "react-native";
@@ -374,6 +375,21 @@ export default function HomeScreen() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeTab, setActiveTab] = useState<"ranks" | "favorites">("ranks");
   const [search, setSearch] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function onRefresh() {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        feedQ.refetch(),
+        favIdsQ.refetch(),
+        favoritesQ.refetch(),
+        profileQ.refetch(),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   const favIds = favIdsQ.data ?? new Set<string>();
   const feed = feedQ.data ?? [];
@@ -419,6 +435,14 @@ export default function HomeScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={C.primary}
+            colors={[C.primary]}
+          />
+        }
       >
         {/* ── Saludo + búsqueda ── */}
         <View
