@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
@@ -79,7 +80,11 @@ function BestMatchCard({ item, onPress }: { item: SearchResult; onPress: () => v
       })}
     >
       <View style={{ height: 180, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center' }}>
-        <Icon name={catIcon(item)} size={100} color={C.onSurface} style={{ opacity: 0.12 }} />
+        {item.cover_url ? (
+          <Image source={{ uri: item.cover_url }} style={{ position: 'absolute', width: '100%', height: '100%' }} contentFit="cover" transition={200} />
+        ) : (
+          <Icon name={catIcon(item)} size={100} color={C.onSurface} style={{ opacity: 0.12 }} />
+        )}
         <View style={{ position: 'absolute', top: 14, right: 14 }}>
           <StarBadgeInline rating={item.rating_avg} count={item.rating_count} />
         </View>
@@ -144,7 +149,11 @@ function ResultCard({ item, onPress }: { item: SearchResult; onPress: () => void
       })}
     >
       <View style={{ height: 100, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center' }}>
-        <Icon name={catIcon(item)} size={44} color={C.onSurface} style={{ opacity: 0.18 }} />
+        {item.cover_url ? (
+          <Image source={{ uri: item.cover_url }} style={{ position: 'absolute', width: '100%', height: '100%' }} contentFit="cover" transition={200} />
+        ) : (
+          <Icon name={catIcon(item)} size={44} color={C.onSurface} style={{ opacity: 0.18 }} />
+        )}
         <View style={{ position: 'absolute', top: 8, right: 8 }}>
           <StarBadgeInline rating={item.rating_avg} count={item.rating_count} />
         </View>

@@ -1,3 +1,4 @@
+import { Image } from "expo-image";
 import { Icon } from "@/components/ui/Icon";
 import { StarRow } from "@/components/ui/StarRow";
 import { useRestaurant } from "@/lib/queries/restaurants";
@@ -577,12 +578,21 @@ export default function RestaurantProfileScreen() {
             borderBottomColor: C.border,
           }}
         >
-          <Icon
-            name={heroIcon}
-            size={120}
-            color={C.onSurface}
-            style={{ opacity: 0.2 }}
-          />
+          {restaurant.cover_url ? (
+            <Image
+              source={{ uri: restaurant.cover_url }}
+              style={{ position: "absolute", width: "100%", height: "100%" }}
+              contentFit="cover"
+              transition={200}
+            />
+          ) : (
+            <Icon
+              name={heroIcon}
+              size={120}
+              color={C.onSurface}
+              style={{ opacity: 0.2 }}
+            />
+          )}
 
           {/* Info overlay */}
           <View

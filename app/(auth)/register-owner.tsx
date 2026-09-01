@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { supabase } from '@/lib/supabase';
+import { uploadRestaurantImage, uploadRestaurantMenu } from '@/lib/storage';
 import { useTheme } from '@/lib/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -60,6 +61,7 @@ export default function RegisterOwnerScreen() {
   const [logoUri, setLogoUri]         = useState<string | null>(null);
   const [coverUri, setCoverUri]       = useState<string | null>(null);
   const [menuPdfName, setMenuPdfName] = useState<string | null>(null);
+  const [menuPdfUri, setMenuPdfUri]   = useState<string | null>(null);
 
   function toggleCat(id: number) {
     setSelectedCats(prev => {
@@ -89,7 +91,10 @@ export default function RegisterOwnerScreen() {
 
   async function pickPdf() {
     const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
-    if (!result.canceled) setMenuPdfName(result.assets[0].name);
+    if (!result.canceled) {
+      setMenuPdfName(result.assets[0].name);
+      setMenuPdfUri(result.assets[0].uri);
+    }
   }
 
   // GoTrue rechaza correos con caracteres no-ASCII (p. ej. la ñ)
@@ -149,16 +154,31 @@ export default function RegisterOwnerScreen() {
     if (whatsapp.trim()) rpcArgs.p_whatsapp = whatsapp.trim();
     if (instagram.trim()) rpcArgs.p_instagram = instagram.trim();
 
-    const { error: rpcError } = await supabase.rpc('create_owner_restaurant', rpcArgs);
+    const { data: newId, error: rpcError } = await supabase.rpc('create_owner_restaurant', rpcArgs);
 
-    setLoading(false);
-
-    if (rpcError) {
+    if (rpcError || !newId) {
+      setLoading(false);
       Alert.alert(
         'Cuenta creada, pero…',
         'No pudimos registrar el local ahora. Puedes hacerlo desde tu panel.',
       );
+      return;
     }
+
+    // Subir media elegida (best-effort; no bloquea el registro)
+    try {
+      const patch: { logo_url?: string; cover_url?: string; menu_pdf_url?: string } = {};
+      if (logoUri) patch.logo_url = await uploadRestaurantImage(newId, 'logo', logoUri);
+      if (coverUri) patch.cover_url = await uploadRestaurantImage(newId, 'cover', coverUri);
+      if (menuPdfUri) patch.menu_pdf_url = await uploadRestaurantMenu(newId, menuPdfUri);
+      if (Object.keys(patch).length > 0) {
+        await supabase.from('restaurants').update(patch).eq('id', newId);
+      }
+    } catch {
+      // se puede reintentar desde el panel
+    }
+
+    setLoading(false);
     // _layout detecta la sesión (role owner) y redirige a /(owner)
   }
 

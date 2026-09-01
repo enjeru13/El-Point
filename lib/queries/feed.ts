@@ -9,6 +9,7 @@ export type FeedRestaurant = {
   rating_avg: number;
   rating_count: number;
   promo_text: string | null;
+  cover_url: string | null;
   categories: RestaurantCategory[];
 };
 
@@ -33,7 +34,7 @@ async function fetchFeed(): Promise<FeedItem[]> {
     .select(
       `id, rating, body, created_at,
        restaurant:restaurants (
-         id, name, address, rating_avg, rating_count, promo_text,
+         id, name, address, rating_avg, rating_count, promo_text, cover_url,
          restaurant_categories ( categories ( slug, label, icon ) )
        ),
        author:profiles!author_id ( username, full_name, level )`,
@@ -58,6 +59,7 @@ async function fetchFeed(): Promise<FeedItem[]> {
         rating_avg: r.restaurant.rating_avg,
         rating_count: r.restaurant.rating_count,
         promo_text: r.restaurant.promo_text ?? null,
+        cover_url: r.restaurant.cover_url ?? null,
         categories: mapCategories(r.restaurant.restaurant_categories),
       },
     }));
@@ -77,7 +79,7 @@ async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
     .select(
       `created_at,
        restaurant:restaurants (
-         id, name, address, rating_avg, rating_count, promo_text,
+         id, name, address, rating_avg, rating_count, promo_text, cover_url,
          restaurant_categories ( categories ( slug, label, icon ) )
        )`,
     )
@@ -94,6 +96,7 @@ async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
       rating_avg: f.restaurant.rating_avg,
       rating_count: f.restaurant.rating_count,
       promo_text: f.restaurant.promo_text ?? null,
+      cover_url: f.restaurant.cover_url ?? null,
       categories: mapCategories(f.restaurant.restaurant_categories),
       favorited_at: f.created_at,
     }));

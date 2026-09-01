@@ -9,6 +9,7 @@ export type SearchResult = {
   price_level: number | null;
   rating_avg: number;
   rating_count: number;
+  cover_url: string | null;
   categories: RestaurantCategory[];
 };
 
@@ -16,7 +17,7 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
   const { data, error } = await supabase
     .from('restaurants')
     .select(
-      `id, name, address, price_level, rating_avg, rating_count,
+      `id, name, address, price_level, rating_avg, rating_count, cover_url,
        restaurant_categories ( categories ( slug, label, icon ) )`,
     )
     .eq('is_active', true);
@@ -30,6 +31,7 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
     price_level: r.price_level,
     rating_avg: r.rating_avg,
     rating_count: r.rating_count,
+    cover_url: r.cover_url ?? null,
     categories: (r.restaurant_categories ?? []).map((rc: any) => rc.categories).filter(Boolean),
   }));
 }

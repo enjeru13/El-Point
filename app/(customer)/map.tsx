@@ -11,6 +11,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import MapView, { Callout, Circle, Marker } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FLOATING_NAV_H } from '@/lib/theme';
@@ -174,12 +175,16 @@ function RestaurantCard({
 
               {/* Thumbnail 58x58 */}
               <View style={{
-                width: 58, height: 58, borderRadius: 14,
+                width: 58, height: 58, borderRadius: 14, overflow: 'hidden',
                 backgroundColor: C.primaryFixed,
                 alignItems: 'center', justifyContent: 'center',
                 borderWidth: 2, borderColor: C.border,
               }}>
-                <Icon name={restaurant.icon} size={28} color={C.onSurface} style={{ opacity: 0.65 }} />
+                {restaurant.cover_url || restaurant.logo_url ? (
+                  <Image source={{ uri: (restaurant.cover_url ?? restaurant.logo_url)! }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={150} />
+                ) : (
+                  <Icon name={restaurant.icon} size={28} color={C.onSurface} style={{ opacity: 0.65 }} />
+                )}
               </View>
 
               {/* Info */}

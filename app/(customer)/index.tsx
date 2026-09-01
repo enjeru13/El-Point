@@ -1,3 +1,4 @@
+import { Image } from "expo-image";
 import { AppLogo } from "@/components/ui/AppLogo";
 import { Icon } from "@/components/ui/Icon";
 import { NotificationsSheet } from "@/components/ui/NotificationsSheet";
@@ -81,7 +82,7 @@ function ReviewCard({
         marginBottom: 16,
       }}
     >
-      {/* Imagen placeholder con icono */}
+      {/* Imagen: portada real o icono */}
       <View
         style={{
           height: 180,
@@ -91,12 +92,21 @@ function ReviewCard({
           justifyContent: "center",
         }}
       >
-        <Icon
-          name={cat?.icon ?? "silverware-fork-knife"}
-          size={80}
-          color={C.primary}
-          style={{ opacity: 0.55 }}
-        />
+        {item.restaurant.cover_url ? (
+          <Image
+            source={{ uri: item.restaurant.cover_url }}
+            style={{ position: "absolute", width: "100%", height: "100%" }}
+            contentFit="cover"
+            transition={200}
+          />
+        ) : (
+          <Icon
+            name={cat?.icon ?? "silverware-fork-knife"}
+            size={80}
+            color={C.primary}
+            style={{ opacity: 0.55 }}
+          />
+        )}
 
         {/* Rating */}
         <View
