@@ -1,7 +1,7 @@
 import { Image } from "expo-image";
 import { AppLogo } from "@/components/ui/AppLogo";
 import { Icon } from "@/components/ui/Icon";
-import { NotificationsSheet } from "@/components/ui/NotificationsSheet";
+import { NotificationBell } from "@/components/ui/NotificationBell";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { SearchBar } from "@/components/ui/SearchBar";
 import {
@@ -15,7 +15,7 @@ import { useCategories } from "@/lib/queries/categories";
 import { useMyProfile } from "@/lib/queries/me";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -465,7 +465,6 @@ export default function HomeScreen() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeTab, setActiveTab] = useState<"ranks" | "favorites">("ranks");
   const [search, setSearch] = useState("");
-  const notifsRef = useRef<{ present: () => void; dismiss: () => void }>(null);
 
   const favIds = favIdsQ.data ?? new Set<string>();
   const feed = feedQ.data ?? [];
@@ -506,41 +505,7 @@ export default function HomeScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: C.surface }}>
       {/* ── Header ── */}
-      <ScreenHeader
-        left={<AppLogo />}
-        right={
-          <Pressable
-            onPress={() => notifsRef.current?.present()}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              alignItems: "center",
-              justifyContent: "center",
-              borderWidth: 2,
-              borderColor: C.border,
-              backgroundColor: C.surface,
-            }}
-          >
-            <Icon name="bell-outline" size={22} color={C.onSurface} />
-            <View
-              style={{
-                position: "absolute",
-                top: 6,
-                right: 6,
-                width: 8,
-                height: 8,
-                borderRadius: 4,
-                backgroundColor: C.primaryContainer,
-                borderWidth: 1.5,
-                borderColor: C.surface,
-              }}
-            />
-          </Pressable>
-        }
-      />
-
-      <NotificationsSheet ref={notifsRef} />
+      <ScreenHeader left={<AppLogo />} right={<NotificationBell />} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

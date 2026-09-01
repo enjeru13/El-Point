@@ -6,6 +6,7 @@ import { useTheme } from '@/lib/ThemeContext';
 import { FLOATING_NAV_H } from '@/lib/theme';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews, type Review } from '@/lib/queries/reviews';
+import { NotificationBell } from '@/components/ui/NotificationBell';
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -123,18 +124,7 @@ export default function OwnerHomeScreen() {
           <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13 }}>Bienvenido</Text>
           <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 22 }} numberOfLines={1}>{restaurant.name}</Text>
         </View>
-        <Pressable
-          onPress={() => router.push(`/restaurant/${restaurant.id}`)}
-          style={{
-            width: 44, height: 44, borderRadius: 22,
-            backgroundColor: C.primaryFixed,
-            alignItems: 'center', justifyContent: 'center',
-            borderWidth: 2, borderColor: C.border,
-            ...shadow.sm,
-          }}
-        >
-          <Icon name="arrow-right" size={22} color={C.primary} />
-        </Pressable>
+        <NotificationBell />
       </View>
 
       <ScrollView

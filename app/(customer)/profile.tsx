@@ -17,7 +17,7 @@ import {
 import { useTheme } from '@/lib/ThemeContext';
 import { AppLogo } from '@/components/ui/AppLogo';
 import { AppTextInput } from '@/components/ui/AppTextInput';
-import { NotificationsSheet, NotificationsHandle } from '@/components/ui/NotificationsSheet';
+import { NotificationBell } from '@/components/ui/NotificationBell';
 import { StarRow } from '@/components/ui/StarRow';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { SectionTitle } from '@/components/ui/SectionTitle';
@@ -51,7 +51,6 @@ function XPBar({ pct }: { pct: number }) {
 export default function ProfileScreen() {
   const { C, shadow } = useTheme();
   const router = useRouter();
-  const notifsRef = useRef<NotificationsHandle>(null);
 
   const profileQ = useMyProfile();
   const reviewsQ = useMyReviews();
@@ -124,16 +123,7 @@ export default function ProfileScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: C.surface }}>
-      <ScreenHeader
-        left={<AppLogo />}
-        right={
-          <Pressable onPress={() => notifsRef.current?.present()} style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border, backgroundColor: C.surface }}>
-            <Icon name="bell-outline" size={22} color={C.onSurface} />
-            <View style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: 4, backgroundColor: C.primaryContainer, borderWidth: 1.5, borderColor: C.surface }} />
-          </Pressable>
-        }
-      />
-      <NotificationsSheet ref={notifsRef} />
+      <ScreenHeader left={<AppLogo />} right={<NotificationBell />} />
 
       {profileQ.isLoading ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
