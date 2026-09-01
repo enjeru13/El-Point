@@ -1,34 +1,60 @@
 import { Icon } from '@/components/ui/Icon';
-import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { FLOATING_NAV_H } from '@/lib/theme';
+import { useMyRestaurant } from '@/lib/queries/owner';
+import { useReviews } from '@/lib/queries/reviews';
 
 const PERIODS = ['Semana', 'Mes', 'Año'] as const;
 type Period = typeof PERIODS[number];
 
-const BARS: Record<Period, { label: string; value: number }[]> = {
-  Semana: [
-    { label: 'L', value: 2 }, { label: 'M', value: 4 }, { label: 'X', value: 3 },
-    { label: 'J', value: 6 }, { label: 'V', value: 8 }, { label: 'S', value: 5 }, { label: 'D', value: 7 },
-  ],
-  Mes: [
-    { label: 'S1', value: 18 }, { label: 'S2', value: 24 }, { label: 'S3', value: 31 }, { label: 'S4', value: 27 },
-  ],
-  Año: [
-    { label: 'E', value: 12 }, { label: 'F', value: 18 }, { label: 'M', value: 22 },
-    { label: 'A', value: 30 }, { label: 'My', value: 28 }, { label: 'J', value: 35 },
-    { label: 'Jl', value: 40 }, { label: 'A', value: 38 }, { label: 'S', value: 44 },
-    { label: 'O', value: 50 }, { label: 'N', value: 46 }, { label: 'D', value: 55 },
-  ],
-};
+const DAY = 86400_000;
 
-const METRICS: Record<Period, { rating: string; reviews: string; views: string; rank: string }> = {
-  Semana: { rating: '4.8', reviews: '35',   views: '820',  rank: '#4 Burgers' },
-  Mes:    { rating: '4.7', reviews: '142',  views: '3.2k', rank: '#2 Burgers' },
-  Año:    { rating: '4.6', reviews: '1.2k', views: '28k',  rank: '#1 Burgers' },
-};
+function timeAgo(iso: string): string {
+  const d = Math.floor((Date.now() - new Date(iso).getTime()) / DAY);
+  if (d <= 0) return 'hoy';
+  if (d === 1) return 'ayer';
+  if (d < 7) return `hace ${d} días`;
+  const w = Math.floor(d / 7);
+  if (w < 5) return `hace ${w} sem`;
+  return `hace ${Math.floor(d / 30)} mes`;
+}
+
+function buildBars(dates: Date[], period: Period): { label: string; value: number }[] {
+  const now = new Date();
+
+  if (period === 'Semana') {
+    const labels = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+    const start = new Date(now); start.setHours(0, 0, 0, 0); start.setDate(start.getDate() - 6);
+    return Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(start.getTime() + i * DAY);
+      const next = new Date(day.getTime() + DAY);
+      return {
+        label: labels[day.getDay()],
+        value: dates.filter(d => d >= day && d < next).length,
+      };
+    });
+  }
+
+  if (period === 'Mes') {
+    const start = new Date(now); start.setHours(0, 0, 0, 0); start.setDate(start.getDate() - 27);
+    return Array.from({ length: 4 }, (_, i) => {
+      const wStart = new Date(start.getTime() + i * 7 * DAY);
+      const wEnd = new Date(wStart.getTime() + 7 * DAY);
+      return { label: `S${i + 1}`, value: dates.filter(d => d >= wStart && d < wEnd).length };
+    });
+  }
+
+  // Año — últimos 12 meses
+  const labels = ['E', 'F', 'M', 'A', 'My', 'J', 'Jl', 'A', 'S', 'O', 'N', 'D'];
+  return Array.from({ length: 12 }, (_, i) => {
+    const m = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1);
+    const mEnd = new Date(now.getFullYear(), now.getMonth() - 11 + i + 1, 1);
+    return { label: labels[m.getMonth()], value: dates.filter(d => d >= m && d < mEnd).length };
+  });
+}
 
 function MetricCard({ icon, label, value, color }: { icon: string; label: string; value: string; color: string }) {
   const { C, shadow } = useTheme();
@@ -52,10 +78,42 @@ export default function AnalyticsScreen() {
   const insets = useSafeAreaInsets();
   const [period, setPeriod] = useState<Period>('Semana');
 
-  const bars = BARS[period];
-  const metrics = METRICS[period];
-  const maxVal = Math.max(...bars.map(b => b.value));
+  const restaurantQ = useMyRestaurant();
+  const restaurant = restaurantQ.data ?? null;
+  const reviewsQ = useReviews(restaurant?.id ?? '');
+  const reviews = reviewsQ.data ?? [];
+
+  const dates = useMemo(() => reviews.map(r => new Date(r.created_at)), [reviews]);
+  const bars = useMemo(() => buildBars(dates, period), [dates, period]);
+  const maxVal = Math.max(1, ...bars.map(b => b.value));
   const BAR_H = 120;
+
+  const periodDays = period === 'Semana' ? 7 : period === 'Mes' ? 28 : 365;
+  const since = Date.now() - periodDays * DAY;
+  const inPeriod = reviews.filter(r => new Date(r.created_at).getTime() >= since).length;
+  const lastReview = reviews[0]?.created_at;
+
+  const dist = [5, 4, 3, 2, 1].map(s => reviews.filter(r => r.rating === s).length);
+  const total = reviews.length;
+
+  if (restaurantQ.isLoading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color={C.primary} />
+      </View>
+    );
+  }
+
+  if (!restaurant) {
+    return (
+      <View style={{ flex: 1, backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24 }}>
+        <Icon name="analytics" size={44} color={C.outline} />
+        <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 16, textAlign: 'center' }}>
+          No hay un local registrado
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: C.surface }}>
@@ -63,7 +121,7 @@ export default function AnalyticsScreen() {
       {/* Header */}
       <View style={{ paddingTop: insets.top + 10, paddingBottom: 14, paddingHorizontal: 20 }}>
         <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24 }}>Métricas</Text>
-        <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, marginTop: 2 }}>La Smasheria</Text>
+        <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, marginTop: 2 }}>{restaurant.name}</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: FLOATING_NAV_H + 20, gap: 20 }}>
@@ -88,56 +146,64 @@ export default function AnalyticsScreen() {
 
         {/* Metric cards */}
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          <MetricCard icon="star"        label="Calificación" value={metrics.rating}  color={C.primary} />
-          <MetricCard icon="comment-text" label="Reseñas"     value={metrics.reviews} color={C.secondary} />
+          <MetricCard icon="star"         label="Calificación"  value={restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : '–'} color={C.primary} />
+          <MetricCard icon="comment-text" label="Total reseñas" value={String(restaurant.rating_count)} color={C.secondary} />
         </View>
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          <MetricCard icon="trending-up" label="Vistas"       value={metrics.views}   color={C.tertiary} />
-          <MetricCard icon="trophy-outline" label="Ranking"   value={metrics.rank}    color={C.primary} />
+          <MetricCard icon="trending-up"   label={`Reseñas (${period.toLowerCase()})`} value={String(inPeriod)} color={C.tertiary} />
+          <MetricCard icon="clock-outline" label="Última reseña" value={lastReview ? timeAgo(lastReview) : '—'} color={C.primary} />
         </View>
 
         {/* Bar chart - reseñas */}
         <View style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, gap: 16, ...shadow.sm }}>
           <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Reseñas por período</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: BAR_H + 24 }}>
-            {bars.map((b, i) => {
-              const h = Math.max(8, (b.value / maxVal) * BAR_H);
-              const isLast = i === bars.length - 1;
-              return (
-                <View key={i} style={{ flex: 1, alignItems: 'center', gap: 4 }}>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 10 }}>{b.value}</Text>
-                  <View style={{
-                    width: '100%', height: h, borderRadius: 8,
-                    backgroundColor: isLast ? C.primary : C.primaryFixed,
-                    borderWidth: 1.5, borderColor: C.border,
-                  }} />
-                  <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 10 }}>{b.label}</Text>
-                </View>
-              );
-            })}
-          </View>
+          {total === 0 ? (
+            <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13 }}>Aún no hay datos.</Text>
+          ) : (
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: BAR_H + 24 }}>
+              {bars.map((b, i) => {
+                const h = b.value === 0 ? 4 : Math.max(8, (b.value / maxVal) * BAR_H);
+                const isLast = i === bars.length - 1;
+                return (
+                  <View key={i} style={{ flex: 1, alignItems: 'center', gap: 4 }}>
+                    <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 10 }}>{b.value}</Text>
+                    <View style={{
+                      width: '100%', height: h, borderRadius: 8,
+                      backgroundColor: b.value === 0 ? C.surfaceContainerHighest : isLast ? C.primary : C.primaryFixed,
+                      borderWidth: 1.5, borderColor: C.border,
+                    }} />
+                    <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 10 }}>{b.label}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          )}
         </View>
 
-        {/* Calificación promedio */}
+        {/* Distribución de estrellas */}
         <View style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, gap: 14, ...shadow.sm }}>
           <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Distribución de estrellas</Text>
-          {[5, 4, 3, 2, 1].map(star => {
-            const pcts: Record<number, number> = { 5: 72, 4: 18, 3: 6, 2: 3, 1: 1 };
-            const pct = pcts[star];
-            return (
-              <View key={star} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <View style={{ flexDirection: 'row', gap: 2, width: 68 }}>
-                  {[1,2,3,4,5].map(s => (
-                    <Icon key={s} name="star" size={11} color={s <= star ? C.primary : C.outlineVariant} fill={s <= star ? C.primary : 'none'} />
-                  ))}
+          {total === 0 ? (
+            <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13 }}>Aún no hay reseñas.</Text>
+          ) : (
+            [5, 4, 3, 2, 1].map((star, idx) => {
+              const count = dist[idx];
+              const pct = Math.round((count / total) * 100);
+              return (
+                <View key={star} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <View style={{ flexDirection: 'row', gap: 2, width: 68 }}>
+                    {[1, 2, 3, 4, 5].map(s => (
+                      <Icon key={s} name="star" size={11} color={s <= star ? C.primary : C.outlineVariant} fill={s <= star ? C.primary : 'none'} />
+                    ))}
+                  </View>
+                  <View style={{ flex: 1, height: 10, borderRadius: 99, overflow: 'hidden', backgroundColor: C.surfaceContainerHighest }}>
+                    <View style={{ height: '100%', width: `${pct}%`, borderRadius: 99, backgroundColor: star >= 4 ? C.primary : star === 3 ? C.secondary : C.error }} />
+                  </View>
+                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, width: 44, textAlign: 'right' }}>{count} · {pct}%</Text>
                 </View>
-                <View style={{ flex: 1, height: 10, borderRadius: 99, overflow: 'hidden', backgroundColor: C.surfaceContainerHighest }}>
-                  <View style={{ height: '100%', width: `${pct}%`, borderRadius: 99, backgroundColor: star >= 4 ? C.primary : star === 3 ? C.secondary : C.error }} />
-                </View>
-                <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, width: 30, textAlign: 'right' }}>{pct}%</Text>
-              </View>
-            );
-          })}
+              );
+            })
+          )}
         </View>
 
       </ScrollView>
