@@ -19,6 +19,7 @@ import { FLOATING_NAV_H } from '@/lib/theme';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { useMyRestaurant, useUpdateMyRestaurant } from '@/lib/queries/owner';
 import { uploadRestaurantImage, uploadRestaurantMenu } from '@/lib/storage';
+import { DEFAULT_HOURS, DAY_LABELS, formatRange, type Hours } from '@/lib/hours';
 
 function Divider() {
   const { C } = useTheme();
@@ -82,7 +83,12 @@ export default function OwnerProfileScreen() {
   const [promo, setPromo]         = useState('');
   const [priceLevel, setPriceLevel] = useState<number | null>(null);
   const [isActive, setIsActive]   = useState(true);
+  const [hours, setHoursState]    = useState<Hours>(DEFAULT_HOURS);
   const [uploading, setUploading] = useState<'logo' | 'cover' | 'menu' | null>(null);
+
+  function setDay(dow: number, patch: Partial<Hours['days'][number]>) {
+    setHoursState((h) => ({ days: h.days.map((d, i) => (i === dow ? { ...d, ...patch } : d)) }));
+  }
 
   async function pickPhoto(kind: 'logo' | 'cover') {
     if (!restaurant) return;
@@ -130,6 +136,7 @@ export default function OwnerProfileScreen() {
     setPromo(restaurant.promo_text ?? '');
     setPriceLevel(restaurant.price_level ?? null);
     setIsActive(restaurant.is_active);
+    setHoursState(restaurant.hours ?? DEFAULT_HOURS);
   }, [restaurant]);
 
   function cancel() {
@@ -143,11 +150,16 @@ export default function OwnerProfileScreen() {
     setPromo(restaurant.promo_text ?? '');
     setPriceLevel(restaurant.price_level ?? null);
     setIsActive(restaurant.is_active);
+    setHoursState(restaurant.hours ?? DEFAULT_HOURS);
     setEditing(false);
   }
 
   function save() {
     if (!name.trim()) { Alert.alert('El nombre no puede quedar vacío'); return; }
+    const badTime = hours.days.some(
+      (d) => !d.closed && (!/^\d{1,2}:\d{2}$/.test(d.open) || !/^\d{1,2}:\d{2}$/.test(d.close)),
+    );
+    if (badTime) { Alert.alert('Horario inválido', 'Usa el formato HH:MM (ej. 12:00).'); return; }
     updateMut.mutate(
       {
         name: name.trim(),
@@ -159,6 +171,7 @@ export default function OwnerProfileScreen() {
         promo_text: promo.trim() || null,
         price_level: priceLevel,
         is_active: isActive,
+        hours,
       },
       {
         onSuccess: () => setEditing(false),
@@ -351,6 +364,60 @@ export default function OwnerProfileScreen() {
                 </Text>
               )}
             </View>
+          </View>
+        </View>
+
+        {/* Horario */}
+        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
+            <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Horario</Text>
+          </View>
+          <View style={{ padding: 14, gap: 8 }}>
+            {[1, 2, 3, 4, 5, 6, 0].map((dow) => {
+              const d = hours.days[dow];
+              return (
+                <View key={dow} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={{ width: 40, color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13 }}>
+                    {DAY_LABELS[dow]}
+                  </Text>
+                  {editing ? (
+                    <>
+                      <Switch
+                        value={!d.closed}
+                        onValueChange={(v) => setDay(dow, { closed: !v })}
+                        trackColor={{ false: C.surfaceContainerHighest, true: C.primaryContainer }}
+                        thumbColor={!d.closed ? C.primary : C.outline}
+                      />
+                      {d.closed ? (
+                        <Text style={{ flex: 1, color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13 }}>Cerrado</Text>
+                      ) : (
+                        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <AppTextInput
+                            value={d.open}
+                            onChangeText={(t) => setDay(dow, { open: t.slice(0, 5) })}
+                            placeholder="12:00"
+                            keyboardType="numbers-and-punctuation"
+                            style={{ fontSize: 13, textAlign: 'center', backgroundColor: C.surfaceContainerLow, borderRadius: 8, borderWidth: 1, borderColor: C.outlineVariant, paddingVertical: 6, minWidth: 56 }}
+                          />
+                          <Text style={{ color: C.outline }}>–</Text>
+                          <AppTextInput
+                            value={d.close}
+                            onChangeText={(t) => setDay(dow, { close: t.slice(0, 5) })}
+                            placeholder="22:00"
+                            keyboardType="numbers-and-punctuation"
+                            style={{ fontSize: 13, textAlign: 'center', backgroundColor: C.surfaceContainerLow, borderRadius: 8, borderWidth: 1, borderColor: C.outlineVariant, paddingVertical: 6, minWidth: 56 }}
+                          />
+                        </View>
+                      )}
+                    </>
+                  ) : (
+                    <Text style={{ flex: 1, color: d.closed ? C.outline : C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13 }}>
+                      {formatRange(d)}
+                    </Text>
+                  )}
+                </View>
+              );
+            })}
           </View>
         </View>
 

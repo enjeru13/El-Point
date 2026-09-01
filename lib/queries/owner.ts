@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { RestaurantCategory } from '@/lib/queries/restaurants';
+import { parseHours, type Hours } from '@/lib/hours';
 
 export type OwnerRestaurant = {
   id: string;
@@ -15,6 +16,7 @@ export type OwnerRestaurant = {
   cover_url: string | null;
   menu_pdf_url: string | null;
   promo_text: string | null;
+  hours: Hours | null;
   is_active: boolean;
   rating_avg: number;
   rating_count: number;
@@ -33,7 +35,7 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
     .from('restaurants')
     .select(
       `id, name, description, address, phone, whatsapp, instagram, price_level,
-       logo_url, cover_url, menu_pdf_url, promo_text, is_active,
+       logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
        rating_avg, rating_count, created_at,
        restaurant_categories ( categories ( slug, label, icon ) )`,
     )
@@ -45,9 +47,10 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
   if (error) throw error;
   if (!data) return null;
 
-  const { restaurant_categories, ...rest } = data as any;
+  const { restaurant_categories, hours, ...rest } = data as any;
   return {
-    ...(rest as Omit<OwnerRestaurant, 'categories'>),
+    ...(rest as Omit<OwnerRestaurant, 'categories' | 'hours'>),
+    hours: parseHours(hours),
     categories: (restaurant_categories ?? []).map((rc: any) => rc.categories).filter(Boolean),
   };
 }
@@ -69,6 +72,7 @@ export type OwnerRestaurantPatch = Partial<{
   logo_url: string | null;
   cover_url: string | null;
   menu_pdf_url: string | null;
+  hours: Hours;
 }>;
 
 export function useUpdateMyRestaurant(restaurantId: string | undefined) {

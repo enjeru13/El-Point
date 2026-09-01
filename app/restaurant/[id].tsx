@@ -13,6 +13,7 @@ import {
   type Review,
 } from "@/lib/queries/reviews";
 import { useMyProfile } from "@/lib/queries/me";
+import { isOpenNow, formatRange, DAY_LABELS_LONG } from "@/lib/hours";
 import { useTheme } from "@/lib/ThemeContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -475,6 +476,7 @@ export default function RestaurantProfileScreen() {
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [replyingId, setReplyingId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [hoursOpen, setHoursOpen] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const HERO_H = 320;
@@ -863,6 +865,53 @@ export default function RestaurantProfileScreen() {
               ...shadow.sm,
             }}
           >
+            {/* Horario */}
+            {(() => {
+              const os = isOpenNow(restaurant.hours);
+              const canExpand = !!restaurant.hours;
+              return (
+                <View style={{ borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
+                  <Pressable
+                    onPress={() => canExpand && setHoursOpen((v) => !v)}
+                    style={{ flexDirection: "row", alignItems: "center", gap: 14, padding: 16 }}
+                  >
+                    <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: os.open ? "rgba(34,197,94,0.15)" : "rgba(186,26,26,0.12)", alignItems: "center", justifyContent: "center" }}>
+                      <Icon name="clock-outline" size={18} color={os.open ? "#16a34a" : C.error} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: os.open ? "#16a34a" : C.error, fontFamily: "PlusJakartaSans_700Bold", fontSize: 15 }}>
+                        {os.open ? "Abierto ahora" : "Cerrado"}
+                      </Text>
+                      <Text style={{ color: C.onSurfaceVariant, fontFamily: "PlusJakartaSans_400Regular", fontSize: 14 }}>
+                        {os.label.replace(/^(Abierto|Cerrado)( ·)? ?/, "")}
+                      </Text>
+                    </View>
+                    {canExpand && (
+                      <Icon name={hoursOpen ? "chevron-right" : "chevron-right"} size={18} color={C.outline} style={{ transform: [{ rotate: hoursOpen ? "90deg" : "0deg" }] }} />
+                    )}
+                  </Pressable>
+                  {hoursOpen && restaurant.hours && (
+                    <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 4 }}>
+                      {[1, 2, 3, 4, 5, 6, 0].map((dow) => {
+                        const d = restaurant.hours!.days[dow];
+                        const today = new Date().getDay() === dow;
+                        return (
+                          <View key={dow} style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                            <Text style={{ color: today ? C.primary : C.onSurfaceVariant, fontFamily: today ? "PlusJakartaSans_700Bold" : "PlusJakartaSans_600SemiBold", fontSize: 13 }}>
+                              {DAY_LABELS_LONG[dow]}
+                            </Text>
+                            <Text style={{ color: today ? C.primary : C.onSurfaceVariant, fontFamily: today ? "PlusJakartaSans_700Bold" : "PlusJakartaSans_400Regular", fontSize: 13 }}>
+                              {formatRange(d)}
+                            </Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  )}
+                </View>
+              );
+            })()}
+
             {/* Dirección */}
             {restaurant.address && (
               <Pressable

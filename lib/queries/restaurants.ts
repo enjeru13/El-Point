@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { parseHours, type Hours } from '@/lib/hours';
 
 export type RestaurantCategory = {
   slug: string;
@@ -21,7 +22,7 @@ export type RestaurantDetail = {
   cover_url: string | null;
   menu_pdf_url: string | null;
   promo_text: string | null;
-  hours: unknown;
+  hours: Hours | null;
   is_active: boolean;
   rating_avg: number;
   rating_count: number;
@@ -50,8 +51,12 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
     .map((rc: any) => rc.categories)
     .filter(Boolean);
 
-  const { restaurant_categories, ...rest } = data as any;
-  return { ...(rest as Omit<RestaurantDetail, 'categories'>), categories };
+  const { restaurant_categories, hours, ...rest } = data as any;
+  return {
+    ...(rest as Omit<RestaurantDetail, 'categories' | 'hours'>),
+    hours: parseHours(hours),
+    categories,
+  };
 }
 
 export function useRestaurant(id: string) {
