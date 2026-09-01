@@ -1,4 +1,5 @@
-import { ActivityIndicator, Platform, Pressable, Text, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Platform, Pressable, Text } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Icon } from '@/components/ui/Icon';
 import { useTheme } from '@/lib/ThemeContext';
@@ -34,6 +35,7 @@ export function Button({
   style,
 }: ButtonProps) {
   const { C } = useTheme();
+  const [pressed, setPressed] = useState(false);
   const off = disabled || loading;
 
   const palette: Record<Variant, { bg: string; fg: string; border: string }> = {
@@ -92,8 +94,10 @@ export function Button({
   return (
     <Pressable
       onPress={handlePress}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
       disabled={off}
-      style={({ pressed }) => [
+      style={[
         base,
         pressed && !off ? { opacity: 0.9, transform: [{ translateY: 1 }] } : null,
         style,
