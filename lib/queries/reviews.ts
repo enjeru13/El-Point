@@ -21,6 +21,7 @@ export type Review = {
   author: ReviewAuthor | null;
   viewer_marked_helpful: boolean;
   photos: string[];
+  reply: { body: string; created_at: string } | null;
 };
 
 export function reviewKeys(restaurantId: string) {
@@ -36,7 +37,8 @@ async function fetchReviews(restaurantId: string): Promise<Review[]> {
     .select(
       `id, restaurant_id, rating, body, helpful_count, created_at,
        author:profiles!author_id ( id, username, full_name, avatar_url, level ),
-       review_photos ( storage_path, position )`,
+       review_photos ( storage_path, position ),
+       review_replies ( body, created_at )`,
     )
     .eq('restaurant_id', restaurantId)
     .order('created_at', { ascending: false });
@@ -68,6 +70,7 @@ async function fetchReviews(restaurantId: string): Promise<Review[]> {
     photos: ((r.review_photos ?? []) as any[])
       .sort((a, b) => a.position - b.position)
       .map((p) => reviewPhotoUrl(p.storage_path)),
+    reply: (Array.isArray(r.review_replies) ? r.review_replies[0] : r.review_replies) ?? null,
   }));
 }
 
@@ -115,6 +118,30 @@ export function useSubmitReview(restaurantId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: reviewKeys(restaurantId) });
       qc.invalidateQueries({ queryKey: restaurantKeys(restaurantId) });
+      qc.invalidateQueries({ queryKey: ['my-profile'] });
+      qc.invalidateQueries({ queryKey: ['my-reviews'] });
+      qc.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+}
+
+export function useReplyToReview(restaurantId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ reviewId, body }: { reviewId: string; body: string }) => {
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData.user) throw userErr ?? new Error('No autenticado');
+      const { error } = await supabase
+        .from('review_replies')
+        .upsert(
+          { review_id: reviewId, author_id: userData.user.id, body: body.trim() },
+          { onConflict: 'review_id' },
+        );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: reviewKeys(restaurantId) });
+      qc.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 }

@@ -135,11 +135,27 @@ export function useMyReviews() {
   return useQuery({ queryKey: ['my-reviews'], queryFn: fetchMyReviews });
 }
 
-// Simple placeholder progression until real gamification rules exist.
+// Quadratic curve — mirrors the DB functions.
+//   xpForLevel(L) = 50 * (L-1)^2 ;  levelForXp(xp) = floor(sqrt(xp/50)) + 1
+export const xpForLevel = (level: number) => 50 * Math.pow(Math.max(1, level) - 1, 2);
+export const levelForXp = (xp: number) => Math.max(1, Math.floor(Math.sqrt(Math.max(0, xp) / 50)) + 1);
+
 export function levelProgress(level: number, xp: number) {
-  const perLevel = 1000;
-  const floor = (level - 1) * perLevel;
-  const next = level * perLevel;
-  const pct = Math.max(0, Math.min(1, (xp - floor) / perLevel));
-  return { next, pct };
+  const floor = xpForLevel(level);
+  const next = xpForLevel(level + 1);
+  const pct = Math.max(0, Math.min(1, (xp - floor) / (next - floor)));
+  return { floor, next, pct };
+}
+
+export const RANKS = [
+  { max: 3, name: 'Novato' },
+  { max: 8, name: 'Comensal' },
+  { max: 15, name: 'Explorador' },
+  { max: 24, name: 'Crítico Local' },
+  { max: 34, name: 'Gurú Gastronómico' },
+  { max: Infinity, name: 'Leyenda' },
+] as const;
+
+export function rankForLevel(level: number): string {
+  return (RANKS.find((r) => level <= r.max) ?? RANKS[RANKS.length - 1]).name;
 }

@@ -3,13 +3,16 @@ import * as ImagePicker from "expo-image-picker";
 import { Icon } from "@/components/ui/Icon";
 import { StarRow } from "@/components/ui/StarRow";
 import { Avatar } from "@/components/ui/Avatar";
+import { RankBadge } from "@/components/ui/RankBadge";
 import { useRestaurant } from "@/lib/queries/restaurants";
 import {
   useReviews,
   useSubmitReview,
   useToggleHelpful,
+  useReplyToReview,
   type Review,
 } from "@/lib/queries/reviews";
+import { useMyProfile } from "@/lib/queries/me";
 import { useTheme } from "@/lib/ThemeContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -465,9 +468,13 @@ export default function RestaurantProfileScreen() {
   const reviewsQ = useReviews(id);
   const submitReview = useSubmitReview(id);
   const toggleHelpful = useToggleHelpful(id);
+  const replyMut = useReplyToReview(id);
+  const myProfileQ = useMyProfile();
 
   const [saved, setSaved] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [replyingId, setReplyingId] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const HERO_H = 320;
@@ -586,6 +593,7 @@ export default function RestaurantProfileScreen() {
 
   const restaurant = restaurantQ.data;
   const reviews = reviewsQ.data ?? [];
+  const isOwnerHere = !!myProfileQ.data?.id && myProfileQ.data.id === restaurant.owner_id;
   const heroIcon = restaurant.categories[0]?.icon ?? "silverware-fork-knife";
   const priceStr = priceLabel(restaurant.price_level);
   const dist = [5, 4, 3, 2, 1].map(
@@ -1335,27 +1343,8 @@ export default function RestaurantProfileScreen() {
                       >
                         {authorName(r.author)}
                       </Text>
-                      <View
-                        style={{
-                          alignSelf: "flex-start",
-                          marginTop: 2,
-                          paddingHorizontal: 7,
-                          paddingVertical: 2,
-                          borderRadius: 6,
-                          backgroundColor: C.primaryFixed,
-                          borderWidth: 1,
-                          borderColor: C.border,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            color: C.onSurface,
-                            fontFamily: "PlusJakartaSans_700Bold",
-                            fontSize: 15,
-                          }}
-                        >
-                          Nivel {r.author?.level ?? 1}
-                        </Text>
+                      <View style={{ marginTop: 3 }}>
+                        <RankBadge level={r.author?.level ?? 1} />
                       </View>
                     </View>
                     <View style={{ alignItems: "flex-end", gap: 2 }}>
@@ -1402,6 +1391,80 @@ export default function RestaurantProfileScreen() {
                       ))}
                     </ScrollView>
                   )}
+
+                  {/* Respuesta del local */}
+                  {r.reply ? (
+                    <View
+                      style={{
+                        marginLeft: 12,
+                        padding: 12,
+                        borderRadius: 12,
+                        backgroundColor: C.surfaceContainerLow,
+                        borderLeftWidth: 3,
+                        borderLeftColor: C.secondary,
+                        gap: 4,
+                      }}
+                    >
+                      <Text style={{ color: C.secondary, fontFamily: "PlusJakartaSans_700Bold", fontSize: 12, letterSpacing: 0.5 }}>
+                        RESPUESTA DEL LOCAL · {timeAgo(r.reply.created_at)}
+                      </Text>
+                      <Text style={{ color: C.onSurface, fontFamily: "PlusJakartaSans_400Regular", fontSize: 14, lineHeight: 20 }}>
+                        {r.reply.body}
+                      </Text>
+                    </View>
+                  ) : isOwnerHere && replyingId === r.id ? (
+                    <View style={{ gap: 8 }}>
+                      <TextInput
+                        value={replyText}
+                        onChangeText={(t) => setReplyText(t.slice(0, 500))}
+                        placeholder="Responde a este cliente…"
+                        placeholderTextColor={C.outline}
+                        multiline
+                        style={{
+                          backgroundColor: C.surfaceContainerLow,
+                          borderWidth: 2, borderColor: C.outlineVariant, borderRadius: 12,
+                          padding: 12, minHeight: 70, textAlignVertical: "top",
+                          fontFamily: "PlusJakartaSans_400Regular", fontSize: 14, color: C.onSurface,
+                        }}
+                      />
+                      <View style={{ flexDirection: "row", gap: 8 }}>
+                        <Pressable
+                          onPress={() => { setReplyingId(null); setReplyText(""); }}
+                          style={{ paddingHorizontal: 16, paddingVertical: 8, borderRadius: 99, borderWidth: 2, borderColor: C.outlineVariant }}
+                        >
+                          <Text style={{ color: C.onSurfaceVariant, fontFamily: "PlusJakartaSans_700Bold", fontSize: 13 }}>Cancelar</Text>
+                        </Pressable>
+                        <Pressable
+                          disabled={replyText.trim().length === 0 || replyMut.isPending}
+                          onPress={() =>
+                            replyMut.mutate(
+                              { reviewId: r.id, body: replyText },
+                              { onSuccess: () => { setReplyingId(null); setReplyText(""); } },
+                            )
+                          }
+                          style={{
+                            flexDirection: "row", alignItems: "center", gap: 6,
+                            paddingHorizontal: 16, paddingVertical: 8, borderRadius: 99,
+                            backgroundColor: replyText.trim().length > 0 ? C.primary : C.surfaceContainerHighest,
+                            borderWidth: 2, borderColor: C.border,
+                          }}
+                        >
+                          {replyMut.isPending
+                            ? <ActivityIndicator size="small" color="#fff" />
+                            : <Icon name="reply" size={14} color={replyText.trim().length > 0 ? "#fff" : C.outline} />}
+                          <Text style={{ color: replyText.trim().length > 0 ? "#fff" : C.outline, fontFamily: "PlusJakartaSans_700Bold", fontSize: 13 }}>Enviar</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  ) : isOwnerHere ? (
+                    <Pressable
+                      onPress={() => { setReplyingId(r.id); setReplyText(""); }}
+                      style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start" }}
+                    >
+                      <Icon name="reply" size={15} color={C.secondary} />
+                      <Text style={{ color: C.secondary, fontFamily: "PlusJakartaSans_700Bold", fontSize: 14 }}>Responder</Text>
+                    </Pressable>
+                  ) : null}
 
                   {/* Helpful */}
                   <Pressable

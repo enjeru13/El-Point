@@ -9,6 +9,7 @@ export type RestaurantCategory = {
 
 export type RestaurantDetail = {
   id: string;
+  owner_id: string | null;
   name: string;
   description: string | null;
   address: string | null;
@@ -35,7 +36,7 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
   const { data, error } = await supabase
     .from('restaurants')
     .select(
-      `id, name, description, address, whatsapp, instagram, phone,
+      `id, owner_id, name, description, address, whatsapp, instagram, phone,
        price_level, logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
        rating_avg, rating_count,
        restaurant_categories ( categories ( slug, label, icon ) )`,
