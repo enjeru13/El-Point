@@ -1,5 +1,5 @@
 import { AppLogo } from "@/components/ui/AppLogo";
-import { AppTextInput } from "@/components/ui/AppTextInput";
+import { Field } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { supabase } from "@/lib/supabase";
@@ -30,7 +30,6 @@ export default function ForgotPasswordScreen() {
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function sendCode() {
@@ -157,40 +156,15 @@ export default function ForgotPasswordScreen() {
                 Escribe tu correo y te enviaremos un código para crear una
                 contraseña nueva.
               </Text>
-              <View style={{ gap: 8 }}>
-                <Text
-                  style={{
-                    color: C.onSurfaceVariant,
-                    fontFamily: "PlusJakartaSans_600SemiBold",
-                    fontSize: 15,
-                    marginLeft: 4,
-                  }}
-                >
-                  Correo electrónico
-                </Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 12,
-                    borderRadius: 16,
-                    height: 56,
-                    paddingHorizontal: 16,
-                    backgroundColor: C.surfaceContainerLow,
-                    borderWidth: 2,
-                    borderColor: C.border,
-                  }}
-                >
-                  <Icon name="email-outline" size={22} color={C.outline} />
-                  <AppTextInput
-                    placeholder="tucorreo@ejemplo.com"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    value={email}
-                    onChangeText={setEmail}
-                  />
-                </View>
-              </View>
+              <Field
+                label="Correo electrónico"
+                icon="email-outline"
+                placeholder="tucorreo@ejemplo.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
+                onChangeText={setEmail}
+              />
               <Button
                 label={loading ? "Enviando…" : "Enviar código"}
                 onPress={sendCode}
@@ -221,132 +195,33 @@ export default function ForgotPasswordScreen() {
                 . Pégalo aquí y elige tu nueva contraseña.
               </Text>
 
-              <View style={{ gap: 8 }}>
-                <Text
-                  style={{
-                    color: C.onSurfaceVariant,
-                    fontFamily: "PlusJakartaSans_600SemiBold",
-                    fontSize: 15,
-                    marginLeft: 4,
-                  }}
-                >
-                  Código
-                </Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 12,
-                    borderRadius: 16,
-                    height: 56,
-                    paddingHorizontal: 16,
-                    backgroundColor: C.surfaceContainerLow,
-                    borderWidth: 2,
-                    borderColor: C.border,
-                  }}
-                >
-                  <Icon
-                    name="shield-lock-outline"
-                    size={22}
-                    color={C.outline}
-                  />
-                  <AppTextInput
-                    placeholder="123456"
-                    keyboardType="number-pad"
-                    value={code}
-                    onChangeText={(t) =>
-                      setCode(t.replace(/\D/g, "").slice(0, 8))
-                    }
-                  />
-                </View>
-              </View>
+              <Field
+                label="Código"
+                icon="shield-lock-outline"
+                placeholder="123456"
+                keyboardType="number-pad"
+                value={code}
+                onChangeText={(t) => setCode(t.replace(/\D/g, "").slice(0, 8))}
+              />
 
-              <View style={{ gap: 8 }}>
-                <Text
-                  style={{
-                    color: C.onSurfaceVariant,
-                    fontFamily: "PlusJakartaSans_600SemiBold",
-                    fontSize: 15,
-                    marginLeft: 4,
-                  }}
-                >
-                  Nueva contraseña
-                </Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 12,
-                    borderRadius: 16,
-                    height: 56,
-                    paddingHorizontal: 16,
-                    backgroundColor: C.surfaceContainerLow,
-                    borderWidth: 2,
-                    borderColor: C.border,
-                  }}
-                >
-                  <Icon name="lock-outline" size={22} color={C.outline} />
-                  <AppTextInput
-                    placeholder="••••••••"
-                    secureTextEntry={!showPw}
-                    value={password}
-                    onChangeText={setPassword}
-                  />
-                  <Pressable onPress={() => setShowPw((v) => !v)}>
-                    <Icon
-                      name={showPw ? "eye-off-outline" : "eye-outline"}
-                      size={22}
-                      color={C.outline}
-                    />
-                  </Pressable>
-                </View>
-              </View>
+              <Field
+                label="Nueva contraseña"
+                icon="lock-outline"
+                placeholder="••••••••"
+                secure
+                value={password}
+                onChangeText={setPassword}
+              />
 
-              <View style={{ gap: 8 }}>
-                <Text
-                  style={{
-                    color: C.onSurfaceVariant,
-                    fontFamily: "PlusJakartaSans_600SemiBold",
-                    fontSize: 15,
-                    marginLeft: 4,
-                  }}
-                >
-                  Confirmar
-                </Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 12,
-                    borderRadius: 16,
-                    height: 56,
-                    paddingHorizontal: 16,
-                    backgroundColor: C.surfaceContainerLow,
-                    borderWidth: 2,
-                    borderColor: C.border,
-                  }}
-                >
-                  <Icon name="lock-outline" size={22} color={C.outline} />
-                  <AppTextInput
-                    placeholder="••••••••"
-                    secureTextEntry={!showPw}
-                    value={confirm}
-                    onChangeText={setConfirm}
-                  />
-                </View>
-                {confirm.length > 0 && password !== confirm && (
-                  <Text
-                    style={{
-                      color: C.error,
-                      fontFamily: "PlusJakartaSans_400Regular",
-                      fontSize: 15,
-                      marginLeft: 4,
-                    }}
-                  >
-                    No coinciden.
-                  </Text>
-                )}
-              </View>
+              <Field
+                label="Confirmar"
+                icon="lock-outline"
+                placeholder="••••••••"
+                secure
+                value={confirm}
+                onChangeText={setConfirm}
+                error={confirm.length > 0 && password !== confirm ? "No coinciden." : null}
+              />
 
               <Button
                 label={loading ? "Guardando…" : "Cambiar contraseña"}
