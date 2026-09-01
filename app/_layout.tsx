@@ -17,7 +17,7 @@ import { Slot, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -25,7 +25,6 @@ import 'react-native-reanimated';
 
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/query';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AppThemeProvider } from '@/lib/ThemeContext';
 
 SplashScreen.preventAutoHideAsync();
