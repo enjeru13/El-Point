@@ -1,7 +1,7 @@
 import { Icon } from '@/components/ui/Icon';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
@@ -57,16 +57,20 @@ const MAP_STYLE = [
 
 // ─── Marker ────────────────────────────────────────────────────────────────────
 
-function RestaurantMarker({
+const RestaurantMarker = memo(function RestaurantMarker({
   restaurant, isSelected, isDimmed, onPress,
 }: {
   restaurant: Restaurant; isSelected: boolean; isDimmed: boolean; onPress: () => void;
 }) {
   const { C, shadow } = useTheme();
-  const [tracking, setTracking] = useState(false);
+  // Brief tracksViewChanges window only when this marker's selected state flips,
+  // then back to false so the native view stops re-rendering (perf + crash guard).
+  const [tracking, setTracking] = useState(true);
+  const first = useRef(true);
   useEffect(() => {
+    if (first.current) { first.current = false; }
     setTracking(true);
-    const t = setTimeout(() => setTracking(false), 400);
+    const t = setTimeout(() => setTracking(false), 250);
     return () => clearTimeout(t);
   }, [isSelected]);
 
@@ -129,7 +133,7 @@ function RestaurantMarker({
       <Callout tooltip><View /></Callout>
     </Marker>
   );
-}
+});
 
 // ─── Bottom card ──────────────────────────────────────────────────────────────
 
@@ -282,6 +286,8 @@ export default function MapScreen() {
   const CARD_HEIGHT = 220;
 
   function openSheet(r: Restaurant) {
+    sheetY.stopAnimation();
+    gpsY.stopAnimation();
     setSelected(r);
     Animated.spring(sheetY, { toValue: 0, useNativeDriver: true, bounciness: 5, speed: 14 }).start();
     Animated.spring(gpsY, { toValue: -(CARD_HEIGHT), useNativeDriver: true, bounciness: 5, speed: 14 }).start();
@@ -294,8 +300,12 @@ export default function MapScreen() {
   }
 
   function closeSheet() {
-    Animated.timing(sheetY, { toValue: 400, duration: 240, easing: Easing.out(Easing.ease), useNativeDriver: true }).start(() => setSelected(null));
-    Animated.timing(gpsY,   { toValue: 0,   duration: 240, easing: Easing.out(Easing.ease), useNativeDriver: true }).start();
+    sheetY.stopAnimation();
+    gpsY.stopAnimation();
+    Animated.timing(sheetY, { toValue: 400, duration: 240, easing: Easing.out(Easing.ease), useNativeDriver: true }).start(({ finished }) => {
+      if (finished) setSelected(null);
+    });
+    Animated.timing(gpsY, { toValue: 0, duration: 240, easing: Easing.out(Easing.ease), useNativeDriver: true }).start();
   }
 
   return (
@@ -308,7 +318,11 @@ export default function MapScreen() {
         showsUserLocation={false}
         showsMyLocationButton={false}
         showsCompass={false}
-        onPress={() => selected && closeSheet()}
+        onPress={(e) => {
+          // Ignore taps that land on a marker so switching selection is one tap.
+          if ((e.nativeEvent as any)?.action === 'marker-press') return;
+          if (selected) closeSheet();
+        }}
       >
         {/* User dot */}
         {userLocation && (

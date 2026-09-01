@@ -83,14 +83,26 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (!ready || !fontsLoaded) return;
-    const inAuth = segments[0] === '(auth)';
+    const root = segments[0];
+    const inAuth = root === '(auth)';
+    const inOwner = root === '(owner)';
+    const inCustomer = root === '(customer)';
+
     if (!session) {
       if (!inAuth) router.replace('/(auth)/login');
-    } else {
-      if (role === 'restaurant_owner') router.replace('/(owner)');
-      else router.replace('/(customer)');
+      return;
     }
-  }, [ready, session, role, fontsLoaded]);
+
+    // Signed in: only redirect if the user is in the wrong place.
+    // Leave stack routes like /restaurant/[id] alone.
+    if (inAuth) {
+      router.replace(role === 'restaurant_owner' ? '/(owner)' : '/(customer)');
+    } else if (role === 'restaurant_owner' && inCustomer) {
+      router.replace('/(owner)');
+    } else if (role === 'customer' && inOwner) {
+      router.replace('/(customer)');
+    }
+  }, [ready, session, role, fontsLoaded, segments]);
 
   if (!ready || !fontsLoaded) return <View style={{ flex: 1, backgroundColor: '#fcf9f8' }} />;
 
