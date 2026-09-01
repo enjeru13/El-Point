@@ -475,7 +475,10 @@ export default function LoginScreen() {
             />
           </Field>
 
-          <Pressable style={{ alignSelf: "flex-end", marginTop: -8 }}>
+          <Pressable
+            onPress={() => router.push("/(auth)/forgot-password")}
+            style={{ alignSelf: "flex-end", marginTop: -8 }}
+          >
             <Text
               style={{
                 color: C.primary,
