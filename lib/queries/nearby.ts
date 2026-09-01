@@ -1,0 +1,63 @@
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+
+export type NearbyRestaurant = {
+  id: string;
+  name: string;
+  address: string | null;
+  lat: number;
+  lng: number;
+  price_level: number | null;
+  rating_avg: number;
+  rating_count: number;
+  cover_url: string | null;
+  logo_url: string | null;
+  distance_m: number;
+};
+
+export function useNearby(
+  origin: { latitude: number; longitude: number } | null,
+  radiusKm = 5,
+  category?: string | null,
+) {
+  return useQuery({
+    queryKey: [
+      'nearby',
+      origin ? Number(origin.latitude.toFixed(4)) : null,
+      origin ? Number(origin.longitude.toFixed(4)) : null,
+      radiusKm,
+      category ?? null,
+    ],
+    enabled: !!origin,
+    queryFn: async (): Promise<NearbyRestaurant[]> => {
+      const { data, error } = await supabase.rpc('nearby_restaurants', {
+        user_lat: origin!.latitude,
+        user_lng: origin!.longitude,
+        radius_km: radiusKm,
+        filter_category: category ?? undefined,
+      });
+      if (error) throw error;
+      return (data ?? []) as NearbyRestaurant[];
+    },
+  });
+}
+
+// The RPC does not return categories; this builds restaurant_id -> icon.
+export function useRestaurantIcons() {
+  return useQuery({
+    queryKey: ['restaurant-icons'],
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('restaurant_categories')
+        .select('restaurant_id, categories ( icon )');
+      if (error) throw error;
+      const m = new Map<string, string>();
+      for (const row of (data ?? []) as any[]) {
+        const icon = row.categories?.icon;
+        if (icon && !m.has(row.restaurant_id)) m.set(row.restaurant_id, icon);
+      }
+      return m;
+    },
+  });
+}
