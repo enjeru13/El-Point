@@ -9,13 +9,13 @@ import {
   Pressable,
   ScrollView,
   Switch,
-  Text,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { useToast } from '@/lib/toast';
 import { FLOATING_NAV_H } from '@/lib/theme';
+import { AppText } from '@/components/ui/AppText';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { useMyRestaurant, useUpdateMyRestaurant } from '@/lib/queries/owner';
 import { uploadRestaurantImage, uploadRestaurantMenu } from '@/lib/storage';
@@ -44,7 +44,7 @@ function Field({
         <Icon name={icon} size={18} color={C.primary} />
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 11, letterSpacing: 0.5 }}>{label.toUpperCase()}</Text>
+        <AppText variant="overline" color={C.outline}>{label.toUpperCase()}</AppText>
         {editing ? (
           <AppTextInput
             value={value}
@@ -55,9 +55,9 @@ function Field({
             style={{ fontSize: 14, marginTop: 2 }}
           />
         ) : (
-          <Text style={{ color: value ? C.onSurface : C.outline, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 14, marginTop: 1 }}>
+          <AppText variant="label" color={value ? C.onSurface : C.outline} style={{ fontSize: 14, marginTop: 1 }}>
             {value || '—'}
-          </Text>
+          </AppText>
         )}
       </View>
     </View>
@@ -193,9 +193,9 @@ export default function OwnerProfileScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24 }}>
         <Icon name="store-outline" size={44} color={C.outline} />
-        <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 16, textAlign: 'center' }}>
+        <AppText variant="heading" align="center" style={{ fontSize: 16 }}>
           No hay un local registrado
-        </Text>
+        </AppText>
       </View>
     );
   }
@@ -207,7 +207,7 @@ export default function OwnerProfileScreen() {
 
       {/* Header */}
       <View style={{ paddingTop: insets.top + 10, paddingBottom: 14, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24 }}>Mi perfil</Text>
+        <AppText variant="title">Mi perfil</AppText>
         {editing ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <Pressable
@@ -215,7 +215,7 @@ export default function OwnerProfileScreen() {
               disabled={busy}
               style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 2, borderColor: C.outlineVariant }}
             >
-              <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13 }}>Cancelar</Text>
+              <AppText variant="label" color={C.onSurfaceVariant}>Cancelar</AppText>
             </Pressable>
             <Pressable
               onPress={save}
@@ -227,7 +227,7 @@ export default function OwnerProfileScreen() {
               }}
             >
               {busy ? <ActivityIndicator size="small" color="#fff" /> : <Icon name="check" size={15} color="#fff" />}
-              <Text style={{ color: '#fff', fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13 }}>Guardar</Text>
+              <AppText variant="label" color="#fff">Guardar</AppText>
             </Pressable>
           </View>
         ) : (
@@ -241,7 +241,7 @@ export default function OwnerProfileScreen() {
               }}
             >
               <Icon name="pencil-outline" size={15} color={C.primary} />
-              <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13 }}>Editar</Text>
+              <AppText variant="label" color={C.primary}>Editar</AppText>
             </Pressable>
             <Pressable
               onPress={() => router.push('/settings')}
@@ -281,7 +281,7 @@ export default function OwnerProfileScreen() {
                 style={{ fontFamily: 'Outfit_700Bold', fontSize: 22, color: C.onSurface }}
               />
             ) : (
-              <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 22 }}>{restaurant.name}</Text>
+              <AppText variant="title" style={{ fontSize: 22, lineHeight: 27 }}>{restaurant.name}</AppText>
             )}
 
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
@@ -290,9 +290,9 @@ export default function OwnerProfileScreen() {
                   <Icon key={s} name="star" size={13} color={s <= Math.round(restaurant.rating_avg) ? C.primary : C.outlineVariant} fill={s <= Math.round(restaurant.rating_avg) ? C.primary : 'none'} />
                 ))}
               </View>
-              <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13 }}>
+              <AppText variant="label" color={C.onSurfaceVariant}>
                 {restaurant.rating_count > 0 ? `${restaurant.rating_avg.toFixed(1)} · ${restaurant.rating_count} reseñas` : 'Sin reseñas aún'}
-              </Text>
+              </AppText>
             </View>
 
             {/* Categorías (solo lectura por ahora) */}
@@ -300,7 +300,7 @@ export default function OwnerProfileScreen() {
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
                 {restaurant.categories.map(c => (
                   <View key={c.slug} style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99, backgroundColor: C.secondaryContainer, borderWidth: 2, borderColor: C.border }}>
-                    <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12 }}>{c.label}</Text>
+                    <AppText variant="caption" style={{ fontSize: 12 }}>{c.label}</AppText>
                   </View>
                 ))}
               </View>
@@ -315,9 +315,9 @@ export default function OwnerProfileScreen() {
                 style={{ fontSize: 14, marginTop: 10, minHeight: 60, textAlignVertical: 'top' }}
               />
             ) : restaurant.description ? (
-              <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, marginTop: 8, lineHeight: 20 }}>
+              <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 8, lineHeight: 20 }}>
                 {restaurant.description}
-              </Text>
+              </AppText>
             ) : null}
           </View>
         </View>
@@ -325,7 +325,7 @@ export default function OwnerProfileScreen() {
         {/* Info editable */}
         <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
           <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
-            <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Información del negocio</Text>
+            <AppText variant="bodyStrong">Información del negocio</AppText>
           </View>
 
           <Field icon="map-marker" label="Dirección" value={address} editing={editing} onChangeText={setAddress} placeholder="Calle, sector, ciudad" />
@@ -343,7 +343,7 @@ export default function OwnerProfileScreen() {
               <Icon name="tag-outline" size={18} color={C.primary} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 11, letterSpacing: 0.5 }}>RANGO DE PRECIO</Text>
+              <AppText variant="overline" color={C.outline}>RANGO DE PRECIO</AppText>
               {editing ? (
                 <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
                   {[1, 2, 3].map(p => {
@@ -354,15 +354,15 @@ export default function OwnerProfileScreen() {
                         onPress={() => setPriceLevel(active ? null : p)}
                         style={{ paddingHorizontal: 14, paddingVertical: 6, borderRadius: 99, borderWidth: 2, borderColor: active ? C.border : C.outlineVariant, backgroundColor: active ? C.primary : C.surface }}
                       >
-                        <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: active ? '#fff' : C.onSurfaceVariant }}>{'$'.repeat(p)}</Text>
+                        <AppText variant="label" color={active ? '#fff' : C.onSurfaceVariant}>{'$'.repeat(p)}</AppText>
                       </Pressable>
                     );
                   })}
                 </View>
               ) : (
-                <Text style={{ color: priceLevel ? C.onSurface : C.outline, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 14, marginTop: 1 }}>
+                <AppText variant="label" color={priceLevel ? C.onSurface : C.outline} style={{ fontSize: 14, marginTop: 1 }}>
                   {priceLevel ? '$'.repeat(priceLevel) : '—'}
-                </Text>
+                </AppText>
               )}
             </View>
           </View>
@@ -371,16 +371,16 @@ export default function OwnerProfileScreen() {
         {/* Horario */}
         <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
           <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
-            <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Horario</Text>
+            <AppText variant="bodyStrong">Horario</AppText>
           </View>
           <View style={{ padding: 14, gap: 8 }}>
             {[1, 2, 3, 4, 5, 6, 0].map((dow) => {
               const d = hours.days[dow];
               return (
                 <View key={dow} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Text style={{ width: 40, color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13 }}>
+                  <AppText variant="label" style={{ width: 40, fontFamily: 'PlusJakartaSans_700Bold' }}>
                     {DAY_LABELS[dow]}
-                  </Text>
+                  </AppText>
                   {editing ? (
                     <>
                       <Switch
@@ -390,7 +390,7 @@ export default function OwnerProfileScreen() {
                         thumbColor={!d.closed ? C.primary : C.outline}
                       />
                       {d.closed ? (
-                        <Text style={{ flex: 1, color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13 }}>Cerrado</Text>
+                        <AppText variant="bodySm" color={C.outline} style={{ flex: 1 }}>Cerrado</AppText>
                       ) : (
                         <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                           <AppTextInput
@@ -400,7 +400,7 @@ export default function OwnerProfileScreen() {
                             keyboardType="numbers-and-punctuation"
                             style={{ fontSize: 13, textAlign: 'center', backgroundColor: C.surfaceContainerLow, borderRadius: 8, borderWidth: 1, borderColor: C.outlineVariant, paddingVertical: 6, minWidth: 56 }}
                           />
-                          <Text style={{ color: C.outline }}>–</Text>
+                          <AppText variant="bodySm" color={C.outline}>–</AppText>
                           <AppTextInput
                             value={d.close}
                             onChangeText={(t) => setDay(dow, { close: t.slice(0, 5) })}
@@ -412,9 +412,9 @@ export default function OwnerProfileScreen() {
                       )}
                     </>
                   ) : (
-                    <Text style={{ flex: 1, color: d.closed ? C.outline : C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13 }}>
+                    <AppText variant="label" color={d.closed ? C.outline : C.onSurfaceVariant} style={{ flex: 1 }}>
                       {formatRange(d)}
-                    </Text>
+                    </AppText>
                   )}
                 </View>
               );
@@ -425,7 +425,7 @@ export default function OwnerProfileScreen() {
         {/* Oferta */}
         <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
           <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
-            <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Oferta / promoción</Text>
+            <AppText variant="bodyStrong">Oferta / promoción</AppText>
           </View>
           <View style={{ padding: 18, gap: 6 }}>
             {editing ? (
@@ -437,17 +437,17 @@ export default function OwnerProfileScreen() {
                   maxLength={80}
                   style={{ fontSize: 14 }}
                 />
-                <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, textAlign: 'right' }}>{promo.length}/80</Text>
+                <AppText variant="caption" color={C.outline} align="right" style={{ fontSize: 12 }}>{promo.length}/80</AppText>
               </>
             ) : restaurant.promo_text ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Icon name="tag" size={16} color={C.primary} />
-                <Text style={{ flex: 1, color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14 }}>{restaurant.promo_text}</Text>
+                <AppText variant="bodyStrong" style={{ flex: 1, fontSize: 14 }}>{restaurant.promo_text}</AppText>
               </View>
             ) : (
-              <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14 }}>
+              <AppText variant="bodySm" color={C.outline}>
                 Sin oferta activa. Toca "Editar" para agregar una.
-              </Text>
+              </AppText>
             )}
           </View>
         </View>
@@ -458,10 +458,10 @@ export default function OwnerProfileScreen() {
             <Icon name="store-outline" size={20} color={C.primary} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Local visible</Text>
-            <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, marginTop: 1 }}>
+            <AppText variant="bodyStrong">Local visible</AppText>
+            <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 1 }}>
               Aparece en el mapa y en búsquedas
-            </Text>
+            </AppText>
           </View>
           <Switch
             value={isActive}
@@ -475,7 +475,7 @@ export default function OwnerProfileScreen() {
         {/* Fotos y menú */}
         <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
           <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
-            <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Fotos y menú</Text>
+            <AppText variant="bodyStrong">Fotos y menú</AppText>
           </View>
           <View style={{ padding: 18, gap: 14 }}>
 
@@ -495,7 +495,7 @@ export default function OwnerProfileScreen() {
               ) : (
                 <View style={{ alignItems: 'center', gap: 6 }}>
                   <Icon name="camera-plus-outline" size={30} color={C.primary} />
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13 }}>Subir foto de portada</Text>
+                  <AppText variant="label" color={C.onSurfaceVariant}>Subir foto de portada</AppText>
                 </View>
               )}
               {uploading === 'cover' && (
@@ -546,12 +546,12 @@ export default function OwnerProfileScreen() {
                     : <Icon name={restaurant.menu_pdf_url ? 'file-check' : 'file-pdf-box'} size={22} color={restaurant.menu_pdf_url ? '#fff' : C.primary} />}
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14 }}>
+                  <AppText variant="bodyStrong" style={{ fontSize: 14 }}>
                     {restaurant.menu_pdf_url ? 'Menú cargado' : 'Subir menú PDF'}
-                  </Text>
-                  <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, marginTop: 1 }}>
+                  </AppText>
+                  <AppText variant="caption" color={C.outline} style={{ fontSize: 12, marginTop: 1 }}>
                     {restaurant.menu_pdf_url ? 'Toca para reemplazar' : 'Tus clientes lo verán en tu perfil'}
-                  </Text>
+                  </AppText>
                 </View>
               </Pressable>
             </View>
