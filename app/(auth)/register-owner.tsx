@@ -15,6 +15,7 @@ import {
   View,
 } from 'react-native';
 import { AppTextInput } from '@/components/ui/AppTextInput';
+import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -33,13 +34,20 @@ const CATEGORIES = [
   { id: 12, label: 'Comida rápida',icon: 'food-variant' },
 ] as const;
 
-const STEPS = 3;
+const STEPS = 4;
 
 export default function RegisterOwnerScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [step, setStep] = useState(0);
+
+  // Step 0 — cuenta
+  const [email, setEmail]       = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm]   = useState('');
+  const [showPw, setShowPw]     = useState(false);
+  const [loading, setLoading]   = useState(false);
 
   const [name, setName]               = useState('');
   const [selectedCats, setSelectedCats] = useState<Set<number>>(new Set());
@@ -84,15 +92,73 @@ export default function RegisterOwnerScreen() {
     if (!result.canceled) setMenuPdfName(result.assets[0].name);
   }
 
+  const emailValid = /^\S+@\S+\.\S+$/.test(email.trim());
+
   const canContinue =
-    step === 0 ? !!(name.trim() && selectedCats.size > 0) :
-    step === 1 ? !!(address.trim() && coords) :
+    step === 0 ? emailValid && password.length >= 8 && password === confirm :
+    step === 1 ? !!(name.trim() && selectedCats.size > 0) :
+    step === 2 ? !!(address.trim() && coords) :
     true;
 
   function handleContinue() {
+    if (loading) return;
     if (step < STEPS - 1) { setStep(step + 1); return; }
-    // TODO: supabase INSERT restaurants + restaurant_categories + upload media to Storage
-    router.replace('/(auth)/welcome?role=owner');
+    handleRegister();
+  }
+
+  async function handleRegister() {
+    setLoading(true);
+
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: { data: { role: 'restaurant_owner' } },
+    });
+
+    if (error) {
+      setLoading(false);
+      Alert.alert('No se pudo crear la cuenta', error.message);
+      return;
+    }
+
+    if (!data.session) {
+      setLoading(false);
+      Alert.alert(
+        'Confirma tu correo',
+        'Te enviamos un correo. Al confirmar, inicia sesión y completa el registro de tu local.',
+      );
+      router.replace('/(auth)/login');
+      return;
+    }
+
+    const rpcArgs: {
+      p_name: string;
+      p_category_ids: number[];
+      p_address?: string;
+      p_lat?: number;
+      p_lng?: number;
+      p_whatsapp?: string;
+      p_instagram?: string;
+    } = {
+      p_name: name.trim(),
+      p_category_ids: Array.from(selectedCats),
+    };
+    if (address.trim()) rpcArgs.p_address = address.trim();
+    if (coords) { rpcArgs.p_lat = coords.lat; rpcArgs.p_lng = coords.lng; }
+    if (whatsapp.trim()) rpcArgs.p_whatsapp = whatsapp.trim();
+    if (instagram.trim()) rpcArgs.p_instagram = instagram.trim();
+
+    const { error: rpcError } = await supabase.rpc('create_owner_restaurant', rpcArgs);
+
+    setLoading(false);
+
+    if (rpcError) {
+      Alert.alert(
+        'Cuenta creada, pero…',
+        'No pudimos registrar el local ahora. Puedes hacerlo desde tu panel.',
+      );
+    }
+    // _layout detecta la sesión (role owner) y redirige a /(owner)
   }
 
   return (
@@ -141,8 +207,112 @@ export default function RegisterOwnerScreen() {
           keyboardShouldPersistTaps="handled"
         >
 
-          {/* ════ STEP 0 — Datos del restaurante ════ */}
+          {/* ════ STEP 0 — Tu cuenta ════ */}
           {step === 0 && (
+            <>
+              <View style={{ marginBottom: 24 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <View
+                    style={{
+                      width: 52, height: 52, borderRadius: 16,
+                      alignItems: 'center', justifyContent: 'center',
+                      backgroundColor: C.primaryFixed,
+                      borderWidth: 2, borderColor: C.border,
+                      ...shadow.sm,
+                    }}
+                  >
+                    <Icon name="account" size={28} color={C.primary} />
+                  </View>
+                  <View>
+                    <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24 }}>
+                      Tu cuenta
+                    </Text>
+                    <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 }}>
+                      Para administrar tu local
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={{ gap: 20 }}>
+                {/* Correo */}
+                <View style={{ gap: 8 }}>
+                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>
+                    Correo electrónico *
+                  </Text>
+                  <View style={{
+                    flexDirection: 'row', alignItems: 'center',
+                    borderRadius: 16, height: 56, paddingHorizontal: 16, gap: 12,
+                    backgroundColor: C.surfaceContainerLow,
+                    borderWidth: 2, borderColor: C.border, ...shadow.sm,
+                  }}>
+                    <Icon name="email-outline" size={22} color={C.outline} />
+                    <AppTextInput
+                      placeholder="tucorreo@ejemplo.com"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      value={email}
+                      onChangeText={setEmail}
+                    />
+                  </View>
+                </View>
+
+                {/* Contraseña */}
+                <View style={{ gap: 8 }}>
+                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>
+                    Contraseña *{' '}
+                    <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular' }}>(mín. 8)</Text>
+                  </Text>
+                  <View style={{
+                    flexDirection: 'row', alignItems: 'center',
+                    borderRadius: 16, height: 56, paddingHorizontal: 16, gap: 12,
+                    backgroundColor: C.surfaceContainerLow,
+                    borderWidth: 2, borderColor: C.border, ...shadow.sm,
+                  }}>
+                    <Icon name="lock-outline" size={22} color={C.outline} />
+                    <AppTextInput
+                      placeholder="••••••••"
+                      secureTextEntry={!showPw}
+                      value={password}
+                      onChangeText={setPassword}
+                    />
+                    <Pressable onPress={() => setShowPw(v => !v)}>
+                      <Icon name={showPw ? 'eye-off-outline' : 'eye-outline'} size={22} color={C.outline} />
+                    </Pressable>
+                  </View>
+                </View>
+
+                {/* Confirmar */}
+                <View style={{ gap: 8 }}>
+                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, marginLeft: 4 }}>
+                    Confirmar contraseña *
+                  </Text>
+                  <View style={{
+                    flexDirection: 'row', alignItems: 'center',
+                    borderRadius: 16, height: 56, paddingHorizontal: 16, gap: 12,
+                    backgroundColor: C.surfaceContainerLow,
+                    borderWidth: 2, borderColor: C.border, ...shadow.sm,
+                  }}>
+                    <Icon name="lock-outline" size={22} color={C.outline} />
+                    <AppTextInput
+                      placeholder="••••••••"
+                      secureTextEntry={!showPw}
+                      value={confirm}
+                      onChangeText={setConfirm}
+                    />
+                  </View>
+                  {confirm.length > 0 && password !== confirm && (
+                    <Text style={{ color: C.error, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, marginLeft: 4 }}>
+                      Las contraseñas no coinciden.
+                    </Text>
+                  )}
+                </View>
+              </View>
+            </>
+          )}
+
+          {/* ════ STEP 1 — Datos del restaurante ════ */}
+          {step === 1 && (
             <>
               <View style={{ marginBottom: 24 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
@@ -263,8 +433,8 @@ export default function RegisterOwnerScreen() {
             </>
           )}
 
-          {/* ════ STEP 1 — Ubicación + contacto ════ */}
-          {step === 1 && (
+          {/* ════ STEP 2 — Ubicación + contacto ════ */}
+          {step === 2 && (
             <>
               <View style={{ marginBottom: 24 }}>
                 <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24, marginBottom: 8 }}>
@@ -377,8 +547,8 @@ export default function RegisterOwnerScreen() {
             </>
           )}
 
-          {/* ════ STEP 2 — Media ════ */}
-          {step === 2 && (
+          {/* ════ STEP 3 — Media ════ */}
+          {step === 3 && (
             <>
               <View style={{ marginBottom: 24 }}>
                 <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24, marginBottom: 8 }}>
@@ -506,19 +676,19 @@ export default function RegisterOwnerScreen() {
       }}>
         <Pressable
           onPress={handleContinue}
-          disabled={!canContinue}
+          disabled={!canContinue || loading}
           style={{
             height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center',
             flexDirection: 'row', gap: 8,
-            backgroundColor: canContinue ? C.primary : C.surfaceContainerHighest,
-            borderWidth: 2, borderColor: canContinue ? C.border : C.outlineVariant,
-            ...(canContinue ? shadow.primary : {}),
+            backgroundColor: canContinue && !loading ? C.primary : C.surfaceContainerHighest,
+            borderWidth: 2, borderColor: canContinue && !loading ? C.border : C.outlineVariant,
+            ...(canContinue && !loading ? shadow.primary : {}),
           }}
         >
-          <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 16, color: canContinue ? '#fff' : C.outline }}>
-            {step === STEPS - 1 ? 'Registrar mi restaurante' : 'Continuar'}
+          <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 16, color: canContinue && !loading ? '#fff' : C.outline }}>
+            {loading ? 'Creando…' : step === STEPS - 1 ? 'Registrar mi restaurante' : 'Continuar'}
           </Text>
-          <Icon name={step === STEPS - 1 ? 'storefront' : 'arrow-right'} size={20} color={canContinue ? '#fff' : C.outline} />
+          {!loading && <Icon name={step === STEPS - 1 ? 'storefront' : 'arrow-right'} size={20} color={canContinue ? '#fff' : C.outline} />}
         </Pressable>
         {step === STEPS - 1 && (
           <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, textAlign: 'center', marginTop: 10, lineHeight: 18 }}>

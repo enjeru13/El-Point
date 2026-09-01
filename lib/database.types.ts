@@ -598,14 +598,14 @@ export type Database = {
           }
       create_owner_restaurant: {
         Args: {
-          p_address: string
-          p_category_ids: number[]
-          p_description: string
-          p_instagram: string
-          p_lat: number
-          p_lng: number
+          p_address?: string
+          p_category_ids?: number[]
+          p_description?: string
+          p_instagram?: string
+          p_lat?: number
+          p_lng?: number
           p_name: string
-          p_whatsapp: string
+          p_whatsapp?: string
         }
         Returns: string
       }

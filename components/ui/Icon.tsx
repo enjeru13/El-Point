@@ -1,8 +1,8 @@
 import {
   Aperture, ArrowLeft, ArrowRight, Award, BarChart2, Bell, BookOpen,
   Camera, CheckCircle2, ChefHat, ChevronRight, Circle, Clock, Coffee,
-  Crosshair, Flame, Globe, Heart, Home, IceCream, ImagePlus,
-  Leaf, LayoutList, Lock, LogOut, Map, MapPin,
+  Crosshair, Eye, EyeOff, Flame, Globe, Heart, Home, IceCream, ImagePlus,
+  Leaf, LayoutList, Lock, LogOut, Mail, Map, MapPin,
   MapPinned, Medal, MessageCircle, MessageSquare, MessagesSquare,
   Minus, Navigation, PartyPopper, Pencil, Phone, Pizza, Plus,
   Reply, Sandwich, Search, Settings, Settings2, Share2, Shield, ShieldCheck,
@@ -44,6 +44,9 @@ const MAP: Record<string, LucideIcon> = {
   'whatsapp':             MessageCircle,
   // Communication
   'bell-outline':         Bell,
+  'email-outline':        Mail,
+  'eye-outline':          Eye,
+  'eye-off-outline':      EyeOff,
   'comment-text':         MessageSquare,
   'comment-text-multiple':MessagesSquare,
   'reply':                Reply,
