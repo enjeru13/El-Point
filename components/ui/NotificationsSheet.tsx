@@ -1,6 +1,7 @@
 import { Icon } from '@/components/ui/Icon';
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Animated,
   Modal,
   Pressable,
@@ -11,52 +12,23 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
+import {
+  useNotifications,
+  useMarkNotificationRead,
+  useMarkAllNotificationsRead,
+  type AppNotification,
+} from '@/lib/queries/notifications';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type NotifType = 'like' | 'reply' | 'levelup' | 'levelup_soon';
-
-interface Notif {
-  id: string;
-  type: NotifType;
-  title: string;
-  body: string;
-  time: string;
-  read: boolean;
+function timeAgo(iso: string): string {
+  const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (min < 1) return 'Ahora';
+  if (min < 60) return `Hace ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `Hace ${h} h`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `Hace ${d} ${d === 1 ? 'día' : 'días'}`;
+  return `Hace ${Math.floor(d / 7)} sem`;
 }
-
-const MOCK: Notif[] = [
-  {
-    id: '1', type: 'like', read: false,
-    title: 'A @burgerking99 le gustó tu reseña',
-    body: 'Tu review de La Smasheria recibió 8 likes.',
-    time: 'Hace 1 hora',
-  },
-  {
-    id: '2', type: 'reply', read: false,
-    title: '@pizzalover_x respondió tu reseña',
-    body: '"Totalmente de acuerdo con la salsa secreta 🔥"',
-    time: 'Hace 3 horas',
-  },
-  {
-    id: '3', type: 'levelup_soon', read: false,
-    title: 'Casi subes de nivel',
-    body: 'Te faltan 2 ranks para ser Crítico Local. ¡Sigue comiendo!',
-    time: 'Hace 5 horas',
-  },
-  {
-    id: '4', type: 'levelup', read: true,
-    title: '¡Subiste de nivel!',
-    body: 'Ahora eres Comensal Experto. Nuevos perks desbloqueados.',
-    time: 'Ayer',
-  },
-  {
-    id: '5', type: 'like', read: true,
-    title: 'A @foodie_mx le gustó tu reseña',
-    body: 'Tu review de Pizza Mágica recibió 3 likes.',
-    time: 'Hace 2 días',
-  },
-];
 
 // ─── Dotted divider ───────────────────────────────────────────────────────────
 
@@ -65,10 +37,7 @@ function DottedDivider({ label }: { label: string }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 14 }}>
       <View style={{ flex: 1, borderTopWidth: 2, borderStyle: 'dashed', borderColor: C.outlineVariant }} />
-      <Text style={{
-        fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10,
-        color: C.outline, letterSpacing: 1.5,
-      }}>
+      <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, color: C.outline, letterSpacing: 1.5 }}>
         {label}
       </Text>
       <View style={{ flex: 1, borderTopWidth: 2, borderStyle: 'dashed', borderColor: C.outlineVariant }} />
@@ -78,23 +47,24 @@ function DottedDivider({ label }: { label: string }) {
 
 // ─── Card ─────────────────────────────────────────────────────────────────────
 
-function NotifCard({ notif, onRead }: { notif: Notif; onRead: (id: string) => void }) {
+function NotifCard({ notif, onRead }: { notif: AppNotification; onRead: (id: string) => void }) {
   const { C, shadow } = useTheme();
-  const NOTIF_CONFIG: Record<NotifType, { icon: string; bg: string; color: string }> = {
-    like:         { icon: 'heart',       bg: C.primaryFixed,       color: C.primary },
-    reply:        { icon: 'reply',       bg: C.secondaryContainer, color: C.secondary },
-    levelup:      { icon: 'star-circle', bg: C.primaryContainer,   color: '#fff' },
-    levelup_soon: { icon: 'trending-up', bg: C.tertiaryContainer,  color: C.tertiary },
+  const CONFIG: Record<AppNotification['type'], { icon: string; bg: string; color: string }> = {
+    like:         { icon: 'heart',        bg: C.primaryFixed,       color: C.primary },
+    reply:        { icon: 'reply',        bg: C.secondaryContainer, color: C.secondary },
+    review:       { icon: 'comment-text', bg: C.secondaryContainer, color: C.secondary },
+    levelup:      { icon: 'star-circle',  bg: C.primaryContainer,   color: '#fff' },
+    levelup_soon: { icon: 'trending-up',  bg: C.tertiaryContainer,  color: C.tertiary },
+    promo:        { icon: 'tag',          bg: C.primaryContainer,   color: '#fff' },
   };
-  const cfg = NOTIF_CONFIG[notif.type];
+  const cfg = CONFIG[notif.type] ?? CONFIG.like;
 
   return (
     <Pressable
-      onPress={() => onRead(notif.id)}
+      onPress={() => !notif.read && onRead(notif.id)}
       style={({ pressed }) => ({
         padding: 16,
         borderRadius: 18,
-        marginBottom: 0,
         backgroundColor: notif.read ? C.surfaceContainerLow : C.surface,
         borderWidth: 2,
         borderColor: notif.read ? C.outlineVariant : C.border,
@@ -102,45 +72,26 @@ function NotifCard({ notif, onRead }: { notif: Notif; onRead: (id: string) => vo
         ...(notif.read ? {} : shadow.sm),
       })}
     >
-      {/* Tipo + tiempo */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-        <View style={{
-          width: 22, height: 22, borderRadius: 8,
-          backgroundColor: cfg.bg,
-          alignItems: 'center', justifyContent: 'center',
-          borderWidth: 1.5, borderColor: C.border,
-        }}>
+        <View style={{ width: 22, height: 22, borderRadius: 8, backgroundColor: cfg.bg, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: C.border }}>
           <Icon name={cfg.icon} size={12} color={cfg.color} />
         </View>
-        <Text style={{
-          fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 11,
-          color: C.outline, flex: 1,
-        }}>
-          {notif.time}
+        <Text style={{ fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 11, color: C.outline, flex: 1 }}>
+          {timeAgo(notif.created_at)}
         </Text>
         {!notif.read && (
-          <View style={{
-            width: 8, height: 8, borderRadius: 4,
-            backgroundColor: C.primaryContainer,
-            borderWidth: 1.5, borderColor: C.border,
-          }} />
+          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: C.primaryContainer, borderWidth: 1.5, borderColor: C.border }} />
         )}
       </View>
 
-      {/* Texto */}
-      <Text style={{
-        fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14,
-        color: notif.read ? C.onSurfaceVariant : C.onSurface,
-        lineHeight: 19, marginBottom: 3,
-      }}>
+      <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: notif.read ? C.onSurfaceVariant : C.onSurface, lineHeight: 19, marginBottom: 3 }}>
         {notif.title}
       </Text>
-      <Text style={{
-        fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13,
-        color: C.onSurfaceVariant, lineHeight: 18,
-      }}>
-        {notif.body}
-      </Text>
+      {notif.body && (
+        <Text style={{ fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, color: C.onSurfaceVariant, lineHeight: 18 }}>
+          {notif.body}
+        </Text>
+      )}
     </Pressable>
   );
 }
@@ -156,53 +107,48 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const [visible, setVisible] = useState(false);
-  const [notifs, setNotifs] = useState(MOCK);
   const translateY = useRef(new Animated.Value(-20)).current;
-  const opacity    = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
 
-  const unread = notifs.filter(n => !n.read);
-  const read   = notifs.filter(n => n.read);
+  const notifsQ = useNotifications();
+  const markRead = useMarkNotificationRead();
+  const markAll = useMarkAllNotificationsRead();
+
+  const notifs = notifsQ.data ?? [];
+  const unread = notifs.filter((n) => !n.read);
+  const read = notifs.filter((n) => n.read);
   const unreadCount = unread.length;
 
   const open = useCallback(() => {
     setVisible(true);
+    notifsQ.refetch();
     translateY.setValue(-20);
     opacity.setValue(0);
     Animated.parallel([
       Animated.spring(translateY, { toValue: 0, useNativeDriver: true, damping: 18, stiffness: 260 }),
-      Animated.timing(opacity,    { toValue: 1, duration: 180, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true }),
     ]).start();
   }, []);
 
   const close = useCallback(() => {
     Animated.parallel([
       Animated.spring(translateY, { toValue: -16, useNativeDriver: true, damping: 18, stiffness: 260 }),
-      Animated.timing(opacity,    { toValue: 0,  duration: 150, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 0, duration: 150, useNativeDriver: true }),
     ]).start(() => setVisible(false));
   }, []);
 
   useImperativeHandle(ref, () => ({ present: open, dismiss: close }));
 
-  const markRead = useCallback((id: string) => {
-    setNotifs(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-  }, []);
-
-  const markAllRead = useCallback(() => {
-    setNotifs(prev => prev.map(n => ({ ...n, read: true })));
-  }, []);
-
   if (!visible) return null;
 
-  const TOP = insets.top + 56 + 8; // debajo del header
+  const TOP = insets.top + 56 + 8;
 
   return (
     <Modal transparent animationType="none" visible={visible} onRequestClose={close}>
-      {/* Backdrop */}
       <TouchableWithoutFeedback onPress={close}>
         <View style={{ position: 'absolute', inset: 0 }} />
       </TouchableWithoutFeedback>
 
-      {/* Dropdown panel */}
       <Animated.View
         style={{
           position: 'absolute',
@@ -225,51 +171,42 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
           borderBottomWidth: 2, borderBottomColor: C.outlineVariant,
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 18, color: C.onSurface }}>
-              Notificaciones
-            </Text>
+            <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 18, color: C.onSurface }}>Notificaciones</Text>
             {unreadCount > 0 && (
-              <View style={{
-                paddingHorizontal: 7, paddingVertical: 1, borderRadius: 99,
-                backgroundColor: C.primaryContainer,
-                borderWidth: 2, borderColor: C.border,
-              }}>
-                <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: C.onSurface }}>
-                  {unreadCount}
-                </Text>
+              <View style={{ paddingHorizontal: 7, paddingVertical: 1, borderRadius: 99, backgroundColor: C.primaryContainer, borderWidth: 2, borderColor: C.border }}>
+                <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: C.onSurface }}>{unreadCount}</Text>
               </View>
             )}
           </View>
           {unreadCount > 0 && (
-            <Pressable onPress={markAllRead}>
-              <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: C.primary }}>
-                Marcar todas
-              </Text>
+            <Pressable onPress={() => markAll.mutate()}>
+              <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: C.primary }}>Marcar todas</Text>
             </Pressable>
           )}
         </View>
 
         {/* List */}
-        <ScrollView
-          contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-        >
-          <View style={{ gap: 12 }}>
-            {unread.map(n => (
-              <NotifCard key={n.id} notif={n} onRead={markRead} />
-            ))}
-          </View>
-
-          {unread.length > 0 && read.length > 0 && (
-            <DottedDivider label="ANTERIORES" />
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24 }} showsVerticalScrollIndicator={false} bounces={false}>
+          {notifsQ.isLoading ? (
+            <View style={{ paddingVertical: 32 }}><ActivityIndicator color={C.primary} /></View>
+          ) : notifs.length === 0 ? (
+            <View style={{ alignItems: 'center', paddingVertical: 32, gap: 8 }}>
+              <Icon name="bell-outline" size={32} color={C.outlineVariant} />
+              <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, textAlign: 'center' }}>
+                No tienes notificaciones todavía.
+              </Text>
+            </View>
+          ) : (
+            <>
+              <View style={{ gap: 12 }}>
+                {unread.map((n) => <NotifCard key={n.id} notif={n} onRead={(id) => markRead.mutate(id)} />)}
+              </View>
+              {unread.length > 0 && read.length > 0 && <DottedDivider label="ANTERIORES" />}
+              <View style={{ gap: 12 }}>
+                {read.map((n) => <NotifCard key={n.id} notif={n} onRead={(id) => markRead.mutate(id)} />)}
+              </View>
+            </>
           )}
-
-          <View style={{ gap: 12 }}>
-            {read.map(n => (
-              <NotifCard key={n.id} notif={n} onRead={markRead} />
-            ))}
-          </View>
         </ScrollView>
       </Animated.View>
     </Modal>
