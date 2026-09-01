@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { useRestaurantSearch, type SearchResult } from '@/lib/queries/search';
+import { isOpenNow } from '@/lib/hours';
 
 type SortKey = 'rank' | 'reviews' | null;
 type PriceKey = 1 | 2 | 3 | null;
@@ -85,6 +86,19 @@ function BestMatchCard({ item, onPress }: { item: SearchResult; onPress: () => v
         ) : (
           <Icon name={catIcon(item)} size={100} color={C.onSurface} style={{ opacity: 0.12 }} />
         )}
+        {item.hours && (
+          <View style={{
+            position: 'absolute', top: 14, left: 14,
+            flexDirection: 'row', alignItems: 'center', gap: 5,
+            paddingHorizontal: 10, paddingVertical: 5, borderRadius: 99,
+            backgroundColor: 'rgba(251,248,255,0.92)', borderWidth: 2, borderColor: C.border,
+          }}>
+            <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: isOpenNow(item.hours).open ? '#22c55e' : '#ef4444' }} />
+            <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: C.onSurface }}>
+              {isOpenNow(item.hours).open ? 'Abierto' : 'Cerrado'}
+            </Text>
+          </View>
+        )}
         <View style={{ position: 'absolute', top: 14, right: 14 }}>
           <StarBadgeInline rating={item.rating_avg} count={item.rating_count} />
         </View>
@@ -154,6 +168,9 @@ function ResultCard({ item, onPress }: { item: SearchResult; onPress: () => void
         ) : (
           <Icon name={catIcon(item)} size={44} color={C.onSurface} style={{ opacity: 0.18 }} />
         )}
+        {item.hours && (
+          <View style={{ position: 'absolute', top: 8, left: 8, width: 10, height: 10, borderRadius: 5, borderWidth: 2, borderColor: '#fff', backgroundColor: isOpenNow(item.hours).open ? '#22c55e' : '#ef4444' }} />
+        )}
         <View style={{ position: 'absolute', top: 8, right: 8 }}>
           <StarBadgeInline rating={item.rating_avg} count={item.rating_count} />
         </View>
@@ -190,8 +207,9 @@ export default function SearchScreen() {
   const [filterOpen, setFilter] = useState(false);
   const [sort, setSort]         = useState<SortKey>(null);
   const [price, setPrice]       = useState<PriceKey>(null);
+  const [onlyOpen, setOnlyOpen] = useState(false);
 
-  const hasActiveFilters = sort !== null || price !== null;
+  const hasActiveFilters = sort !== null || price !== null || onlyOpen;
   const all = searchQ.data ?? [];
 
   const results = useMemo(() => {
@@ -203,12 +221,13 @@ export default function SearchScreen() {
         r.categories.some(c => c.label.toLowerCase().includes(q) || c.slug.includes(q)) ||
         (r.address ?? '').toLowerCase().includes(q);
       const matchPrice = !price || r.price_level === price;
-      return matchQuery && matchPrice;
+      const matchOpen = !onlyOpen || isOpenNow(r.hours).open;
+      return matchQuery && matchPrice && matchOpen;
     });
     if (sort === 'rank') list = [...list].sort((a, b) => b.rating_avg - a.rating_avg);
     if (sort === 'reviews') list = [...list].sort((a, b) => b.rating_count - a.rating_count);
     return list;
-  }, [all, query, price, sort]);
+  }, [all, query, price, sort, onlyOpen]);
 
   const best = results[0] ?? null;
   const rest = results.slice(1);
@@ -216,8 +235,8 @@ export default function SearchScreen() {
   for (let i = 0; i < rest.length; i += 2) pairs.push(rest.slice(i, i + 2));
 
   function go(label: string) { setQuery(label); setShow(true); }
-  function clear() { setQuery(''); setShow(false); setFilter(false); setSort(null); setPrice(null); }
-  function resetFilters() { setSort(null); setPrice(null); }
+  function clear() { setQuery(''); setShow(false); setFilter(false); setSort(null); setPrice(null); setOnlyOpen(false); }
+  function resetFilters() { setSort(null); setPrice(null); setOnlyOpen(false); }
 
   return (
     <View style={{ flex: 1, backgroundColor: C.surface }}>
@@ -320,6 +339,23 @@ export default function SearchScreen() {
               })}
             </View>
           </View>
+
+          <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
+
+          <Pressable
+            onPress={() => setOnlyOpen(v => !v)}
+            style={{
+              flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start',
+              paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99,
+              backgroundColor: onlyOpen ? '#dcfce7' : C.surface,
+              borderWidth: 2, borderColor: onlyOpen ? '#16a34a' : C.outlineVariant,
+            }}
+          >
+            <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: onlyOpen ? '#16a34a' : C.outline }} />
+            <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: onlyOpen ? '#16a34a' : C.onSurfaceVariant }}>
+              Abiertos ahora
+            </Text>
+          </Pressable>
 
           {hasActiveFilters && (
             <Pressable onPress={resetFilters} style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
