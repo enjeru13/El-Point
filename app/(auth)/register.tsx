@@ -12,9 +12,10 @@ import {
   Text,
   View,
 } from 'react-native';
-import { AppTextInput } from '@/components/ui/AppTextInput';
+import { Field } from '@/components/ui/Field';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/ThemeContext';
+import { Button } from '@/components/ui/Button';
 import { ThemePicker } from '@/components/ui/ThemePicker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -212,46 +213,23 @@ export default function RegisterScreen() {
                 </Text>
               </View>
 
-              <View className="gap-5">
-                <View className="gap-2">
-                  <Text
-                    className="text-sm ml-1"
-                    style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold' }}
-                  >
-                    Usuario
-                  </Text>
-                  <View
-                    className="flex-row items-center rounded-2xl h-14 px-4 gap-2 border-2"
-                    style={{
-                      backgroundColor: C.surfaceContainerLow,
-                      borderColor: C.border,
-                      ...shadow.md,
-                    }}
-                  >
-                    <Text
-                      className="text-lg"
-                      style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold' }}
-                    >
-                      @
-                    </Text>
-                    <AppTextInput
-                      className=""
-                      placeholder="foodie_lover"
-                      placeholderTextColor={C.outline + '66'}
-                      autoCapitalize="none"
-                      value={username}
-                      onChangeText={setUsername}
-                    />
-                  </View>
-                </View>
-
-                <InputField
+              <View style={{ gap: 16 }}>
+                <Field
+                  label="Usuario"
+                  icon="account"
+                  placeholder="foodie_lover"
+                  autoCapitalize="none"
+                  value={username}
+                  onChangeText={(t) => setUsername(t.replace(/[^a-z0-9_.]/gi, ''))}
+                />
+                <Field
                   label="Correo electrónico"
                   icon="email-outline"
                   placeholder="mateo@ejemplo.com"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
                   value={email}
                   onChangeText={setEmail}
-                  keyboardType="email-address"
                 />
               </View>
 
@@ -389,27 +367,25 @@ export default function RegisterScreen() {
                   Mínimo 8 caracteres. Hazla memorable pero segura.
                 </Text>
               </View>
-              <View className="gap-5">
-                <PasswordField
+              <View style={{ gap: 16 }}>
+                <Field
                   label="Contraseña"
+                  icon="lock-outline"
                   placeholder="••••••••"
+                  secure
                   value={password}
                   onChangeText={setPassword}
+                  hint={password.length > 0 && password.length < 8 ? 'Mínimo 8 caracteres' : undefined}
                 />
-                <PasswordField
+                <Field
                   label="Confirmar contraseña"
+                  icon="lock-outline"
                   placeholder="••••••••"
+                  secure
                   value={confirm}
                   onChangeText={setConfirm}
+                  error={confirm.length > 0 && password !== confirm ? 'Las contraseñas no coinciden.' : null}
                 />
-                {confirm.length > 0 && password !== confirm && (
-                  <Text
-                    className="text-sm ml-1"
-                    style={{ color: C.error, fontFamily: 'PlusJakartaSans_400Regular' }}
-                  >
-                    Las contraseñas no coinciden.
-                  </Text>
-                )}
               </View>
             </>
           )}
@@ -632,37 +608,24 @@ export default function RegisterScreen() {
               <View style={{ height: '100%', borderRadius: 99, width: `${(selected.size / CATEGORIES.length) * 100}%`, backgroundColor: C.primary }} />
             </View>
             <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-              <Pressable onPress={handleContinue} style={{ flex: 1, height: 56, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 14 }}>Omitir</Text>
-              </Pressable>
-              <Pressable
+              <Button label="Omitir" onPress={handleContinue} variant="ghost" fullWidth={false} style={{ flex: 1 }} />
+              <Button
+                label={selected.size > 0 ? `Continuar (${selected.size})` : 'Continuar'}
                 onPress={handleContinue}
-                style={{ flex: 2, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: C.primary, borderWidth: 2, borderColor: C.border, ...shadow.primary }}
-              >
-                <Text style={{ color: '#fff', fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16 }}>
-                  {selected.size > 0 ? `Continuar (${selected.size})` : 'Continuar'}
-                </Text>
-              </Pressable>
+                fullWidth={false}
+                style={{ flex: 2 }}
+              />
             </View>
           </>
         ) : (
           <>
-            <Pressable
+            <Button
+              label={loading ? 'Creando cuenta…' : step === 2 ? 'Crear cuenta' : step === 4 ? 'Empezar a explorar' : 'Continuar'}
               onPress={handleContinue}
-              disabled={!canContinue || loading}
-              style={{
-                height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center',
-                flexDirection: 'row', gap: 8,
-                backgroundColor: canContinue && !loading ? C.primary : C.surfaceContainerHighest,
-                borderWidth: 2, borderColor: C.border,
-                ...(canContinue && !loading ? shadow.primary : {}),
-              }}
-            >
-              <Text style={{ color: canContinue && !loading ? '#fff' : C.outline, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16 }}>
-                {loading ? 'Creando cuenta...' : step === 2 ? 'Crear cuenta' : step === 4 ? 'Empezar a explorar' : 'Continuar'}
-              </Text>
-              {!loading && <Icon name={step === 4 ? 'check' : step === 2 ? 'check' : 'arrow-right'} size={20} color={canContinue ? '#fff' : C.outline} />}
-            </Pressable>
+              disabled={!canContinue}
+              loading={loading}
+              iconTrailing={step === 2 || step === 4 ? 'check' : 'arrow-right'}
+            />
             {step === 0 && (
               <Text style={{ color: C.onSurfaceVariant + '80', fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, textAlign: 'center', marginTop: 10, lineHeight: 18 }}>
                 Al continuar, aceptas nuestros <Text style={{ textDecorationLine: 'underline' }}>Términos de Servicio</Text> y <Text style={{ textDecorationLine: 'underline' }}>Política de Privacidad</Text>.
@@ -672,125 +635,5 @@ export default function RegisterScreen() {
         )}
       </View>
     </View>
-  );
-}
-
-// ─── Componentes reutilizables ────────────────────────────────────────────────
-
-function InputField({
-  label, icon, placeholder, value, onChangeText, keyboardType = 'default',
-}: {
-  label: string;
-  icon: string;
-  placeholder: string;
-  value: string;
-  onChangeText: (t: string) => void;
-  keyboardType?: 'default' | 'email-address';
-}) {
-  const { C, shadow } = useTheme();
-  return (
-    <View className="gap-2">
-      <Text className="text-sm ml-1" style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold' }}>
-        {label}
-      </Text>
-      <View className="flex-row items-center rounded-2xl h-14 px-4 gap-3 border-2" style={{ backgroundColor: C.surfaceContainerLow, borderColor: C.border, ...shadow.md }}>
-        <Icon name={icon} size={22} color={C.outline} />
-        <AppTextInput className="" placeholder={placeholder} placeholderTextColor={C.outline + '66'} autoCapitalize="none" keyboardType={keyboardType} value={value} onChangeText={onChangeText} />
-      </View>
-    </View>
-  );
-}
-
-function PasswordField({
-  label, placeholder, value, onChangeText,
-}: {
-  label: string;
-  placeholder: string;
-  value: string;
-  onChangeText: (t: string) => void;
-}) {
-  const { C, shadow } = useTheme();
-  const [show, setShow] = useState(false);
-  return (
-    <View className="gap-2">
-      <Text
-        className="text-sm ml-1"
-        style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold' }}
-      >
-        {label}
-      </Text>
-      <View
-        className="flex-row items-center rounded-2xl h-14 px-4 gap-3 border-2"
-        style={{
-          backgroundColor: C.surfaceContainerLow,
-          borderColor: C.border,
-          ...shadow.md,
-        }}
-      >
-        <Icon name="lock-outline" size={22} color={C.outline} />
-        <AppTextInput
-          className=""
-          placeholder={placeholder}
-          placeholderTextColor={C.outline + '66'}
-          secureTextEntry={!show}
-          value={value}
-          onChangeText={onChangeText}
-        />
-        <Pressable onPress={() => setShow(!show)}>
-          <Icon
-            name={show ? 'eye-off-outline' : 'eye-outline'}
-            size={22}
-            color={C.outline}
-          />
-        </Pressable>
-      </View>
-    </View>
-  );
-}
-
-function RoleCard({
-  icon, title, description, selected, onPress,
-}: {
-  icon: string;
-  title: string;
-  description: string;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  const { C, shadow } = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      className="flex-row items-center gap-4 p-5 rounded-3xl border-2"
-      style={{
-        borderColor: selected ? C.primary : C.outlineVariant,
-        backgroundColor: selected ? C.primaryFixed + '33' : C.surfaceContainerLow,
-        ...(selected ? shadow.md : {}),
-      }}
-    >
-      <View
-        className="w-14 h-14 rounded-2xl items-center justify-center"
-        style={{ backgroundColor: selected ? C.primary : C.surfaceContainerHighest }}
-      >
-        <Icon name={icon} size={28} color={selected ? '#fff' : C.onSurfaceVariant} />
-      </View>
-      <View className="flex-1">
-        <Text
-          className="text-base mb-1"
-          style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold' }}
-        >
-          {title}
-        </Text>
-        <Text
-          className="text-sm leading-5"
-          style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular' }}
-        >
-          {description}
-        </Text>
-      </View>
-      {selected && (
-        <Icon name="check-circle" size={24} color={C.primary} />
-      )}
-    </Pressable>
   );
 }

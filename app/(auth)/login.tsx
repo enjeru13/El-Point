@@ -1,5 +1,6 @@
 import { AppLogo } from "@/components/ui/AppLogo";
-import { AppTextInput, InputWrapper } from "@/components/ui/AppTextInput";
+import { Button } from "@/components/ui/Button";
+import { Field } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
 import { supabase } from "@/lib/supabase";
 import { useTheme } from "@/lib/ThemeContext";
@@ -316,50 +317,12 @@ function FloatingIcon({ icon }: { icon: (typeof FOOD_ICONS)[0] }) {
   );
 }
 
-function Field({
-  label,
-  icon,
-  focused,
-  children,
-  right,
-}: {
-  label: string;
-  icon: string;
-  focused: boolean;
-  children: React.ReactNode;
-  right?: React.ReactNode;
-}) {
-  const { C } = useTheme();
-  return (
-    <View style={{ gap: 8 }}>
-      <Text
-        style={{
-          color: C.onSurfaceVariant,
-          fontFamily: "PlusJakartaSans_600SemiBold",
-          fontSize: 15,
-          marginLeft: 4,
-        }}
-      >
-        {label}
-      </Text>
-      <InputWrapper focused={focused}>
-        <Icon name={icon} size={22} color={focused ? C.primary : C.outline} />
-        {children}
-        {right}
-      </InputWrapper>
-    </View>
-  );
-}
-
 export default function LoginScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPw, setShowPw] = useState(false);
-  const [focusEmail, setFocusEmail] = useState(false);
-  const [focusPw, setFocusPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
@@ -438,42 +401,21 @@ export default function LoginScreen() {
           <Field
             label="Correo electrónico"
             icon="email-outline"
-            focused={focusEmail}
-          >
-            <AppTextInput
-              placeholder="hambriento@elpoint.app"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-              onFocus={() => setFocusEmail(true)}
-              onBlur={() => setFocusEmail(false)}
-            />
-          </Field>
+            placeholder="hambriento@elpoint.app"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+          />
 
           <Field
             label="Contraseña"
             icon="lock-outline"
-            focused={focusPw}
-            right={
-              <Pressable onPress={() => setShowPw(!showPw)}>
-                <Icon
-                  name={showPw ? "eye-off-outline" : "eye-outline"}
-                  size={22}
-                  color={C.outline}
-                />
-              </Pressable>
-            }
-          >
-            <AppTextInput
-              placeholder="••••••••"
-              secureTextEntry={!showPw}
-              value={password}
-              onChangeText={setPassword}
-              onFocus={() => setFocusPw(true)}
-              onBlur={() => setFocusPw(false)}
-            />
-          </Field>
+            placeholder="••••••••"
+            secure
+            value={password}
+            onChangeText={setPassword}
+          />
 
           <Pressable
             onPress={() => router.push("/(auth)/forgot-password")}
@@ -491,33 +433,12 @@ export default function LoginScreen() {
           </Pressable>
 
           {/* Botón ingresar */}
-          <Pressable
+          <Button
+            label={loading ? "Ingresando…" : "Ingresar"}
             onPress={handleLogin}
-            disabled={loading}
-            style={{
-              height: 56,
-              borderRadius: 28,
-              alignItems: "center",
-              justifyContent: "center",
-              flexDirection: "row",
-              gap: 8,
-              backgroundColor: loading ? C.outline : C.primary,
-              borderWidth: 2,
-              borderColor: C.border,
-              ...shadow.primary,
-            }}
-          >
-            <Text
-              style={{
-                color: "#fff",
-                fontFamily: "Outfit_700Bold",
-                fontSize: 16,
-              }}
-            >
-              {loading ? "Ingresando..." : "Ingresar"}
-            </Text>
-            {!loading && <Icon name="arrow-right" size={20} color="#fff" />}
-          </Pressable>
+            loading={loading}
+            iconTrailing="arrow-right"
+          />
 
           {/* Divisor */}
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -540,31 +461,13 @@ export default function LoginScreen() {
           </View>
 
           {/* Google */}
-          <Pressable
-            style={{
-              height: 56,
-              borderRadius: 28,
-              alignItems: "center",
-              justifyContent: "center",
-              flexDirection: "row",
-              gap: 10,
-              backgroundColor: C.surface,
-              borderWidth: 2,
-              borderColor: C.border,
-              ...shadow.sm,
-            }}
-          >
-            <Icon name="google" size={22} color="#EA4335" />
-            <Text
-              style={{
-                color: C.onSurface,
-                fontFamily: "PlusJakartaSans_700Bold",
-                fontSize: 15,
-              }}
-            >
-              Continuar con Google
-            </Text>
-          </Pressable>
+          <Button
+            label="Continuar con Google"
+            onPress={() => {}}
+            variant="secondary"
+            icon="google"
+            iconColor="#EA4335"
+          />
 
           {/* Registro */}
           <View

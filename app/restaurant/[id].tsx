@@ -3,6 +3,8 @@ import * as ImagePicker from "expo-image-picker";
 import { Icon } from "@/components/ui/Icon";
 import { StarRow } from "@/components/ui/StarRow";
 import { Avatar } from "@/components/ui/Avatar";
+import { Button } from "@/components/ui/Button";
+import { Field } from "@/components/ui/Field";
 import { RankBadge } from "@/components/ui/RankBadge";
 import { useRestaurant } from "@/lib/queries/restaurants";
 import {
@@ -327,35 +329,12 @@ function ReviewModal({
 
               {/* Comentario */}
               <View style={{ gap: 8 }}>
-                <Text
-                  style={{
-                    color: C.onSurfaceVariant,
-                    fontFamily: "PlusJakartaSans_700Bold",
-                    fontSize: 12,
-                    letterSpacing: 1,
-                  }}
-                >
-                  TU EXPERIENCIA
-                </Text>
-                <TextInput
+                <Field
+                  label="TU EXPERIENCIA"
                   value={comment}
                   onChangeText={(t) => setComment(t.slice(0, 500))}
-                  placeholder="Cuéntale a la comunidad qué tal estuvo..."
-                  placeholderTextColor={C.outline}
+                  placeholder="Cuéntale a la comunidad qué tal estuvo…"
                   multiline
-                  style={{
-                    backgroundColor: C.surfaceContainerLow,
-                    borderWidth: 2,
-                    borderColor:
-                      comment.length > 0 ? C.border : C.outlineVariant,
-                    borderRadius: 16,
-                    padding: 14,
-                    fontFamily: "PlusJakartaSans_400Regular",
-                    fontSize: 15,
-                    color: C.onSurface,
-                    textAlignVertical: "top",
-                    minHeight: 110,
-                  }}
                 />
                 <Text
                   style={{
@@ -412,43 +391,13 @@ function ReviewModal({
               )}
 
               {/* Submit */}
-              <Pressable
-                disabled={!canSubmit}
+              <Button
+                label={submitting ? "Publicando…" : "Publicar Rank"}
                 onPress={() => onSubmit(rating, comment.trim(), photos)}
-                style={{
-                  paddingVertical: 15,
-                  borderRadius: 99,
-                  backgroundColor: canSubmit
-                    ? C.primary
-                    : C.surfaceContainerHighest,
-                  borderWidth: 2,
-                  borderColor: canSubmit ? C.border : C.outlineVariant,
-                  alignItems: "center",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  gap: 8,
-                  ...(canSubmit ? shadow.primary : {}),
-                }}
-              >
-                {submitting ? (
-                  <ActivityIndicator size="small" color={C.outline} />
-                ) : (
-                  <Icon
-                    name="fire"
-                    size={18}
-                    color={canSubmit ? C.onPrimary : C.outline}
-                  />
-                )}
-                <Text
-                  style={{
-                    color: canSubmit ? C.onPrimary : C.outline,
-                    fontFamily: "Outfit_700Bold",
-                    fontSize: 16,
-                  }}
-                >
-                  {submitting ? "Publicando..." : "Publicar Rank"}
-                </Text>
-              </Pressable>
+                disabled={!(rating > 0 && comment.trim().length >= 10)}
+                loading={submitting}
+                icon="fire"
+              />
             </View>
           </View>
         </Animated.View>
@@ -546,48 +495,8 @@ export default function RestaurantProfileScreen() {
           No pudimos cargar este lugar
         </Text>
         <View style={{ flexDirection: "row", gap: 10 }}>
-          <Pressable
-            onPress={() => restaurantQ.refetch()}
-            style={{
-              paddingHorizontal: 20,
-              paddingVertical: 10,
-              borderRadius: 99,
-              backgroundColor: C.primary,
-              borderWidth: 2,
-              borderColor: C.border,
-            }}
-          >
-            <Text
-              style={{
-                color: C.onPrimary,
-                fontFamily: "PlusJakartaSans_700Bold",
-                fontSize: 14,
-              }}
-            >
-              Reintentar
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => router.back()}
-            style={{
-              paddingHorizontal: 20,
-              paddingVertical: 10,
-              borderRadius: 99,
-              backgroundColor: C.primaryFixed,
-              borderWidth: 2,
-              borderColor: C.border,
-            }}
-          >
-            <Text
-              style={{
-                color: C.primary,
-                fontFamily: "PlusJakartaSans_700Bold",
-                fontSize: 14,
-              }}
-            >
-              Volver
-            </Text>
-          </Pressable>
+          <Button label="Reintentar" onPress={() => restaurantQ.refetch()} size="sm" fullWidth={false} />
+          <Button label="Volver" onPress={() => router.back()} variant="secondary" size="sm" fullWidth={false} />
         </View>
       </View>
     );
@@ -788,70 +697,30 @@ export default function RestaurantProfileScreen() {
 
           {/* ── Acciones ── */}
           <View style={{ flexDirection: "row", gap: 10 }}>
-            {/* Rankear — CTA principal */}
-            <Pressable
+            <Button
+              label="Rankear"
               onPress={() => setReviewModalOpen(true)}
-              style={{
-                flex: 2,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                paddingVertical: 14,
-                borderRadius: 99,
-                backgroundColor: C.primary,
-                borderWidth: 2,
-                borderColor: C.border,
-                ...shadow.primary,
-              }}
-            >
-              <Icon name="fire" size={20} color={C.onPrimary} />
-              <Text
-                style={{
-                  color: C.onPrimary,
-                  fontFamily: "Outfit_700Bold",
-                  fontSize: 16,
-                }}
-              >
-                Rankear
-              </Text>
-            </Pressable>
-
-            {/* Ir */}
-            <Pressable
-              disabled={!restaurant.address}
+              icon="fire"
+              size="sm"
+              fullWidth={false}
+              style={{ flex: 2 }}
+            />
+            <Button
+              label="Ir"
               onPress={() =>
                 restaurant.address &&
                 Linking.openURL(
                   `https://maps.google.com/?q=${encodeURIComponent(restaurant.address)}`,
                 )
               }
-              style={{
-                flex: 1,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 6,
-                paddingVertical: 14,
-                borderRadius: 99,
-                backgroundColor: C.surface,
-                borderWidth: 2,
-                borderColor: C.border,
-                opacity: restaurant.address ? 1 : 0.5,
-                ...shadow.sm,
-              }}
-            >
-              <Icon name="navigation-variant" size={18} color={C.secondary} />
-              <Text
-                style={{
-                  color: C.onSurface,
-                  fontFamily: "Outfit_700Bold",
-                  fontSize: 15,
-                }}
-              >
-                Ir
-              </Text>
-            </Pressable>
+              disabled={!restaurant.address}
+              variant="secondary"
+              icon="navigation-variant"
+              iconColor={C.secondary}
+              size="sm"
+              fullWidth={false}
+              style={{ flex: 1 }}
+            />
           </View>
 
           {/* ── Info ── */}
@@ -1463,46 +1332,34 @@ export default function RestaurantProfileScreen() {
                     </View>
                   ) : isOwnerHere && replyingId === r.id ? (
                     <View style={{ gap: 8 }}>
-                      <TextInput
+                      <Field
                         value={replyText}
                         onChangeText={(t) => setReplyText(t.slice(0, 500))}
                         placeholder="Responde a este cliente…"
-                        placeholderTextColor={C.outline}
                         multiline
-                        style={{
-                          backgroundColor: C.surfaceContainerLow,
-                          borderWidth: 2, borderColor: C.outlineVariant, borderRadius: 12,
-                          padding: 12, minHeight: 70, textAlignVertical: "top",
-                          fontFamily: "PlusJakartaSans_400Regular", fontSize: 14, color: C.onSurface,
-                        }}
                       />
                       <View style={{ flexDirection: "row", gap: 8 }}>
-                        <Pressable
+                        <Button
+                          label="Cancelar"
                           onPress={() => { setReplyingId(null); setReplyText(""); }}
-                          style={{ paddingHorizontal: 16, paddingVertical: 8, borderRadius: 99, borderWidth: 2, borderColor: C.outlineVariant }}
-                        >
-                          <Text style={{ color: C.onSurfaceVariant, fontFamily: "PlusJakartaSans_700Bold", fontSize: 13 }}>Cancelar</Text>
-                        </Pressable>
-                        <Pressable
-                          disabled={replyText.trim().length === 0 || replyMut.isPending}
+                          variant="ghost"
+                          size="sm"
+                          fullWidth={false}
+                        />
+                        <Button
+                          label="Enviar"
                           onPress={() =>
                             replyMut.mutate(
                               { reviewId: r.id, body: replyText },
                               { onSuccess: () => { setReplyingId(null); setReplyText(""); } },
                             )
                           }
-                          style={{
-                            flexDirection: "row", alignItems: "center", gap: 6,
-                            paddingHorizontal: 16, paddingVertical: 8, borderRadius: 99,
-                            backgroundColor: replyText.trim().length > 0 ? C.primary : C.surfaceContainerHighest,
-                            borderWidth: 2, borderColor: C.border,
-                          }}
-                        >
-                          {replyMut.isPending
-                            ? <ActivityIndicator size="small" color="#fff" />
-                            : <Icon name="reply" size={14} color={replyText.trim().length > 0 ? "#fff" : C.outline} />}
-                          <Text style={{ color: replyText.trim().length > 0 ? "#fff" : C.outline, fontFamily: "PlusJakartaSans_700Bold", fontSize: 13 }}>Enviar</Text>
-                        </Pressable>
+                          disabled={replyText.trim().length === 0}
+                          loading={replyMut.isPending}
+                          icon="reply"
+                          size="sm"
+                          fullWidth={false}
+                        />
                       </View>
                     </View>
                   ) : isOwnerHere ? (

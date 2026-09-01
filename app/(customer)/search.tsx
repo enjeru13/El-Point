@@ -15,6 +15,7 @@ import { useTheme } from '@/lib/ThemeContext';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { useRestaurantSearch, type SearchResult } from '@/lib/queries/search';
 import { isOpenNow } from '@/lib/hours';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 type SortKey = 'rank' | 'reviews' | null;
 type PriceKey = 1 | 2 | 3 | null;
@@ -373,18 +374,13 @@ export default function SearchScreen() {
       ) : showResults ? (
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 24, paddingBottom: 100 }}>
           {results.length === 0 ? (
-            <View style={{ alignItems: 'center', paddingVertical: 60, gap: 14 }}>
-              <View style={{ width: 68, height: 68, borderRadius: 20, backgroundColor: C.surfaceContainerLow, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.outlineVariant }}>
-                <Icon name="food-off-outline" size={32} color={C.outline} />
-              </View>
-              <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 20, color: C.onSurface }}>Sin resultados</Text>
-              <Text style={{ fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: C.outline, textAlign: 'center', maxWidth: 240 }}>
-                Prueba con otro término o quita filtros
-              </Text>
-              <Pressable onPress={clear} style={{ paddingHorizontal: 20, paddingVertical: 10, borderRadius: 99, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border }}>
-                <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: C.primary }}>Ver tendencias</Text>
-              </Pressable>
-            </View>
+            <EmptyState
+              icon="food-off-outline"
+              title="Sin resultados"
+              body="Prueba con otro término o quita filtros"
+              actionLabel="Ver tendencias"
+              onAction={clear}
+            />
           ) : (
             <>
               {best && (
