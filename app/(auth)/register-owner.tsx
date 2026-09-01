@@ -92,7 +92,8 @@ export default function RegisterOwnerScreen() {
     if (!result.canceled) setMenuPdfName(result.assets[0].name);
   }
 
-  const emailValid = /^\S+@\S+\.\S+$/.test(email.trim());
+  // GoTrue rechaza correos con caracteres no-ASCII (p. ej. la ñ)
+  const emailValid = /^[\x00-\x7F]+@[\x00-\x7F]+\.[\x00-\x7F]{2,}$/.test(email.trim());
 
   const canContinue =
     step === 0 ? emailValid && password.length >= 8 && password === confirm :
@@ -255,6 +256,11 @@ export default function RegisterOwnerScreen() {
                       onChangeText={setEmail}
                     />
                   </View>
+                  {email.trim().length > 0 && !emailValid && (
+                    <Text style={{ color: C.error, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, marginLeft: 4 }}>
+                      Usa solo letras sin tildes ni ñ (ej. dueno@gmail.com).
+                    </Text>
+                  )}
                 </View>
 
                 {/* Contraseña */}

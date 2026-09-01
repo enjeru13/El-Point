@@ -113,8 +113,11 @@ export default function RegisterScreen() {
     if (step < STEPS - 1) setStep(step + 1);
   }
 
+  // GoTrue rechaza correos con caracteres no-ASCII (p. ej. la ñ)
+  const emailValid = /^[\x00-\x7F]+@[\x00-\x7F]+\.[\x00-\x7F]{2,}$/.test(email.trim());
+
   const canContinue =
-    step === 0 ? !!(username.trim() && email.trim()) :
+    step === 0 ? !!(username.trim()) && emailValid :
     step === 1 ? true :
     step === 2 ? password.length >= 8 && password === confirm :
     true; // steps 3 & 4 always ok
