@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FLOATING_NAV_H } from '@/lib/theme';
 import { useTheme } from '@/lib/ThemeContext';
 import { SearchBar } from '@/components/ui/SearchBar';
+import { Chip } from '@/components/ui/Chip';
 import { useNearby, useRestaurantIcons, type NearbyRestaurant } from '@/lib/queries/nearby';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -375,28 +376,15 @@ export default function MapScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: 6, paddingHorizontal: 12, paddingBottom: 4, paddingTop: 2 }}
         >
-          {CATEGORIES.map(cat => {
-            const active = activeCategory === cat.id;
-            return (
-              <Pressable
-                key={cat.id}
-                onPress={() => { setActiveCategory(cat.id); if (selected) closeSheet(); }}
-                style={{
-                  flexDirection: 'row', alignItems: 'center', gap: 5,
-                  paddingHorizontal: 12, paddingVertical: 7, borderRadius: 99,
-                  borderWidth: 2,
-                  borderColor: active ? C.border : C.outlineVariant,
-                  backgroundColor: active ? C.primary : C.surface,
-                  ...(active ? shadow.primary : shadow.sm),
-                }}
-              >
-                <Icon name={cat.icon} size={13} color={active ? C.onPrimary : C.onSurfaceVariant} />
-                <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: active ? C.onPrimary : C.onSurface }}>
-                  {cat.label}
-                </Text>
-              </Pressable>
-            );
-          })}
+          {CATEGORIES.map(cat => (
+            <Chip
+              key={cat.id}
+              label={cat.label}
+              icon={cat.icon}
+              active={activeCategory === cat.id}
+              onPress={() => { setActiveCategory(cat.id); if (selected) closeSheet(); }}
+            />
+          ))}
         </ScrollView>
 
         {/* Estado */}

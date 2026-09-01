@@ -4,6 +4,7 @@ import { uploadRestaurantImage, uploadRestaurantMenu } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 import { useTheme } from "@/lib/ThemeContext";
 import { Button } from "@/components/ui/Button";
+import { Chip } from "@/components/ui/Chip";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
@@ -459,43 +460,16 @@ export default function RegisterOwnerScreen() {
                   <View
                     style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}
                   >
-                    {CATEGORIES.map((cat) => {
-                      const sel = selectedCats.has(cat.id);
-                      return (
-                        <Pressable
-                          key={cat.id}
-                          onPress={() => toggleCat(cat.id)}
-                          style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            gap: 6,
-                            paddingHorizontal: 14,
-                            paddingVertical: 8,
-                            borderRadius: 99,
-                            borderWidth: 2,
-                            borderColor: sel ? C.secondary : C.outlineVariant,
-                            backgroundColor: sel
-                              ? C.secondaryContainer
-                              : C.surface,
-                          }}
-                        >
-                          <Icon
-                            name={cat.icon as any}
-                            size={16}
-                            color={sel ? C.secondary : C.onSurfaceVariant}
-                          />
-                          <Text
-                            style={{
-                              fontFamily: "PlusJakartaSans_600SemiBold",
-                              fontSize: 15,
-                              color: sel ? C.secondary : C.onSurfaceVariant,
-                            }}
-                          >
-                            {cat.label}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
+                    {CATEGORIES.map((cat) => (
+                      <Chip
+                        key={cat.id}
+                        label={cat.label}
+                        icon={cat.icon}
+                        tone="secondary"
+                        active={selectedCats.has(cat.id)}
+                        onPress={() => toggleCat(cat.id)}
+                      />
+                    ))}
                   </View>
                 </View>
               </View>

@@ -31,7 +31,7 @@ export function Chip({
         borderWidth: 2,
         borderColor: active ? C.border : C.outlineVariant,
         backgroundColor: active ? activeBg : C.surface,
-        ...(active ? shadow.sm : {}),
+        ...(active ? (tone === 'secondary' ? shadow.sm : shadow.primary) : {}),
       }}
     >
       {icon && <Icon name={icon} size={15} color={active ? '#fff' : C.onSurfaceVariant} />}

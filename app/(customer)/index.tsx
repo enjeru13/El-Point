@@ -3,6 +3,7 @@ import { AppLogo } from "@/components/ui/AppLogo";
 import { Avatar } from "@/components/ui/Avatar";
 import { Icon } from "@/components/ui/Icon";
 import { RankBadge } from "@/components/ui/RankBadge";
+import { Chip } from "@/components/ui/Chip";
 import { NotificationBell } from "@/components/ui/NotificationBell";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { SearchBar } from "@/components/ui/SearchBar";
@@ -530,42 +531,15 @@ export default function HomeScreen() {
             gap: 8,
           }}
         >
-          {CATEGORIES.map((cat) => {
-            const active = activeCategory === cat.id;
-            return (
-              <Pressable
-                key={cat.id}
-                onPress={() => setActiveCategory(cat.id)}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 6,
-                  paddingHorizontal: 14,
-                  paddingVertical: 8,
-                  borderRadius: 99,
-                  borderWidth: 2,
-                  borderColor: active ? C.border : C.outlineVariant,
-                  backgroundColor: active ? C.primary : C.surface,
-                  ...(active ? shadow.primary : {}),
-                }}
-              >
-                <Icon
-                  name={cat.icon}
-                  size={16}
-                  color={active ? "#fff" : C.onSurfaceVariant}
-                />
-                <Text
-                  style={{
-                    fontFamily: "PlusJakartaSans_700Bold",
-                    fontSize: 15,
-                    color: active ? "#fff" : C.onSurface,
-                  }}
-                >
-                  {cat.label}
-                </Text>
-              </Pressable>
-            );
-          })}
+          {CATEGORIES.map((cat) => (
+            <Chip
+              key={cat.id}
+              label={cat.label}
+              icon={cat.icon}
+              active={activeCategory === cat.id}
+              onPress={() => setActiveCategory(cat.id)}
+            />
+          ))}
         </ScrollView>
 
         {/* ── Tabs ── */}

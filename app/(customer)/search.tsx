@@ -16,6 +16,7 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { useRestaurantSearch, type SearchResult } from '@/lib/queries/search';
 import { isOpenNow } from '@/lib/hours';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Chip } from '@/components/ui/Chip';
 
 type SortKey = 'rank' | 'reviews' | null;
 type PriceKey = 1 | 2 | 3 | null;
@@ -292,26 +293,15 @@ export default function SearchScreen() {
               {([
                 { key: 'rank' as SortKey,    label: 'Mejor rank',   icon: 'star-outline' },
                 { key: 'reviews' as SortKey, label: 'Más reseñas',  icon: 'comment-text' },
-              ]).map(opt => {
-                const active = sort === opt.key;
-                return (
-                  <Pressable
-                    key={opt.key!}
-                    onPress={() => setSort(active ? null : opt.key)}
-                    style={{
-                      flexDirection: 'row', alignItems: 'center', gap: 6,
-                      paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99,
-                      backgroundColor: active ? C.primary : C.surface,
-                      borderWidth: 2, borderColor: active ? C.border : C.outlineVariant,
-                    }}
-                  >
-                    <Icon name={opt.icon} size={14} color={active ? '#fff' : C.onSurfaceVariant} />
-                    <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: active ? '#fff' : C.onSurfaceVariant }}>
-                      {opt.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
+              ]).map(opt => (
+                <Chip
+                  key={opt.key!}
+                  label={opt.label}
+                  icon={opt.icon}
+                  active={sort === opt.key}
+                  onPress={() => setSort(sort === opt.key ? null : opt.key)}
+                />
+              ))}
             </View>
           </View>
 
@@ -320,24 +310,14 @@ export default function SearchScreen() {
           <View style={{ gap: 8 }}>
             <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: C.onSurfaceVariant, letterSpacing: 0.8 }}>PRECIO</Text>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              {([1, 2, 3] as PriceKey[]).map(p => {
-                const active = price === p;
-                return (
-                  <Pressable
-                    key={p!}
-                    onPress={() => setPrice(active ? null : p)}
-                    style={{
-                      paddingHorizontal: 16, paddingVertical: 8, borderRadius: 99,
-                      backgroundColor: active ? C.primary : C.surface,
-                      borderWidth: 2, borderColor: active ? C.border : C.outlineVariant,
-                    }}
-                  >
-                    <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: active ? '#fff' : C.onSurfaceVariant }}>
-                      {'$'.repeat(p!)}
-                    </Text>
-                  </Pressable>
-                );
-              })}
+              {([1, 2, 3] as PriceKey[]).map(p => (
+                <Chip
+                  key={p!}
+                  label={'$'.repeat(p!)}
+                  active={price === p}
+                  onPress={() => setPrice(price === p ? null : p)}
+                />
+              ))}
             </View>
           </View>
 
