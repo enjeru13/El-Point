@@ -1,16 +1,19 @@
 import { Icon } from '@/components/ui/Icon';
 import { AppText } from '@/components/ui/AppText';
-import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
-  Animated,
-  Modal,
-  Pressable,
-  ScrollView,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from 'react';
+import { ActivityIndicator, Pressable, View } from 'react-native';
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetScrollView,
+  type BottomSheetBackdropProps,
+} from '@gorhom/bottom-sheet';
 import { useTheme } from '@/lib/ThemeContext';
 import {
   useNotifications,
@@ -98,7 +101,7 @@ function NotifCard({ notif, onRead }: { notif: AppNotification; onRead: (id: str
   );
 }
 
-// ─── Dropdown ─────────────────────────────────────────────────────────────────
+// ─── Sheet ────────────────────────────────────────────────────────────────────
 
 export interface NotificationsHandle {
   present: () => void;
@@ -106,11 +109,9 @@ export interface NotificationsHandle {
 }
 
 export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
-  const { C, shadow } = useTheme();
-  const insets = useSafeAreaInsets();
-  const [visible, setVisible] = useState(false);
-  const translateY = useRef(new Animated.Value(-20)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+  const { C } = useTheme();
+  const sheetRef = useRef<BottomSheetModal>(null);
+  const snapPoints = useMemo(() => ['70%'], []);
 
   const notifsQ = useNotifications();
   const markRead = useMarkNotificationRead();
@@ -121,96 +122,102 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
   const read = notifs.filter((n) => n.read);
   const unreadCount = unread.length;
 
-  const open = useCallback(() => {
-    setVisible(true);
-    notifsQ.refetch();
-    translateY.setValue(-20);
-    opacity.setValue(0);
-    Animated.parallel([
-      Animated.spring(translateY, { toValue: 0, useNativeDriver: true, damping: 18, stiffness: 260 }),
-      Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true }),
-    ]).start();
-  }, []);
+  useImperativeHandle(ref, () => ({
+    present: () => {
+      notifsQ.refetch();
+      sheetRef.current?.present();
+    },
+    dismiss: () => sheetRef.current?.dismiss(),
+  }));
 
-  const close = useCallback(() => {
-    Animated.parallel([
-      Animated.spring(translateY, { toValue: -16, useNativeDriver: true, damping: 18, stiffness: 260 }),
-      Animated.timing(opacity, { toValue: 0, duration: 150, useNativeDriver: true }),
-    ]).start(() => setVisible(false));
-  }, []);
-
-  useImperativeHandle(ref, () => ({ present: open, dismiss: close }));
-
-  if (!visible) return null;
-
-  const TOP = insets.top + 56 + 8;
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+        pressBehavior="close"
+        opacity={0.4}
+      />
+    ),
+    [],
+  );
 
   return (
-    <Modal transparent animationType="none" visible={visible} onRequestClose={close}>
-      <TouchableWithoutFeedback onPress={close}>
-        <View style={{ position: 'absolute', inset: 0 }} />
-      </TouchableWithoutFeedback>
-
-      <Animated.View
+    <BottomSheetModal
+      ref={sheetRef}
+      snapPoints={snapPoints}
+      enableDynamicSizing={false}
+      backdropComponent={renderBackdrop}
+      handleIndicatorStyle={{ backgroundColor: C.outlineVariant, width: 44 }}
+      backgroundStyle={{
+        backgroundColor: C.surface,
+        borderRadius: 28,
+        borderWidth: 2,
+        borderColor: C.border,
+      }}
+    >
+      {/* Header */}
+      <View
         style={{
-          position: 'absolute',
-          top: TOP,
-          left: 16, right: 16,
-          maxHeight: 480,
-          backgroundColor: C.surface,
-          borderRadius: 24,
-          borderWidth: 2, borderColor: C.border,
-          transform: [{ translateY }],
-          opacity,
-          overflow: 'hidden',
-          ...shadow.md,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 20,
+          paddingBottom: 12,
+          borderBottomWidth: 2,
+          borderBottomColor: C.outlineVariant,
         }}
       >
-        {/* Header */}
-        <View style={{
-          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-          paddingHorizontal: 16, paddingVertical: 14,
-          borderBottomWidth: 2, borderBottomColor: C.outlineVariant,
-        }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <AppText variant="heading">Notificaciones</AppText>
-            {unreadCount > 0 && (
-              <View style={{ paddingHorizontal: 7, paddingVertical: 1, borderRadius: 99, backgroundColor: C.primaryContainer, borderWidth: 2, borderColor: C.border }}>
-                <AppText variant="caption" style={{ fontSize: 12 }}>{unreadCount}</AppText>
-              </View>
-            )}
-          </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <AppText variant="heading">Notificaciones</AppText>
           {unreadCount > 0 && (
-            <Pressable onPress={() => markAll.mutate()}>
-              <AppText variant="label" color={C.primary}>Marcar todas</AppText>
-            </Pressable>
+            <View style={{ paddingHorizontal: 7, paddingVertical: 1, borderRadius: 99, backgroundColor: C.primaryContainer, borderWidth: 2, borderColor: C.border }}>
+              <AppText variant="caption" style={{ fontSize: 12 }}>{unreadCount}</AppText>
+            </View>
           )}
         </View>
+        {unreadCount > 0 && (
+          <Pressable onPress={() => markAll.mutate()} hitSlop={8}>
+            <AppText variant="label" color={C.primary}>Marcar todas</AppText>
+          </Pressable>
+        )}
+      </View>
 
-        {/* List */}
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24 }} showsVerticalScrollIndicator={false} bounces={false}>
-          {notifsQ.isLoading ? (
-            <View style={{ paddingVertical: 32 }}><ActivityIndicator color={C.primary} /></View>
-          ) : notifs.length === 0 ? (
-            <View style={{ alignItems: 'center', paddingVertical: 32, gap: 8 }}>
-              <Icon name="bell-outline" size={32} color={C.outlineVariant} />
-              <AppText variant="bodySm" color={C.outline} align="center">
-                No tienes notificaciones todavía.
-              </AppText>
+      {/* List */}
+      <BottomSheetScrollView
+        contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {notifsQ.isLoading ? (
+          <View style={{ paddingVertical: 32 }}>
+            <ActivityIndicator color={C.primary} />
+          </View>
+        ) : notifs.length === 0 ? (
+          <View style={{ alignItems: 'center', paddingVertical: 32, gap: 8 }}>
+            <Icon name="bell-outline" size={32} color={C.outlineVariant} />
+            <AppText variant="bodySm" color={C.outline} align="center">
+              No tienes notificaciones todavía.
+            </AppText>
+          </View>
+        ) : (
+          <>
+            <View style={{ gap: 12 }}>
+              {unread.map((n) => (
+                <NotifCard key={n.id} notif={n} onRead={(id) => markRead.mutate(id)} />
+              ))}
             </View>
-          ) : (
-            <>
-              <View style={{ gap: 12 }}>
-                {unread.map((n) => <NotifCard key={n.id} notif={n} onRead={(id) => markRead.mutate(id)} />)}
-              </View>
-              {unread.length > 0 && read.length > 0 && <DottedDivider label="ANTERIORES" />}
-              <View style={{ gap: 12 }}>
-                {read.map((n) => <NotifCard key={n.id} notif={n} onRead={(id) => markRead.mutate(id)} />)}
-              </View>
-            </>
-          )}
-        </ScrollView>
-      </Animated.View>
-    </Modal>
+            {unread.length > 0 && read.length > 0 && <DottedDivider label="ANTERIORES" />}
+            <View style={{ gap: 12 }}>
+              {read.map((n) => (
+                <NotifCard key={n.id} notif={n} onRead={(id) => markRead.mutate(id)} />
+              ))}
+            </View>
+          </>
+        )}
+      </BottomSheetScrollView>
+    </BottomSheetModal>
   );
 });
+
+NotificationsSheet.displayName = 'NotificationsSheet';

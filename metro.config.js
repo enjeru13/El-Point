@@ -5,7 +5,7 @@ const { withNativeWind } = require("nativewind/metro");
 const config = getDefaultConfig(__dirname);
 
 // Allow Metro to resolve .mjs files (needed for lucide-react-native)
-config.resolver.sourceExts = [...config.resolver.sourceExts, 'mjs'];
+config.resolver.sourceExts = [...config.resolver.sourceExts, "mjs"];
 config.resolver.unstable_enablePackageExports = true;
 
 // react-native-maps is native-only; swap it for a stub on web so the

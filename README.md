@@ -37,10 +37,10 @@ lib/
 
 ## Roles
 
-| Rol | Ruta |
-|-----|------|
+| Rol     | Ruta                                         |
+| ------- | -------------------------------------------- |
 | Cliente | `/(customer)` — feed, mapa, búsqueda, perfil |
-| Dueño | `/(owner)` — dashboard, analytics, settings |
+| Dueño   | `/(owner)` — dashboard, analytics, settings  |
 
 El rol se obtiene de `profiles.role` en Supabase al iniciar sesión.
 
