@@ -3,6 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Icon } from "@/components/ui/Icon";
 import { StarRow } from "@/components/ui/StarRow";
 import { Avatar } from "@/components/ui/Avatar";
+import { RankBadge } from "@/components/ui/RankBadge";
 import { useRestaurant } from "@/lib/queries/restaurants";
 import {
   useReviews,
@@ -1335,27 +1336,8 @@ export default function RestaurantProfileScreen() {
                       >
                         {authorName(r.author)}
                       </Text>
-                      <View
-                        style={{
-                          alignSelf: "flex-start",
-                          marginTop: 2,
-                          paddingHorizontal: 7,
-                          paddingVertical: 2,
-                          borderRadius: 6,
-                          backgroundColor: C.primaryFixed,
-                          borderWidth: 1,
-                          borderColor: C.border,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            color: C.onSurface,
-                            fontFamily: "PlusJakartaSans_700Bold",
-                            fontSize: 15,
-                          }}
-                        >
-                          Nivel {r.author?.level ?? 1}
-                        </Text>
+                      <View style={{ marginTop: 3 }}>
+                        <RankBadge level={r.author?.level ?? 1} />
                       </View>
                     </View>
                     <View style={{ alignItems: "flex-end", gap: 2 }}>

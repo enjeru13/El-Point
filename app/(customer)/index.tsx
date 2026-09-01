@@ -2,6 +2,7 @@ import { Image } from "expo-image";
 import { AppLogo } from "@/components/ui/AppLogo";
 import { Avatar } from "@/components/ui/Avatar";
 import { Icon } from "@/components/ui/Icon";
+import { RankBadge } from "@/components/ui/RankBadge";
 import { NotificationBell } from "@/components/ui/NotificationBell";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { SearchBar } from "@/components/ui/SearchBar";
@@ -292,24 +293,10 @@ function ReviewCard({
               >
                 {authorLabel(item.author)}
               </Text>
-              <View
-                style={{
-                  marginTop: 2,
-                  alignSelf: "flex-start",
-                  paddingHorizontal: 6,
-                  paddingVertical: 2,
-                  borderRadius: 99,
-                  backgroundColor: C.primaryFixed,
-                }}
-              >
-                <Text
-                  style={{
-                    color: C.primary,
-                    fontFamily: "PlusJakartaSans_700Bold",
-                    fontSize: 15,
-                  }}
-                >
-                  Nivel {item.author?.level ?? 1} · {timeAgo(item.created_at)}
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 3 }}>
+                <RankBadge level={item.author?.level ?? 1} />
+                <Text style={{ color: C.outline, fontFamily: "PlusJakartaSans_600SemiBold", fontSize: 12 }}>
+                  {timeAgo(item.created_at)}
                 </Text>
               </View>
             </View>

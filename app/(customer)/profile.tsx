@@ -22,6 +22,7 @@ import { StarRow } from '@/components/ui/StarRow';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { useMyProfile, useMyReviews, useUpdateMyProfile, levelProgress } from '@/lib/queries/me';
+import { RankBadge } from '@/components/ui/RankBadge';
 import { uploadAvatar } from '@/lib/storage';
 import { useFavorites } from '@/lib/queries/feed';
 
@@ -226,9 +227,9 @@ export default function ProfileScreen() {
             {/* Nivel / XP */}
             <View style={{ backgroundColor: C.surface, borderRadius: 28, padding: 20, gap: 12, borderWidth: 2, borderColor: C.border, ...shadow.md }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <View style={{ gap: 4 }}>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, letterSpacing: 1 }}>NIVEL ACTUAL</Text>
-                  <Text style={{ color: C.primary, fontFamily: 'Outfit_700Bold', fontSize: 20 }}>Nivel {level}</Text>
+                <View style={{ gap: 6 }}>
+                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, letterSpacing: 1 }}>NIVEL {level}</Text>
+                  <RankBadge level={level} size="md" />
                 </View>
                 <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 99, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border }}>
                   <Text style={{ color: C.primary, fontFamily: 'Outfit_700Bold', fontSize: 16 }}>{xp} XP</Text>

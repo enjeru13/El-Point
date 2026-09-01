@@ -135,12 +135,27 @@ export function useMyReviews() {
   return useQuery({ queryKey: ['my-reviews'], queryFn: fetchMyReviews });
 }
 
-// Level = xp / 200 + 1 (mirrors the DB award_xp function).
-export const XP_PER_LEVEL = 200;
+// Quadratic curve — mirrors the DB functions.
+//   xpForLevel(L) = 50 * (L-1)^2 ;  levelForXp(xp) = floor(sqrt(xp/50)) + 1
+export const xpForLevel = (level: number) => 50 * Math.pow(Math.max(1, level) - 1, 2);
+export const levelForXp = (xp: number) => Math.max(1, Math.floor(Math.sqrt(Math.max(0, xp) / 50)) + 1);
 
 export function levelProgress(level: number, xp: number) {
-  const floor = (level - 1) * XP_PER_LEVEL;
-  const next = level * XP_PER_LEVEL;
-  const pct = Math.max(0, Math.min(1, (xp - floor) / XP_PER_LEVEL));
-  return { next, pct };
+  const floor = xpForLevel(level);
+  const next = xpForLevel(level + 1);
+  const pct = Math.max(0, Math.min(1, (xp - floor) / (next - floor)));
+  return { floor, next, pct };
+}
+
+export const RANKS = [
+  { max: 3, name: 'Novato' },
+  { max: 8, name: 'Comensal' },
+  { max: 15, name: 'Explorador' },
+  { max: 24, name: 'Crítico Local' },
+  { max: 34, name: 'Gurú Gastronómico' },
+  { max: Infinity, name: 'Leyenda' },
+] as const;
+
+export function rankForLevel(level: number): string {
+  return (RANKS.find((r) => level <= r.max) ?? RANKS[RANKS.length - 1]).name;
 }
