@@ -1,10 +1,24 @@
-import * as Haptics from 'expo-haptics';
-import { ActivityIndicator, Platform, Pressable, StyleProp, Text, View, ViewStyle } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, Text, View } from 'react-native';
+import type { StyleProp, ViewStyle } from 'react-native';
 import { Icon } from '@/components/ui/Icon';
 import { useTheme } from '@/lib/ThemeContext';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type Size = 'md' | 'sm';
+
+type ButtonProps = {
+  label: string;
+  onPress: () => void;
+  variant?: Variant;
+  size?: Size;
+  loading?: boolean;
+  disabled?: boolean;
+  icon?: string;
+  iconTrailing?: string;
+  iconColor?: string;
+  fullWidth?: boolean;
+  style?: StyleProp<ViewStyle>;
+};
 
 export function Button({
   label,
@@ -18,27 +32,15 @@ export function Button({
   iconColor,
   fullWidth = true,
   style,
-}: {
-  label: string;
-  onPress: () => void;
-  variant?: Variant;
-  size?: Size;
-  loading?: boolean;
-  disabled?: boolean;
-  icon?: string;
-  iconTrailing?: string;
-  iconColor?: string;
-  fullWidth?: boolean;
-  style?: StyleProp<ViewStyle>;
-}) {
-  const { C, shadow } = useTheme();
+}: ButtonProps) {
+  const { C } = useTheme();
   const off = disabled || loading;
 
   const palette: Record<Variant, { bg: string; fg: string; border: string }> = {
-    primary: { bg: C.primary, fg: '#fff', border: C.border },
+    primary: { bg: C.primary, fg: '#ffffff', border: C.border },
     secondary: { bg: C.primaryFixed, fg: C.onSurface, border: C.border },
     ghost: { bg: 'transparent', fg: C.primary, border: 'transparent' },
-    danger: { bg: C.error, fg: '#fff', border: C.border },
+    danger: { bg: C.error, fg: '#ffffff', border: C.border },
   };
   const p = palette[variant];
   const bg = off ? C.surfaceContainerHighest : p.bg;
@@ -48,23 +50,43 @@ export function Button({
   const height = size === 'md' ? 56 : 44;
   const fontSize = size === 'md' ? 16 : 14;
   const iconSize = size === 'md' ? 20 : 16;
-  const boxShadow =
-    off || variant === 'ghost'
-      ? {}
-      : variant === 'primary'
-        ? shadow.primary
-        : variant === 'secondary' || variant === 'danger'
-          ? shadow.sm
-          : {};
+  const withShadow = !off && variant !== 'ghost';
 
   function handlePress() {
     if (off) return;
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(
-        variant === 'danger' ? Haptics.ImpactFeedbackStyle.Medium : Haptics.ImpactFeedbackStyle.Light,
-      ).catch(() => {});
+      try {
+        // lazily required so a missing native module can never break render
+        const Haptics = require('expo-haptics');
+        Haptics.impactAsync(
+          variant === 'danger'
+            ? Haptics.ImpactFeedbackStyle.Medium
+            : Haptics.ImpactFeedbackStyle.Light,
+        ).catch(() => {});
+      } catch {}
     }
     onPress();
+  }
+
+  const base: ViewStyle = {
+    height,
+    borderRadius: height / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 20,
+    backgroundColor: bg,
+    borderWidth: variant === 'ghost' ? 0 : 2,
+    borderColor: border,
+    alignSelf: fullWidth ? 'stretch' : 'flex-start',
+  };
+  if (withShadow) {
+    base.shadowColor = variant === 'primary' ? C.primary : '#1c1b1b';
+    base.shadowOffset = { width: 3, height: 3 };
+    base.shadowOpacity = variant === 'primary' ? 0.5 : 1;
+    base.shadowRadius = 0;
+    base.elevation = 4;
   }
 
   return (
@@ -72,34 +94,24 @@ export function Button({
       onPress={handlePress}
       disabled={off}
       style={({ pressed }) => [
-        {
-          height,
-          borderRadius: height / 2,
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'row',
-          gap: 8,
-          paddingHorizontal: 20,
-          backgroundColor: bg,
-          borderWidth: variant === 'ghost' ? 0 : 2,
-          borderColor: border,
-          alignSelf: fullWidth ? 'stretch' : 'flex-start',
-          opacity: pressed && !off ? 0.9 : 1,
-          transform: pressed && !off ? [{ translateY: 1 }] : [],
-          ...boxShadow,
-        },
+        base,
+        pressed && !off ? { opacity: 0.9, transform: [{ translateY: 1 }] } : null,
         style,
       ]}
     >
       {loading ? (
         <ActivityIndicator size="small" color={fg} />
-      ) : (
-        icon && <Icon name={icon} size={iconSize} color={off ? fg : iconColor ?? fg} />
-      )}
-      <Text style={{ color: fg, fontFamily: 'Outfit_700Bold', fontSize }}>{label}</Text>
-      {!loading && iconTrailing && <Icon name={iconTrailing} size={iconSize} color={fg} />}
-      {/* keep row height stable while loading */}
-      {loading && <View style={{ width: 0 }} />}
+      ) : icon ? (
+        <Icon name={icon} size={iconSize} color={off ? fg : iconColor ?? fg} />
+      ) : null}
+
+      <Text style={{ color: fg, fontFamily: 'Outfit_700Bold', fontSize }}>
+        {label}
+      </Text>
+
+      {!loading && iconTrailing ? (
+        <Icon name={iconTrailing} size={iconSize} color={fg} />
+      ) : null}
     </Pressable>
   );
 }
