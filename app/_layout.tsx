@@ -16,7 +16,7 @@ import { useFonts } from 'expo-font';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -50,24 +50,33 @@ export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole]       = useState<UserRole>(null);
   const [ready, setReady]     = useState(false);
+  const currentUid = useRef<string | null>(null);
 
   useEffect(() => {
     if (fontsLoaded) SplashScreen.hideAsync();
   }, [fontsLoaded]);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    function handle(session: Session | null) {
       setSession(session);
-      if (session) fetchRole(session.user.id);
-      else setReady(true);
-    });
+      const uid = session?.user.id ?? null;
+      if (uid && uid !== currentUid.current) {
+        // new user — clear the old role so we never route on a stale one
+        currentUid.current = uid;
+        setRole(null);
+        fetchRole(uid);
+      } else if (!uid) {
+        currentUid.current = null;
+        setRole(null);
+        setReady(true);
+      }
+      // same uid (e.g. token refresh) — keep role as is
+    }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session) fetchRole(session.user.id);
-      else { setRole(null); setReady(true); }
-    });
-
+    supabase.auth.getSession().then(({ data: { session } }) => handle(session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => handle(session),
+    );
     return () => subscription.unsubscribe();
   }, []);
 
@@ -93,6 +102,9 @@ export default function RootLayout() {
       return;
     }
 
+    // Signed in but role not resolved yet — wait, don't flash the wrong group.
+    if (role === null) return;
+
     // Signed in: only redirect if the user is in the wrong place.
     // Leave stack routes like /restaurant/[id] alone.
     if (inAuth) {
@@ -104,7 +116,8 @@ export default function RootLayout() {
     }
   }, [ready, session, role, fontsLoaded, segments]);
 
-  if (!ready || !fontsLoaded) return <View style={{ flex: 1, backgroundColor: '#fcf9f8' }} />;
+  if (!ready || !fontsLoaded || (session && role === null))
+    return <View style={{ flex: 1, backgroundColor: '#fcf9f8' }} />;
 
   return (
     <QueryClientProvider client={queryClient}>
