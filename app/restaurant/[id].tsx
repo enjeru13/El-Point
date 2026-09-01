@@ -1176,7 +1176,7 @@ export default function RestaurantProfileScreen() {
                         <Button
                           label="Cancelar"
                           onPress={() => { setReplyingId(null); setReplyText(""); }}
-                          variant="ghost"
+                          variant="secondary"
                           size="sm"
                           fullWidth={false}
                         />

@@ -203,7 +203,7 @@ export default function ProfileScreen() {
 
               {editing ? (
                 <View style={{ flexDirection: 'row', gap: 10, alignSelf: 'stretch' }}>
-                  <Button label="Cancelar" onPress={cancelEdit} disabled={busy} variant="ghost" size="sm" fullWidth={false} style={{ flex: 1 }} />
+                  <Button label="Cancelar" onPress={cancelEdit} disabled={busy} variant="secondary" size="sm" fullWidth={false} style={{ flex: 1 }} />
                   <Button label="Guardar" onPress={saveEdit} loading={busy} icon="check" size="sm" fullWidth={false} style={{ flex: 1 }} />
                 </View>
               ) : (
