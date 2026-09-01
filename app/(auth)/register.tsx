@@ -19,6 +19,7 @@ import { useTheme } from '@/lib/ThemeContext';
 import { Button } from '@/components/ui/Button';
 import { ThemePicker } from '@/components/ui/ThemePicker';
 import { useCategories } from '@/lib/queries/categories';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
@@ -253,6 +254,10 @@ export default function RegisterScreen() {
 
               {/* Grid 2 columnas */}
               <View className="flex-row flex-wrap gap-3">
+                {categoriesQ.isLoading &&
+                  Array.from({ length: 8 }).map((_, i) => (
+                    <Skeleton key={i} width="47%" height={116} radius={24} />
+                  ))}
                 {(categoriesQ.data ?? []).map(cat => {
                   const isSelected = selected.has(cat.id);
                   return (
@@ -263,7 +268,7 @@ export default function RegisterScreen() {
                       style={{
                         width: '47%',
                         borderColor: isSelected ? C.secondary : C.outlineVariant,
-                        backgroundColor: isSelected ? C.secondaryContainer : '#fff',
+                        backgroundColor: isSelected ? C.secondaryContainer : C.surface,
                         ...(isSelected ? shadow.md : {}),
                       }}
                     >
