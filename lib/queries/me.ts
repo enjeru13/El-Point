@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
 export type MyProfile = {
@@ -30,6 +30,31 @@ async function fetchMyProfile(): Promise<MyProfile | null> {
 
 export function useMyProfile() {
   return useQuery({ queryKey: ['my-profile'], queryFn: fetchMyProfile });
+}
+
+export type MyProfilePatch = Partial<{
+  username: string | null;
+  full_name: string | null;
+  bio: string | null;
+  avatar_url: string | null;
+}>;
+
+export function useUpdateMyProfile() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (patch: MyProfilePatch) => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error('No autenticado');
+      const { error } = await supabase.from('profiles').update(patch).eq('id', userData.user.id);
+      if (error) {
+        if (error.code === '23505') throw new Error('Ese nombre de usuario ya está en uso.');
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['my-profile'] });
+    },
+  });
 }
 
 export type MyReview = {

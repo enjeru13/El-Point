@@ -32,3 +32,16 @@ export function uploadRestaurantImage(restaurantId: string, kind: 'logo' | 'cove
 export function uploadRestaurantMenu(restaurantId: string, uri: string) {
   return uploadFile(`${restaurantId}/menu`, uri, 'application/pdf');
 }
+
+async function uploadToBucket(bucket: string, path: string, uri: string, contentType: string): Promise<string> {
+  const res = await fetch(uri);
+  const buf = await res.arrayBuffer();
+  const { error } = await supabase.storage.from(bucket).upload(path, buf, { contentType, upsert: true });
+  if (error) throw error;
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return `${data.publicUrl}?v=${Date.now()}`;
+}
+
+export function uploadAvatar(userId: string, uri: string) {
+  return uploadToBucket('avatars', `${userId}/avatar`, uri, imageContentType(uri));
+}
