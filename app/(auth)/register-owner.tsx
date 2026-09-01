@@ -6,6 +6,7 @@ import { useToast } from "@/lib/toast";
 import { useTheme } from "@/lib/ThemeContext";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
+import { useCategories } from "@/lib/queries/categories";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
@@ -22,21 +23,6 @@ import {
 } from "react-native";
 import { AppText } from "@/components/ui/AppText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const CATEGORIES = [
-  { id: 1, label: "Pizza", icon: "pizza" },
-  { id: 2, label: "Hamburguesas", icon: "hamburger" },
-  { id: 3, label: "Sushi", icon: "fish" },
-  { id: 4, label: "Tacos", icon: "taco" },
-  { id: 5, label: "Vegano", icon: "leaf" },
-  { id: 6, label: "Café", icon: "coffee" },
-  { id: 7, label: "Postres", icon: "ice-cream" },
-  { id: 8, label: "Alta Cocina", icon: "silverware-fork-knife" },
-  { id: 9, label: "BBQ", icon: "grill" },
-  { id: 10, label: "Pasta", icon: "noodles" },
-  { id: 11, label: "Mariscos", icon: "shaker-outline" },
-  { id: 12, label: "Comida rápida", icon: "food-variant" },
-] as const;
 
 const STEPS = 4;
 
@@ -55,6 +41,7 @@ export default function RegisterOwnerScreen() {
 
   const [name, setName] = useState("");
   const [selectedCats, setSelectedCats] = useState<Set<number>>(new Set());
+  const categoriesQ = useCategories();
 
   const [address, setAddress] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
@@ -415,7 +402,7 @@ export default function RegisterOwnerScreen() {
                   <View
                     style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}
                   >
-                    {CATEGORIES.map((cat) => (
+                    {(categoriesQ.data ?? []).map((cat) => (
                       <Chip
                         key={cat.id}
                         label={cat.label}

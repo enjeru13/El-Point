@@ -18,28 +18,12 @@ import { useToast } from '@/lib/toast';
 import { useTheme } from '@/lib/ThemeContext';
 import { Button } from '@/components/ui/Button';
 import { ThemePicker } from '@/components/ui/ThemePicker';
+import { useCategories } from '@/lib/queries/categories';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
 
 const STEPS = 5;
-
-const CATEGORIES: {
-  id: string;
-  label: string;
-  icon: string;
-}[] = [
-  { id: 'pizza',      label: 'Pizza',        icon: 'pizza' },
-  { id: 'burgers',    label: 'Hamburguesas', icon: 'hamburger' },
-  { id: 'sushi',      label: 'Sushi',        icon: 'fish' },
-  { id: 'tacos',      label: 'Tacos',        icon: 'taco' },
-  { id: 'vegan',      label: 'Vegano',       icon: 'leaf' },
-  { id: 'coffee',     label: 'Café',         icon: 'coffee' },
-  { id: 'desserts',   label: 'Postres',      icon: 'ice-cream' },
-  { id: 'finedining', label: 'Alta Cocina',  icon: 'silverware-fork-knife' },
-  { id: 'bbq',        label: 'BBQ',          icon: 'grill' },
-  { id: 'pasta',      label: 'Pasta',        icon: 'noodles' },
-];
 
 // ─── Pantalla principal ───────────────────────────────────────────────────────
 
@@ -48,14 +32,15 @@ export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const toast = useToast();
+  const categoriesQ = useCategories();
   const [step, setStep] = useState(0);
 
   // Step 0 — datos básicos
   const [username, setUsername]   = useState('');
   const [email, setEmail]         = useState('');
 
-  // Step 1 — preferencias
-  const [selected, setSelected]   = useState<Set<string>>(new Set());
+  // Step 1 — preferencias (ids de categoría)
+  const [selected, setSelected]   = useState<Set<number>>(new Set());
 
   // Step 2 — contraseña
   const [password, setPassword]   = useState('');
@@ -70,7 +55,7 @@ export default function RegisterScreen() {
 
   const [loading, setLoading]     = useState(false);
 
-  function toggleCategory(id: string) {
+  function toggleCategory(id: number) {
     setSelected(prev => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
@@ -101,21 +86,12 @@ export default function RegisterScreen() {
     }
 
     // Sesión activa → completar perfil (el trigger ya creó la fila)
-    let favoriteCategories: number[] = [];
-    if (selected.size > 0) {
-      const { data: cats } = await supabase
-        .from('categories')
-        .select('id, slug')
-        .in('slug', Array.from(selected));
-      favoriteCategories = (cats ?? []).map((c) => c.id);
-    }
-
     await supabase
       .from('profiles')
       .update({
         username: username.trim() || null,
         search_radius_km: radius,
-        favorite_categories: favoriteCategories,
+        favorite_categories: Array.from(selected),
       })
       .eq('id', data.user!.id);
 
@@ -277,7 +253,7 @@ export default function RegisterScreen() {
 
               {/* Grid 2 columnas */}
               <View className="flex-row flex-wrap gap-3">
-                {CATEGORIES.map(cat => {
+                {(categoriesQ.data ?? []).map(cat => {
                   const isSelected = selected.has(cat.id);
                   return (
                     <Pressable
@@ -524,10 +500,10 @@ export default function RegisterScreen() {
         {step === 1 ? (
           <>
             <View style={{ height: 8, borderRadius: 99, overflow: 'hidden', backgroundColor: C.surfaceContainerHighest, marginBottom: 12 }}>
-              <View style={{ height: '100%', borderRadius: 99, width: `${(selected.size / CATEGORIES.length) * 100}%`, backgroundColor: C.primary }} />
+              <View style={{ height: '100%', borderRadius: 99, width: `${Math.min(100, (selected.size / Math.max(1, (categoriesQ.data ?? []).length)) * 100)}%`, backgroundColor: C.primary }} />
             </View>
             <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-              <Button label="Omitir" onPress={handleContinue} variant="ghost" fullWidth={false} style={{ flex: 1 }} />
+              <Button label="Omitir" onPress={handleContinue} variant="secondary" fullWidth={false} style={{ flex: 1 }} />
               <Button
                 label={selected.size > 0 ? `Continuar (${selected.size})` : 'Continuar'}
                 onPress={handleContinue}
