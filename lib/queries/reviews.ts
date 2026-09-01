@@ -115,6 +115,9 @@ export function useSubmitReview(restaurantId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: reviewKeys(restaurantId) });
       qc.invalidateQueries({ queryKey: restaurantKeys(restaurantId) });
+      qc.invalidateQueries({ queryKey: ['my-profile'] });
+      qc.invalidateQueries({ queryKey: ['my-reviews'] });
+      qc.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 }

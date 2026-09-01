@@ -135,11 +135,12 @@ export function useMyReviews() {
   return useQuery({ queryKey: ['my-reviews'], queryFn: fetchMyReviews });
 }
 
-// Simple placeholder progression until real gamification rules exist.
+// Level = xp / 200 + 1 (mirrors the DB award_xp function).
+export const XP_PER_LEVEL = 200;
+
 export function levelProgress(level: number, xp: number) {
-  const perLevel = 1000;
-  const floor = (level - 1) * perLevel;
-  const next = level * perLevel;
-  const pct = Math.max(0, Math.min(1, (xp - floor) / perLevel));
+  const floor = (level - 1) * XP_PER_LEVEL;
+  const next = level * XP_PER_LEVEL;
+  const pct = Math.max(0, Math.min(1, (xp - floor) / XP_PER_LEVEL));
   return { next, pct };
 }
