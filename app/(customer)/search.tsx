@@ -6,12 +6,12 @@ import {
   ActivityIndicator,
   Pressable,
   ScrollView,
-  Text,
   TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
+import { AppText } from '@/components/ui/AppText';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { useRestaurantSearch, type SearchResult } from '@/lib/queries/search';
 import { isOpenNow } from '@/lib/hours';
@@ -44,7 +44,7 @@ function StarBadgeInline({ rating, count }: { rating: number; count: number }) {
         paddingHorizontal: 8, paddingVertical: 4, borderRadius: 99,
         backgroundColor: C.surfaceContainerHighest, borderWidth: 2, borderColor: C.border,
       }}>
-        <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: C.onSurfaceVariant }}>Nuevo</Text>
+        <AppText variant="label" color={C.onSurfaceVariant}>Nuevo</AppText>
       </View>
     );
   }
@@ -57,7 +57,7 @@ function StarBadgeInline({ rating, count }: { rating: number; count: number }) {
       backgroundColor: bg, borderWidth: 2, borderColor: C.border,
     }}>
       <Icon name="star" size={13} color={text} />
-      <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: text }}>{rating.toFixed(1)}</Text>
+      <AppText variant="label" color={text}>{rating.toFixed(1)}</AppText>
     </View>
   );
 }
@@ -96,9 +96,9 @@ function BestMatchCard({ item, onPress }: { item: SearchResult; onPress: () => v
             backgroundColor: 'rgba(251,248,255,0.92)', borderWidth: 2, borderColor: C.border,
           }}>
             <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: isOpenNow(item.hours).open ? '#22c55e' : '#ef4444' }} />
-            <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: C.onSurface }}>
+            <AppText variant="caption" style={{ fontSize: 12 }}>
               {isOpenNow(item.hours).open ? 'Abierto' : 'Cerrado'}
-            </Text>
+            </AppText>
           </View>
         )}
         <View style={{ position: 'absolute', top: 14, right: 14 }}>
@@ -109,40 +109,40 @@ function BestMatchCard({ item, onPress }: { item: SearchResult; onPress: () => v
       <View style={{ padding: 18, gap: 10 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99, backgroundColor: C.surfaceContainerHighest }}>
-            <Text style={{ fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, color: C.onSurfaceVariant }}>
+            <AppText variant="caption" color={C.onSurfaceVariant} style={{ fontSize: 12 }}>
               {catLabel(item)}
-            </Text>
+            </AppText>
           </View>
           {priceLabel(item.price_level) !== '' && (
             <>
-              <Text style={{ color: C.outlineVariant }}>·</Text>
-              <Text style={{ fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, color: C.onSurfaceVariant }}>
+              <AppText variant="caption" color={C.outlineVariant} style={{ fontSize: 12 }}>·</AppText>
+              <AppText variant="caption" color={C.onSurfaceVariant} style={{ fontSize: 12 }}>
                 {priceLabel(item.price_level)}
-              </Text>
+              </AppText>
             </>
           )}
         </View>
 
-        <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 26, color: C.onSurface, letterSpacing: -0.5 }}>
+        <AppText variant="title" style={{ fontSize: 26, lineHeight: 30 }}>
           {item.name}
-        </Text>
+        </AppText>
 
         {item.address && (
-          <Text style={{ fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: C.onSurfaceVariant, lineHeight: 21 }} numberOfLines={2}>
+          <AppText variant="bodySm" color={C.onSurfaceVariant} numberOfLines={2}>
             {item.address}
-          </Text>
+          </AppText>
         )}
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTopWidth: 1, borderTopColor: C.outlineVariant }}>
-          <Text style={{ fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13, color: C.outline }}>
+          <AppText variant="label" color={C.outline}>
             {item.rating_count} {item.rating_count === 1 ? 'rank' : 'ranks'}
-          </Text>
+          </AppText>
           <View style={{
             flexDirection: 'row', alignItems: 'center', gap: 6,
             paddingHorizontal: 16, paddingVertical: 9, borderRadius: 99,
             backgroundColor: C.primaryContainer, borderWidth: 2, borderColor: C.border,
           }}>
-            <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: C.onSurface }}>Ver lugar</Text>
+            <AppText variant="bodyStrong" style={{ fontSize: 14 }}>Ver lugar</AppText>
             <Icon name="arrow-right" size={15} color={C.onSurface} />
           </View>
         </View>
@@ -178,16 +178,16 @@ function ResultCard({ item, onPress }: { item: SearchResult; onPress: () => void
         </View>
       </View>
       <View style={{ padding: 12, gap: 4 }}>
-        <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: C.onSurface }} numberOfLines={1}>
+        <AppText variant="bodyStrong" style={{ fontSize: 14 }} numberOfLines={1}>
           {item.name}
-        </Text>
-        <Text style={{ fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, color: C.onSurfaceVariant }}>
+        </AppText>
+        <AppText variant="caption" color={C.onSurfaceVariant} style={{ fontSize: 12 }}>
           {[catLabel(item), priceLabel(item.price_level)].filter(Boolean).join(' · ')}
-        </Text>
+        </AppText>
         {item.address && (
-          <Text style={{ fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, color: C.outline }} numberOfLines={1}>
+          <AppText variant="caption" color={C.outline} style={{ fontSize: 12 }} numberOfLines={1}>
             {item.address}
-          </Text>
+          </AppText>
         )}
       </View>
     </Pressable>
@@ -288,7 +288,7 @@ export default function SearchScreen() {
           paddingHorizontal: 16, paddingVertical: 14, gap: 14,
         }}>
           <View style={{ gap: 8 }}>
-            <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: C.onSurfaceVariant, letterSpacing: 0.8 }}>ORDENAR</Text>
+            <AppText variant="overline" color={C.onSurfaceVariant}>ORDENAR</AppText>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               {([
                 { key: 'rank' as SortKey,    label: 'Mejor rank',   icon: 'star-outline' },
@@ -308,7 +308,7 @@ export default function SearchScreen() {
           <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
 
           <View style={{ gap: 8 }}>
-            <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: C.onSurfaceVariant, letterSpacing: 0.8 }}>PRECIO</Text>
+            <AppText variant="overline" color={C.onSurfaceVariant}>PRECIO</AppText>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               {([1, 2, 3] as PriceKey[]).map(p => (
                 <Chip
@@ -333,15 +333,15 @@ export default function SearchScreen() {
             }}
           >
             <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: onlyOpen ? '#16a34a' : C.outline }} />
-            <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: onlyOpen ? '#16a34a' : C.onSurfaceVariant }}>
+            <AppText variant="label" color={onlyOpen ? '#16a34a' : C.onSurfaceVariant}>
               Abiertos ahora
-            </Text>
+            </AppText>
           </Pressable>
 
           {hasActiveFilters && (
             <Pressable onPress={resetFilters} style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
               <Icon name="close-circle-outline" size={14} color={C.outline} />
-              <Text style={{ fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13, color: C.outline }}>Limpiar filtros</Text>
+              <AppText variant="label" color={C.outline}>Limpiar filtros</AppText>
             </Pressable>
           )}
         </View>
@@ -365,13 +365,13 @@ export default function SearchScreen() {
             <>
               {best && (
                 <View style={{ gap: 12 }}>
-                  <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 20, color: C.onSurface }}>Mejor coincidencia</Text>
+                  <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>Mejor coincidencia</AppText>
                   <BestMatchCard item={best} onPress={() => router.push(`/restaurant/${best.id}`)} />
                 </View>
               )}
               {rest.length > 0 && (
                 <View style={{ gap: 12 }}>
-                  <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 20, color: C.onSurface }}>Más lugares</Text>
+                  <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>Más lugares</AppText>
                   <View style={{ gap: 10 }}>
                     {pairs.map((pair, i) => (
                       <View key={i} style={{ flexDirection: 'row', gap: 10 }}>
@@ -392,7 +392,7 @@ export default function SearchScreen() {
           <View style={{ paddingHorizontal: 16, paddingTop: 24 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
               <Icon name="trending-up" size={18} color={C.primary} />
-              <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 18, color: C.onSurface, marginLeft: 6 }}>Tendencias</Text>
+              <AppText variant="heading" style={{ marginLeft: 6 }}>Tendencias</AppText>
             </View>
             {TRENDING.map((label, i) => (
               <Pressable
@@ -405,12 +405,19 @@ export default function SearchScreen() {
                 })}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 14 }}>
-                  <Text style={{ width: 28, fontFamily: 'Outfit_700Bold', fontSize: i < 3 ? 18 : 15, color: i === 0 ? C.primary : i < 3 ? C.onSurface : C.outline }}>
+                  <AppText
+                    variant="heading"
+                    color={i === 0 ? C.primary : i < 3 ? C.onSurface : C.outline}
+                    style={{ width: 28, fontSize: i < 3 ? 18 : 15 }}
+                  >
                     {i + 1}
-                  </Text>
-                  <Text style={{ flex: 1, fontFamily: i < 3 ? 'PlusJakartaSans_700Bold' : 'PlusJakartaSans_600SemiBold', fontSize: 15, color: C.onSurface }}>
+                  </AppText>
+                  <AppText
+                    variant={i < 3 ? 'bodyStrong' : 'subtitle'}
+                    style={{ flex: 1, fontSize: 15 }}
+                  >
                     {label}
-                  </Text>
+                  </AppText>
                   <Icon name={i < 3 ? 'fire' : 'arrow-right'} size={i < 3 ? 18 : 15} color={i < 3 ? C.primaryContainer : C.outlineVariant} />
                 </View>
               </Pressable>

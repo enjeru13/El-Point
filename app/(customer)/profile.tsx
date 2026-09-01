@@ -5,17 +5,15 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
-  Alert,
   Animated,
   Easing,
   Pressable,
   ScrollView,
-  Text,
-  TextInput,
   View,
 } from 'react-native';
 import { useTheme } from '@/lib/ThemeContext';
 import { AppLogo } from '@/components/ui/AppLogo';
+import { AppText } from '@/components/ui/AppText';
 import { Field } from '@/components/ui/Field';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { StarRow } from '@/components/ui/StarRow';
@@ -171,7 +169,7 @@ export default function ProfileScreen() {
                   </View>
                 ) : (
                   <View style={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: C.primaryContainer, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
-                    <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 12 }}>{level}</Text>
+                    <AppText variant="caption" style={{ fontSize: 12 }}>{level}</AppText>
                   </View>
                 )}
               </Pressable>
@@ -184,10 +182,10 @@ export default function ProfileScreen() {
                 </View>
               ) : (
                 <View style={{ alignItems: 'center', gap: 4 }}>
-                  <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 22 }}>{name}</Text>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, textAlign: 'center' }}>
+                  <AppText variant="title" style={{ fontSize: 22, lineHeight: 27 }}>{name}</AppText>
+                  <AppText variant="body" color={C.onSurfaceVariant} align="center">
                     {profile?.bio ?? 'Comensal de El Point'}
-                  </Text>
+                  </AppText>
                 </View>
               )}
 
@@ -205,17 +203,17 @@ export default function ProfileScreen() {
             <View style={{ backgroundColor: C.surface, borderRadius: 28, padding: 20, gap: 12, borderWidth: 2, borderColor: C.border, ...shadow.md }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <View style={{ gap: 6 }}>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, letterSpacing: 1 }}>NIVEL {level}</Text>
+                  <AppText variant="overline" color={C.onSurfaceVariant}>NIVEL {level}</AppText>
                   <RankBadge level={level} size="md" />
                 </View>
                 <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 99, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border }}>
-                  <Text style={{ color: C.primary, fontFamily: 'Outfit_700Bold', fontSize: 16 }}>{xp} XP</Text>
+                  <AppText variant="subtitle" color={C.primary} style={{ fontFamily: 'Outfit_700Bold' }}>{xp} XP</AppText>
                 </View>
               </View>
               <XPBar pct={pct} />
-              <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
+              <AppText variant="label" color={C.onSurfaceVariant}>
                 {next - xp > 0 ? `${next - xp} XP para el nivel ${level + 1}` : `¡Listo para subir de nivel!`}
-              </Text>
+              </AppText>
             </View>
 
             {/* Stats */}
@@ -226,8 +224,8 @@ export default function ProfileScreen() {
               ].map(stat => (
                 <View key={stat.label} style={{ flex: 1, backgroundColor: C.surface, borderRadius: 24, padding: 20, alignItems: 'center', gap: 6, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
                   <Icon name={stat.icon} size={28} color={stat.color} />
-                  <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24 }}>{stat.value}</Text>
-                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>{stat.label}</Text>
+                  <AppText variant="title">{stat.value}</AppText>
+                  <AppText variant="label" color={C.onSurfaceVariant}>{stat.label}</AppText>
                 </View>
               ))}
             </View>
@@ -238,9 +236,9 @@ export default function ProfileScreen() {
               {favoritesQ.isLoading ? (
                 <View style={{ paddingVertical: 24 }}><ActivityIndicator color={C.primary} /></View>
               ) : favorites.length === 0 ? (
-                <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14 }}>
+                <AppText variant="bodySm" color={C.outline}>
                   Marca "Me sirve" en las reseñas para guardar lugares aquí.
-                </Text>
+                </AppText>
               ) : (
                 <View style={{ gap: 10 }}>
                   {favorites.map(f => (
@@ -257,14 +255,14 @@ export default function ProfileScreen() {
                         )}
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }} numberOfLines={1}>{f.name}</Text>
-                        {f.address && <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12 }} numberOfLines={1}>{f.address}</Text>}
+                        <AppText variant="bodyStrong" numberOfLines={1}>{f.name}</AppText>
+                        {f.address && <AppText variant="caption" color={C.outline} numberOfLines={1}>{f.address}</AppText>}
                       </View>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
                         <Icon name="star" size={13} color={C.secondary} />
-                        <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13 }}>
+                        <AppText variant="label">
                           {f.rating_avg > 0 ? f.rating_avg.toFixed(1) : '–'}
-                        </Text>
+                        </AppText>
                       </View>
                     </Pressable>
                   ))}
@@ -278,9 +276,9 @@ export default function ProfileScreen() {
               {reviewsQ.isLoading ? (
                 <View style={{ paddingVertical: 24 }}><ActivityIndicator color={C.primary} /></View>
               ) : reviews.length === 0 ? (
-                <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14 }}>
+                <AppText variant="bodySm" color={C.outline}>
                   Aún no has rankeado ningún lugar.
-                </Text>
+                </AppText>
               ) : (
                 reviews.map(r => (
                   <Pressable
@@ -293,17 +291,17 @@ export default function ProfileScreen() {
                     </View>
                     <View style={{ flex: 1, gap: 6 }}>
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }} numberOfLines={1}>
+                        <AppText variant="bodyStrong" numberOfLines={1}>
                           {r.restaurant?.name ?? 'Local'}
-                        </Text>
+                        </AppText>
                         <StarRow rating={r.rating} />
                       </View>
-                      <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, lineHeight: 20 }} numberOfLines={2}>
+                      <AppText variant="body" color={C.onSurfaceVariant} numberOfLines={2}>
                         {r.body}
-                      </Text>
-                      <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
+                      </AppText>
+                      <AppText variant="label" color={C.outline}>
                         {timeAgo(r.created_at)}
-                      </Text>
+                      </AppText>
                     </View>
                   </Pressable>
                 ))

@@ -8,10 +8,10 @@ import {
   Easing,
   Pressable,
   ScrollView,
-  Text,
   View,
 } from 'react-native';
 import { Image } from 'expo-image';
+import { AppText } from '@/components/ui/AppText';
 import MapView, { Callout, Circle, Marker } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FLOATING_NAV_H } from '@/lib/theme';
@@ -123,13 +123,9 @@ const RestaurantMarker = memo(function RestaurantMarker({
             name="star" size={9}
             color={isSelected ? C.secondaryContainer : C.secondary}
           />
-          <Text style={{
-            color: isSelected ? C.onPrimary : C.onSurface,
-            fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10,
-            marginLeft: 2,
-          }}>
+          <AppText variant="caption" color={isSelected ? C.onPrimary : C.onSurface} style={{ marginLeft: 2 }}>
             {restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : '–'}
-          </Text>
+          </AppText>
         </View>
       </View>
       <Callout tooltip><View /></Callout>
@@ -190,12 +186,12 @@ function RestaurantCard({
 
               {/* Info */}
               <View style={{ flex: 1, paddingHorizontal: 12 }}>
-                <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 17, lineHeight: 21 }} numberOfLines={1}>
+                <AppText variant="heading" style={{ fontSize: 17, lineHeight: 21 }} numberOfLines={1}>
                   {restaurant.name}
-                </Text>
-                <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12 }}>
+                </AppText>
+                <AppText variant="caption" color={C.onSurfaceVariant}>
                   {[priceLabel(restaurant.price_level), restaurant.distanceLabel].filter(Boolean).join(' · ')}
-                </Text>
+                </AppText>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
                   {[1,2,3,4,5].map(i => (
                     <Icon
@@ -205,9 +201,9 @@ function RestaurantCard({
                       color={C.secondary}
                     />
                   ))}
-                  <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, marginLeft: 4 }}>
+                  <AppText variant="caption" style={{ marginLeft: 4 }}>
                     {restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : 'Sin ranks'}
-                  </Text>
+                  </AppText>
                 </View>
               </View>
 
@@ -391,8 +387,8 @@ export default function MapScreen() {
         {(nearbyQ.isLoading || (!nearbyQ.isLoading && filtered.length === 0)) && (
           <View style={{ alignSelf: 'center', marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
             {nearbyQ.isLoading
-              ? <><ActivityIndicator size="small" color={C.primary} /><Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: C.onSurfaceVariant }}>Buscando lugares...</Text></>
-              : <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: C.onSurfaceVariant }}>Sin lugares en el área</Text>
+              ? <><ActivityIndicator size="small" color={C.primary} /><AppText variant="caption" color={C.onSurfaceVariant}>Buscando lugares...</AppText></>
+              : <AppText variant="caption" color={C.onSurfaceVariant}>Sin lugares en el área</AppText>
             }
           </View>
         )}

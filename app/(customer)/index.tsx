@@ -24,9 +24,9 @@ import {
   ActivityIndicator,
   Pressable,
   ScrollView,
-  Text,
   View,
 } from "react-native";
+import { AppText } from "@/components/ui/AppText";
 
 // ─── Categorías (slug = id, alineado con la DB) ──────────────────────────────
 
@@ -132,15 +132,9 @@ function ReviewCard({
           }}
         >
           <Icon name="star" size={14} color={C.secondary} />
-          <Text
-            style={{
-              color: C.secondary,
-              fontFamily: "PlusJakartaSans_700Bold",
-              fontSize: 15,
-            }}
-          >
+          <AppText variant="bodyStrong" color={C.secondary}>
             {item.rating.toFixed(1)}
-          </Text>
+          </AppText>
         </View>
 
         {/* Etiquetas arriba-izquierda: PROMO + categoría */}
@@ -169,16 +163,7 @@ function ReviewCard({
               }}
             >
               <Icon name="tag" size={13} color={C.onSurface} />
-              <Text
-                style={{
-                  color: C.onSurface,
-                  fontFamily: "Outfit_700Bold",
-                  fontSize: 13,
-                  letterSpacing: 0.5,
-                }}
-              >
-                PROMO
-              </Text>
+              <AppText variant="caption">PROMO</AppText>
             </View>
           )}
           {cat && (
@@ -192,15 +177,7 @@ function ReviewCard({
                 borderColor: C.border,
               }}
             >
-              <Text
-                style={{
-                  color: C.onSurface,
-                  fontFamily: "PlusJakartaSans_600SemiBold",
-                  fontSize: 15,
-                }}
-              >
-                {cat.label}
-              </Text>
+              <AppText variant="label">{cat.label}</AppText>
             </View>
           )}
         </View>
@@ -208,15 +185,9 @@ function ReviewCard({
 
       {/* Contenido */}
       <View style={{ padding: 16, gap: 10 }}>
-        <Text
-          style={{
-            color: C.onSurface,
-            fontFamily: "Outfit_700Bold",
-            fontSize: 20,
-          }}
-        >
+        <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>
           {item.restaurant.name}
-        </Text>
+        </AppText>
 
         {/* Franja de promo */}
         {promo && (
@@ -234,17 +205,9 @@ function ReviewCard({
             }}
           >
             <Icon name="tag" size={16} color={C.primary} />
-            <Text
-              style={{
-                flex: 1,
-                color: C.onSurface,
-                fontFamily: "PlusJakartaSans_700Bold",
-                fontSize: 15,
-              }}
-              numberOfLines={2}
-            >
+            <AppText variant="bodyStrong" style={{ flex: 1 }} numberOfLines={2}>
               {promo}
-            </Text>
+            </AppText>
           </View>
         )}
 
@@ -258,18 +221,14 @@ function ReviewCard({
             borderLeftColor: C.primary,
           }}
         >
-          <Text
-            style={{
-              color: C.onSurfaceVariant,
-              fontFamily: "PlusJakartaSans_400Regular",
-              fontSize: 15,
-              lineHeight: 22,
-              fontStyle: "italic",
-            }}
+          <AppText
+            variant="body"
+            color={C.onSurfaceVariant}
+            style={{ lineHeight: 22, fontStyle: "italic" }}
             numberOfLines={3}
           >
             "{item.body}"
-          </Text>
+          </AppText>
         </View>
 
         {/* Reviewer */}
@@ -286,20 +245,12 @@ function ReviewCard({
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <Avatar uri={item.author?.avatar_url} size={36} />
             <View>
-              <Text
-                style={{
-                  color: C.onSurface,
-                  fontFamily: "PlusJakartaSans_700Bold",
-                  fontSize: 15,
-                }}
-              >
-                {authorLabel(item.author)}
-              </Text>
+              <AppText variant="bodyStrong">{authorLabel(item.author)}</AppText>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 3 }}>
                 <RankBadge level={item.author?.level ?? 1} />
-                <Text style={{ color: C.outline, fontFamily: "PlusJakartaSans_600SemiBold", fontSize: 12 }}>
+                <AppText variant="caption" color={C.outline}>
                   {timeAgo(item.created_at)}
-                </Text>
+                </AppText>
               </View>
             </View>
           </View>
@@ -324,15 +275,9 @@ function ReviewCard({
               size={14}
               color={favorited ? "#fff" : C.primary}
             />
-            <Text
-              style={{
-                color: favorited ? "#fff" : C.primary,
-                fontFamily: "PlusJakartaSans_700Bold",
-                fontSize: 15,
-              }}
-            >
+            <AppText variant="bodyStrong" color={favorited ? "#fff" : C.primary}>
               Me sirve
-            </Text>
+            </AppText>
           </Pressable>
         </View>
       </View>
@@ -395,40 +340,18 @@ function FavoriteRow({
         )}
       </View>
       <View style={{ flex: 1 }}>
-        <Text
-          style={{
-            color: C.onSurface,
-            fontFamily: "PlusJakartaSans_700Bold",
-            fontSize: 15,
-          }}
-          numberOfLines={1}
-        >
+        <AppText variant="bodyStrong" numberOfLines={1}>
           {name}
-        </Text>
+        </AppText>
         {address && (
-          <Text
-            style={{
-              color: C.outline,
-              fontFamily: "PlusJakartaSans_400Regular",
-              fontSize: 12,
-            }}
-            numberOfLines={1}
-          >
+          <AppText variant="caption" color={C.outline} numberOfLines={1}>
             {address}
-          </Text>
+          </AppText>
         )}
       </View>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
         <Icon name="star" size={13} color={C.secondary} />
-        <Text
-          style={{
-            color: C.onSurface,
-            fontFamily: "PlusJakartaSans_700Bold",
-            fontSize: 13,
-          }}
-        >
-          {rating > 0 ? rating.toFixed(1) : "–"}
-        </Text>
+        <AppText variant="label">{rating > 0 ? rating.toFixed(1) : "–"}</AppText>
       </View>
     </Pressable>
   );
@@ -504,15 +427,9 @@ export default function HomeScreen() {
             gap: 14,
           }}
         >
-          <Text
-            style={{
-              color: C.onSurface,
-              fontFamily: "Outfit_700Bold",
-              fontSize: 26,
-            }}
-          >
+          <AppText variant="title" style={{ fontSize: 26, lineHeight: 31 }}>
             ¡Hola, Comensal! 👋
-          </Text>
+          </AppText>
 
           <SearchBar
             value={search}
@@ -572,15 +489,12 @@ export default function HomeScreen() {
                 marginBottom: -2,
               }}
             >
-              <Text
-                style={{
-                  fontFamily: "Outfit_700Bold",
-                  fontSize: 18,
-                  color: activeTab === tab.key ? C.primary : C.outline,
-                }}
+              <AppText
+                variant="heading"
+                color={activeTab === tab.key ? C.primary : C.outline}
               >
                 {tab.label}
-              </Text>
+              </AppText>
             </Pressable>
           ))}
         </View>
@@ -597,27 +511,13 @@ export default function HomeScreen() {
                 style={{ alignItems: "center", paddingVertical: 48, gap: 12 }}
               >
                 <Icon name="heart-outline" size={48} color={C.outline} />
-                <Text
-                  style={{
-                    color: C.onSurfaceVariant,
-                    fontFamily: "Outfit_700Bold",
-                    fontSize: 18,
-                  }}
-                >
+                <AppText variant="heading" color={C.onSurfaceVariant}>
                   Sin favoritos aún
-                </Text>
-                <Text
-                  style={{
-                    color: C.outline,
-                    fontFamily: "PlusJakartaSans_400Regular",
-                    fontSize: 15,
-                    textAlign: "center",
-                    maxWidth: 240,
-                  }}
-                >
+                </AppText>
+                <AppText variant="body" color={C.outline} align="center" style={{ maxWidth: 240 }}>
                   Marca "Me sirve" en las reseñas que más te gusten para
                   guardarlas aquí.
-                </Text>
+                </AppText>
               </View>
             ) : (
               (favoritesQ.data ?? []).map((f) => (
@@ -639,18 +539,11 @@ export default function HomeScreen() {
           ) : feedQ.isError ? (
             <View style={{ alignItems: "center", paddingVertical: 48, gap: 8 }}>
               <Icon name="food-off-outline" size={48} color={C.outline} />
-              <Text
-                style={{
-                  color: C.error,
-                  fontFamily: "PlusJakartaSans_400Regular",
-                  fontSize: 13,
-                  textAlign: "center",
-                }}
-              >
+              <AppText variant="bodySm" color={C.error} align="center">
                 {String(
                   (feedQ.error as any)?.message ?? "Error al cargar el feed",
                 )}
-              </Text>
+              </AppText>
             </View>
           ) : filtered.length > 0 ? (
             filtered.map((item) => (
@@ -674,30 +567,16 @@ export default function HomeScreen() {
               style={{ alignItems: "center", paddingVertical: 48, gap: 12 }}
             >
               <Icon name="food-off-outline" size={48} color={C.outline} />
-              <Text
-                style={{
-                  color: C.onSurfaceVariant,
-                  fontFamily: "Outfit_700Bold",
-                  fontSize: 16,
-                }}
-              >
+              <AppText variant="heading" color={C.onSurfaceVariant}>
                 {feed.length === 0
                   ? "Todavía no hay ranks"
                   : "Nada en esta categoría"}
-              </Text>
-              <Text
-                style={{
-                  color: C.outline,
-                  fontFamily: "PlusJakartaSans_400Regular",
-                  fontSize: 14,
-                  textAlign: "center",
-                  maxWidth: 250,
-                }}
-              >
+              </AppText>
+              <AppText variant="bodySm" color={C.outline} align="center" style={{ maxWidth: 250 }}>
                 {feed.length === 0
                   ? "Sé el primero: abre un lugar y deja tu rank."
                   : "Prueba otra categoría o quita el filtro."}
-              </Text>
+              </AppText>
             </View>
           )}
         </View>
