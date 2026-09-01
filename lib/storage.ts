@@ -1,61 +1,68 @@
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { supabase } from '@/lib/supabase';
 
-const BUCKET = 'restaurant-media';
+const RESTAURANT_BUCKET = 'restaurant-media';
 
-async function uploadFile(path: string, uri: string, contentType: string): Promise<string> {
-  const res = await fetch(uri);
+/** Resize + JPEG-compress before upload. Falls back to the original on failure. */
+async function compressImage(uri: string, maxWidth = 1600): Promise<string> {
+  try {
+    const ctx = ImageManipulator.manipulate(uri);
+    ctx.resize({ width: maxWidth });
+    const rendered = await ctx.renderAsync();
+    const out = await rendered.saveAsync({ compress: 0.7, format: SaveFormat.JPEG });
+    return out.uri;
+  } catch {
+    return uri;
+  }
+}
+
+async function putImage(bucket: string, path: string, uri: string): Promise<string> {
+  const small = await compressImage(uri);
+  const res = await fetch(small);
   const buf = await res.arrayBuffer();
-
-  const { error } = await supabase.storage.from(BUCKET).upload(path, buf, {
-    contentType,
-    upsert: true,
-  });
+  const { error } = await supabase.storage
+    .from(bucket)
+    .upload(path, buf, { contentType: 'image/jpeg', upsert: true });
   if (error) throw error;
-
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  // cache-bust so overwritten files show immediately
-  return `${data.publicUrl}?v=${Date.now()}`;
+  return path;
 }
 
-function imageContentType(uri: string): string {
-  const ext = uri.split('?')[0].split('.').pop()?.toLowerCase();
-  if (ext === 'png') return 'image/png';
-  if (ext === 'webp') return 'image/webp';
-  return 'image/jpeg';
+async function publicUrl(bucket: string, path: string, bust = false): Promise<string> {
+  const url = supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+  return bust ? `${url}?v=${Date.now()}` : url;
 }
 
-/** kind = 'logo' | 'cover'. Fixed object name per kind → no orphans on re-upload. */
-export function uploadRestaurantImage(restaurantId: string, kind: 'logo' | 'cover', uri: string) {
-  return uploadFile(`${restaurantId}/${kind}`, uri, imageContentType(uri));
+// ─── Restaurant media ───────────────────────────────────────────────────────
+
+/** kind = 'logo' | 'cover'. Fixed name per kind → no orphans on re-upload. */
+export async function uploadRestaurantImage(restaurantId: string, kind: 'logo' | 'cover', uri: string) {
+  await putImage(RESTAURANT_BUCKET, `${restaurantId}/${kind}`, uri);
+  return publicUrl(RESTAURANT_BUCKET, `${restaurantId}/${kind}`, true);
 }
 
-export function uploadRestaurantMenu(restaurantId: string, uri: string) {
-  return uploadFile(`${restaurantId}/menu`, uri, 'application/pdf');
-}
-
-async function uploadToBucket(bucket: string, path: string, uri: string, contentType: string): Promise<string> {
-  const res = await fetch(uri);
-  const buf = await res.arrayBuffer();
-  const { error } = await supabase.storage.from(bucket).upload(path, buf, { contentType, upsert: true });
-  if (error) throw error;
-  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return `${data.publicUrl}?v=${Date.now()}`;
-}
-
-export function uploadAvatar(userId: string, uri: string) {
-  return uploadToBucket('avatars', `${userId}/avatar`, uri, imageContentType(uri));
-}
-
-/** Returns the bucket-relative storage path (not a URL). */
-export async function uploadReviewPhoto(reviewId: string, index: number, uri: string): Promise<string> {
-  const path = `${reviewId}/${index}`;
+export async function uploadRestaurantMenu(restaurantId: string, uri: string) {
+  const path = `${restaurantId}/menu`;
   const res = await fetch(uri);
   const buf = await res.arrayBuffer();
   const { error } = await supabase.storage
-    .from('review-photos')
-    .upload(path, buf, { contentType: imageContentType(uri), upsert: true });
+    .from(RESTAURANT_BUCKET)
+    .upload(path, buf, { contentType: 'application/pdf', upsert: true });
   if (error) throw error;
-  return path;
+  return publicUrl(RESTAURANT_BUCKET, path, true);
+}
+
+// ─── Avatars ────────────────────────────────────────────────────────────────
+
+export async function uploadAvatar(userId: string, uri: string) {
+  await putImage('avatars', `${userId}/avatar`, uri);
+  return publicUrl('avatars', `${userId}/avatar`, true);
+}
+
+// ─── Review photos ──────────────────────────────────────────────────────────
+
+/** Returns the bucket-relative storage path (not a URL). */
+export function uploadReviewPhoto(reviewId: string, index: number, uri: string): Promise<string> {
+  return putImage('review-photos', `${reviewId}/${index}`, uri);
 }
 
 export function reviewPhotoUrl(storagePath: string): string {

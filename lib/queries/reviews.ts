@@ -102,11 +102,13 @@ export function useSubmitReview(restaurantId: string) {
       if (error) throw error;
 
       if (photoUris.length > 0 && review) {
-        const rows: { review_id: string; storage_path: string; position: number }[] = [];
-        for (let i = 0; i < photoUris.length; i++) {
-          const path = await uploadReviewPhoto(review.id, i, photoUris[i]);
-          rows.push({ review_id: review.id, storage_path: path, position: i });
-        }
+        const rows = await Promise.all(
+          photoUris.map(async (uri, i) => ({
+            review_id: review.id,
+            storage_path: await uploadReviewPhoto(review.id, i, uri),
+            position: i,
+          })),
+        );
         await supabase.from('review_photos').insert(rows);
       }
     },
