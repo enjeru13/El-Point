@@ -1,11 +1,12 @@
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Switch, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/ThemeContext';
 import { THEMES, THEME_META, ThemeName } from '@/lib/themes';
 import { useMyProfile, useUpdateSettings } from '@/lib/queries/me';
+import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 
 const THEME_NAMES = Object.keys(THEME_META) as ThemeName[];
@@ -34,9 +35,9 @@ function ThemeDot({ name, size = 44 }: { name: ThemeName; size?: number }) {
 function SectionLabel({ label }: { label: string }) {
   const { C } = useTheme();
   return (
-    <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 11, letterSpacing: 1.5, paddingHorizontal: 4, marginBottom: 10 }}>
+    <AppText variant="overline" color={C.onSurfaceVariant} style={{ paddingHorizontal: 4, marginBottom: 10 }}>
       {label.toUpperCase()}
-    </Text>
+    </AppText>
   );
 }
 
@@ -64,8 +65,8 @@ function ToggleRow({ icon, label, sublabel, value, onChange }: {
         <Icon name={icon} size={20} color={C.primary} />
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>{label}</Text>
-        {sublabel && <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, marginTop: 1 }}>{sublabel}</Text>}
+        <AppText variant="bodyStrong">{label}</AppText>
+        {sublabel && <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 1 }}>{sublabel}</AppText>}
       </View>
       <Switch value={value} onValueChange={onChange} trackColor={{ false: C.surfaceContainerHighest, true: C.primaryContainer }} thumbColor={value ? C.primary : C.outline} />
     </View>
@@ -98,7 +99,7 @@ export default function SettingsScreen() {
         >
           <Icon name="arrow-left" size={20} color={C.onSurface} />
         </Pressable>
-        <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 22, flex: 1 }}>Ajustes</Text>
+        <AppText variant="title" style={{ flex: 1 }}>Ajustes</AppText>
       </View>
 
       {profileQ.isLoading ? (
@@ -113,7 +114,7 @@ export default function SettingsScreen() {
             <SectionLabel label="Apariencia" />
             <SectionCard>
               <View style={{ padding: 18, gap: 16 }}>
-                <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Tema de color</Text>
+                <AppText variant="bodyStrong">Tema de color</AppText>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
                   {THEME_NAMES.map((name) => {
                     const active = name === themeName;
@@ -189,7 +190,7 @@ export default function SettingsScreen() {
                 <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
                   <Icon name="lock-outline" size={20} color={C.primary} />
                 </View>
-                <Text style={{ flex: 1, color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Cambiar contraseña</Text>
+                <AppText variant="bodyStrong" style={{ flex: 1 }}>Cambiar contraseña</AppText>
                 <Icon name="chevron-right" size={20} color={C.outline} />
               </Pressable>
             </SectionCard>
@@ -202,9 +203,9 @@ export default function SettingsScreen() {
             icon="logout"
           />
 
-          <Text style={{ textAlign: 'center', color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12 }}>
+          <AppText variant="bodySm" color={C.outline} align="center">
             El Point v0.1.0
-          </Text>
+          </AppText>
         </ScrollView>
       )}
     </View>

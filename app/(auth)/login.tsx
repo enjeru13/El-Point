@@ -1,4 +1,5 @@
 import { AppLogo } from "@/components/ui/AppLogo";
+import { AppText } from "@/components/ui/AppText";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/lib/toast";
 import { Field } from "@/components/ui/Field";
@@ -14,7 +15,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -380,17 +380,13 @@ export default function LoginScreen() {
         {/* Header */}
         <View style={{ alignItems: "center", marginBottom: 32 }}>
           <AppLogo size="lg" variant="dark" />
-          <Text
-            style={{
-              color: "rgba(255,255,255,0.9)",
-              fontFamily: "PlusJakartaSans_600SemiBold",
-              fontSize: 15,
-              letterSpacing: 2,
-              marginTop: 4,
-            }}
+          <AppText
+            variant="overline"
+            color="rgba(255,255,255,0.9)"
+            style={{ letterSpacing: 2, marginTop: 4 }}
           >
             Donde está el sabor.
-          </Text>
+          </AppText>
         </View>
 
         {/* Card neo-brutalist */}
@@ -429,15 +425,9 @@ export default function LoginScreen() {
             onPress={() => router.push("/(auth)/forgot-password")}
             style={{ alignSelf: "flex-end", marginTop: -8 }}
           >
-            <Text
-              style={{
-                color: C.primary,
-                fontFamily: "PlusJakartaSans_700Bold",
-                fontSize: 15,
-              }}
-            >
+            <AppText variant="bodyStrong" color={C.primary}>
               ¿Olvidaste tu contraseña?
-            </Text>
+            </AppText>
           </Pressable>
 
           {/* Botón ingresar */}
@@ -453,16 +443,9 @@ export default function LoginScreen() {
             <View
               style={{ flex: 1, height: 1, backgroundColor: C.outlineVariant }}
             />
-            <Text
-              style={{
-                color: C.outline,
-                fontSize: 15,
-                fontFamily: "PlusJakartaSans_600SemiBold",
-                letterSpacing: 1.5,
-              }}
-            >
+            <AppText variant="overline" color={C.outline}>
               O CONTINÚA CON
-            </Text>
+            </AppText>
             <View
               style={{ flex: 1, height: 1, backgroundColor: C.outlineVariant }}
             />
@@ -481,25 +464,13 @@ export default function LoginScreen() {
           <View
             style={{ flexDirection: "row", justifyContent: "center", gap: 4 }}
           >
-            <Text
-              style={{
-                color: C.onSurfaceVariant,
-                fontSize: 15,
-                fontFamily: "PlusJakartaSans_400Regular",
-              }}
-            >
+            <AppText variant="body" color={C.onSurfaceVariant}>
               ¿No tienes cuenta?
-            </Text>
+            </AppText>
             <Pressable onPress={() => router.push("/(auth)/register")}>
-              <Text
-                style={{
-                  color: C.primary,
-                  fontFamily: "PlusJakartaSans_700Bold",
-                  fontSize: 15,
-                }}
-              >
+              <AppText variant="bodyStrong" color={C.primary}>
                 Regístrate
-              </Text>
+              </AppText>
             </Pressable>
           </View>
         </View>
