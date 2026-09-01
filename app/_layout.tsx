@@ -25,6 +25,7 @@ import 'react-native-reanimated';
 
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/query';
+import { ToastProvider } from '@/lib/toast';
 import { AppThemeProvider } from '@/lib/ThemeContext';
 
 SplashScreen.preventAutoHideAsync();
@@ -111,7 +112,9 @@ export default function RootLayout() {
         <GestureHandlerRootView style={{ flex: 1 }}>
           <BottomSheetModalProvider>
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-              <Slot />
+              <ToastProvider>
+                <Slot />
+              </ToastProvider>
               <StatusBar style="auto" />
             </ThemeProvider>
           </BottomSheetModalProvider>

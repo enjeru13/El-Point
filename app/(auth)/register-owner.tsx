@@ -2,6 +2,7 @@ import { Field } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
 import { uploadRestaurantImage, uploadRestaurantMenu } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
+import { useToast } from "@/lib/toast";
 import { useTheme } from "@/lib/ThemeContext";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
@@ -43,6 +44,7 @@ export default function RegisterOwnerScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const toast = useToast();
   const [step, setStep] = useState(0);
 
   // Step 0 — cuenta
@@ -77,7 +79,7 @@ export default function RegisterOwnerScreen() {
   async function detectLocation() {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permiso denegado");
+      toast.error("Permiso de ubicación denegado");
       return;
     }
     const loc = await Location.getCurrentPositionAsync({});
@@ -142,7 +144,7 @@ export default function RegisterOwnerScreen() {
 
     if (error) {
       setLoading(false);
-      Alert.alert("No se pudo crear la cuenta", error.message);
+      toast.error(error.message);
       return;
     }
 
@@ -183,9 +185,8 @@ export default function RegisterOwnerScreen() {
 
     if (rpcError || !newId) {
       setLoading(false);
-      Alert.alert(
-        "Cuenta creada, pero…",
-        "No pudimos registrar el local ahora. Puedes hacerlo desde tu panel.",
+      toast.error(
+        "Cuenta creada, pero no pudimos registrar el local. Hazlo desde tu panel.",
       );
       return;
     }

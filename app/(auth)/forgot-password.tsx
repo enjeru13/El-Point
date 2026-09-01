@@ -3,12 +3,12 @@ import { Field } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { supabase } from "@/lib/supabase";
+import { useToast } from "@/lib/toast";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -24,6 +24,7 @@ export default function ForgotPasswordScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const toast = useToast();
 
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
@@ -38,7 +39,7 @@ export default function ForgotPasswordScreen() {
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
     setLoading(false);
     if (error) {
-      Alert.alert("No se pudo enviar", error.message);
+      toast.error(error.message);
       return;
     }
     setStep("code");
@@ -46,15 +47,15 @@ export default function ForgotPasswordScreen() {
 
   async function submitNewPassword() {
     if (code.trim().length < 6) {
-      Alert.alert("Código incompleto");
+      toast.error("Código incompleto");
       return;
     }
     if (password.length < 8) {
-      Alert.alert("La contraseña debe tener al menos 8 caracteres");
+      toast.error("La contraseña debe tener al menos 8 caracteres");
       return;
     }
     if (password !== confirm) {
-      Alert.alert("Las contraseñas no coinciden");
+      toast.error("Las contraseñas no coinciden");
       return;
     }
 
@@ -66,7 +67,7 @@ export default function ForgotPasswordScreen() {
     });
     if (otpError) {
       setLoading(false);
-      Alert.alert("Código inválido", otpError.message);
+      toast.error(`Código inválido: ${otpError.message}`);
       return;
     }
 
@@ -75,10 +76,10 @@ export default function ForgotPasswordScreen() {
     setLoading(false);
 
     if (updError) {
-      Alert.alert("No se pudo actualizar", updError.message);
+      toast.error(updError.message);
       return;
     }
-    Alert.alert("Listo", "Tu contraseña fue actualizada. Inicia sesión.");
+    toast.success("Contraseña actualizada. Inicia sesión.");
     router.replace("/(auth)/login");
   }
 

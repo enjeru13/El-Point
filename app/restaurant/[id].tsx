@@ -15,6 +15,7 @@ import {
   type Review,
 } from "@/lib/queries/reviews";
 import { useMyProfile } from "@/lib/queries/me";
+import { useToast } from "@/lib/toast";
 import { isOpenNow, formatRange, DAY_LABELS_LONG } from "@/lib/hours";
 import { useTheme } from "@/lib/ThemeContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -420,6 +421,7 @@ export default function RestaurantProfileScreen() {
   const toggleHelpful = useToggleHelpful(id);
   const replyMut = useReplyToReview(id);
   const myProfileQ = useMyProfile();
+  const toast = useToast();
 
   const [saved, setSaved] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -515,7 +517,13 @@ export default function RestaurantProfileScreen() {
   function handleSubmit(rating: number, body: string, photoUris: string[]) {
     submitReview.mutate(
       { rating, body, photoUris },
-      { onSuccess: () => setReviewModalOpen(false) },
+      {
+        onSuccess: () => {
+          setReviewModalOpen(false);
+          toast.success("¡Rank publicado! +10 XP");
+        },
+        onError: () => toast.error("No se pudo publicar. ¿Iniciaste sesión?"),
+      },
     );
   }
 
@@ -1351,7 +1359,10 @@ export default function RestaurantProfileScreen() {
                           onPress={() =>
                             replyMut.mutate(
                               { reviewId: r.id, body: replyText },
-                              { onSuccess: () => { setReplyingId(null); setReplyText(""); } },
+                              {
+                                onSuccess: () => { setReplyingId(null); setReplyText(""); toast.success("Respuesta enviada"); },
+                                onError: () => toast.error("No se pudo enviar la respuesta"),
+                              },
                             )
                           }
                           disabled={replyText.trim().length === 0}

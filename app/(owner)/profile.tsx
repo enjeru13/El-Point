@@ -6,7 +6,6 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   Switch,
@@ -15,6 +14,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
+import { useToast } from '@/lib/toast';
 import { FLOATING_NAV_H } from '@/lib/theme';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { useMyRestaurant, useUpdateMyRestaurant } from '@/lib/queries/owner';
@@ -69,6 +69,7 @@ export default function OwnerProfileScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
+  const toast = useToast();
   const restaurantQ = useMyRestaurant();
   const restaurant = restaurantQ.data ?? null;
   const updateMut = useUpdateMyRestaurant(restaurant?.id);
@@ -104,7 +105,7 @@ export default function OwnerProfileScreen() {
       const url = await uploadRestaurantImage(restaurant.id, kind, r.assets[0].uri);
       updateMut.mutate(kind === 'logo' ? { logo_url: url } : { cover_url: url });
     } catch (e: any) {
-      Alert.alert('No se pudo subir la imagen', e?.message ?? 'Intenta de nuevo');
+      toast.error(e?.message ?? 'No se pudo subir la imagen');
     } finally {
       setUploading(null);
     }
@@ -119,7 +120,7 @@ export default function OwnerProfileScreen() {
       const url = await uploadRestaurantMenu(restaurant.id, r.assets[0].uri);
       updateMut.mutate({ menu_pdf_url: url });
     } catch (e: any) {
-      Alert.alert('No se pudo subir el menú', e?.message ?? 'Intenta de nuevo');
+      toast.error(e?.message ?? 'No se pudo subir el menú');
     } finally {
       setUploading(null);
     }
@@ -155,11 +156,11 @@ export default function OwnerProfileScreen() {
   }
 
   function save() {
-    if (!name.trim()) { Alert.alert('El nombre no puede quedar vacío'); return; }
+    if (!name.trim()) { toast.error('El nombre no puede quedar vacío'); return; }
     const badTime = hours.days.some(
       (d) => !d.closed && (!/^\d{1,2}:\d{2}$/.test(d.open) || !/^\d{1,2}:\d{2}$/.test(d.close)),
     );
-    if (badTime) { Alert.alert('Horario inválido', 'Usa el formato HH:MM (ej. 12:00).'); return; }
+    if (badTime) { toast.error('Horario inválido. Usa el formato HH:MM (ej. 12:00).'); return; }
     updateMut.mutate(
       {
         name: name.trim(),
@@ -174,8 +175,8 @@ export default function OwnerProfileScreen() {
         hours,
       },
       {
-        onSuccess: () => setEditing(false),
-        onError: (e: any) => Alert.alert('No se pudo guardar', e?.message ?? 'Intenta de nuevo'),
+        onSuccess: () => { setEditing(false); toast.success('Cambios guardados'); },
+        onError: (e: any) => toast.error(e?.message ?? 'No se pudo guardar'),
       },
     );
   }

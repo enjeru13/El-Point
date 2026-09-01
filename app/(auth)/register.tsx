@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { Field } from '@/components/ui/Field';
 import { supabase } from '@/lib/supabase';
+import { useToast } from '@/lib/toast';
 import { useTheme } from '@/lib/ThemeContext';
 import { Button } from '@/components/ui/Button';
 import { ThemePicker } from '@/components/ui/ThemePicker';
@@ -46,6 +47,7 @@ export default function RegisterScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const toast = useToast();
   const [step, setStep] = useState(0);
 
   // Step 0 — datos básicos
@@ -86,7 +88,7 @@ export default function RegisterScreen() {
 
     if (error) {
       setLoading(false);
-      Alert.alert('No se pudo crear la cuenta', error.message);
+      toast.error(error.message);
       return;
     }
 

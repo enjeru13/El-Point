@@ -26,6 +26,7 @@ import { RankBadge } from '@/components/ui/RankBadge';
 import { Button } from '@/components/ui/Button';
 import { uploadAvatar } from '@/lib/storage';
 import { useFavorites } from '@/lib/queries/feed';
+import { useToast } from '@/lib/toast';
 
 function timeAgo(iso: string): string {
   const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400_000);
@@ -59,6 +60,7 @@ export default function ProfileScreen() {
   const favoritesQ = useFavorites();
 
   const updateMut = useUpdateMyProfile();
+  const toast = useToast();
 
   const profile = profileQ.data ?? null;
   const reviews = reviewsQ.data ?? [];
@@ -94,14 +96,14 @@ export default function ProfileScreen() {
   function saveEdit() {
     const u = username.trim();
     if (u && !/^[a-z0-9_.]{3,20}$/i.test(u)) {
-      Alert.alert('Usuario inválido', 'Solo letras, números, punto y guion bajo (3–20).');
+      toast.error('Usuario: solo letras, números, punto y guion bajo (3–20).');
       return;
     }
     updateMut.mutate(
       { username: u || null, full_name: fullName.trim() || null, bio: bio.trim() || null },
       {
-        onSuccess: () => setEditing(false),
-        onError: (e: any) => Alert.alert('No se pudo guardar', e?.message ?? 'Intenta de nuevo'),
+        onSuccess: () => { setEditing(false); toast.success('Perfil actualizado'); },
+        onError: (e: any) => toast.error(e?.message ?? 'No se pudo guardar'),
       },
     );
   }
@@ -115,7 +117,7 @@ export default function ProfileScreen() {
       const url = await uploadAvatar(profile.id, r.assets[0].uri);
       updateMut.mutate({ avatar_url: url });
     } catch (e: any) {
-      Alert.alert('No se pudo subir el avatar', e?.message ?? 'Intenta de nuevo');
+      toast.error(e?.message ?? 'No se pudo subir el avatar');
     } finally {
       setAvatarUploading(false);
     }

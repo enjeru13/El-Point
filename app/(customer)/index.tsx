@@ -1,4 +1,5 @@
 import { Image } from "expo-image";
+import * as Haptics from "expo-haptics";
 import { AppLogo } from "@/components/ui/AppLogo";
 import { Avatar } from "@/components/ui/Avatar";
 import { Icon } from "@/components/ui/Icon";
@@ -657,12 +658,15 @@ export default function HomeScreen() {
                 key={item.id}
                 item={item}
                 favorited={favIds.has(item.restaurant.id)}
-                onToggleFavorite={() =>
+                onToggleFavorite={() => {
+                  Haptics.impactAsync(
+                    Haptics.ImpactFeedbackStyle.Light,
+                  ).catch(() => {});
                   toggleFav.mutate({
                     restaurantId: item.restaurant.id,
                     favorited: favIds.has(item.restaurant.id),
-                  })
-                }
+                  });
+                }}
               />
             ))
           ) : (

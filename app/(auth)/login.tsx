@@ -1,5 +1,6 @@
 import { AppLogo } from "@/components/ui/AppLogo";
 import { Button } from "@/components/ui/Button";
+import { useToast } from "@/lib/toast";
 import { Field } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
 import { supabase } from "@/lib/supabase";
@@ -324,6 +325,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   async function handleLogin() {
     if (!email.trim() || !password.trim()) return;
@@ -333,7 +335,13 @@ export default function LoginScreen() {
       password,
     });
     setLoading(false);
-    if (error) alert(error.message);
+    if (error) {
+      toast.error(
+        error.message.includes('Invalid login')
+          ? 'Correo o contraseña incorrectos.'
+          : error.message,
+      );
+    }
     // _layout.tsx detecta session y redirige automáticamente
   }
 
