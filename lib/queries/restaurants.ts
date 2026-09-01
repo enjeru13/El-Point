@@ -19,6 +19,7 @@ export type RestaurantDetail = {
   logo_url: string | null;
   cover_url: string | null;
   menu_pdf_url: string | null;
+  promo_text: string | null;
   hours: unknown;
   is_active: boolean;
   rating_avg: number;
@@ -35,7 +36,7 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
     .from('restaurants')
     .select(
       `id, name, description, address, whatsapp, instagram, phone,
-       price_level, logo_url, cover_url, menu_pdf_url, hours, is_active,
+       price_level, logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
        rating_avg, rating_count,
        restaurant_categories ( categories ( slug, label, icon ) )`,
     )

@@ -226,6 +226,7 @@ export type Database = {
           owner_id: string | null
           phone: string | null
           price_level: number | null
+          promo_text: string | null
           rating_avg: number
           rating_count: number
           updated_at: string
@@ -247,6 +248,7 @@ export type Database = {
           owner_id?: string | null
           phone?: string | null
           price_level?: number | null
+          promo_text?: string | null
           rating_avg?: number
           rating_count?: number
           updated_at?: string
@@ -268,6 +270,7 @@ export type Database = {
           owner_id?: string | null
           phone?: string | null
           price_level?: number | null
+          promo_text?: string | null
           rating_avg?: number
           rating_count?: number
           updated_at?: string
@@ -593,6 +596,19 @@ export type Database = {
             }
             Returns: string
           }
+      create_owner_restaurant: {
+        Args: {
+          p_address: string
+          p_category_ids: number[]
+          p_description: string
+          p_instagram: string
+          p_lat: number
+          p_lng: number
+          p_name: string
+          p_whatsapp: string
+        }
+        Returns: string
+      }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {

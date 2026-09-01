@@ -399,6 +399,30 @@ export default function RestaurantProfileScreen() {
         {/* ── Contenido ── */}
         <View style={{ padding: 16, gap: 20 }}>
 
+          {/* ── Oferta ── */}
+          {restaurant.promo_text && (
+            <View
+              style={{
+                flexDirection: 'row', alignItems: 'center', gap: 10,
+                padding: 14, borderRadius: 16,
+                backgroundColor: C.primaryContainer,
+                borderWidth: 2, borderColor: C.border,
+                borderLeftWidth: 6,
+                ...shadow.sm,
+              }}
+            >
+              <Icon name="tag" size={20} color={C.onSurface} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 13, letterSpacing: 0.5 }}>
+                  OFERTA
+                </Text>
+                <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
+                  {restaurant.promo_text}
+                </Text>
+              </View>
+            </View>
+          )}
+
           {/* ── Acciones ── */}
           <View style={{ flexDirection: 'row', gap: 10 }}>
             {/* Rankear — CTA principal */}

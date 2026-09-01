@@ -75,6 +75,7 @@ const MAP: Record<string, LucideIcon> = {
   'heart-outline':        Heart,
   'check-circle':         CheckCircle2,
   'tag-outline':          Tag,
+  'tag':                  Tag,
   // Food
   'silverware-fork-knife':Utensils,
   'food':                 Utensils,

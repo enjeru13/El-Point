@@ -44,6 +44,11 @@ on conflict (id) do update
       instagram = excluded.instagram,
       phone = excluded.phone;
 
+-- Demo promos (idempotent)
+update public.restaurants set promo_text = '2x1 en smash burgers todos los martes' where id = '11111111-1111-1111-1111-111111111111';
+update public.restaurants set promo_text = '-20% en bowls antes de las 6pm'        where id = '66666666-6666-6666-6666-666666666666';
+update public.restaurants set promo_text = 'Postre gratis con tu combo del dia'     where id = '44444444-4444-4444-4444-444444444444';
+
 insert into public.restaurant_categories (restaurant_id, category_id)
 values
   ('11111111-1111-1111-1111-111111111111', 2),   -- burgers

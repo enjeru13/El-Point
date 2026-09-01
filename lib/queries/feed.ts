@@ -8,6 +8,7 @@ export type FeedRestaurant = {
   address: string | null;
   rating_avg: number;
   rating_count: number;
+  promo_text: string | null;
   categories: RestaurantCategory[];
 };
 
@@ -32,7 +33,7 @@ async function fetchFeed(): Promise<FeedItem[]> {
     .select(
       `id, rating, body, created_at,
        restaurant:restaurants (
-         id, name, address, rating_avg, rating_count,
+         id, name, address, rating_avg, rating_count, promo_text,
          restaurant_categories ( categories ( slug, label, icon ) )
        ),
        author:profiles!author_id ( username, full_name, level )`,
@@ -56,6 +57,7 @@ async function fetchFeed(): Promise<FeedItem[]> {
         address: r.restaurant.address,
         rating_avg: r.restaurant.rating_avg,
         rating_count: r.restaurant.rating_count,
+        promo_text: r.restaurant.promo_text ?? null,
         categories: mapCategories(r.restaurant.restaurant_categories),
       },
     }));
@@ -75,7 +77,7 @@ async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
     .select(
       `created_at,
        restaurant:restaurants (
-         id, name, address, rating_avg, rating_count,
+         id, name, address, rating_avg, rating_count, promo_text,
          restaurant_categories ( categories ( slug, label, icon ) )
        )`,
     )
@@ -91,6 +93,7 @@ async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
       address: f.restaurant.address,
       rating_avg: f.restaurant.rating_avg,
       rating_count: f.restaurant.rating_count,
+      promo_text: f.restaurant.promo_text ?? null,
       categories: mapCategories(f.restaurant.restaurant_categories),
       favorited_at: f.created_at,
     }));

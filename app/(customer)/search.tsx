@@ -334,7 +334,7 @@ export default function SearchScreen() {
               </View>
               <Text style={{ fontFamily: 'Outfit_700Bold', fontSize: 20, color: C.onSurface }}>Sin resultados</Text>
               <Text style={{ fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: C.outline, textAlign: 'center', maxWidth: 240 }}>
-                Probá con otro término o quitá filtros
+                Prueba con otro término o quita filtros
               </Text>
               <Pressable onPress={clear} style={{ paddingHorizontal: 20, paddingVertical: 10, borderRadius: 99, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border }}>
                 <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: C.primary }}>Ver tendencias</Text>

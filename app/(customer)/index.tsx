@@ -25,6 +25,7 @@ import {
 
 const CATEGORIES: { id: string; label: string; icon: string }[] = [
   { id: 'all',      label: 'Todo',      icon: 'silverware-fork-knife' },
+  { id: 'promo',    label: 'Ofertas',   icon: 'tag' },
   { id: 'burgers',  label: 'Burgers',   icon: 'hamburger' },
   { id: 'pizza',    label: 'Pizza',     icon: 'pizza' },
   { id: 'hotdogs',  label: 'Hot Dogs',  icon: 'food-hot-dog' },
@@ -65,6 +66,7 @@ function ReviewCard({
   const { C, shadow } = useTheme();
   const router = useRouter();
   const cat = item.restaurant.categories[0];
+  const promo = item.restaurant.promo_text;
 
   return (
     <Pressable
@@ -103,21 +105,38 @@ function ReviewCard({
           </Text>
         </View>
 
-        {/* Categoría */}
-        {cat && (
-          <View
-            style={{
-              position: 'absolute', top: 12, left: 12,
-              paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99,
-              backgroundColor: C.surface,
-              borderWidth: 2, borderColor: C.border,
-            }}
-          >
-            <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
-              {cat.label}
-            </Text>
-          </View>
-        )}
+        {/* Etiquetas arriba-izquierda: OFERTA + categoría */}
+        <View style={{ position: 'absolute', top: 12, left: 12, gap: 6, alignItems: 'flex-start' }}>
+          {promo && (
+            <View
+              style={{
+                flexDirection: 'row', alignItems: 'center', gap: 4,
+                paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99,
+                backgroundColor: C.primaryContainer,
+                borderWidth: 2, borderColor: C.border,
+                ...shadow.sm,
+              }}
+            >
+              <Icon name="tag" size={13} color={C.onSurface} />
+              <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 13, letterSpacing: 0.5 }}>
+                OFERTA
+              </Text>
+            </View>
+          )}
+          {cat && (
+            <View
+              style={{
+                paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99,
+                backgroundColor: C.surface,
+                borderWidth: 2, borderColor: C.border,
+              }}
+            >
+              <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
+                {cat.label}
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
 
       {/* Contenido */}
@@ -125,6 +144,24 @@ function ReviewCard({
         <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 20 }}>
           {item.restaurant.name}
         </Text>
+
+        {/* Franja de oferta */}
+        {promo && (
+          <View
+            style={{
+              flexDirection: 'row', alignItems: 'center', gap: 8,
+              padding: 10, borderRadius: 12,
+              backgroundColor: C.primaryFixed,
+              borderWidth: 2, borderColor: C.border,
+              borderLeftWidth: 5,
+            }}
+          >
+            <Icon name="tag" size={16} color={C.primary} />
+            <Text style={{ flex: 1, color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }} numberOfLines={2}>
+              {promo}
+            </Text>
+          </View>
+        )}
 
         {/* Quote */}
         <View
@@ -253,7 +290,11 @@ export default function HomeScreen() {
   const feed = feedQ.data ?? [];
 
   const filtered = feed.filter(item => {
-    if (activeCategory !== 'all' && !item.restaurant.categories.some(c => c.slug === activeCategory)) return false;
+    if (activeCategory === 'promo') {
+      if (!item.restaurant.promo_text) return false;
+    } else if (activeCategory !== 'all' && !item.restaurant.categories.some(c => c.slug === activeCategory)) {
+      return false;
+    }
     if (search.trim()) {
       const q = search.toLowerCase();
       return item.restaurant.name.toLowerCase().includes(q) || item.body.toLowerCase().includes(q);
@@ -370,7 +411,7 @@ export default function HomeScreen() {
                   Sin favoritos aún
                 </Text>
                 <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, textAlign: 'center', maxWidth: 240 }}>
-                  Dale "Me sirve" a las reseñas que más te gusten para guardarlas acá.
+                  Marca "Me sirve" en las reseñas que más te gusten para guardarlas aquí.
                 </Text>
               </View>
             ) : (
@@ -414,7 +455,7 @@ export default function HomeScreen() {
               <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, textAlign: 'center', maxWidth: 250 }}>
                 {feed.length === 0
                   ? 'Sé el primero: abre un lugar y deja tu rank.'
-                  : 'Probá otra categoría o quitá el filtro.'}
+                  : 'Prueba otra categoría o quita el filtro.'}
               </Text>
             </View>
           )}
