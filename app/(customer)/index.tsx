@@ -133,7 +133,9 @@ function ReviewCard({
         >
           <Icon name="star" size={14} color={C.secondary} />
           <AppText variant="bodyStrong" color={C.secondary}>
-            {item.rating.toFixed(1)}
+            {item.restaurant.rating_count > 0
+              ? item.restaurant.rating_avg.toFixed(1)
+              : "Nuevo"}
           </AppText>
         </View>
 
