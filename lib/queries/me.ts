@@ -10,6 +10,7 @@ export type MyProfile = {
   level: number;
   xp: number;
   search_radius_km: number;
+  settings: Record<string, boolean>;
   created_at: string;
 };
 
@@ -20,16 +21,42 @@ async function fetchMyProfile(): Promise<MyProfile | null> {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, username, full_name, avatar_url, bio, level, xp, search_radius_km, created_at')
+    .select('id, username, full_name, avatar_url, bio, level, xp, search_radius_km, settings, created_at')
     .eq('id', uid)
     .maybeSingle();
 
   if (error) throw error;
-  return (data as MyProfile) ?? null;
+  if (!data) return null;
+  return { ...(data as any), settings: ((data as any).settings ?? {}) as Record<string, boolean> };
 }
 
 export function useMyProfile() {
   return useQuery({ queryKey: ['my-profile'], queryFn: fetchMyProfile });
+}
+
+export function useUpdateSettings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (patch: Record<string, boolean>) => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error('No autenticado');
+      const current = qc.getQueryData<MyProfile | null>(['my-profile'])?.settings ?? {};
+      const merged = { ...current, ...patch };
+      const { error } = await supabase.from('profiles').update({ settings: merged }).eq('id', userData.user.id);
+      if (error) throw error;
+      return merged;
+    },
+    onMutate: async (patch) => {
+      await qc.cancelQueries({ queryKey: ['my-profile'] });
+      const prev = qc.getQueryData<MyProfile | null>(['my-profile']);
+      if (prev) qc.setQueryData(['my-profile'], { ...prev, settings: { ...prev.settings, ...patch } });
+      return { prev };
+    },
+    onError: (_e, _p, ctx) => {
+      if (ctx?.prev) qc.setQueryData(['my-profile'], ctx.prev);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ['my-profile'] }),
+  });
 }
 
 export type MyProfilePatch = Partial<{

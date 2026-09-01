@@ -1,6 +1,6 @@
 import { Icon } from '@/components/ui/Icon';
-import { useState } from 'react';
 import { Pressable, ScrollView, Switch, Text, View } from 'react-native';
+import { useMyProfile, useUpdateSettings } from '@/lib/queries/me';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { THEMES, THEME_META, ThemeName } from '@/lib/themes';
@@ -61,13 +61,31 @@ function ToggleRow({ icon, label, sublabel, value, onChange }: { icon: string; l
   );
 }
 
+const OWNER_SETTING_DEFAULTS: Record<string, boolean> = {
+  notifReviews: true,
+  notifReplies: true,
+  notifWeekly: true,
+  haptics: true,
+};
+
 export default function OwnerSettingsScreen() {
   const { C, shadow, themeName, setTheme } = useTheme();
   const insets = useSafeAreaInsets();
-  const [notifReviews,  setNotifReviews]  = useState(true);
-  const [notifReplies,  setNotifReplies]  = useState(true);
-  const [notifWeekly,   setNotifWeekly]   = useState(true);
-  const [haptics,       setHaptics]       = useState(true);
+
+  const profileQ = useMyProfile();
+  const updateSettings = useUpdateSettings();
+  const saved = profileQ.data?.settings ?? {};
+  const s = (key: string) => saved[key] ?? OWNER_SETTING_DEFAULTS[key] ?? false;
+  const set = (key: string) => (v: boolean) => updateSettings.mutate({ [key]: v });
+
+  const notifReviews = s('notifReviews');
+  const notifReplies = s('notifReplies');
+  const notifWeekly  = s('notifWeekly');
+  const haptics       = s('haptics');
+  const setNotifReviews = set('notifReviews');
+  const setNotifReplies = set('notifReplies');
+  const setNotifWeekly  = set('notifWeekly');
+  const setHaptics      = set('haptics');
 
   return (
     <View style={{ flex: 1, backgroundColor: C.surface }}>

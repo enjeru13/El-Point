@@ -147,6 +147,7 @@ export type Database = {
           level: number
           role: string
           search_radius_km: number
+          settings: Json
           updated_at: string
           username: string | null
           xp: number
@@ -160,6 +161,7 @@ export type Database = {
           level?: number
           role?: string
           search_radius_km?: number
+          settings?: Json
           updated_at?: string
           username?: string | null
           xp?: number
@@ -173,6 +175,7 @@ export type Database = {
           level?: number
           role?: string
           search_radius_km?: number
+          settings?: Json
           updated_at?: string
           username?: string | null
           xp?: number
@@ -763,6 +766,7 @@ export type Database = {
           rating_count: number
         }[]
       }
+      owns_restaurant_path: { Args: { object_name: string }; Returns: boolean }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
         | { Args: { use_typmod?: boolean }; Returns: string }

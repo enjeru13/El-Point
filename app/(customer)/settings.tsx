@@ -3,8 +3,8 @@ import { supabase } from "@/lib/supabase";
 import { FLOATING_NAV_H } from "@/lib/theme";
 import { useTheme } from "@/lib/ThemeContext";
 import { THEMES, THEME_META, ThemeName } from "@/lib/themes";
+import { useMyProfile, useUpdateSettings } from "@/lib/queries/me";
 import { useRouter } from "expo-router";
-import { useState } from "react";
 import { Pressable, ScrollView, Switch, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -184,19 +184,44 @@ function SectionLabel({ label }: { label: string }) {
 
 const THEME_NAMES = Object.keys(THEME_META) as ThemeName[];
 
+const SETTING_DEFAULTS: Record<string, boolean> = {
+  notifRanks: true,
+  notifReplies: true,
+  notifLevelup: true,
+  notifPromos: false,
+  soundEnabled: true,
+  haptics: true,
+  compactCards: false,
+  showDistance: true,
+};
+
 export default function SettingsScreen() {
   const { C, shadow, themeName, setTheme } = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const [notifRanks, setNotifRanks] = useState(true);
-  const [notifReplies, setNotifReplies] = useState(true);
-  const [notifLevelup, setNotifLevelup] = useState(true);
-  const [notifPromos, setNotifPromos] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [haptics, setHaptics] = useState(true);
-  const [compactCards, setCompactCards] = useState(false);
-  const [showDistance, setShowDistance] = useState(true);
+  const profileQ = useMyProfile();
+  const updateSettings = useUpdateSettings();
+  const saved = profileQ.data?.settings ?? {};
+  const s = (key: string) => saved[key] ?? SETTING_DEFAULTS[key] ?? false;
+  const set = (key: string) => (v: boolean) => updateSettings.mutate({ [key]: v });
+
+  const notifRanks   = s('notifRanks');
+  const notifReplies = s('notifReplies');
+  const notifLevelup = s('notifLevelup');
+  const notifPromos  = s('notifPromos');
+  const soundEnabled = s('soundEnabled');
+  const haptics      = s('haptics');
+  const compactCards = s('compactCards');
+  const showDistance = s('showDistance');
+  const setNotifRanks   = set('notifRanks');
+  const setNotifReplies = set('notifReplies');
+  const setNotifLevelup = set('notifLevelup');
+  const setNotifPromos  = set('notifPromos');
+  const setSoundEnabled = set('soundEnabled');
+  const setHaptics      = set('haptics');
+  const setCompactCards = set('compactCards');
+  const setShowDistance = set('showDistance');
 
   return (
     <View style={{ flex: 1, backgroundColor: C.surface }}>
