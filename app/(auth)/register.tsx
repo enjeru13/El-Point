@@ -9,9 +9,9 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Text,
   View,
 } from 'react-native';
+import { AppText } from '@/components/ui/AppText';
 import { Field } from '@/components/ui/Field';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/lib/toast';
@@ -201,18 +201,12 @@ export default function RegisterScreen() {
                 >
                   <Icon name="party-popper" size={40} color={C.secondary} />
                 </View>
-                <Text
-                  className="text-2xl text-center mb-2"
-                  style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold' }}
-                >
+                <AppText variant="title" align="center" style={{ marginBottom: 8 }}>
                   ¡Cuéntanos quién eres!
-                </Text>
-                <Text
-                  className="text-base text-center"
-                  style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular' }}
-                >
+                </AppText>
+                <AppText variant="body" color={C.onSurfaceVariant} align="center">
                   Únete a la comunidad gastronómica más vibrante del barrio.
-                </Text>
+                </AppText>
               </View>
 
               <View style={{ gap: 16 }}>
@@ -250,30 +244,20 @@ export default function RegisterScreen() {
                 >
                   <Icon name="storefront-outline" size={24} color="#fff" />
                 </View>
-                <Text
-                  className="text-base text-center mb-1"
-                  style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold' }}
-                >
+                <AppText variant="subtitle" align="center" style={{ marginBottom: 4 }}>
                   ¿Eres dueño de un restaurante?
-                </Text>
-                <Text
-                  className="text-sm text-center mb-4"
-                  style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular' }}
-                >
+                </AppText>
+                <AppText variant="bodySm" color={C.onSurfaceVariant} align="center" style={{ marginBottom: 16 }}>
                   Gestiona tu menú, analíticas y llega a más comensales.
-                </Text>
+                </AppText>
                 <Pressable onPress={() => { setRole('restaurant_owner'); router.push('/(auth)/register-owner'); }}>
-                  <Text
-                    className="text-sm pb-px"
-                    style={{
-                      color: C.primary,
-                      fontFamily: 'PlusJakartaSans_700Bold',
-                      borderBottomWidth: 1,
-                      borderBottomColor: C.primary + '4d',
-                    }}
+                  <AppText
+                    variant="label"
+                    color={C.primary}
+                    style={{ borderBottomWidth: 1, borderBottomColor: C.primary + '4d', paddingBottom: 1 }}
                   >
                     Regístrate como socio
-                  </Text>
+                  </AppText>
                 </Pressable>
               </View>
             </>
@@ -283,18 +267,12 @@ export default function RegisterScreen() {
           {step === 1 && (
             <>
               <View className="mb-6">
-                <Text
-                  className="text-2xl mb-2"
-                  style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold' }}
-                >
+                <AppText variant="title" style={{ marginBottom: 8 }}>
                   Tu perfil de sabor
-                </Text>
-                <Text
-                  className="text-base"
-                  style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular' }}
-                >
+                </AppText>
+                <AppText variant="body" color={C.onSurfaceVariant}>
                   Elige tus estilos favoritos para personalizar tu experiencia.
-                </Text>
+                </AppText>
               </View>
 
               {/* Grid 2 columnas */}
@@ -330,15 +308,13 @@ export default function RegisterScreen() {
                           color={isSelected ? C.onSecondary : C.primary}
                         />
                       </View>
-                      <Text
-                        className="text-sm text-center"
-                        style={{
-                          color: isSelected ? C.secondary : C.onSurface,
-                          fontFamily: 'PlusJakartaSans_600SemiBold',
-                        }}
+                      <AppText
+                        variant="label"
+                        align="center"
+                        color={isSelected ? C.secondary : C.onSurface}
                       >
                         {cat.label}
-                      </Text>
+                      </AppText>
                     </Pressable>
                   );
                 })}
@@ -356,18 +332,12 @@ export default function RegisterScreen() {
                 >
                   <Icon name="shield-lock-outline" size={40} color={C.primary} />
                 </View>
-                <Text
-                  className="text-2xl text-center mb-2"
-                  style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold' }}
-                >
+                <AppText variant="title" align="center" style={{ marginBottom: 8 }}>
                   Crea tu contraseña
-                </Text>
-                <Text
-                  className="text-base text-center"
-                  style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular' }}
-                >
+                </AppText>
+                <AppText variant="body" color={C.onSurfaceVariant} align="center">
                   Mínimo 8 caracteres. Hazla memorable pero segura.
-                </Text>
+                </AppText>
               </View>
               <View style={{ gap: 16 }}>
                 <Field
@@ -396,18 +366,12 @@ export default function RegisterScreen() {
           {step === 3 && (
             <>
               <View className="mb-6">
-                <Text
-                  className="text-2xl mb-2"
-                  style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold' }}
-                >
+                <AppText variant="title" style={{ marginBottom: 8 }}>
                   Encuentra tu barrio
-                </Text>
-                <Text
-                  className="text-base"
-                  style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular' }}
-                >
+                </AppText>
+                <AppText variant="body" color={C.onSurfaceVariant}>
                   Define tu radio de búsqueda para descubrir sabores cerca tuyo.
-                </Text>
+                </AppText>
               </View>
 
               {/* Mapa placeholder con círculo animado */}
@@ -458,12 +422,7 @@ export default function RegisterScreen() {
                 {locGranted ? (
                   <View className="absolute top-4 left-4 flex-row items-center gap-2 bg-white/80 px-3 py-2 rounded-full">
                     <Icon name="check-circle" size={16} color={C.primary} />
-                    <Text
-                      className="text-xs"
-                      style={{ color: C.primary, fontFamily: 'PlusJakartaSans_600SemiBold' }}
-                    >
-                      Ubicación activa
-                    </Text>
+                    <AppText variant="caption" color={C.primary}>Ubicación activa</AppText>
                   </View>
                 ) : (
                   <Pressable
@@ -471,12 +430,7 @@ export default function RegisterScreen() {
                     className="absolute top-4 left-4 flex-row items-center gap-2 bg-white/80 px-3 py-2 rounded-full"
                   >
                     <Icon name="crosshairs-gps" size={16} color={C.primary} />
-                    <Text
-                      className="text-xs"
-                      style={{ color: C.primary, fontFamily: 'PlusJakartaSans_600SemiBold' }}
-                    >
-                      Activar ubicación
-                    </Text>
+                    <AppText variant="caption" color={C.primary}>Activar ubicación</AppText>
                   </Pressable>
                 )}
               </View>
@@ -485,31 +439,16 @@ export default function RegisterScreen() {
               <View className="gap-4">
                 <View className="flex-row justify-between items-end">
                   <View>
-                    <Text
-                      className="text-lg"
-                      style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold' }}
-                    >
-                      Radio de búsqueda
-                    </Text>
-                    <Text
-                      className="text-sm"
-                      style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular' }}
-                    >
+                    <AppText variant="subtitle">Radio de búsqueda</AppText>
+                    <AppText variant="bodySm" color={C.onSurfaceVariant}>
                       ¿Qué tan lejos irías por comida?
-                    </Text>
+                    </AppText>
                   </View>
                   <View className="items-end">
-                    <Text
-                      style={{ color: C.primary, fontSize: 30, fontFamily: 'Outfit_800ExtraBold' }}
-                    >
+                    <AppText variant="display" color={C.primary} style={{ fontSize: 30, lineHeight: 34 }}>
                       {radius}
-                    </Text>
-                    <Text
-                      className="text-sm"
-                      style={{ color: C.primary, fontFamily: 'PlusJakartaSans_600SemiBold' }}
-                    >
-                      km
-                    </Text>
+                    </AppText>
+                    <AppText variant="label" color={C.primary}>km</AppText>
                   </View>
                 </View>
 
@@ -525,18 +464,8 @@ export default function RegisterScreen() {
                     />
                   </View>
                   <View className="flex-row justify-between">
-                    <Text
-                      className="text-xs"
-                      style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular' }}
-                    >
-                      1 km
-                    </Text>
-                    <Text
-                      className="text-xs"
-                      style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular' }}
-                    >
-                      15 km
-                    </Text>
+                    <AppText variant="caption" color={C.outline}>1 km</AppText>
+                    <AppText variant="caption" color={C.outline}>15 km</AppText>
                   </View>
                   {/* Botones de ajuste */}
                   <View className="flex-row items-center justify-center gap-6">
@@ -548,22 +477,10 @@ export default function RegisterScreen() {
                       <Icon name="minus" size={22} color={C.onSurfaceVariant} />
                     </Pressable>
                     <View className="items-center">
-                      <Text
-                        style={{
-                          color: C.primary,
-                          fontSize: 48,
-                          lineHeight: 56,
-                          fontFamily: 'Outfit_800ExtraBold',
-                        }}
-                      >
+                      <AppText variant="display" color={C.primary} style={{ fontSize: 48, lineHeight: 56 }}>
                         {radius}
-                      </Text>
-                      <Text
-                        className="text-sm"
-                        style={{ color: C.primary, fontFamily: 'PlusJakartaSans_600SemiBold' }}
-                      >
-                        km
-                      </Text>
+                      </AppText>
+                      <AppText variant="label" color={C.primary}>km</AppText>
                     </View>
                     <Pressable
                       onPress={() => setRadius(r => Math.min(15, r + 1))}
@@ -582,12 +499,12 @@ export default function RegisterScreen() {
           {step === 4 && (
             <>
               <View className="mb-6">
-                <Text className="text-2xl mb-2" style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold' }}>
+                <AppText variant="title" style={{ marginBottom: 8 }}>
                   Tu estilo visual
-                </Text>
-                <Text className="text-base" style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular' }}>
+                </AppText>
+                <AppText variant="body" color={C.onSurfaceVariant}>
                   Elige el tema que más va contigo. Puedes cambiarlo cuando quieras en tu perfil.
-                </Text>
+                </AppText>
               </View>
               <ThemePicker />
             </>
@@ -629,9 +546,9 @@ export default function RegisterScreen() {
               iconTrailing={step === 2 || step === 4 ? 'check' : 'arrow-right'}
             />
             {step === 0 && (
-              <Text style={{ color: C.onSurfaceVariant + '80', fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, textAlign: 'center', marginTop: 10, lineHeight: 18 }}>
-                Al continuar, aceptas nuestros <Text style={{ textDecorationLine: 'underline' }}>Términos de Servicio</Text> y <Text style={{ textDecorationLine: 'underline' }}>Política de Privacidad</Text>.
-              </Text>
+              <AppText variant="caption" color={C.onSurfaceVariant + '80'} align="center" style={{ marginTop: 10, lineHeight: 18 }}>
+                Al continuar, aceptas nuestros <AppText variant="caption" style={{ textDecorationLine: 'underline' }}>Términos de Servicio</AppText> y <AppText variant="caption" style={{ textDecorationLine: 'underline' }}>Política de Privacidad</AppText>.
+              </AppText>
             )}
           </>
         )}

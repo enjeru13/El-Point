@@ -18,9 +18,9 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Text,
   View,
 } from "react-native";
+import { AppText } from "@/components/ui/AppText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CATEGORIES = [
@@ -310,24 +310,10 @@ export default function RegisterOwnerScreen() {
                     <Icon name="account" size={28} color={C.primary} />
                   </View>
                   <View>
-                    <Text
-                      style={{
-                        color: C.onSurface,
-                        fontFamily: "Outfit_700Bold",
-                        fontSize: 24,
-                      }}
-                    >
-                      Tu cuenta
-                    </Text>
-                    <Text
-                      style={{
-                        color: C.onSurfaceVariant,
-                        fontFamily: "PlusJakartaSans_400Regular",
-                        fontSize: 15,
-                      }}
-                    >
+                    <AppText variant="title">Tu cuenta</AppText>
+                    <AppText variant="body" color={C.onSurfaceVariant}>
                       Para administrar tu local
-                    </Text>
+                    </AppText>
                   </View>
                 </View>
               </View>
@@ -398,35 +384,15 @@ export default function RegisterOwnerScreen() {
                     />
                   </View>
                   <View>
-                    <Text
-                      style={{
-                        color: C.onSurface,
-                        fontFamily: "Outfit_700Bold",
-                        fontSize: 24,
-                      }}
-                    >
-                      Tu restaurante
-                    </Text>
-                    <Text
-                      style={{
-                        color: C.onSurfaceVariant,
-                        fontFamily: "PlusJakartaSans_400Regular",
-                        fontSize: 15,
-                      }}
-                    >
+                    <AppText variant="title">Tu restaurante</AppText>
+                    <AppText variant="body" color={C.onSurfaceVariant}>
                       Datos principales
-                    </Text>
+                    </AppText>
                   </View>
                 </View>
-                <Text
-                  style={{
-                    color: C.onSurfaceVariant,
-                    fontFamily: "PlusJakartaSans_400Regular",
-                    fontSize: 15,
-                  }}
-                >
+                <AppText variant="body" color={C.onSurfaceVariant}>
                   Únete a la comunidad gastronómica más vibrante del barrio.
-                </Text>
+                </AppText>
               </View>
 
               <View style={{ gap: 20 }}>
@@ -440,24 +406,12 @@ export default function RegisterOwnerScreen() {
 
                 {/* Categorías */}
                 <View style={{ gap: 12 }}>
-                  <Text
-                    style={{
-                      color: C.onSurfaceVariant,
-                      fontFamily: "PlusJakartaSans_600SemiBold",
-                      fontSize: 15,
-                      marginLeft: 4,
-                    }}
-                  >
+                  <AppText variant="bodyStrong" color={C.onSurfaceVariant} style={{ marginLeft: 4 }}>
                     Categorías *{" "}
-                    <Text
-                      style={{
-                        color: C.outline,
-                        fontFamily: "PlusJakartaSans_400Regular",
-                      }}
-                    >
+                    <AppText variant="body" color={C.outline}>
                       ({selectedCats.size} seleccionadas)
-                    </Text>
-                  </Text>
+                    </AppText>
+                  </AppText>
                   <View
                     style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}
                   >
@@ -495,29 +449,14 @@ export default function RegisterOwnerScreen() {
                   }}
                 >
                   <Icon name="trending-up" size={22} color={C.secondary} />
-                  <Text
-                    style={{
-                      color: C.onSurface,
-                      fontFamily: "PlusJakartaSans_700Bold",
-                      fontSize: 15,
-                      flex: 1,
-                    }}
-                  >
+                  <AppText variant="bodyStrong" style={{ flex: 1 }}>
                     Obtén el badge "Local Heat" 🔥
-                  </Text>
+                  </AppText>
                 </View>
-                <Text
-                  style={{
-                    color: C.onSecondaryContainer,
-                    fontFamily: "PlusJakartaSans_400Regular",
-                    fontSize: 15,
-                    lineHeight: 20,
-                    marginBottom: 12,
-                  }}
-                >
+                <AppText variant="body" color={C.onSecondaryContainer} style={{ marginBottom: 12 }}>
                   Completa tu perfil hoy y recibe 2 semanas de boost en
                   búsquedas locales.
-                </Text>
+                </AppText>
                 <View
                   style={{
                     height: 8,
@@ -535,17 +474,9 @@ export default function RegisterOwnerScreen() {
                     }}
                   />
                 </View>
-                <Text
-                  style={{
-                    color: C.secondary,
-                    fontFamily: "PlusJakartaSans_700Bold",
-                    fontSize: 15,
-                    marginTop: 6,
-                    letterSpacing: 1,
-                  }}
-                >
+                <AppText variant="overline" color={C.secondary} style={{ marginTop: 6 }}>
                   35% COMPLETADO
-                </Text>
+                </AppText>
               </View>
             </>
           )}
@@ -554,25 +485,12 @@ export default function RegisterOwnerScreen() {
           {step === 2 && (
             <>
               <View style={{ marginBottom: 24 }}>
-                <Text
-                  style={{
-                    color: C.onSurface,
-                    fontFamily: "Outfit_700Bold",
-                    fontSize: 24,
-                    marginBottom: 8,
-                  }}
-                >
+                <AppText variant="title" style={{ marginBottom: 8 }}>
                   Ubicación y contacto
-                </Text>
-                <Text
-                  style={{
-                    color: C.onSurfaceVariant,
-                    fontFamily: "PlusJakartaSans_400Regular",
-                    fontSize: 15,
-                  }}
-                >
+                </AppText>
+                <AppText variant="body" color={C.onSurfaceVariant}>
                   Ayuda a tus clientes a encontrarte y conectar contigo.
-                </Text>
+                </AppText>
               </View>
 
               <View style={{ gap: 20 }}>
@@ -607,17 +525,11 @@ export default function RegisterOwnerScreen() {
                       size={20}
                       color={coords ? C.secondary : C.outline}
                     />
-                    <Text
-                      style={{
-                        fontFamily: "PlusJakartaSans_600SemiBold",
-                        fontSize: 15,
-                        color: coords ? C.secondary : C.onSurfaceVariant,
-                      }}
-                    >
+                    <AppText variant="bodyStrong" color={coords ? C.secondary : C.onSurfaceVariant}>
                       {coords
                         ? `GPS capturado (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`
                         : "Detectar ubicación GPS automáticamente"}
-                    </Text>
+                    </AppText>
                   </Pressable>
                 </View>
 
@@ -646,41 +558,21 @@ export default function RegisterOwnerScreen() {
           {step === 3 && (
             <>
               <View style={{ marginBottom: 24 }}>
-                <Text
-                  style={{
-                    color: C.onSurface,
-                    fontFamily: "Outfit_700Bold",
-                    fontSize: 24,
-                    marginBottom: 8,
-                  }}
-                >
+                <AppText variant="title" style={{ marginBottom: 8 }}>
                   Muestra tu cocina ✨
-                </Text>
-                <Text
-                  style={{
-                    color: C.onSurfaceVariant,
-                    fontFamily: "PlusJakartaSans_400Regular",
-                    fontSize: 15,
-                  }}
-                >
+                </AppText>
+                <AppText variant="body" color={C.onSurfaceVariant}>
                   Fotos de calidad aumentan el engagement 40%. Todo es opcional
                   pero recomendado.
-                </Text>
+                </AppText>
               </View>
 
               <View style={{ gap: 20 }}>
                 {/* Logo */}
                 <View style={{ gap: 8 }}>
-                  <Text
-                    style={{
-                      color: C.onSurfaceVariant,
-                      fontFamily: "PlusJakartaSans_600SemiBold",
-                      fontSize: 15,
-                      marginLeft: 4,
-                    }}
-                  >
+                  <AppText variant="bodyStrong" color={C.onSurfaceVariant} style={{ marginLeft: 4 }}>
                     Logo del restaurante
-                  </Text>
+                  </AppText>
                   <Pressable
                     onPress={() => pickImage(setLogoUri)}
                     style={{
@@ -717,24 +609,12 @@ export default function RegisterOwnerScreen() {
                         >
                           <Icon name="image-plus" size={28} color={C.primary} />
                         </View>
-                        <Text
-                          style={{
-                            color: C.onSurfaceVariant,
-                            fontFamily: "PlusJakartaSans_600SemiBold",
-                            fontSize: 15,
-                          }}
-                        >
+                        <AppText variant="bodyStrong" color={C.onSurfaceVariant}>
                           Subir logo
-                        </Text>
-                        <Text
-                          style={{
-                            color: C.outline,
-                            fontFamily: "PlusJakartaSans_400Regular",
-                            fontSize: 15,
-                          }}
-                        >
+                        </AppText>
+                        <AppText variant="bodySm" color={C.outline}>
                           PNG, JPG · máx 10MB
-                        </Text>
+                        </AppText>
                       </View>
                     )}
                   </Pressable>
@@ -750,15 +630,9 @@ export default function RegisterOwnerScreen() {
                       marginLeft: 4,
                     }}
                   >
-                    <Text
-                      style={{
-                        color: C.onSurfaceVariant,
-                        fontFamily: "PlusJakartaSans_600SemiBold",
-                        fontSize: 15,
-                      }}
-                    >
+                    <AppText variant="bodyStrong" color={C.onSurfaceVariant}>
                       Foto de portada
-                    </Text>
+                    </AppText>
                     <View
                       style={{
                         paddingHorizontal: 8,
@@ -769,16 +643,9 @@ export default function RegisterOwnerScreen() {
                         borderColor: C.secondary,
                       }}
                     >
-                      <Text
-                        style={{
-                          color: C.secondary,
-                          fontFamily: "PlusJakartaSans_700Bold",
-                          fontSize: 15,
-                          letterSpacing: 0.5,
-                        }}
-                      >
+                      <AppText variant="caption" color={C.secondary}>
                         RECOMENDADO
-                      </Text>
+                      </AppText>
                     </View>
                   </View>
                   <Pressable
@@ -821,24 +688,12 @@ export default function RegisterOwnerScreen() {
                             color={C.primary}
                           />
                         </View>
-                        <Text
-                          style={{
-                            color: C.onSurfaceVariant,
-                            fontFamily: "PlusJakartaSans_600SemiBold",
-                            fontSize: 15,
-                          }}
-                        >
+                        <AppText variant="bodyStrong" color={C.onSurfaceVariant}>
                           Sube tu mejor foto de plato
-                        </Text>
-                        <Text
-                          style={{
-                            color: C.outline,
-                            fontFamily: "PlusJakartaSans_400Regular",
-                            fontSize: 15,
-                          }}
-                        >
+                        </AppText>
+                        <AppText variant="bodySm" color={C.outline}>
                           PNG, JPG · máx 10MB
-                        </Text>
+                        </AppText>
                       </View>
                     )}
                   </Pressable>
@@ -846,16 +701,9 @@ export default function RegisterOwnerScreen() {
 
                 {/* Menú PDF */}
                 <View style={{ gap: 8 }}>
-                  <Text
-                    style={{
-                      color: C.onSurfaceVariant,
-                      fontFamily: "PlusJakartaSans_600SemiBold",
-                      fontSize: 15,
-                      marginLeft: 4,
-                    }}
-                  >
+                  <AppText variant="bodyStrong" color={C.onSurfaceVariant} style={{ marginLeft: 4 }}>
                     Menú en PDF
-                  </Text>
+                  </AppText>
                   <Pressable
                     onPress={pickPdf}
                     style={{
@@ -893,27 +741,14 @@ export default function RegisterOwnerScreen() {
                       />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text
-                        style={{
-                          color: C.onSurface,
-                          fontFamily: "PlusJakartaSans_600SemiBold",
-                          fontSize: 15,
-                        }}
-                      >
+                      <AppText variant="bodyStrong">
                         {menuPdfName ?? "Subir menú PDF"}
-                      </Text>
-                      <Text
-                        style={{
-                          color: C.outline,
-                          fontFamily: "PlusJakartaSans_400Regular",
-                          fontSize: 15,
-                          marginTop: 2,
-                        }}
-                      >
+                      </AppText>
+                      <AppText variant="bodySm" color={C.outline} style={{ marginTop: 2 }}>
                         {menuPdfName
                           ? "Toca para cambiar"
                           : "Tus clientes lo verán en tu perfil"}
-                      </Text>
+                      </AppText>
                     </View>
                   </Pressable>
                 </View>
@@ -944,22 +779,13 @@ export default function RegisterOwnerScreen() {
           iconTrailing={step === STEPS - 1 ? "store-outline" : "arrow-right"}
         />
         {step === STEPS - 1 && (
-          <Text
-            style={{
-              color: C.outline,
-              fontFamily: "PlusJakartaSans_400Regular",
-              fontSize: 12,
-              textAlign: "center",
-              marginTop: 10,
-              lineHeight: 18,
-            }}
-          >
+          <AppText variant="caption" color={C.outline} align="center" style={{ marginTop: 10, lineHeight: 18 }}>
             Al registrarte, aceptas los{" "}
-            <Text style={{ textDecorationLine: "underline", color: C.primary }}>
+            <AppText variant="caption" color={C.primary} style={{ textDecorationLine: "underline" }}>
               Términos de Socio
-            </Text>{" "}
+            </AppText>{" "}
             de El Point.
-          </Text>
+          </AppText>
         )}
       </View>
     </View>
