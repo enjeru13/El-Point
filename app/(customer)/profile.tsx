@@ -23,6 +23,7 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { useMyProfile, useMyReviews, useUpdateMyProfile, levelProgress } from '@/lib/queries/me';
 import { RankBadge } from '@/components/ui/RankBadge';
+import { Button } from '@/components/ui/Button';
 import { uploadAvatar } from '@/lib/storage';
 import { useFavorites } from '@/lib/queries/feed';
 
@@ -197,30 +198,11 @@ export default function ProfileScreen() {
 
               {editing ? (
                 <View style={{ flexDirection: 'row', gap: 10, alignSelf: 'stretch' }}>
-                  <Pressable
-                    onPress={cancelEdit}
-                    disabled={busy}
-                    style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 99, borderWidth: 2, borderColor: C.outlineVariant }}
-                  >
-                    <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Cancelar</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={saveEdit}
-                    disabled={busy}
-                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 99, backgroundColor: C.primary, borderWidth: 2, borderColor: C.border, ...shadow.sm }}
-                  >
-                    {busy ? <ActivityIndicator size="small" color="#fff" /> : <Icon name="check" size={15} color="#fff" />}
-                    <Text style={{ color: '#fff', fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Guardar</Text>
-                  </Pressable>
+                  <Button label="Cancelar" onPress={cancelEdit} disabled={busy} variant="ghost" size="sm" fullWidth={false} style={{ flex: 1 }} />
+                  <Button label="Guardar" onPress={saveEdit} loading={busy} icon="check" size="sm" fullWidth={false} style={{ flex: 1 }} />
                 </View>
               ) : (
-                <Pressable
-                  onPress={() => setEditing(true)}
-                  style={{ alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 10, borderRadius: 99, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, justifyContent: 'center' }}
-                >
-                  <Icon name="pencil-outline" size={16} color={C.primary} />
-                  <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Editar perfil</Text>
-                </Pressable>
+                <Button label="Editar perfil" onPress={() => setEditing(true)} variant="secondary" size="sm" icon="pencil-outline" />
               )}
             </View>
 

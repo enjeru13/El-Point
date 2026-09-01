@@ -8,6 +8,7 @@ import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews, type Review } from '@/lib/queries/reviews';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { Avatar } from '@/components/ui/Avatar';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -95,18 +96,12 @@ export default function OwnerHomeScreen() {
 
   if (!restaurant) {
     return (
-      <View style={{ flex: 1, backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 24 }}>
-        <Icon name="store-outline" size={48} color={C.outline} />
-        <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 18, textAlign: 'center' }}>
-          Todavía no tienes un local registrado
-        </Text>
-        <Pressable
-          onPress={() => restaurantQ.refetch()}
-          style={{ paddingHorizontal: 20, paddingVertical: 10, borderRadius: 99, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border }}
-        >
-          <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14 }}>Reintentar</Text>
-        </Pressable>
-      </View>
+      <EmptyState
+        icon="store-outline"
+        title="Todavía no tienes un local registrado"
+        actionLabel="Reintentar"
+        onAction={() => restaurantQ.refetch()}
+      />
     );
   }
 

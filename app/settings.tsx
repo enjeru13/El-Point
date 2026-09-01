@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/ThemeContext';
 import { THEMES, THEME_META, ThemeName } from '@/lib/themes';
 import { useMyProfile, useUpdateSettings } from '@/lib/queries/me';
+import { Button } from '@/components/ui/Button';
 
 const THEME_NAMES = Object.keys(THEME_META) as ThemeName[];
 
@@ -194,13 +195,13 @@ export default function SettingsScreen() {
             </SectionCard>
           </View>
 
-          <Pressable
+          <Button
+            label="Cerrar sesión"
             onPress={() => supabase.auth.signOut()}
-            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 99, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border }}
-          >
-            <Icon name="logout" size={18} color={C.error} />
-            <Text style={{ color: C.error, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Cerrar sesión</Text>
-          </Pressable>
+            variant="danger"
+            icon="logout"
+            iconColor={C.error}
+          />
 
           <Text style={{ textAlign: 'center', color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12 }}>
             El Point v0.1.0
