@@ -123,7 +123,20 @@ export default function ProfileScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: C.surface }}>
-      <ScreenHeader left={<AppLogo />} right={<NotificationBell />} />
+      <ScreenHeader
+        left={<AppLogo />}
+        right={
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Pressable
+              onPress={() => router.push('/settings')}
+              style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border, backgroundColor: C.surface }}
+            >
+              <Icon name="settings" size={20} color={C.onSurface} />
+            </Pressable>
+            <NotificationBell />
+          </View>
+        }
+      />
 
       {profileQ.isLoading ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -200,22 +213,13 @@ export default function ProfileScreen() {
                   </Pressable>
                 </View>
               ) : (
-                <View style={{ flexDirection: 'row', gap: 10, alignSelf: 'stretch' }}>
-                  <Pressable
-                    onPress={() => setEditing(true)}
-                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 10, borderRadius: 99, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, justifyContent: 'center' }}
-                  >
-                    <Icon name="pencil-outline" size={16} color={C.primary} />
-                    <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Editar</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => router.push('/(customer)/settings')}
-                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 10, borderRadius: 99, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, justifyContent: 'center' }}
-                  >
-                    <Icon name="settings" size={16} color={C.primary} />
-                    <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Ajustes</Text>
-                  </Pressable>
-                </View>
+                <Pressable
+                  onPress={() => setEditing(true)}
+                  style={{ alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 10, borderRadius: 99, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, justifyContent: 'center' }}
+                >
+                  <Icon name="pencil-outline" size={16} color={C.primary} />
+                  <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Editar perfil</Text>
+                </Pressable>
               )}
             </View>
 

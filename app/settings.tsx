@@ -1,0 +1,212 @@
+import { Icon } from '@/components/ui/Icon';
+import { useRouter } from 'expo-router';
+import { ActivityIndicator, Pressable, ScrollView, Switch, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { supabase } from '@/lib/supabase';
+import { useTheme } from '@/lib/ThemeContext';
+import { THEMES, THEME_META, ThemeName } from '@/lib/themes';
+import { useMyProfile, useUpdateSettings } from '@/lib/queries/me';
+
+const THEME_NAMES = Object.keys(THEME_META) as ThemeName[];
+
+const DEFAULTS: Record<string, boolean> = {
+  // customer
+  notifRanks: true, notifReplies: true, notifLevelup: true, notifPromos: false,
+  soundEnabled: true, haptics: true, compactCards: false, showDistance: true,
+  // owner
+  notifReviews: true, notifWeekly: true,
+};
+
+function ThemeDot({ name, size = 44 }: { name: ThemeName; size?: number }) {
+  const p = THEMES[name];
+  const r = size / 2;
+  return (
+    <View style={{ width: size, height: size, borderRadius: r, borderWidth: 2, borderColor: '#1c1b1b' }}>
+      <View style={{ flex: 1, borderRadius: r - 2, overflow: 'hidden', flexDirection: 'row' }}>
+        <View style={{ width: (size - 4) / 2, height: size - 4, backgroundColor: p.primary }} />
+        <View style={{ width: (size - 4) / 2, height: size - 4, backgroundColor: p.secondary }} />
+      </View>
+    </View>
+  );
+}
+
+function SectionLabel({ label }: { label: string }) {
+  const { C } = useTheme();
+  return (
+    <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 11, letterSpacing: 1.5, paddingHorizontal: 4, marginBottom: 10 }}>
+      {label.toUpperCase()}
+    </Text>
+  );
+}
+
+function SectionCard({ children }: { children: React.ReactNode }) {
+  const { C, shadow } = useTheme();
+  return (
+    <View style={{ backgroundColor: C.surface, borderRadius: 24, borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+      {children}
+    </View>
+  );
+}
+
+function Divider() {
+  const { C } = useTheme();
+  return <View style={{ height: 1, backgroundColor: C.outlineVariant, marginHorizontal: 18 }} />;
+}
+
+function ToggleRow({ icon, label, sublabel, value, onChange }: {
+  icon: string; label: string; sublabel?: string; value: boolean; onChange: (v: boolean) => void;
+}) {
+  const { C } = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}>
+      <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+        <Icon name={icon} size={20} color={C.primary} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>{label}</Text>
+        {sublabel && <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, marginTop: 1 }}>{sublabel}</Text>}
+      </View>
+      <Switch value={value} onValueChange={onChange} trackColor={{ false: C.surfaceContainerHighest, true: C.primaryContainer }} thumbColor={value ? C.primary : C.outline} />
+    </View>
+  );
+}
+
+export default function SettingsScreen() {
+  const { C, shadow, themeName, setTheme } = useTheme();
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+
+  const profileQ = useMyProfile();
+  const updateSettings = useUpdateSettings();
+  const isOwner = profileQ.data?.role === 'restaurant_owner';
+  const saved = profileQ.data?.settings ?? {};
+  const s = (k: string) => saved[k] ?? DEFAULTS[k] ?? false;
+  const set = (k: string) => (v: boolean) => updateSettings.mutate({ [k]: v });
+
+  return (
+    <View style={{ flex: 1, backgroundColor: C.surface }}>
+      {/* Header */}
+      <View style={{
+        paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 14,
+        flexDirection: 'row', alignItems: 'center', gap: 12,
+        borderBottomWidth: 2, borderBottomColor: C.border, backgroundColor: C.surface,
+      }}>
+        <Pressable
+          onPress={() => router.back()}
+          style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border, backgroundColor: C.surface, ...shadow.sm }}
+        >
+          <Icon name="arrow-left" size={20} color={C.onSurface} />
+        </Pressable>
+        <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 22, flex: 1 }}>Ajustes</Text>
+      </View>
+
+      {profileQ.isLoading ? (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator size="large" color={C.primary} />
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={{ padding: 20, gap: 24, paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>
+
+          {/* Apariencia */}
+          <View style={{ gap: 10 }}>
+            <SectionLabel label="Apariencia" />
+            <SectionCard>
+              <View style={{ padding: 18, gap: 16 }}>
+                <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Tema de color</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+                  {THEME_NAMES.map((name) => {
+                    const active = name === themeName;
+                    return (
+                      <Pressable key={name} onPress={() => setTheme(name)} style={{ alignItems: 'center', gap: 6, width: 60 }}>
+                        <View style={{ padding: 3, borderRadius: 99, borderWidth: 2.5, borderColor: active ? C.primary : 'transparent' }}>
+                          <ThemeDot name={name} size={40} />
+                        </View>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            </SectionCard>
+
+            {!isOwner && (
+              <SectionCard>
+                <ToggleRow icon="view-agenda-outline" label="Tarjetas compactas" sublabel="Más resultados en pantalla" value={s('compactCards')} onChange={set('compactCards')} />
+                <Divider />
+                <ToggleRow icon="map-marker-distance" label="Mostrar distancia" sublabel="Requiere permiso de ubicación" value={s('showDistance')} onChange={set('showDistance')} />
+              </SectionCard>
+            )}
+          </View>
+
+          {/* Notificaciones */}
+          <View style={{ gap: 10 }}>
+            <SectionLabel label="Notificaciones" />
+            <SectionCard>
+              {isOwner ? (
+                <>
+                  <ToggleRow icon="star" label="Nuevas reseñas" sublabel="Cuando alguien califica tu local" value={s('notifReviews')} onChange={set('notifReviews')} />
+                  <Divider />
+                  <ToggleRow icon="reply-outline" label="Respuestas" sublabel="Cuando responden tus comentarios" value={s('notifReplies')} onChange={set('notifReplies')} />
+                  <Divider />
+                  <ToggleRow icon="analytics" label="Reporte semanal" sublabel="Resumen de métricas cada semana" value={s('notifWeekly')} onChange={set('notifWeekly')} />
+                </>
+              ) : (
+                <>
+                  <ToggleRow icon="star-outline" label="Reacciones a mis ranks" sublabel="Cuando marcan tu reseña como útil" value={s('notifRanks')} onChange={set('notifRanks')} />
+                  <Divider />
+                  <ToggleRow icon="reply-outline" label="Respuestas" sublabel="Cuando responden tu reseña" value={s('notifReplies')} onChange={set('notifReplies')} />
+                  <Divider />
+                  <ToggleRow icon="trophy-outline" label="Subida de nivel" sublabel="Cuando alcanzas un nuevo nivel" value={s('notifLevelup')} onChange={set('notifLevelup')} />
+                  <Divider />
+                  <ToggleRow icon="tag-outline" label="Promos y novedades" sublabel="Ofertas de locales cercanos" value={s('notifPromos')} onChange={set('notifPromos')} />
+                </>
+              )}
+            </SectionCard>
+          </View>
+
+          {/* Sonido y táctil */}
+          <View style={{ gap: 10 }}>
+            <SectionLabel label="Sonido y táctil" />
+            <SectionCard>
+              {!isOwner && (
+                <>
+                  <ToggleRow icon="volume-high" label="Sonidos de la app" value={s('soundEnabled')} onChange={set('soundEnabled')} />
+                  <Divider />
+                </>
+              )}
+              <ToggleRow icon="vibrate" label="Vibración háptica" value={s('haptics')} onChange={set('haptics')} />
+            </SectionCard>
+          </View>
+
+          {/* Cuenta */}
+          <View style={{ gap: 10 }}>
+            <SectionLabel label="Cuenta" />
+            <SectionCard>
+              <Pressable
+                onPress={() => router.push('/(auth)/forgot-password')}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
+              >
+                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+                  <Icon name="lock-outline" size={20} color={C.primary} />
+                </View>
+                <Text style={{ flex: 1, color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Cambiar contraseña</Text>
+                <Icon name="chevron-right" size={20} color={C.outline} />
+              </Pressable>
+            </SectionCard>
+          </View>
+
+          <Pressable
+            onPress={() => supabase.auth.signOut()}
+            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 99, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border }}
+          >
+            <Icon name="logout" size={18} color={C.error} />
+            <Text style={{ color: C.error, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Cerrar sesión</Text>
+          </Pressable>
+
+          <Text style={{ textAlign: 'center', color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12 }}>
+            El Point v0.1.0
+          </Text>
+        </ScrollView>
+      )}
+    </View>
+  );
+}

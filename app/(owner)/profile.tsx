@@ -2,6 +2,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Image } from 'expo-image';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -65,6 +66,7 @@ function Field({
 export default function OwnerProfileScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const restaurantQ = useMyRestaurant();
   const restaurant = restaurantQ.data ?? null;
@@ -215,17 +217,25 @@ export default function OwnerProfileScreen() {
             </Pressable>
           </View>
         ) : (
-          <Pressable
-            onPress={() => setEditing(true)}
-            style={{
-              flexDirection: 'row', alignItems: 'center', gap: 6,
-              paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
-              backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, ...shadow.sm,
-            }}
-          >
-            <Icon name="pencil-outline" size={15} color={C.primary} />
-            <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13 }}>Editar</Text>
-          </Pressable>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Pressable
+              onPress={() => setEditing(true)}
+              style={{
+                flexDirection: 'row', alignItems: 'center', gap: 6,
+                paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+                backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, ...shadow.sm,
+              }}
+            >
+              <Icon name="pencil-outline" size={15} color={C.primary} />
+              <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13 }}>Editar</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => router.push('/settings')}
+              style={{ width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border, backgroundColor: C.surface, ...shadow.sm }}
+            >
+              <Icon name="settings" size={18} color={C.onSurface} />
+            </Pressable>
+          </View>
         )}
       </View>
 
