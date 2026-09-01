@@ -1,5 +1,6 @@
 import { Image } from "expo-image";
 import { AppLogo } from "@/components/ui/AppLogo";
+import { Avatar } from "@/components/ui/Avatar";
 import { Icon } from "@/components/ui/Icon";
 import { NotificationBell } from "@/components/ui/NotificationBell";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
@@ -280,20 +281,7 @@ function ReviewCard({
           }}
         >
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <View
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 18,
-                backgroundColor: C.primaryFixed,
-                alignItems: "center",
-                justifyContent: "center",
-                borderWidth: 2,
-                borderColor: C.border,
-              }}
-            >
-              <Icon name="account" size={20} color={C.primary} />
-            </View>
+            <Avatar uri={item.author?.avatar_url} size={36} />
             <View>
               <Text
                 style={{
@@ -371,12 +359,14 @@ function FavoriteRow({
   address,
   rating,
   icon,
+  cover,
 }: {
   id: string;
   name: string;
   address: string | null;
   rating: number;
   icon: string;
+  cover: string | null;
 }) {
   const { C, shadow } = useTheme();
   const router = useRouter();
@@ -401,6 +391,7 @@ function FavoriteRow({
           width: 48,
           height: 48,
           borderRadius: 12,
+          overflow: "hidden",
           backgroundColor: C.primaryFixed,
           alignItems: "center",
           justifyContent: "center",
@@ -408,7 +399,11 @@ function FavoriteRow({
           borderColor: C.border,
         }}
       >
-        <Icon name={icon} size={24} color={C.primary} />
+        {cover ? (
+          <Image source={{ uri: cover }} style={{ width: "100%", height: "100%" }} contentFit="cover" transition={150} />
+        ) : (
+          <Icon name={icon} size={24} color={C.primary} />
+        )}
       </View>
       <View style={{ flex: 1 }}>
         <Text
@@ -671,6 +666,7 @@ export default function HomeScreen() {
                   address={f.address}
                   rating={f.rating_avg}
                   icon={f.categories[0]?.icon ?? "silverware-fork-knife"}
+                  cover={f.cover_url}
                 />
               ))
             )

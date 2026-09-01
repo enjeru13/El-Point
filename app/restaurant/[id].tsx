@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 import { Icon } from "@/components/ui/Icon";
 import { StarRow } from "@/components/ui/StarRow";
+import { Avatar } from "@/components/ui/Avatar";
 import { useRestaurant } from "@/lib/queries/restaurants";
 import {
   useReviews,
@@ -1280,20 +1281,7 @@ export default function RestaurantProfileScreen() {
                       gap: 10,
                     }}
                   >
-                    <View
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 20,
-                        backgroundColor: C.primaryFixed,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderWidth: 2,
-                        borderColor: C.border,
-                      }}
-                    >
-                      <Icon name="account" size={22} color={C.primary} />
-                    </View>
+                    <Avatar uri={r.author?.avatar_url} size={40} />
                     <View style={{ flex: 1 }}>
                       <Text
                         style={{

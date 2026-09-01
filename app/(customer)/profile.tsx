@@ -267,8 +267,12 @@ export default function ProfileScreen() {
                       onPress={() => router.push(`/restaurant/${f.id}`)}
                       style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 18, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, ...shadow.sm }}
                     >
-                      <View style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
-                        <Icon name={f.categories[0]?.icon ?? 'silverware-fork-knife'} size={24} color={C.primary} />
+                      <View style={{ width: 48, height: 48, borderRadius: 12, overflow: 'hidden', backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+                        {f.cover_url ? (
+                          <Image source={{ uri: f.cover_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={150} />
+                        ) : (
+                          <Icon name={f.categories[0]?.icon ?? 'silverware-fork-knife'} size={24} color={C.primary} />
+                        )}
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }} numberOfLines={1}>{f.name}</Text>

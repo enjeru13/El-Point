@@ -234,11 +234,19 @@ export default function OwnerProfileScreen() {
         {/* Hero card */}
         <View style={{ borderRadius: 24, overflow: 'hidden', borderWidth: 2, borderColor: C.border, ...shadow.md }}>
           <View style={{ height: 110, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center' }}>
-            <Icon name={restaurant.categories[0]?.icon ?? 'store-outline'} size={48} color={C.primary} />
+            {restaurant.cover_url ? (
+              <Image source={{ uri: restaurant.cover_url }} style={{ position: 'absolute', width: '100%', height: '100%' }} contentFit="cover" transition={150} />
+            ) : (
+              <Icon name={restaurant.categories[0]?.icon ?? 'store-outline'} size={48} color={C.primary} />
+            )}
           </View>
           <View style={{ paddingHorizontal: 20, paddingBottom: 20, backgroundColor: C.surface }}>
-            <View style={{ marginTop: -28, marginBottom: 12, width: 64, height: 64, borderRadius: 20, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: C.surface }}>
-              <Icon name={restaurant.categories[0]?.icon ?? 'store-outline'} size={30} color="#fff" />
+            <View style={{ marginTop: -28, marginBottom: 12, width: 64, height: 64, borderRadius: 20, overflow: 'hidden', backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: C.surface }}>
+              {restaurant.logo_url ? (
+                <Image source={{ uri: restaurant.logo_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={150} />
+              ) : (
+                <Icon name={restaurant.categories[0]?.icon ?? 'store-outline'} size={30} color="#fff" />
+              )}
             </View>
 
             {editing ? (
