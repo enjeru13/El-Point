@@ -3,6 +3,7 @@ import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
+  Alert,
   Animated,
   KeyboardAvoidingView,
   Platform,
@@ -12,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { AppTextInput } from '@/components/ui/AppTextInput';
+import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/ThemeContext';
 import { ThemePicker } from '@/components/ui/ThemePicker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -63,6 +65,8 @@ export default function RegisterScreen() {
   // Step 0 — rol (card dueño)
   const [role, setRole]           = useState<'customer' | 'restaurant_owner'>('customer');
 
+  const [loading, setLoading]     = useState(false);
+
   function toggleCategory(id: string) {
     setSelected(prev => {
       const next = new Set(prev);
@@ -71,26 +75,62 @@ export default function RegisterScreen() {
     });
   }
 
+  async function handleSignUp() {
+    setLoading(true);
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: { data: { role: 'customer', username: username.trim() } },
+    });
+
+    if (error) {
+      setLoading(false);
+      Alert.alert('No se pudo crear la cuenta', error.message);
+      return;
+    }
+
+    // Confirmación de email activada → todavía sin sesión
+    if (!data.session) {
+      setLoading(false);
+      Alert.alert('Casi listo', 'Te enviamos un correo para confirmar tu cuenta.');
+      router.replace('/(auth)/login');
+      return;
+    }
+
+    // Sesión activa → completar perfil (el trigger ya creó la fila)
+    let favoriteCategories: number[] = [];
+    if (selected.size > 0) {
+      const { data: cats } = await supabase
+        .from('categories')
+        .select('id, slug')
+        .in('slug', Array.from(selected));
+      favoriteCategories = (cats ?? []).map((c) => c.id);
+    }
+
+    await supabase
+      .from('profiles')
+      .update({
+        username: username.trim() || null,
+        search_radius_km: radius,
+        favorite_categories: favoriteCategories,
+      })
+      .eq('id', data.user!.id);
+
+    setLoading(false);
+    // _layout detecta la sesión y redirige a /(customer)
+  }
+
   function handleContinue() {
-    if (step === 2) {
-      // TODO: llamar supabase.auth.signUp aquí con email + password + metadata
-      setStep(3);
-      return;
-    }
-    if (step === 3) {
-      setStep(4);
-      return;
-    }
-    if (step === 4) {
-      // TODO: guardar radius en perfil
-      router.replace('/(auth)/welcome');
-      return;
-    }
+    if (loading) return;
+    if (step === 4) { handleSignUp(); return; }
     if (step < STEPS - 1) setStep(step + 1);
   }
 
+  // GoTrue rechaza correos con caracteres no-ASCII (p. ej. la ñ)
+  const emailValid = /^[\x00-\x7F]+@[\x00-\x7F]+\.[\x00-\x7F]{2,}$/.test(email.trim());
+
   const canContinue =
-    step === 0 ? !!(username.trim() && email.trim()) :
+    step === 0 ? !!(username.trim()) && emailValid :
     step === 1 ? true :
     step === 2 ? password.length >= 8 && password === confirm :
     true; // steps 3 & 4 always ok
@@ -609,19 +649,19 @@ export default function RegisterScreen() {
           <>
             <Pressable
               onPress={handleContinue}
-              disabled={!canContinue}
+              disabled={!canContinue || loading}
               style={{
                 height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center',
                 flexDirection: 'row', gap: 8,
-                backgroundColor: canContinue ? C.primary : C.surfaceContainerHighest,
+                backgroundColor: canContinue && !loading ? C.primary : C.surfaceContainerHighest,
                 borderWidth: 2, borderColor: C.border,
-                ...(canContinue ? shadow.primary : {}),
+                ...(canContinue && !loading ? shadow.primary : {}),
               }}
             >
-              <Text style={{ color: canContinue ? '#fff' : C.outline, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16 }}>
-                {step === 2 ? 'Crear cuenta' : step === 4 ? 'Empezar a explorar' : 'Continuar'}
+              <Text style={{ color: canContinue && !loading ? '#fff' : C.outline, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16 }}>
+                {loading ? 'Creando cuenta...' : step === 2 ? 'Crear cuenta' : step === 4 ? 'Empezar a explorar' : 'Continuar'}
               </Text>
-              <Icon name={step === 4 ? 'rocket-launch-outline' : step === 2 ? 'check' : 'arrow-right'} size={20} color={canContinue ? '#fff' : C.outline} />
+              {!loading && <Icon name={step === 4 ? 'check' : step === 2 ? 'check' : 'arrow-right'} size={20} color={canContinue ? '#fff' : C.outline} />}
             </Pressable>
             {step === 0 && (
               <Text style={{ color: C.onSurfaceVariant + '80', fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, textAlign: 'center', marginTop: 10, lineHeight: 18 }}>

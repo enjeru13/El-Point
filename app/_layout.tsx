@@ -17,13 +17,14 @@ import { Slot, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { QueryClientProvider } from '@tanstack/react-query';
 import 'react-native-reanimated';
 
 import { supabase } from '@/lib/supabase';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { queryClient } from '@/lib/query';
 import { AppThemeProvider } from '@/lib/ThemeContext';
 
 SplashScreen.preventAutoHideAsync();
@@ -81,27 +82,41 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (!ready || !fontsLoaded) return;
-    const inAuth = segments[0] === '(auth)';
+    const root = segments[0];
+    const inAuth = root === '(auth)';
+    const inOwner = root === '(owner)';
+    const inCustomer = root === '(customer)';
+
     if (!session) {
       if (!inAuth) router.replace('/(auth)/login');
-    } else {
-      if (role === 'restaurant_owner') router.replace('/(owner)');
-      else router.replace('/(customer)');
+      return;
     }
-  }, [ready, session, role, fontsLoaded]);
+
+    // Signed in: only redirect if the user is in the wrong place.
+    // Leave stack routes like /restaurant/[id] alone.
+    if (inAuth) {
+      router.replace(role === 'restaurant_owner' ? '/(owner)' : '/(customer)');
+    } else if (role === 'restaurant_owner' && inCustomer) {
+      router.replace('/(owner)');
+    } else if (role === 'customer' && inOwner) {
+      router.replace('/(customer)');
+    }
+  }, [ready, session, role, fontsLoaded, segments]);
 
   if (!ready || !fontsLoaded) return <View style={{ flex: 1, backgroundColor: '#fcf9f8' }} />;
 
   return (
-    <AppThemeProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <BottomSheetModalProvider>
-          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <Slot />
-            <StatusBar style="auto" />
-          </ThemeProvider>
-        </BottomSheetModalProvider>
-      </GestureHandlerRootView>
-    </AppThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <AppThemeProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <BottomSheetModalProvider>
+            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+              <Slot />
+              <StatusBar style="auto" />
+            </ThemeProvider>
+          </BottomSheetModalProvider>
+        </GestureHandlerRootView>
+      </AppThemeProvider>
+    </QueryClientProvider>
   );
 }

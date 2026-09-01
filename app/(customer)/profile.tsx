@@ -1,370 +1,332 @@
 import { Icon } from '@/components/ui/Icon';
-import { useEffect, useRef } from 'react';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { NotificationsSheet, NotificationsHandle } from '@/components/ui/NotificationsSheet';
-import { THEMES, THEME_META } from '@/lib/themes';
 import {
+  ActivityIndicator,
+  Alert,
   Animated,
   Easing,
   Pressable,
   ScrollView,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { useTheme } from '@/lib/ThemeContext';
 import { AppLogo } from '@/components/ui/AppLogo';
-import { supabase } from '@/lib/supabase';
+import { AppTextInput } from '@/components/ui/AppTextInput';
+import { NotificationBell } from '@/components/ui/NotificationBell';
 import { StarRow } from '@/components/ui/StarRow';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { SectionTitle } from '@/components/ui/SectionTitle';
+import { useMyProfile, useMyReviews, useUpdateMyProfile, levelProgress } from '@/lib/queries/me';
+import { uploadAvatar } from '@/lib/storage';
+import { useFavorites } from '@/lib/queries/feed';
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
+function timeAgo(iso: string): string {
+  const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400_000);
+  if (d <= 0) return 'Hoy';
+  if (d === 1) return 'Ayer';
+  if (d < 7) return `Hace ${d} días`;
+  const w = Math.floor(d / 7);
+  if (w < 5) return `Hace ${w} ${w === 1 ? 'semana' : 'semanas'}`;
+  return `Hace ${Math.floor(d / 30)} mes`;
+}
 
-const USER = {
-  username: '@foodie_alex',
-  rank: 'Comensal Experto',
-  level: 42,
-  xp: 3200,
-  xpNext: 4000,
-  xpNextRank: 'Crítico Local',
-  totalReviews: 156,
-  reviewPower: 9.8,
-};
-
-
-// ─── Componentes ──────────────────────────────────────────────────────────────
-
-function XPBar({ xp, xpNext }: { xp: number; xpNext: number }) {
+function XPBar({ pct }: { pct: number }) {
   const { C } = useTheme();
   const width = useRef(new Animated.Value(0)).current;
-  const pct = xp / xpNext;
-
   useEffect(() => {
-    Animated.timing(width, {
-      toValue: pct,
-      duration: 1000,
-      delay: 300,
-      easing: Easing.out(Easing.quad),
-      useNativeDriver: false,
-    }).start();
-  }, []);
-
+    Animated.timing(width, { toValue: pct, duration: 900, delay: 200, easing: Easing.out(Easing.quad), useNativeDriver: false }).start();
+  }, [pct]);
   return (
     <View style={{ height: 12, borderRadius: 99, overflow: 'hidden', backgroundColor: C.primaryFixed }}>
-      <Animated.View
-        style={{
-          height: '100%', borderRadius: 99, backgroundColor: C.primaryContainer,
-          width: width.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
-        }}
-      />
+      <Animated.View style={{ height: '100%', borderRadius: 99, backgroundColor: C.primaryContainer, width: width.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }} />
     </View>
   );
 }
 
-// ─── Pantalla ─────────────────────────────────────────────────────────────────
-
 export default function ProfileScreen() {
-  const { C, shadow, themeName } = useTheme();
+  const { C, shadow } = useTheme();
   const router = useRouter();
-  const notifsRef = useRef<NotificationsHandle>(null);
 
-  const FAVORITES = [
-    { id: '1', name: 'Neon Noodle Bar', category: 'Asian Fusion', rating: 4.9, icon: 'noodles' as const, bg: C.tertiaryContainer },
-    { id: '2', name: 'Taco Stand',      category: 'Tacos',        rating: 4.7, icon: 'taco' as const,   bg: C.primaryFixed },
-    { id: '3', name: 'Brew & Bake',     category: 'Café',         rating: 4.8, icon: 'coffee' as const, bg: C.secondaryContainer },
-  ];
+  const profileQ = useMyProfile();
+  const reviewsQ = useMyReviews();
+  const favoritesQ = useFavorites();
 
-  const REVIEWS = [
-    { id: '1', restaurant: 'Burger Joint', rating: 4, comment: '"Increíbles sabores. La salsa secreta es de otro mundo. Definitivamente mi nuevo spot favorito."', date: 'Hace 2 días', icon: 'hamburger' as const, iconBg: C.primaryFixed },
-    { id: '2', restaurant: 'Green Bowl Oasis', rating: 5, comment: '"Perfecta comida post-entreno. Ingredientes súper frescos y servicio rápido incluso lleno."', date: 'Hace 1 semana', icon: 'leaf' as const, iconBg: C.secondaryContainer },
-  ];
+  const updateMut = useUpdateMyProfile();
 
-  const RANK_COLORS: Record<string, string> = {
-    'Novato':              C.surfaceContainerHighest,
-    'Explorador':          C.primaryFixed,
-    'Comensal Experto':    C.primaryContainer,
-    'Crítico Local':       C.secondary,
-    'Gurú Gastronómico':   C.tertiary,
-  };
-  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const profile = profileQ.data ?? null;
+  const reviews = reviewsQ.data ?? [];
+  const favorites = favoritesQ.data ?? [];
+
+  const name = profile?.username ? `@${profile.username}` : profile?.full_name ?? 'Comensal';
+  const level = profile?.level ?? 1;
+  const xp = profile?.xp ?? 0;
+  const { next, pct } = levelProgress(level, xp);
+
+  const [editing, setEditing]   = useState(false);
+  const [username, setUsername] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [bio, setBio]           = useState('');
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
   useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1.3, duration: 800, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 1,   duration: 800, useNativeDriver: true }),
-      ])
-    ).start();
-  }, []);
+    if (!profile) return;
+    setUsername(profile.username ?? '');
+    setFullName(profile.full_name ?? '');
+    setBio(profile.bio ?? '');
+  }, [profile]);
+
+  function cancelEdit() {
+    if (profile) {
+      setUsername(profile.username ?? '');
+      setFullName(profile.full_name ?? '');
+      setBio(profile.bio ?? '');
+    }
+    setEditing(false);
+  }
+
+  function saveEdit() {
+    const u = username.trim();
+    if (u && !/^[a-z0-9_.]{3,20}$/i.test(u)) {
+      Alert.alert('Usuario inválido', 'Solo letras, números, punto y guion bajo (3–20).');
+      return;
+    }
+    updateMut.mutate(
+      { username: u || null, full_name: fullName.trim() || null, bio: bio.trim() || null },
+      {
+        onSuccess: () => setEditing(false),
+        onError: (e: any) => Alert.alert('No se pudo guardar', e?.message ?? 'Intenta de nuevo'),
+      },
+    );
+  }
+
+  async function pickAvatar() {
+    if (!profile) return;
+    const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.85 });
+    if (r.canceled) return;
+    setAvatarUploading(true);
+    try {
+      const url = await uploadAvatar(profile.id, r.assets[0].uri);
+      updateMut.mutate({ avatar_url: url });
+    } catch (e: any) {
+      Alert.alert('No se pudo subir el avatar', e?.message ?? 'Intenta de nuevo');
+    } finally {
+      setAvatarUploading(false);
+    }
+  }
+
+  const busy = updateMut.isPending;
 
   return (
     <View style={{ flex: 1, backgroundColor: C.surface }}>
-      <ScreenHeader
-        left={<AppLogo />}
-        right={
-          <Pressable onPress={() => notifsRef.current?.present()} style={{ width:40, height:40, borderRadius:20, alignItems:'center', justifyContent:'center', borderWidth:2, borderColor:C.border, backgroundColor:C.surface }}>
-            <Icon name="bell-outline" size={22} color={C.onSurface} />
-            <View style={{ position:'absolute', top:6, right:6, width:8, height:8, borderRadius:4, backgroundColor:C.primaryContainer, borderWidth:1.5, borderColor:C.surface }} />
-          </Pressable>
-        }
-      />
-      <NotificationsSheet ref={notifsRef} />
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}
-      >
-      <View style={{ padding: 20, gap: 20 }}>
+      <ScreenHeader left={<AppLogo />} right={<NotificationBell />} />
 
-        {/* ── Card perfil ── */}
-        <View
-          style={{
-            backgroundColor: C.surface, borderRadius: 28, padding: 24,
-            alignItems: 'center', gap: 12,
-            borderWidth: 2, borderColor: C.border,
-            ...shadow.md,
-          }}
-        >
-          {/* Avatar */}
-          <View style={{ position: 'relative' }}>
-            <View
-              style={{
-                width: 88, height: 88, borderRadius: 44,
-                backgroundColor: C.primaryFixed,
-                alignItems: 'center', justifyContent: 'center',
-                borderWidth: 3, borderColor: C.border,
-              }}
-            >
-              <Icon name="account" size={48} color={C.primary} />
-            </View>
-            {/* Badge estrella */}
-            <View
-              style={{
-                position: 'absolute', bottom: 0, right: 0,
-                width: 28, height: 28, borderRadius: 14,
-                backgroundColor: C.primaryContainer,
-                alignItems: 'center', justifyContent: 'center',
-                borderWidth: 2, borderColor: C.border,
-              }}
-            >
-              <Icon name="star" size={14} color={C.onPrimaryContainer} />
-            </View>
-          </View>
-
-          <View style={{ alignItems: 'center', gap: 4 }}>
-            <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 22 }}>
-              {USER.username}
-            </Text>
-            <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 }}>
-              Amante de la comida picante y los rincones escondidos
-            </Text>
-          </View>
-
-          <Pressable
-            style={{
-              flexDirection: 'row', alignItems: 'center', gap: 6,
-              paddingHorizontal: 20, paddingVertical: 10, borderRadius: 99,
-              backgroundColor: C.primaryFixed,
-              borderWidth: 2, borderColor: C.border,
-              alignSelf: 'stretch', justifyContent: 'center',
-            }}
-          >
-            <Icon name="pencil-outline" size={16} color={C.primary} />
-            <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
-              Editar perfil
-            </Text>
-          </Pressable>
+      {profileQ.isLoading ? (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator size="large" color={C.primary} />
         </View>
+      ) : (
+        <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+          <View style={{ padding: 20, gap: 20 }}>
 
-        {/* ── Gamificación ── */}
-        <View
-          style={{
-            backgroundColor: C.surface, borderRadius: 28, padding: 20, gap: 12,
-            borderWidth: 2, borderColor: C.border,
-            ...shadow.md,
-          }}
-        >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <View style={{ gap: 4 }}>
-              <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, letterSpacing: 1 }}>
-                NIVEL ACTUAL
-              </Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={{ color: C.primary, fontFamily: 'Outfit_700Bold', fontSize: 20 }}>
-                  {USER.rank}
-                </Text>
-                <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-                  <Icon name="fire" size={20} color={C.primaryContainer} />
-                </Animated.View>
-              </View>
-            </View>
-            <View
-              style={{
-                paddingHorizontal: 12, paddingVertical: 6, borderRadius: 99,
-                backgroundColor: C.primaryFixed,
-                borderWidth: 2, borderColor: C.border,
-              }}
-            >
-              <Text style={{ color: C.primary, fontFamily: 'Outfit_700Bold', fontSize: 16 }}>
-                LVL {USER.level}
-              </Text>
-            </View>
-          </View>
+            {/* Card perfil */}
+            <View style={{ backgroundColor: C.surface, borderRadius: 28, padding: 24, alignItems: 'center', gap: 12, borderWidth: 2, borderColor: C.border, ...shadow.md }}>
+              <Pressable onPress={editing ? pickAvatar : undefined} style={{ position: 'relative' }}>
+                <View style={{ width: 88, height: 88, borderRadius: 44, overflow: 'hidden', backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: C.border }}>
+                  {profile?.avatar_url ? (
+                    <Image source={{ uri: profile.avatar_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={150} />
+                  ) : (
+                    <Icon name="account" size={48} color={C.primary} />
+                  )}
+                  {avatarUploading && (
+                    <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.35)', alignItems: 'center', justifyContent: 'center' }}>
+                      <ActivityIndicator color="#fff" size="small" />
+                    </View>
+                  )}
+                </View>
+                {editing ? (
+                  <View style={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+                    <Icon name="camera-plus-outline" size={14} color="#fff" />
+                  </View>
+                ) : (
+                  <View style={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: C.primaryContainer, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+                    <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 12 }}>{level}</Text>
+                  </View>
+                )}
+              </Pressable>
 
-          <XPBar xp={USER.xp} xpNext={USER.xpNext} />
-
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
-              {USER.xp.toLocaleString()} XP
-            </Text>
-            <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
-              {USER.xpNext.toLocaleString()} XP → {USER.xpNextRank}
-            </Text>
-          </View>
-        </View>
-
-        {/* ── Stats ── */}
-        <View style={{ flexDirection: 'row', gap: 12 }}>
-          {[
-            { icon: 'medal' as const,      value: USER.totalReviews, label: 'Total Ranks',      color: C.primaryContainer },
-            { icon: 'star-circle' as const, value: USER.reviewPower, label: 'Poder de Reseña', color: C.secondary },
-          ].map(stat => (
-            <View
-              key={stat.label}
-              style={{
-                flex: 1, backgroundColor: C.surface, borderRadius: 24,
-                padding: 20, alignItems: 'center', gap: 6,
-                borderWidth: 2, borderColor: C.border,
-                ...shadow.sm,
-              }}
-            >
-              <Icon name={stat.icon} size={28} color={stat.color} />
-              <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24 }}>
-                {stat.value}
-              </Text>
-              <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, textAlign: 'center' }}>
-                {stat.label}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        {/* ── Favoritos ── */}
-        <View style={{ gap: 12 }}>
-          <SectionTitle icon="heart" label="Favoritos" />
-
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            {/* Card grande */}
-            <View
-              style={{
-                flex: 2, height: 180, borderRadius: 20,
-                backgroundColor: FAVORITES[0].bg,
-                alignItems: 'center', justifyContent: 'center',
-                borderWidth: 2, borderColor: C.border,
-                overflow: 'hidden',
-                ...shadow.md,
-              }}
-            >
-              <Icon name={FAVORITES[0].icon} size={64} color={C.onSurface} style={{ opacity: 0.4 }} />
-              <View
-                style={{
-                  position: 'absolute', bottom: 0, left: 0, right: 0,
-                  padding: 12, backgroundColor: 'rgba(28,27,27,0.55)',
-                }}
-              >
-                <Text style={{ color: '#fff', fontFamily: 'Outfit_700Bold', fontSize: 15 }}>
-                  {FAVORITES[0].name}
-                </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                  <Icon name="star" size={12} color={C.secondaryContainer} />
-                  <Text style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
-                    {FAVORITES[0].rating}
+              {editing ? (
+                <View style={{ alignSelf: 'stretch', gap: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 14, height: 48, paddingHorizontal: 14, borderWidth: 2, borderColor: C.border, backgroundColor: C.surfaceContainerLow }}>
+                    <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16 }}>@</Text>
+                    <AppTextInput value={username} onChangeText={setUsername} placeholder="usuario" autoCapitalize="none" style={{ fontSize: 15 }} />
+                  </View>
+                  <View style={{ borderRadius: 14, height: 48, paddingHorizontal: 14, justifyContent: 'center', borderWidth: 2, borderColor: C.border, backgroundColor: C.surfaceContainerLow }}>
+                    <AppTextInput value={fullName} onChangeText={setFullName} placeholder="Nombre" style={{ fontSize: 15 }} />
+                  </View>
+                  <View style={{ borderRadius: 14, minHeight: 64, padding: 14, borderWidth: 2, borderColor: C.border, backgroundColor: C.surfaceContainerLow }}>
+                    <AppTextInput value={bio} onChangeText={setBio} placeholder="Cuéntanos sobre ti…" multiline style={{ fontSize: 15, textAlignVertical: 'top' }} />
+                  </View>
+                </View>
+              ) : (
+                <View style={{ alignItems: 'center', gap: 4 }}>
+                  <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 22 }}>{name}</Text>
+                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, textAlign: 'center' }}>
+                    {profile?.bio ?? 'Comensal de El Point'}
                   </Text>
                 </View>
-              </View>
+              )}
+
+              {editing ? (
+                <View style={{ flexDirection: 'row', gap: 10, alignSelf: 'stretch' }}>
+                  <Pressable
+                    onPress={cancelEdit}
+                    disabled={busy}
+                    style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 99, borderWidth: 2, borderColor: C.outlineVariant }}
+                  >
+                    <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Cancelar</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={saveEdit}
+                    disabled={busy}
+                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 99, backgroundColor: C.primary, borderWidth: 2, borderColor: C.border, ...shadow.sm }}
+                  >
+                    {busy ? <ActivityIndicator size="small" color="#fff" /> : <Icon name="check" size={15} color="#fff" />}
+                    <Text style={{ color: '#fff', fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Guardar</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <View style={{ flexDirection: 'row', gap: 10, alignSelf: 'stretch' }}>
+                  <Pressable
+                    onPress={() => setEditing(true)}
+                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 10, borderRadius: 99, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, justifyContent: 'center' }}
+                  >
+                    <Icon name="pencil-outline" size={16} color={C.primary} />
+                    <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Editar</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => router.push('/(customer)/settings')}
+                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 10, borderRadius: 99, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, justifyContent: 'center' }}
+                  >
+                    <Icon name="settings" size={16} color={C.primary} />
+                    <Text style={{ color: C.primary, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Ajustes</Text>
+                  </Pressable>
+                </View>
+              )}
             </View>
 
-            {/* Cards pequeñas */}
-            <View style={{ flex: 1, gap: 10 }}>
-              {FAVORITES.slice(1).map(fav => (
-                <View
-                  key={fav.id}
-                  style={{
-                    flex: 1, borderRadius: 16,
-                    backgroundColor: fav.bg,
-                    alignItems: 'center', justifyContent: 'center',
-                    borderWidth: 2, borderColor: C.border,
-                    overflow: 'hidden',
-                  }}
-                >
-                  <Icon name={fav.icon} size={28} color={C.onSurface} style={{ opacity: 0.4 }} />
-                  <View
-                    style={{
-                      position: 'absolute', bottom: 0, left: 0, right: 0,
-                      padding: 8, backgroundColor: 'rgba(28,27,27,0.55)',
-                    }}
-                  >
-                    <Text style={{ color: '#fff', fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }} numberOfLines={1}>
-                      {fav.name}
-                    </Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                      <Icon name="star" size={10} color={C.secondaryContainer} />
-                      <Text style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
-                        {fav.rating}
-                      </Text>
-                    </View>
-                  </View>
+            {/* Nivel / XP */}
+            <View style={{ backgroundColor: C.surface, borderRadius: 28, padding: 20, gap: 12, borderWidth: 2, borderColor: C.border, ...shadow.md }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <View style={{ gap: 4 }}>
+                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, letterSpacing: 1 }}>NIVEL ACTUAL</Text>
+                  <Text style={{ color: C.primary, fontFamily: 'Outfit_700Bold', fontSize: 20 }}>Nivel {level}</Text>
+                </View>
+                <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 99, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border }}>
+                  <Text style={{ color: C.primary, fontFamily: 'Outfit_700Bold', fontSize: 16 }}>{xp} XP</Text>
+                </View>
+              </View>
+              <XPBar pct={pct} />
+              <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
+                {next - xp > 0 ? `${next - xp} XP para el nivel ${level + 1}` : `¡Listo para subir de nivel!`}
+              </Text>
+            </View>
+
+            {/* Stats */}
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              {[
+                { icon: 'medal', value: reviews.length, label: 'Ranks', color: C.primaryContainer },
+                { icon: 'heart', value: favorites.length, label: 'Favoritos', color: C.secondary },
+              ].map(stat => (
+                <View key={stat.label} style={{ flex: 1, backgroundColor: C.surface, borderRadius: 24, padding: 20, alignItems: 'center', gap: 6, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
+                  <Icon name={stat.icon} size={28} color={stat.color} />
+                  <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 24 }}>{stat.value}</Text>
+                  <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>{stat.label}</Text>
                 </View>
               ))}
             </View>
-          </View>
-        </View>
 
-        {/* ── Últimas reseñas ── */}
-        <View style={{ gap: 12 }}>
-          <SectionTitle icon="comment-text" label="Últimas Reseñas" />
-
-          {REVIEWS.map(r => (
-            <View
-              key={r.id}
-              style={{
-                backgroundColor: C.surface, borderRadius: 20,
-                padding: 16, flexDirection: 'row', gap: 14,
-                borderWidth: 2, borderColor: C.border,
-                ...shadow.sm,
-              }}
-            >
-              <View
-                style={{
-                  width: 60, height: 60, borderRadius: 14,
-                  backgroundColor: r.iconBg,
-                  alignItems: 'center', justifyContent: 'center',
-                  borderWidth: 2, borderColor: C.border, flexShrink: 0,
-                }}
-              >
-                <Icon name={r.icon} size={28} color={C.primary} />
-              </View>
-              <View style={{ flex: 1, gap: 6 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>
-                    {r.restaurant}
-                  </Text>
-                  <StarRow rating={r.rating} />
+            {/* Favoritos */}
+            <View style={{ gap: 12 }}>
+              <SectionTitle icon="heart" label="Favoritos" />
+              {favoritesQ.isLoading ? (
+                <View style={{ paddingVertical: 24 }}><ActivityIndicator color={C.primary} /></View>
+              ) : favorites.length === 0 ? (
+                <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14 }}>
+                  Marca "Me sirve" en las reseñas para guardar lugares aquí.
+                </Text>
+              ) : (
+                <View style={{ gap: 10 }}>
+                  {favorites.map(f => (
+                    <Pressable
+                      key={f.id}
+                      onPress={() => router.push(`/restaurant/${f.id}`)}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 18, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, ...shadow.sm }}
+                    >
+                      <View style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+                        <Icon name={f.categories[0]?.icon ?? 'silverware-fork-knife'} size={24} color={C.primary} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }} numberOfLines={1}>{f.name}</Text>
+                        {f.address && <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12 }} numberOfLines={1}>{f.address}</Text>}
+                      </View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                        <Icon name="star" size={13} color={C.secondary} />
+                        <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13 }}>
+                          {f.rating_avg > 0 ? f.rating_avg.toFixed(1) : '–'}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  ))}
                 </View>
-                <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, lineHeight: 20 }} numberOfLines={2}>
-                  {r.comment}
-                </Text>
-                <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
-                  {r.date}
-                </Text>
-              </View>
+              )}
             </View>
-          ))}
-        </View>
 
+            {/* Últimas reseñas */}
+            <View style={{ gap: 12 }}>
+              <SectionTitle icon="comment-text" label="Mis reseñas" />
+              {reviewsQ.isLoading ? (
+                <View style={{ paddingVertical: 24 }}><ActivityIndicator color={C.primary} /></View>
+              ) : reviews.length === 0 ? (
+                <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14 }}>
+                  Aún no has rankeado ningún lugar.
+                </Text>
+              ) : (
+                reviews.map(r => (
+                  <Pressable
+                    key={r.id}
+                    onPress={() => r.restaurant && router.push(`/restaurant/${r.restaurant.id}`)}
+                    style={{ backgroundColor: C.surface, borderRadius: 20, padding: 16, flexDirection: 'row', gap: 14, borderWidth: 2, borderColor: C.border, ...shadow.sm }}
+                  >
+                    <View style={{ width: 60, height: 60, borderRadius: 14, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border, flexShrink: 0 }}>
+                      <Icon name={r.restaurant?.icon ?? 'silverware-fork-knife'} size={28} color={C.primary} />
+                    </View>
+                    <View style={{ flex: 1, gap: 6 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }} numberOfLines={1}>
+                          {r.restaurant?.name ?? 'Local'}
+                        </Text>
+                        <StarRow rating={r.rating} />
+                      </View>
+                      <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, lineHeight: 20 }} numberOfLines={2}>
+                        {r.body}
+                      </Text>
+                      <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 }}>
+                        {timeAgo(r.created_at)}
+                      </Text>
+                    </View>
+                  </Pressable>
+                ))
+              )}
+            </View>
 
-
-      </View>
-      </ScrollView>
+          </View>
+        </ScrollView>
+      )}
     </View>
   );
 }

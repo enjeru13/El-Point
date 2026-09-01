@@ -1,7 +1,7 @@
 import { Icon } from '@/components/ui/Icon';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
@@ -11,38 +11,29 @@ import {
   Text,
   View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import MapView, { Callout, Circle, Marker } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FLOATING_NAV_H } from '@/lib/theme';
 import { useTheme } from '@/lib/ThemeContext';
 import { SearchBar } from '@/components/ui/SearchBar';
+import { useNearby, useRestaurantIcons, type NearbyRestaurant } from '@/lib/queries/nearby';
 
-// ─── Types & data ─────────────────────────────────────────────────────────────
+// ─── Config ───────────────────────────────────────────────────────────────────
 
-type MockBase = {
-  id: string; name: string; category: string;
-  icon: string;
-  rating: number; hot: boolean; hotPct: number;
-  iconBg: string; dLat: number; dLng: number;
-};
+// San Cristobal, Tachira, Venezuela
+const DEFAULT_ORIGIN = { latitude: 7.7669, longitude: -72.2251 };
+const RADIUS_KM = 8;
 
-const DEFAULT_ORIGIN = { latitude: 10.4806, longitude: -66.9036 };
+type Restaurant = NearbyRestaurant & { icon: string; distanceLabel: string };
 
-function buildRestaurants(mockBase: MockBase[], origin: { latitude: number; longitude: number }) {
-  return mockBase.map(r => {
-    const lat   = origin.latitude  + r.dLat;
-    const lng   = origin.longitude + r.dLng;
-    const distM = Math.round(
-      Math.sqrt(
-        Math.pow(r.dLat * 111000, 2) +
-        Math.pow(r.dLng * 111000 * Math.cos(origin.latitude * Math.PI / 180), 2)
-      )
-    );
-    return { ...r, lat, lng, distance: distM < 1000 ? `${distM} m` : `${(distM / 1000).toFixed(1)} km` };
-  });
+function fmtDistance(m: number): string {
+  return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
 }
 
-type Restaurant = ReturnType<typeof buildRestaurants>[0];
+function priceLabel(level: number | null): string {
+  return level && level >= 1 ? '$'.repeat(Math.min(level, 3)) : '';
+}
 
 const CATEGORIES: { id: string; label: string; icon: string }[] = [
   { id: 'all',      label: 'Todo',     icon: 'silverware-fork-knife' },
@@ -50,7 +41,7 @@ const CATEGORIES: { id: string; label: string; icon: string }[] = [
   { id: 'pizza',    label: 'Pizza',    icon: 'pizza' },
   { id: 'hotdogs',  label: 'Hot Dogs', icon: 'food-hot-dog' },
   { id: 'arepas',   label: 'Arepas',   icon: 'corn' },
-  { id: 'trending', label: 'Trending', icon: 'fire' },
+  { id: 'finedining', label: 'Alta Cocina', icon: 'silverware-fork-knife' },
 ];
 
 const MAP_STYLE = [
@@ -67,17 +58,20 @@ const MAP_STYLE = [
 
 // ─── Marker ────────────────────────────────────────────────────────────────────
 
-function RestaurantMarker({
+const RestaurantMarker = memo(function RestaurantMarker({
   restaurant, isSelected, isDimmed, onPress,
 }: {
   restaurant: Restaurant; isSelected: boolean; isDimmed: boolean; onPress: () => void;
 }) {
   const { C, shadow } = useTheme();
-  // tracksViewChanges: true briefly after selection changes so native re-renders, then false for perf
-  const [tracking, setTracking] = useState(false);
+  // Brief tracksViewChanges window only when this marker's selected state flips,
+  // then back to false so the native view stops re-rendering (perf + crash guard).
+  const [tracking, setTracking] = useState(true);
+  const first = useRef(true);
   useEffect(() => {
+    if (first.current) { first.current = false; }
     setTracking(true);
-    const t = setTimeout(() => setTracking(false), 400);
+    const t = setTimeout(() => setTracking(false), 250);
     return () => clearTimeout(t);
   }, [isSelected]);
 
@@ -105,17 +99,6 @@ function RestaurantMarker({
             size={isSelected ? 26 : 22}
             color={isSelected ? C.onPrimary : C.primary}
           />
-          {restaurant.hot && !isSelected && (
-            <View style={{
-              position: 'absolute', top: -5, right: -5,
-              width: 18, height: 18, borderRadius: 9,
-              backgroundColor: C.primaryContainer,
-              alignItems: 'center', justifyContent: 'center',
-              borderWidth: 1.5, borderColor: C.border,
-            }}>
-              <Icon name="fire" size={10} color={C.onSurface} />
-            </View>
-          )}
         </View>
 
         {/* Pointy tail */}
@@ -144,14 +127,14 @@ function RestaurantMarker({
             fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10,
             marginLeft: 2,
           }}>
-            {restaurant.rating.toFixed(1)}
+            {restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : '–'}
           </Text>
         </View>
       </View>
       <Callout tooltip><View /></Callout>
     </Marker>
   );
-}
+});
 
 // ─── Bottom card ──────────────────────────────────────────────────────────────
 
@@ -165,7 +148,6 @@ function RestaurantCard({
 }) {
   const { C, shadow } = useTheme();
 
-  // Always rendered — never return null, so translateY animation works before restaurant mounts
   return (
     <Animated.View
       pointerEvents={restaurant ? 'auto' : 'none'}
@@ -193,44 +175,37 @@ function RestaurantCard({
 
               {/* Thumbnail 58x58 */}
               <View style={{
-                width: 58, height: 58, borderRadius: 14,
-                backgroundColor: restaurant.iconBg,
+                width: 58, height: 58, borderRadius: 14, overflow: 'hidden',
+                backgroundColor: C.primaryFixed,
                 alignItems: 'center', justifyContent: 'center',
                 borderWidth: 2, borderColor: C.border,
               }}>
-                <Icon name={restaurant.icon} size={28} color={C.onSurface} style={{ opacity: 0.65 }} />
-                {restaurant.hot && (
-                  <View style={{
-                    position: 'absolute', top: -5, right: -5,
-                    width: 18, height: 18, borderRadius: 9,
-                    backgroundColor: C.primaryContainer,
-                    alignItems: 'center', justifyContent: 'center',
-                    borderWidth: 1.5, borderColor: C.border,
-                  }}>
-                    <Icon name="fire" size={10} color={C.onSurface} />
-                  </View>
+                {restaurant.cover_url || restaurant.logo_url ? (
+                  <Image source={{ uri: (restaurant.cover_url ?? restaurant.logo_url)! }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={150} />
+                ) : (
+                  <Icon name={restaurant.icon} size={28} color={C.onSurface} style={{ opacity: 0.65 }} />
                 )}
               </View>
 
-              {/* Info — ocupa el espacio restante */}
+              {/* Info */}
               <View style={{ flex: 1, paddingHorizontal: 12 }}>
                 <Text style={{ color: C.onSurface, fontFamily: 'Outfit_700Bold', fontSize: 17, lineHeight: 21 }} numberOfLines={1}>
                   {restaurant.name}
                 </Text>
                 <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12 }}>
-                  {restaurant.category} · {restaurant.distance}
+                  {[priceLabel(restaurant.price_level), restaurant.distanceLabel].filter(Boolean).join(' · ')}
                 </Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
                   {[1,2,3,4,5].map(i => (
                     <Icon
                       key={i}
-                      name={i <= Math.round(restaurant.rating) ? 'star' : 'star-outline'}
+                      name={i <= Math.round(restaurant.rating_avg) ? 'star' : 'star-outline'}
                       size={13}
                       color={C.secondary}
                     />
                   ))}
                   <Text style={{ color: C.onSurface, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, marginLeft: 4 }}>
-                    {restaurant.rating.toFixed(1)}
+                    {restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : 'Sin ranks'}
                   </Text>
                 </View>
               </View>
@@ -260,14 +235,7 @@ export default function MapScreen() {
   const router  = useRouter();
   const insets  = useSafeAreaInsets();
 
-  const MOCK_BASE: MockBase[] = [
-    { id: '1', name: 'La Smasheria',    category: 'Burgers',  icon: 'hamburger',   rating: 4.8, hot: true,  hotPct: 85, iconBg: C.primaryFixed,       dLat:  0.0018, dLng:  0.0000 },
-    { id: '2', name: 'Pizza Mágica',    category: 'Pizza',    icon: 'pizza',        rating: 4.2, hot: false, hotPct: 40, iconBg: C.tertiaryContainer,  dLat:  0.0032, dLng:  0.0026 },
-    { id: '3', name: 'El Perrero Loco', category: 'Hot Dogs', icon: 'food-hot-dog', rating: 5.0, hot: true,  hotPct: 95, iconBg: C.secondaryContainer, dLat: -0.0016, dLng: -0.0019 },
-    { id: '4', name: 'Arepa & Co.',     category: 'Arepas',   icon: 'corn',         rating: 4.6, hot: false, hotPct: 60, iconBg: C.primaryFixed,       dLat:  0.0029, dLng: -0.0034 },
-  ];
-
-  const [userLocation, setUserLocation]   = useState<{ latitude: number; longitude: number } | null>(null);
+  const [userLocation, setUserLocation]     = useState<{ latitude: number; longitude: number } | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
   const [selected, setSelected]             = useState<Restaurant | null>(null);
   const [search, setSearch]                 = useState('');
@@ -277,6 +245,25 @@ export default function MapScreen() {
   const gpsY     = useRef(new Animated.Value(0)).current;
   const pingAnim = useRef(new Animated.Value(1)).current;
   const mapRef   = useRef<MapView>(null);
+
+  const origin = userLocation ?? DEFAULT_ORIGIN;
+  const nearbyQ = useNearby(origin, RADIUS_KM, activeCategory === 'all' ? null : activeCategory);
+  const iconsQ = useRestaurantIcons();
+
+  const restaurants: Restaurant[] = useMemo(() => {
+    const icons = iconsQ.data;
+    return (nearbyQ.data ?? []).map(r => ({
+      ...r,
+      icon: icons?.get(r.id) ?? 'silverware-fork-knife',
+      distanceLabel: fmtDistance(r.distance_m),
+    }));
+  }, [nearbyQ.data, iconsQ.data]);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return restaurants;
+    const q = search.toLowerCase();
+    return restaurants.filter(r => r.name.toLowerCase().includes(q));
+  }, [restaurants, search]);
 
   // Ping animation for user dot
   useEffect(() => {
@@ -298,59 +285,56 @@ export default function MapScreen() {
     const coords = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
     setUserLocation(coords);
     setLocLoading(false);
-    mapRef.current?.animateToRegion({ ...coords, latitudeDelta: 0.012, longitudeDelta: 0.012 }, 800);
+    mapRef.current?.animateToRegion({ ...coords, latitudeDelta: 0.03, longitudeDelta: 0.03 }, 800);
   }
 
   const CARD_HEIGHT = 220;
 
   function openSheet(r: Restaurant) {
+    sheetY.stopAnimation();
+    gpsY.stopAnimation();
     setSelected(r);
-    // Animate card up
     Animated.spring(sheetY, { toValue: 0, useNativeDriver: true, bounciness: 5, speed: 14 }).start();
-    // Push GPS button up
     Animated.spring(gpsY, { toValue: -(CARD_HEIGHT), useNativeDriver: true, bounciness: 5, speed: 14 }).start();
-    // Center map slightly above selected marker so card doesn't cover it
     mapRef.current?.animateToRegion({
-      latitude: r.lat - 0.003,
+      latitude: r.lat - 0.006,
       longitude: r.lng,
-      latitudeDelta: 0.012,
-      longitudeDelta: 0.012,
+      latitudeDelta: 0.02,
+      longitudeDelta: 0.02,
     }, 400);
   }
 
   function closeSheet() {
-    Animated.timing(sheetY, { toValue: 400, duration: 240, easing: Easing.out(Easing.ease), useNativeDriver: true }).start(() => setSelected(null));
-    Animated.timing(gpsY,   { toValue: 0,   duration: 240, easing: Easing.out(Easing.ease), useNativeDriver: true }).start();
+    sheetY.stopAnimation();
+    gpsY.stopAnimation();
+    Animated.timing(sheetY, { toValue: 400, duration: 240, easing: Easing.out(Easing.ease), useNativeDriver: true }).start(({ finished }) => {
+      if (finished) setSelected(null);
+    });
+    Animated.timing(gpsY, { toValue: 0, duration: 240, easing: Easing.out(Easing.ease), useNativeDriver: true }).start();
   }
-
-  const origin      = userLocation ?? DEFAULT_ORIGIN;
-  const restaurants = buildRestaurants(MOCK_BASE, origin);
-
-  const filtered = restaurants.filter(r => {
-    if (activeCategory === 'trending') return r.hot;
-    if (activeCategory !== 'all') return r.category.toLowerCase().replace(/\s+/g, '') === activeCategory;
-    if (search.trim()) return r.name.toLowerCase().includes(search.toLowerCase()) || r.category.toLowerCase().includes(search.toLowerCase());
-    return true;
-  });
 
   return (
     <View style={{ flex: 1 }}>
       <MapView
         ref={mapRef}
         style={{ flex: 1 }}
-        initialRegion={{ latitude: origin.latitude, longitude: origin.longitude, latitudeDelta: 0.012, longitudeDelta: 0.012 }}
+        initialRegion={{ latitude: origin.latitude, longitude: origin.longitude, latitudeDelta: 0.04, longitudeDelta: 0.04 }}
         customMapStyle={MAP_STYLE}
         showsUserLocation={false}
         showsMyLocationButton={false}
         showsCompass={false}
-        onPress={() => selected && closeSheet()}
+        onPress={(e) => {
+          // Ignore taps that land on a marker so switching selection is one tap.
+          if ((e.nativeEvent as any)?.action === 'marker-press') return;
+          if (selected) closeSheet();
+        }}
       >
         {/* User dot */}
         {userLocation && (
           <>
             <Circle
               center={userLocation}
-              radius={80}
+              radius={120}
               fillColor={`${C.primary}14`}
               strokeColor={`${C.primary}33`}
               strokeWidth={1}
@@ -414,9 +398,19 @@ export default function MapScreen() {
             );
           })}
         </ScrollView>
+
+        {/* Estado */}
+        {(nearbyQ.isLoading || (!nearbyQ.isLoading && filtered.length === 0)) && (
+          <View style={{ alignSelf: 'center', marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
+            {nearbyQ.isLoading
+              ? <><ActivityIndicator size="small" color={C.primary} /><Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: C.onSurfaceVariant }}>Buscando lugares...</Text></>
+              : <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: C.onSurfaceVariant }}>Sin lugares en el área</Text>
+            }
+          </View>
+        )}
       </View>
 
-      {/* ── GPS button (sube cuando card está abierta) ── */}
+      {/* ── GPS button ── */}
       <Animated.View style={{
         position: 'absolute', right: 14, bottom: FLOATING_NAV_H + 16,
         transform: [{ translateY: gpsY }],

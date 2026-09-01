@@ -1,8 +1,8 @@
 import {
-  ArrowLeft, ArrowRight, Award, BarChart2, Bell, BookOpen,
+  Aperture, ArrowLeft, ArrowRight, Award, BarChart2, Bell, BookOpen,
   Camera, CheckCircle2, ChefHat, ChevronRight, Circle, Clock, Coffee,
-  Crosshair, Flame, Globe, Heart, Home, IceCream, ImagePlus,
-  Instagram, Leaf, LayoutList, Lock, LogOut, Map, MapPin,
+  Crosshair, Eye, EyeOff, Flame, Globe, Heart, Home, IceCream, ImagePlus,
+  Leaf, LayoutList, Lock, LogOut, Mail, Map, MapPin,
   MapPinned, Medal, MessageCircle, MessageSquare, MessagesSquare,
   Minus, Navigation, PartyPopper, Pencil, Phone, Pizza, Plus,
   Reply, Sandwich, Search, Settings, Settings2, Share2, Shield, ShieldCheck,
@@ -40,10 +40,13 @@ const MAP: Record<string, LucideIcon> = {
   'shield-outline':       Shield,
   'shield-lock-outline':  ShieldCheck,
   'google':               Globe,
-  'instagram':            Instagram,
+  'instagram':            Aperture,
   'whatsapp':             MessageCircle,
   // Communication
   'bell-outline':         Bell,
+  'email-outline':        Mail,
+  'eye-outline':          Eye,
+  'eye-off-outline':      EyeOff,
   'comment-text':         MessageSquare,
   'comment-text-multiple':MessagesSquare,
   'reply':                Reply,
@@ -75,6 +78,7 @@ const MAP: Record<string, LucideIcon> = {
   'heart-outline':        Heart,
   'check-circle':         CheckCircle2,
   'tag-outline':          Tag,
+  'tag':                  Tag,
   // Food
   'silverware-fork-knife':Utensils,
   'food':                 Utensils,
@@ -94,13 +98,13 @@ const MAP: Record<string, LucideIcon> = {
   'camera-plus-outline':  Camera,
   'image-plus':           ImagePlus,
   'file-pdf-box':         FileText,
+  'file-check':           FileText,
   'book-open-outline':    BookOpen,
   // Settings
   'vibrate':              Vibrate,
   'volume-high':          Volume2,
   'view-agenda-outline':  LayoutList,
   'clock-outline':        Clock,
-  'phone-outline':        Phone,
 };
 
 export type IconName = keyof typeof MAP;
