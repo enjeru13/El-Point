@@ -26,7 +26,8 @@ type MockBase = {
   iconBg: string; dLat: number; dLng: number;
 };
 
-const DEFAULT_ORIGIN = { latitude: 10.4806, longitude: -66.9036 };
+// San Cristobal, Tachira, Venezuela
+const DEFAULT_ORIGIN = { latitude: 7.7669, longitude: -72.2251 };
 
 function buildRestaurants(mockBase: MockBase[], origin: { latitude: number; longitude: number }) {
   return mockBase.map(r => {

@@ -1,8 +1,8 @@
 import {
-  ArrowLeft, ArrowRight, Award, BarChart2, Bell, BookOpen,
+  Aperture, ArrowLeft, ArrowRight, Award, BarChart2, Bell, BookOpen,
   Camera, CheckCircle2, ChefHat, ChevronRight, Circle, Clock, Coffee,
   Crosshair, Flame, Globe, Heart, Home, IceCream, ImagePlus,
-  Instagram, Leaf, LayoutList, Lock, LogOut, Map, MapPin,
+  Leaf, LayoutList, Lock, LogOut, Map, MapPin,
   MapPinned, Medal, MessageCircle, MessageSquare, MessagesSquare,
   Minus, Navigation, PartyPopper, Pencil, Phone, Pizza, Plus,
   Reply, Sandwich, Search, Settings, Settings2, Share2, Shield, ShieldCheck,
@@ -40,7 +40,7 @@ const MAP: Record<string, LucideIcon> = {
   'shield-outline':       Shield,
   'shield-lock-outline':  ShieldCheck,
   'google':               Globe,
-  'instagram':            Instagram,
+  'instagram':            Aperture,
   'whatsapp':             MessageCircle,
   // Communication
   'bell-outline':         Bell,
@@ -100,7 +100,6 @@ const MAP: Record<string, LucideIcon> = {
   'volume-high':          Volume2,
   'view-agenda-outline':  LayoutList,
   'clock-outline':        Clock,
-  'phone-outline':        Phone,
 };
 
 export type IconName = keyof typeof MAP;

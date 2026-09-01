@@ -1,6 +1,7 @@
 import { Icon } from "@/components/ui/Icon";
 import { useTheme } from "@/lib/ThemeContext";
-import { BottomTabBarProps, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useEffect, useRef } from "react";
 import { Animated, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -94,7 +95,7 @@ function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
           ...shadow.md,
         }}
       >
-        {state.routes.map((route, i) => (
+        {state.routes.map((route: BottomTabBarProps["state"]["routes"][number], i: number) => (
           <TabItem
             key={route.key}
             route={route}

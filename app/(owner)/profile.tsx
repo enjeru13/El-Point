@@ -5,8 +5,8 @@ import { useTheme } from '@/lib/ThemeContext';
 import { FLOATING_NAV_H } from '@/lib/theme';
 
 const INFO_ROWS = [
-  { icon: 'map-marker',          label: 'Dirección',   value: 'Av. Insurgentes 432, CDMX' },
-  { icon: 'phone-outline',       label: 'Teléfono',    value: '+52 55 1234 5678' },
+  { icon: 'map-marker',          label: 'Dirección',   value: 'Carrera 22, Barrio Obrero, San Cristóbal' },
+  { icon: 'phone-outline',       label: 'Teléfono',    value: '+58 276 344 1234' },
   { icon: 'clock-outline',       label: 'Horario',     value: 'Lun–Vie 12:00–22:00' },
   { icon: 'silverware-fork-knife', label: 'Categoría', value: 'Hamburguesas · Smash Burger' },
   { icon: 'globe',               label: 'Instagram',   value: '@lasmasheria' },
