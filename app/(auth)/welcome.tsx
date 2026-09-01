@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useTheme } from '@/lib/ThemeContext';
+import { Button } from '@/components/ui/Button';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: W, height: H } = Dimensions.get('window');
@@ -143,15 +144,11 @@ export default function WelcomeScreen() {
         </Animated.View>
 
         <Animated.View style={{ width: '100%', gap: 12, opacity: fadeIn }}>
-          <Pressable
+          <Button
+            label={isOwner ? 'Ver mi panel' : 'Explorar ahora'}
             onPress={() => router.replace(isOwner ? '/(owner)' : '/(customer)')}
-            style={{ height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, backgroundColor: C.primary, borderWidth: 2, borderColor: C.border, ...shadow.primary }}
-          >
-            <Text style={{ color: '#fff', fontFamily: 'Outfit_700Bold', fontSize: 16 }}>
-              {isOwner ? 'Ver mi panel' : 'Explorar ahora'}
-            </Text>
-            <Icon name={isOwner ? 'view-dashboard' : 'arrow-right'} size={20} color="#fff" />
-          </Pressable>
+            iconTrailing="arrow-right"
+          />
           <Text style={{ color: C.outline, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, textAlign: 'center' }}>
             {isOwner ? '¿Listo para recibir a tus primeros clientes?' : '¿Listo para encontrar tu nuevo lugar favorito?'}
           </Text>

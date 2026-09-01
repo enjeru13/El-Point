@@ -15,6 +15,7 @@ export function Button({
   disabled = false,
   icon,
   iconTrailing,
+  iconColor,
   fullWidth = true,
   style,
 }: {
@@ -26,6 +27,7 @@ export function Button({
   disabled?: boolean;
   icon?: string;
   iconTrailing?: string;
+  iconColor?: string;
   fullWidth?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
@@ -92,7 +94,7 @@ export function Button({
       {loading ? (
         <ActivityIndicator size="small" color={fg} />
       ) : (
-        icon && <Icon name={icon} size={iconSize} color={fg} />
+        icon && <Icon name={icon} size={iconSize} color={off ? fg : iconColor ?? fg} />
       )}
       <Text style={{ color: fg, fontFamily: 'Outfit_700Bold', fontSize }}>{label}</Text>
       {!loading && iconTrailing && <Icon name={iconTrailing} size={iconSize} color={fg} />}

@@ -15,6 +15,7 @@ import {
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/ThemeContext';
+import { Button } from '@/components/ui/Button';
 import { ThemePicker } from '@/components/ui/ThemePicker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -632,37 +633,24 @@ export default function RegisterScreen() {
               <View style={{ height: '100%', borderRadius: 99, width: `${(selected.size / CATEGORIES.length) * 100}%`, backgroundColor: C.primary }} />
             </View>
             <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-              <Pressable onPress={handleContinue} style={{ flex: 1, height: 56, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ color: C.onSurfaceVariant, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 14 }}>Omitir</Text>
-              </Pressable>
-              <Pressable
+              <Button label="Omitir" onPress={handleContinue} variant="ghost" fullWidth={false} style={{ flex: 1 }} />
+              <Button
+                label={selected.size > 0 ? `Continuar (${selected.size})` : 'Continuar'}
                 onPress={handleContinue}
-                style={{ flex: 2, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: C.primary, borderWidth: 2, borderColor: C.border, ...shadow.primary }}
-              >
-                <Text style={{ color: '#fff', fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16 }}>
-                  {selected.size > 0 ? `Continuar (${selected.size})` : 'Continuar'}
-                </Text>
-              </Pressable>
+                fullWidth={false}
+                style={{ flex: 2 }}
+              />
             </View>
           </>
         ) : (
           <>
-            <Pressable
+            <Button
+              label={loading ? 'Creando cuenta…' : step === 2 ? 'Crear cuenta' : step === 4 ? 'Empezar a explorar' : 'Continuar'}
               onPress={handleContinue}
-              disabled={!canContinue || loading}
-              style={{
-                height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center',
-                flexDirection: 'row', gap: 8,
-                backgroundColor: canContinue && !loading ? C.primary : C.surfaceContainerHighest,
-                borderWidth: 2, borderColor: C.border,
-                ...(canContinue && !loading ? shadow.primary : {}),
-              }}
-            >
-              <Text style={{ color: canContinue && !loading ? '#fff' : C.outline, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16 }}>
-                {loading ? 'Creando cuenta...' : step === 2 ? 'Crear cuenta' : step === 4 ? 'Empezar a explorar' : 'Continuar'}
-              </Text>
-              {!loading && <Icon name={step === 4 ? 'check' : step === 2 ? 'check' : 'arrow-right'} size={20} color={canContinue ? '#fff' : C.outline} />}
-            </Pressable>
+              disabled={!canContinue}
+              loading={loading}
+              iconTrailing={step === 2 || step === 4 ? 'check' : 'arrow-right'}
+            />
             {step === 0 && (
               <Text style={{ color: C.onSurfaceVariant + '80', fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, textAlign: 'center', marginTop: 10, lineHeight: 18 }}>
                 Al continuar, aceptas nuestros <Text style={{ textDecorationLine: 'underline' }}>Términos de Servicio</Text> y <Text style={{ textDecorationLine: 'underline' }}>Política de Privacidad</Text>.

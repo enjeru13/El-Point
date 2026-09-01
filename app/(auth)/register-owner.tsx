@@ -3,6 +3,7 @@ import { Icon } from "@/components/ui/Icon";
 import { uploadRestaurantImage, uploadRestaurantMenu } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 import { useTheme } from "@/lib/ThemeContext";
+import { Button } from "@/components/ui/Button";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
@@ -1213,44 +1214,13 @@ export default function RegisterOwnerScreen() {
           backgroundColor: C.surface + "f0",
         }}
       >
-        <Pressable
+        <Button
+          label={loading ? "Creando…" : step === STEPS - 1 ? "Registrar mi restaurante" : "Continuar"}
           onPress={handleContinue}
-          disabled={!canContinue || loading}
-          style={{
-            height: 56,
-            borderRadius: 28,
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "row",
-            gap: 8,
-            backgroundColor:
-              canContinue && !loading ? C.primary : C.surfaceContainerHighest,
-            borderWidth: 2,
-            borderColor: canContinue && !loading ? C.border : C.outlineVariant,
-            ...(canContinue && !loading ? shadow.primary : {}),
-          }}
-        >
-          <Text
-            style={{
-              fontFamily: "Outfit_700Bold",
-              fontSize: 16,
-              color: canContinue && !loading ? "#fff" : C.outline,
-            }}
-          >
-            {loading
-              ? "Creando…"
-              : step === STEPS - 1
-                ? "Registrar mi restaurante"
-                : "Continuar"}
-          </Text>
-          {!loading && (
-            <Icon
-              name={step === STEPS - 1 ? "storefront" : "arrow-right"}
-              size={20}
-              color={canContinue ? "#fff" : C.outline}
-            />
-          )}
-        </Pressable>
+          disabled={!canContinue}
+          loading={loading}
+          iconTrailing={step === STEPS - 1 ? "store-outline" : "arrow-right"}
+        />
         {step === STEPS - 1 && (
           <Text
             style={{

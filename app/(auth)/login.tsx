@@ -1,4 +1,5 @@
 import { AppLogo } from "@/components/ui/AppLogo";
+import { Button } from "@/components/ui/Button";
 import { AppTextInput, InputWrapper } from "@/components/ui/AppTextInput";
 import { Icon } from "@/components/ui/Icon";
 import { supabase } from "@/lib/supabase";
@@ -491,33 +492,12 @@ export default function LoginScreen() {
           </Pressable>
 
           {/* Botón ingresar */}
-          <Pressable
+          <Button
+            label={loading ? "Ingresando…" : "Ingresar"}
             onPress={handleLogin}
-            disabled={loading}
-            style={{
-              height: 56,
-              borderRadius: 28,
-              alignItems: "center",
-              justifyContent: "center",
-              flexDirection: "row",
-              gap: 8,
-              backgroundColor: loading ? C.outline : C.primary,
-              borderWidth: 2,
-              borderColor: C.border,
-              ...shadow.primary,
-            }}
-          >
-            <Text
-              style={{
-                color: "#fff",
-                fontFamily: "Outfit_700Bold",
-                fontSize: 16,
-              }}
-            >
-              {loading ? "Ingresando..." : "Ingresar"}
-            </Text>
-            {!loading && <Icon name="arrow-right" size={20} color="#fff" />}
-          </Pressable>
+            loading={loading}
+            iconTrailing="arrow-right"
+          />
 
           {/* Divisor */}
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -540,31 +520,13 @@ export default function LoginScreen() {
           </View>
 
           {/* Google */}
-          <Pressable
-            style={{
-              height: 56,
-              borderRadius: 28,
-              alignItems: "center",
-              justifyContent: "center",
-              flexDirection: "row",
-              gap: 10,
-              backgroundColor: C.surface,
-              borderWidth: 2,
-              borderColor: C.border,
-              ...shadow.sm,
-            }}
-          >
-            <Icon name="google" size={22} color="#EA4335" />
-            <Text
-              style={{
-                color: C.onSurface,
-                fontFamily: "PlusJakartaSans_700Bold",
-                fontSize: 15,
-              }}
-            >
-              Continuar con Google
-            </Text>
-          </Pressable>
+          <Button
+            label="Continuar con Google"
+            onPress={() => {}}
+            variant="secondary"
+            icon="google"
+            iconColor="#EA4335"
+          />
 
           {/* Registro */}
           <View
