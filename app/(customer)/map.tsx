@@ -19,6 +19,7 @@ import { useTheme } from '@/lib/ThemeContext';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { Chip } from '@/components/ui/Chip';
 import { useNearby, useRestaurantIcons, type NearbyRestaurant } from '@/lib/queries/nearby';
+import { useCategories } from '@/lib/queries/categories';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -36,14 +37,7 @@ function priceLabel(level: number | null): string {
   return level && level >= 1 ? '$'.repeat(Math.min(level, 3)) : '';
 }
 
-const CATEGORIES: { id: string; label: string; icon: string }[] = [
-  { id: 'all',      label: 'Todo',     icon: 'silverware-fork-knife' },
-  { id: 'burgers',  label: 'Burgers',  icon: 'hamburger' },
-  { id: 'pizza',    label: 'Pizza',    icon: 'pizza' },
-  { id: 'hotdogs',  label: 'Hot Dogs', icon: 'food-hot-dog' },
-  { id: 'arepas',   label: 'Arepas',   icon: 'corn' },
-  { id: 'finedining', label: 'Alta Cocina', icon: 'silverware-fork-knife' },
-];
+const PINNED = [{ slug: 'all', label: 'Todo', icon: 'silverware-fork-knife' }];
 
 const MAP_STYLE = [
   { elementType: 'geometry',            stylers: [{ color: '#f5f5f0' }] },
@@ -234,6 +228,7 @@ export default function MapScreen() {
 
   const [userLocation, setUserLocation]     = useState<{ latitude: number; longitude: number } | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
+  const categoriesQ = useCategories();
   const [selected, setSelected]             = useState<Restaurant | null>(null);
   const [search, setSearch]                 = useState('');
   const [locLoading, setLocLoading]         = useState(false);
@@ -372,13 +367,13 @@ export default function MapScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: 6, paddingHorizontal: 12, paddingBottom: 4, paddingTop: 2 }}
         >
-          {CATEGORIES.map(cat => (
+          {[...PINNED, ...(categoriesQ.data ?? [])].map(cat => (
             <Chip
-              key={cat.id}
+              key={cat.slug}
               label={cat.label}
               icon={cat.icon}
-              active={activeCategory === cat.id}
-              onPress={() => { setActiveCategory(cat.id); if (selected) closeSheet(); }}
+              active={activeCategory === cat.slug}
+              onPress={() => { setActiveCategory(cat.slug); if (selected) closeSheet(); }}
             />
           ))}
         </ScrollView>

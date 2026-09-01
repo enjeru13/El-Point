@@ -29,18 +29,11 @@ import {
 import { AppText } from "@/components/ui/AppText";
 import { SkeletonList } from "@/components/ui/Skeleton";
 
-// ─── Categorías (slug = id, alineado con la DB) ──────────────────────────────
+// ─── Filtros fijos; el resto sale de la DB (useCategories) ───────────────────
 
-const CATEGORIES: { id: string; label: string; icon: string }[] = [
-  { id: "all", label: "Todo", icon: "silverware-fork-knife" },
-  { id: "promo", label: "Promos", icon: "tag" },
-  { id: "burgers", label: "Burgers", icon: "hamburger" },
-  { id: "pizza", label: "Pizza", icon: "pizza" },
-  { id: "hotdogs", label: "Hot Dogs", icon: "food-hot-dog" },
-  { id: "arepas", label: "Arepas", icon: "corn" },
-  { id: "fastfood", label: "Rápida", icon: "food-variant" },
-  { id: "coffee", label: "Café", icon: "coffee" },
-  { id: "desserts", label: "Postres", icon: "ice-cream" },
+const PINNED: { slug: string; label: string; icon: string }[] = [
+  { slug: "all", label: "Todo", icon: "silverware-fork-knife" },
+  { slug: "promo", label: "Promos", icon: "tag" },
 ];
 
 function timeAgo(iso: string): string {
@@ -475,13 +468,13 @@ export default function HomeScreen() {
             gap: 8,
           }}
         >
-          {CATEGORIES.map((cat) => (
+          {[...PINNED, ...(categoriesQ.data ?? [])].map((cat) => (
             <Chip
-              key={cat.id}
+              key={cat.slug}
               label={cat.label}
               icon={cat.icon}
-              active={activeCategory === cat.id}
-              onPress={() => setActiveCategory(cat.id)}
+              active={activeCategory === cat.slug}
+              onPress={() => setActiveCategory(cat.slug)}
             />
           ))}
         </ScrollView>
