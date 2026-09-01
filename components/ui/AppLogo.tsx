@@ -1,24 +1,24 @@
-import { Text, View } from 'react-native';
-import { useTheme } from '@/lib/ThemeContext';
+import { useTheme } from "@/lib/ThemeContext";
+import { Text, View } from "react-native";
 
 type Props = {
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'light' | 'dark';
+  size?: "sm" | "md" | "lg";
+  variant?: "light" | "dark";
 };
 
-export function AppLogo({ size = 'md', variant = 'light' }: Props) {
+export function AppLogo({ size = "md", variant = "light" }: Props) {
   const { C } = useTheme();
-  const scale = size === 'sm' ? 0.75 : size === 'lg' ? 1.8 : 1;
-  const isDark = variant === 'dark';
+  const scale = size === "sm" ? 0.75 : size === "lg" ? 1.8 : 1;
+  const isDark = variant === "dark";
 
-  const textColor    = isDark ? '#ffffff' : C.onSurface;
-  const subColor     = isDark ? 'rgba(255,255,255,0.6)' : C.onSurfaceVariant;
-  const borderColor  = isDark ? 'rgba(255,255,255,0.4)' : C.border;
-  const dotColor     = isDark ? '#ff5a1f' : C.primaryContainer;
-  const dotBorder    = isDark ? 'rgba(255,255,255,0.5)' : C.border;
+  const textColor = isDark ? "#ffffff" : C.onSurface;
+  const subColor = isDark ? "rgba(255,255,255,0.6)" : C.onSurfaceVariant;
+  const borderColor = isDark ? "rgba(255,255,255,0.4)" : C.border;
+  const dotColor = isDark ? "#ff5a1f" : C.primaryContainer;
+  const dotBorder = isDark ? "rgba(255,255,255,0.5)" : C.border;
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3 }}>
+    <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 3 }}>
       {/* "el" — pequeño, outline */}
       <View
         style={{
@@ -32,7 +32,7 @@ export function AppLogo({ size = 'md', variant = 'light' }: Props) {
       >
         <Text
           style={{
-            fontFamily: 'Outfit_700Bold',
+            fontFamily: "Outfit_700Bold",
             fontSize: Math.round(13 * scale),
             color: subColor,
             lineHeight: Math.round(13 * scale),
@@ -43,10 +43,10 @@ export function AppLogo({ size = 'md', variant = 'light' }: Props) {
       </View>
 
       {/* "Point" + dot */}
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+      <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
         <Text
           style={{
-            fontFamily: 'Outfit_800ExtraBold',
+            fontFamily: "Outfit_800ExtraBold",
             fontSize: Math.round(26 * scale),
             color: textColor,
             lineHeight: Math.round(26 * scale),

@@ -1,35 +1,35 @@
-import { Icon } from '@/components/ui/Icon';
-import { AppText } from '@/components/ui/AppText';
+import { AppText } from "@/components/ui/AppText";
+import { Icon } from "@/components/ui/Icon";
+import { useTheme } from "@/lib/ThemeContext";
+import {
+  useMarkAllNotificationsRead,
+  useMarkNotificationRead,
+  useNotifications,
+  type AppNotification,
+} from "@/lib/queries/notifications";
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetScrollView,
+  type BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
 import {
   forwardRef,
   useCallback,
   useImperativeHandle,
   useMemo,
   useRef,
-} from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
-import {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetScrollView,
-  type BottomSheetBackdropProps,
-} from '@gorhom/bottom-sheet';
-import { useTheme } from '@/lib/ThemeContext';
-import {
-  useNotifications,
-  useMarkNotificationRead,
-  useMarkAllNotificationsRead,
-  type AppNotification,
-} from '@/lib/queries/notifications';
+} from "react";
+import { ActivityIndicator, Pressable, View } from "react-native";
 
 function timeAgo(iso: string): string {
   const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
-  if (min < 1) return 'Ahora';
+  if (min < 1) return "Ahora";
   if (min < 60) return `Hace ${min} min`;
   const h = Math.floor(min / 60);
   if (h < 24) return `Hace ${h} h`;
   const d = Math.floor(h / 24);
-  if (d < 7) return `Hace ${d} ${d === 1 ? 'día' : 'días'}`;
+  if (d < 7) return `Hace ${d} ${d === 1 ? "día" : "días"}`;
   return `Hace ${Math.floor(d / 7)} sem`;
 }
 
@@ -38,25 +38,65 @@ function timeAgo(iso: string): string {
 function DottedDivider({ label }: { label: string }) {
   const { C } = useTheme();
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 14 }}>
-      <View style={{ flex: 1, borderTopWidth: 2, borderStyle: 'dashed', borderColor: C.outlineVariant }} />
-      <AppText variant="overline" color={C.outline}>{label}</AppText>
-      <View style={{ flex: 1, borderTopWidth: 2, borderStyle: 'dashed', borderColor: C.outlineVariant }} />
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        marginVertical: 14,
+      }}
+    >
+      <View
+        style={{
+          flex: 1,
+          borderTopWidth: 2,
+          borderStyle: "dashed",
+          borderColor: C.outlineVariant,
+        }}
+      />
+      <AppText variant="overline" color={C.outline}>
+        {label}
+      </AppText>
+      <View
+        style={{
+          flex: 1,
+          borderTopWidth: 2,
+          borderStyle: "dashed",
+          borderColor: C.outlineVariant,
+        }}
+      />
     </View>
   );
 }
 
 // ─── Card ─────────────────────────────────────────────────────────────────────
 
-function NotifCard({ notif, onRead }: { notif: AppNotification; onRead: (id: string) => void }) {
+function NotifCard({
+  notif,
+  onRead,
+}: {
+  notif: AppNotification;
+  onRead: (id: string) => void;
+}) {
   const { C, shadow } = useTheme();
-  const CONFIG: Record<AppNotification['type'], { icon: string; bg: string; color: string }> = {
-    like:         { icon: 'heart',        bg: C.primaryFixed,       color: C.primary },
-    reply:        { icon: 'reply',        bg: C.secondaryContainer, color: C.secondary },
-    review:       { icon: 'comment-text', bg: C.secondaryContainer, color: C.secondary },
-    levelup:      { icon: 'star-circle',  bg: C.primaryContainer,   color: '#fff' },
-    levelup_soon: { icon: 'trending-up',  bg: C.tertiaryContainer,  color: C.tertiary },
-    promo:        { icon: 'tag',          bg: C.primaryContainer,   color: '#fff' },
+  const CONFIG: Record<
+    AppNotification["type"],
+    { icon: string; bg: string; color: string }
+  > = {
+    like: { icon: "heart", bg: C.primaryFixed, color: C.primary },
+    reply: { icon: "reply", bg: C.secondaryContainer, color: C.secondary },
+    review: {
+      icon: "comment-text",
+      bg: C.secondaryContainer,
+      color: C.secondary,
+    },
+    levelup: { icon: "star-circle", bg: C.primaryContainer, color: "#fff" },
+    levelup_soon: {
+      icon: "trending-up",
+      bg: C.tertiaryContainer,
+      color: C.tertiary,
+    },
+    promo: { icon: "tag", bg: C.primaryContainer, color: "#fff" },
   };
   const cfg = CONFIG[notif.type] ?? CONFIG.like;
 
@@ -73,15 +113,42 @@ function NotifCard({ notif, onRead }: { notif: AppNotification; onRead: (id: str
         ...(notif.read ? {} : shadow.sm),
       })}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-        <View style={{ width: 22, height: 22, borderRadius: 8, backgroundColor: cfg.bg, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: C.border }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 6,
+          marginBottom: 6,
+        }}
+      >
+        <View
+          style={{
+            width: 22,
+            height: 22,
+            borderRadius: 8,
+            backgroundColor: cfg.bg,
+            alignItems: "center",
+            justifyContent: "center",
+            borderWidth: 1.5,
+            borderColor: C.border,
+          }}
+        >
           <Icon name={cfg.icon} size={12} color={cfg.color} />
         </View>
         <AppText variant="caption" color={C.outline} style={{ flex: 1 }}>
           {timeAgo(notif.created_at)}
         </AppText>
         {!notif.read && (
-          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: C.primaryContainer, borderWidth: 1.5, borderColor: C.border }} />
+          <View
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 4,
+              backgroundColor: C.primaryContainer,
+              borderWidth: 1.5,
+              borderColor: C.border,
+            }}
+          />
         )}
       </View>
 
@@ -111,7 +178,7 @@ export interface NotificationsHandle {
 export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
   const { C } = useTheme();
   const sheetRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => ['70%'], []);
+  const snapPoints = useMemo(() => ["70%"], []);
 
   const notifsQ = useNotifications();
   const markRead = useMarkNotificationRead();
@@ -160,26 +227,39 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
       {/* Header */}
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
           paddingHorizontal: 20,
           paddingBottom: 12,
           borderBottomWidth: 2,
           borderBottomColor: C.outlineVariant,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           <AppText variant="heading">Notificaciones</AppText>
           {unreadCount > 0 && (
-            <View style={{ paddingHorizontal: 7, paddingVertical: 1, borderRadius: 99, backgroundColor: C.primaryContainer, borderWidth: 2, borderColor: C.border }}>
-              <AppText variant="caption" style={{ fontSize: 12 }}>{unreadCount}</AppText>
+            <View
+              style={{
+                paddingHorizontal: 7,
+                paddingVertical: 1,
+                borderRadius: 99,
+                backgroundColor: C.primaryContainer,
+                borderWidth: 2,
+                borderColor: C.border,
+              }}
+            >
+              <AppText variant="caption" style={{ fontSize: 12 }}>
+                {unreadCount}
+              </AppText>
             </View>
           )}
         </View>
         {unreadCount > 0 && (
           <Pressable onPress={() => markAll.mutate()} hitSlop={8}>
-            <AppText variant="label" color={C.primary}>Marcar todas</AppText>
+            <AppText variant="label" color={C.primary}>
+              Marcar todas
+            </AppText>
           </Pressable>
         )}
       </View>
@@ -194,7 +274,7 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
             <ActivityIndicator color={C.primary} />
           </View>
         ) : notifs.length === 0 ? (
-          <View style={{ alignItems: 'center', paddingVertical: 32, gap: 8 }}>
+          <View style={{ alignItems: "center", paddingVertical: 32, gap: 8 }}>
             <Icon name="bell-outline" size={32} color={C.outlineVariant} />
             <AppText variant="bodySm" color={C.outline} align="center">
               No tienes notificaciones todavía.
@@ -204,13 +284,23 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
           <>
             <View style={{ gap: 12 }}>
               {unread.map((n) => (
-                <NotifCard key={n.id} notif={n} onRead={(id) => markRead.mutate(id)} />
+                <NotifCard
+                  key={n.id}
+                  notif={n}
+                  onRead={(id) => markRead.mutate(id)}
+                />
               ))}
             </View>
-            {unread.length > 0 && read.length > 0 && <DottedDivider label="ANTERIORES" />}
+            {unread.length > 0 && read.length > 0 && (
+              <DottedDivider label="ANTERIORES" />
+            )}
             <View style={{ gap: 12 }}>
               {read.map((n) => (
-                <NotifCard key={n.id} notif={n} onRead={(id) => markRead.mutate(id)} />
+                <NotifCard
+                  key={n.id}
+                  notif={n}
+                  onRead={(id) => markRead.mutate(id)}
+                />
               ))}
             </View>
           </>
@@ -220,4 +310,4 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
   );
 });
 
-NotificationsSheet.displayName = 'NotificationsSheet';
+NotificationsSheet.displayName = "NotificationsSheet";

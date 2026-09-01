@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { supabase } from "@/lib/supabase";
+import { useQuery } from "@tanstack/react-query";
 
 export type NearbyRestaurant = {
   id: string;
@@ -22,7 +22,7 @@ export function useNearby(
 ) {
   return useQuery({
     queryKey: [
-      'nearby',
+      "nearby",
       origin ? Number(origin.latitude.toFixed(4)) : null,
       origin ? Number(origin.longitude.toFixed(4)) : null,
       radiusKm,
@@ -30,7 +30,7 @@ export function useNearby(
     ],
     enabled: !!origin,
     queryFn: async (): Promise<NearbyRestaurant[]> => {
-      const { data, error } = await supabase.rpc('nearby_restaurants', {
+      const { data, error } = await supabase.rpc("nearby_restaurants", {
         user_lat: origin!.latitude,
         user_lng: origin!.longitude,
         radius_km: radiusKm,
@@ -45,12 +45,12 @@ export function useNearby(
 // The RPC does not return categories; this builds restaurant_id -> icon.
 export function useRestaurantIcons() {
   return useQuery({
-    queryKey: ['restaurant-icons'],
+    queryKey: ["restaurant-icons"],
     staleTime: 5 * 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('restaurant_categories')
-        .select('restaurant_id, categories ( icon )');
+        .from("restaurant_categories")
+        .select("restaurant_id, categories ( icon )");
       if (error) throw error;
       const m = new Map<string, string>();
       for (const row of (data ?? []) as any[]) {

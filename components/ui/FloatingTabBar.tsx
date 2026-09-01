@@ -1,11 +1,11 @@
-import * as Haptics from "expo-haptics";
+import { AppText } from "@/components/ui/AppText";
+import { Icon } from "@/components/ui/Icon";
+import { useTheme } from "@/lib/ThemeContext";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import * as Haptics from "expo-haptics";
 import { useEffect, useRef } from "react";
 import { Animated, Platform, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Icon } from "@/components/ui/Icon";
-import { AppText } from "@/components/ui/AppText";
-import { useTheme } from "@/lib/ThemeContext";
 
 /**
  * Shared neo-brutalist floating tab bar. The active tab expands into a
@@ -39,15 +39,27 @@ function TabItem({
     <Pressable
       onPress={() => {
         if (!focused && Platform.OS !== "web") {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+            () => {},
+          );
         }
         onPress();
       }}
       onPressIn={() =>
-        Animated.spring(press, { toValue: 0.92, useNativeDriver: false, damping: 15, stiffness: 300 }).start()
+        Animated.spring(press, {
+          toValue: 0.92,
+          useNativeDriver: false,
+          damping: 15,
+          stiffness: 300,
+        }).start()
       }
       onPressOut={() =>
-        Animated.spring(press, { toValue: 1, useNativeDriver: false, damping: 15, stiffness: 300 }).start()
+        Animated.spring(press, {
+          toValue: 1,
+          useNativeDriver: false,
+          damping: 15,
+          stiffness: 300,
+        }).start()
       }
       hitSlop={6}
     >
@@ -57,14 +69,22 @@ function TabItem({
           alignItems: "center",
           gap: focused ? 6 : 0,
           height: 44,
-          paddingHorizontal: anim.interpolate({ inputRange: [0, 1], outputRange: [12, 16] }),
+          paddingHorizontal: anim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [12, 16],
+          }),
           borderRadius: 22,
           borderWidth: focused ? 2 : 0,
           borderColor: focused ? C.border : "transparent",
           backgroundColor: focused ? C.primaryFixed : "transparent",
           transform: [
             { scale: press },
-            { translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [0, -2] }) },
+            {
+              translateY: anim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, -2],
+              }),
+            },
           ],
           ...(focused ? shadow.primary : {}),
         }}

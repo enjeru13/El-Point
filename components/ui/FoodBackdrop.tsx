@@ -1,15 +1,40 @@
-import { useMemo, useRef, useEffect } from "react";
-import { Animated, Dimensions, Easing, View } from "react-native";
 import { Icon } from "@/components/ui/Icon";
+import { useEffect, useMemo, useRef } from "react";
+import { Animated, Dimensions, Easing, View } from "react-native";
 
 const { width: W, height: H } = Dimensions.get("window");
 
 const FOOD_ICONS = [
-  "hamburger", "pizza", "food-hot-dog", "sandwich", "croissant", "donut",
-  "cookie", "food-steak", "egg-fried", "fish", "food-apple", "cherries",
-  "carrot", "soup", "cup-soda", "beer", "glass-wine", "popcorn", "cake",
-  "candy", "fruit-grapes", "fruit-citrus", "ham", "food-drumstick",
-  "ice-cream", "ice-cream-cone", "coffee", "chef-hat", "salad", "wheat",
+  "hamburger",
+  "pizza",
+  "food-hot-dog",
+  "sandwich",
+  "croissant",
+  "donut",
+  "cookie",
+  "food-steak",
+  "egg-fried",
+  "fish",
+  "food-apple",
+  "cherries",
+  "carrot",
+  "soup",
+  "cup-soda",
+  "beer",
+  "glass-wine",
+  "popcorn",
+  "cake",
+  "candy",
+  "fruit-grapes",
+  "fruit-citrus",
+  "ham",
+  "food-drumstick",
+  "ice-cream",
+  "ice-cream-cone",
+  "coffee",
+  "chef-hat",
+  "salad",
+  "wheat",
 ] as const;
 
 // tiny seeded PRNG so the layout is stable between renders
@@ -154,7 +179,14 @@ export function FoodBackdrop({
   return (
     <View
       pointerEvents="none"
-      style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, overflow: "hidden" }}
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        overflow: "hidden",
+      }}
     >
       {layout.map((item) => (
         <FloatingIcon key={item.key} item={item} color={color} />

@@ -1,7 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { restaurantKeys } from '@/lib/queries/restaurants';
-import { uploadReviewPhoto, reviewPhotoUrl } from '@/lib/storage';
+import { restaurantKeys } from "@/lib/queries/restaurants";
+import { reviewPhotoUrl, uploadReviewPhoto } from "@/lib/storage";
+import { supabase } from "@/lib/supabase";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type ReviewAuthor = {
   id: string;
@@ -25,7 +25,7 @@ export type Review = {
 };
 
 export function reviewKeys(restaurantId: string) {
-  return ['reviews', restaurantId] as const;
+  return ["reviews", restaurantId] as const;
 }
 
 async function fetchReviews(restaurantId: string): Promise<Review[]> {
@@ -33,26 +33,26 @@ async function fetchReviews(restaurantId: string): Promise<Review[]> {
   const viewerId = userData.user?.id ?? null;
 
   const { data, error } = await supabase
-    .from('reviews')
+    .from("reviews")
     .select(
       `id, restaurant_id, rating, body, helpful_count, created_at,
        author:profiles!author_id ( id, username, full_name, avatar_url, level ),
        review_photos ( storage_path, position ),
        review_replies ( body, created_at )`,
     )
-    .eq('restaurant_id', restaurantId)
-    .order('created_at', { ascending: false });
+    .eq("restaurant_id", restaurantId)
+    .order("created_at", { ascending: false });
 
   if (error) throw error;
 
   let markedIds = new Set<string>();
   if (viewerId && data.length > 0) {
     const { data: marks } = await supabase
-      .from('review_helpful')
-      .select('review_id')
-      .eq('user_id', viewerId)
+      .from("review_helpful")
+      .select("review_id")
+      .eq("user_id", viewerId)
       .in(
-        'review_id',
+        "review_id",
         data.map((r) => r.id),
       );
     markedIds = new Set((marks ?? []).map((m) => m.review_id));
@@ -70,7 +70,10 @@ async function fetchReviews(restaurantId: string): Promise<Review[]> {
     photos: ((r.review_photos ?? []) as any[])
       .sort((a, b) => a.position - b.position)
       .map((p) => reviewPhotoUrl(p.storage_path)),
-    reply: (Array.isArray(r.review_replies) ? r.review_replies[0] : r.review_replies) ?? null,
+    reply:
+      (Array.isArray(r.review_replies)
+        ? r.review_replies[0]
+        : r.review_replies) ?? null,
   }));
 }
 
@@ -95,12 +98,18 @@ export function useSubmitReview(restaurantId: string) {
       photoUris?: string[];
     }) => {
       const { data: userData, error: userErr } = await supabase.auth.getUser();
-      if (userErr || !userData.user) throw userErr ?? new Error('No autenticado');
+      if (userErr || !userData.user)
+        throw userErr ?? new Error("No autenticado");
 
       const { data: review, error } = await supabase
-        .from('reviews')
-        .insert({ restaurant_id: restaurantId, author_id: userData.user.id, rating, body })
-        .select('id')
+        .from("reviews")
+        .insert({
+          restaurant_id: restaurantId,
+          author_id: userData.user.id,
+          rating,
+          body,
+        })
+        .select("id")
         .single();
       if (error) throw error;
 
@@ -112,20 +121,20 @@ export function useSubmitReview(restaurantId: string) {
             position: i,
           })),
         );
-        await supabase.from('review_photos').insert(rows);
+        await supabase.from("review_photos").insert(rows);
       }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: reviewKeys(restaurantId) });
       qc.invalidateQueries({ queryKey: restaurantKeys(restaurantId) });
-      qc.invalidateQueries({ queryKey: ['my-profile'] });
-      qc.invalidateQueries({ queryKey: ['my-reviews'] });
-      qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ["my-profile"] });
+      qc.invalidateQueries({ queryKey: ["my-reviews"] });
+      qc.invalidateQueries({ queryKey: ["notifications"] });
       // rating_avg changed → refresh every surface that shows it
-      qc.invalidateQueries({ queryKey: ['home-feed'] });
-      qc.invalidateQueries({ queryKey: ['favorites'] });
-      qc.invalidateQueries({ queryKey: ['nearby'] });
-      qc.invalidateQueries({ queryKey: ['restaurant-search'] });
+      qc.invalidateQueries({ queryKey: ["home-feed"] });
+      qc.invalidateQueries({ queryKey: ["favorites"] });
+      qc.invalidateQueries({ queryKey: ["nearby"] });
+      qc.invalidateQueries({ queryKey: ["restaurant-search"] });
     },
   });
 }
@@ -133,20 +142,29 @@ export function useSubmitReview(restaurantId: string) {
 export function useReplyToReview(restaurantId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ reviewId, body }: { reviewId: string; body: string }) => {
+    mutationFn: async ({
+      reviewId,
+      body,
+    }: {
+      reviewId: string;
+      body: string;
+    }) => {
       const { data: userData, error: userErr } = await supabase.auth.getUser();
-      if (userErr || !userData.user) throw userErr ?? new Error('No autenticado');
-      const { error } = await supabase
-        .from('review_replies')
-        .upsert(
-          { review_id: reviewId, author_id: userData.user.id, body: body.trim() },
-          { onConflict: 'review_id' },
-        );
+      if (userErr || !userData.user)
+        throw userErr ?? new Error("No autenticado");
+      const { error } = await supabase.from("review_replies").upsert(
+        {
+          review_id: reviewId,
+          author_id: userData.user.id,
+          body: body.trim(),
+        },
+        { onConflict: "review_id" },
+      );
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: reviewKeys(restaurantId) });
-      qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 }
@@ -154,21 +172,28 @@ export function useReplyToReview(restaurantId: string) {
 export function useToggleHelpful(restaurantId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ reviewId, marked }: { reviewId: string; marked: boolean }) => {
+    mutationFn: async ({
+      reviewId,
+      marked,
+    }: {
+      reviewId: string;
+      marked: boolean;
+    }) => {
       const { data: userData, error: userErr } = await supabase.auth.getUser();
-      if (userErr || !userData.user) throw userErr ?? new Error('No autenticado');
+      if (userErr || !userData.user)
+        throw userErr ?? new Error("No autenticado");
       const userId = userData.user.id;
 
       if (marked) {
         const { error } = await supabase
-          .from('review_helpful')
+          .from("review_helpful")
           .delete()
-          .eq('user_id', userId)
-          .eq('review_id', reviewId);
+          .eq("user_id", userId)
+          .eq("review_id", reviewId);
         if (error) throw error;
       } else {
         const { error } = await supabase
-          .from('review_helpful')
+          .from("review_helpful")
           .insert({ user_id: userId, review_id: reviewId });
         if (error) throw error;
       }

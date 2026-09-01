@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { parseHours, type Hours } from '@/lib/hours';
+import { parseHours, type Hours } from "@/lib/hours";
+import { supabase } from "@/lib/supabase";
+import { useQuery } from "@tanstack/react-query";
 
 export type RestaurantCategory = {
   slug: string;
@@ -30,19 +30,19 @@ export type RestaurantDetail = {
 };
 
 export function restaurantKeys(id: string) {
-  return ['restaurant', id] as const;
+  return ["restaurant", id] as const;
 }
 
 async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
   const { data, error } = await supabase
-    .from('restaurants')
+    .from("restaurants")
     .select(
       `id, owner_id, name, description, address, whatsapp, instagram, phone,
        price_level, logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
        rating_avg, rating_count,
        restaurant_categories ( categories ( slug, label, icon ) )`,
     )
-    .eq('id', id)
+    .eq("id", id)
     .single();
 
   if (error) throw error;
@@ -53,7 +53,7 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
 
   const { restaurant_categories, hours, ...rest } = data as any;
   return {
-    ...(rest as Omit<RestaurantDetail, 'categories' | 'hours'>),
+    ...(rest as Omit<RestaurantDetail, "categories" | "hours">),
     hours: parseHours(hours),
     categories,
   };

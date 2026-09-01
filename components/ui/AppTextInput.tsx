@@ -1,35 +1,47 @@
-import { useState } from 'react';
-import { TextInput, TextInputProps, View, ViewStyle } from 'react-native';
-import { useTheme } from '@/lib/ThemeContext';
+import { useTheme } from "@/lib/ThemeContext";
+import { useState } from "react";
+import { TextInput, TextInputProps, View, ViewStyle } from "react-native";
 
 interface Props extends TextInputProps {
   containerStyle?: ViewStyle;
   children?: React.ReactNode;
 }
 
-export function AppTextInput({ containerStyle, style, onFocus, onBlur, ...props }: Props) {
+export function AppTextInput({
+  containerStyle,
+  style,
+  onFocus,
+  onBlur,
+  ...props
+}: Props) {
   const { C } = useTheme();
   const [focused, setFocused] = useState(false);
 
   return (
     <TextInput
       {...props}
-      onFocus={e => { setFocused(true); onFocus?.(e); }}
-      onBlur={e => { setFocused(false); onBlur?.(e); }}
+      onFocus={(e) => {
+        setFocused(true);
+        onFocus?.(e);
+      }}
+      onBlur={(e) => {
+        setFocused(false);
+        onBlur?.(e);
+      }}
       style={[
         {
           flex: 1,
           fontSize: 16,
-          fontFamily: 'PlusJakartaSans_400Regular',
+          fontFamily: "PlusJakartaSans_400Regular",
           color: C.onSurface,
           padding: 0,
           margin: 0,
           includeFontPadding: false,
-          textAlignVertical: 'center',
+          textAlignVertical: "center",
         },
         style,
       ]}
-      placeholderTextColor={C.outline + '99'}
+      placeholderTextColor={C.outline + "99"}
     />
   );
 }
@@ -48,8 +60,8 @@ export function InputWrapper({
     <View
       style={[
         {
-          flexDirection: 'row',
-          alignItems: 'center',
+          flexDirection: "row",
+          alignItems: "center",
           borderRadius: 16,
           height: 56,
           paddingHorizontal: 16,

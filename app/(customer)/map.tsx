@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { Image } from 'expo-image';
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { AppText } from '@/components/ui/AppText';
 import MapView, { Callout, Circle, Marker } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -130,92 +131,65 @@ const RestaurantMarker = memo(function RestaurantMarker({
 // ─── Bottom card ──────────────────────────────────────────────────────────────
 
 function RestaurantCard({
-  restaurant, translateY, onClose, onViewProfile,
+  restaurant,
+  onViewProfile,
 }: {
-  restaurant: Restaurant | null;
-  translateY: Animated.Value;
-  onClose: () => void;
+  restaurant: Restaurant;
   onViewProfile: () => void;
 }) {
-  const { C, shadow } = useTheme();
+  const { C } = useTheme();
 
   return (
-    <Animated.View
-      pointerEvents={restaurant ? 'auto' : 'none'}
-      style={{
-        position: 'absolute', bottom: FLOATING_NAV_H + 24,
-        left: 12, right: 12,
-        transform: [{ translateY }],
-      }}
-    >
-      {restaurant && (
+    <Pressable onPress={onViewProfile} style={{ paddingHorizontal: 16, paddingBottom: 16, paddingTop: 4 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        {/* Thumbnail 58x58 */}
         <View style={{
-          backgroundColor: C.surface,
-          borderRadius: 22,
+          width: 58, height: 58, borderRadius: 14, overflow: 'hidden',
+          backgroundColor: C.primaryFixed,
+          alignItems: 'center', justifyContent: 'center',
           borderWidth: 2, borderColor: C.border,
-          ...shadow.lg,
         }}>
-          {/* Handle de cierre */}
-          <Pressable onPress={onClose} style={{ paddingTop: 10, paddingBottom: 6, alignItems: 'center' }}>
-            <View style={{ width: 32, height: 4, borderRadius: 99, backgroundColor: C.outlineVariant }} />
-          </Pressable>
-
-          {/* Fila principal */}
-          <Pressable onPress={onViewProfile} style={{ padding: 14, paddingTop: 6 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-
-              {/* Thumbnail 58x58 */}
-              <View style={{
-                width: 58, height: 58, borderRadius: 14, overflow: 'hidden',
-                backgroundColor: C.primaryFixed,
-                alignItems: 'center', justifyContent: 'center',
-                borderWidth: 2, borderColor: C.border,
-              }}>
-                {restaurant.cover_url || restaurant.logo_url ? (
-                  <Image source={{ uri: (restaurant.cover_url ?? restaurant.logo_url)! }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={150} />
-                ) : (
-                  <Icon name={restaurant.icon} size={28} color={C.onSurface} style={{ opacity: 0.65 }} />
-                )}
-              </View>
-
-              {/* Info */}
-              <View style={{ flex: 1, paddingHorizontal: 12 }}>
-                <AppText variant="heading" style={{ fontSize: 17, lineHeight: 21 }} numberOfLines={1}>
-                  {restaurant.name}
-                </AppText>
-                <AppText variant="caption" color={C.onSurfaceVariant}>
-                  {[priceLabel(restaurant.price_level), restaurant.distanceLabel].filter(Boolean).join(' · ')}
-                </AppText>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
-                  {[1,2,3,4,5].map(i => (
-                    <Icon
-                      key={i}
-                      name={i <= Math.round(restaurant.rating_avg) ? 'star' : 'star-outline'}
-                      size={13}
-                      color={C.secondary}
-                    />
-                  ))}
-                  <AppText variant="caption" style={{ marginLeft: 4 }}>
-                    {restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : 'Sin ranks'}
-                  </AppText>
-                </View>
-              </View>
-
-              {/* Flecha */}
-              <View style={{
-                width: 40, height: 40, borderRadius: 20,
-                backgroundColor: C.primary,
-                alignItems: 'center', justifyContent: 'center',
-                borderWidth: 2, borderColor: C.border,
-              }}>
-                <Icon name="arrow-right" size={20} color={C.onPrimary} />
-              </View>
-
-            </View>
-          </Pressable>
+          {restaurant.cover_url || restaurant.logo_url ? (
+            <Image source={{ uri: (restaurant.cover_url ?? restaurant.logo_url)! }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={150} />
+          ) : (
+            <Icon name={restaurant.icon} size={28} color={C.onSurface} style={{ opacity: 0.65 }} />
+          )}
         </View>
-      )}
-    </Animated.View>
+
+        {/* Info */}
+        <View style={{ flex: 1, paddingHorizontal: 12 }}>
+          <AppText variant="heading" style={{ fontSize: 17, lineHeight: 21 }} numberOfLines={1}>
+            {restaurant.name}
+          </AppText>
+          <AppText variant="caption" color={C.onSurfaceVariant}>
+            {[priceLabel(restaurant.price_level), restaurant.distanceLabel].filter(Boolean).join(' · ')}
+          </AppText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
+            {[1,2,3,4,5].map(i => (
+              <Icon
+                key={i}
+                name={i <= Math.round(restaurant.rating_avg) ? 'star' : 'star-outline'}
+                size={13}
+                color={C.secondary}
+              />
+            ))}
+            <AppText variant="caption" style={{ marginLeft: 4 }}>
+              {restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : 'Sin ranks'}
+            </AppText>
+          </View>
+        </View>
+
+        {/* Flecha */}
+        <View style={{
+          width: 40, height: 40, borderRadius: 20,
+          backgroundColor: C.primary,
+          alignItems: 'center', justifyContent: 'center',
+          borderWidth: 2, borderColor: C.border,
+        }}>
+          <Icon name="arrow-right" size={20} color={C.onPrimary} />
+        </View>
+      </View>
+    </Pressable>
   );
 }
 
@@ -233,10 +207,11 @@ export default function MapScreen() {
   const [search, setSearch]                 = useState('');
   const [locLoading, setLocLoading]         = useState(false);
 
-  const sheetY   = useRef(new Animated.Value(400)).current;
+  const sheetRef = useRef<BottomSheet>(null);
   const gpsY     = useRef(new Animated.Value(0)).current;
   const pingAnim = useRef(new Animated.Value(1)).current;
   const mapRef   = useRef<MapView>(null);
+  const sheetSnap = useMemo(() => [168], []);
 
   const origin = userLocation ?? DEFAULT_ORIGIN;
   const nearbyQ = useNearby(origin, RADIUS_KM, activeCategory === 'all' ? null : activeCategory);
@@ -280,14 +255,22 @@ export default function MapScreen() {
     mapRef.current?.animateToRegion({ ...coords, latitudeDelta: 0.03, longitudeDelta: 0.03 }, 800);
   }
 
-  const CARD_HEIGHT = 220;
+  const GPS_LIFT = 168 + 24;
+
+  function liftGps(up: boolean) {
+    gpsY.stopAnimation();
+    Animated.spring(gpsY, {
+      toValue: up ? -GPS_LIFT : 0,
+      useNativeDriver: true,
+      bounciness: 4,
+      speed: 14,
+    }).start();
+  }
 
   function openSheet(r: Restaurant) {
-    sheetY.stopAnimation();
-    gpsY.stopAnimation();
     setSelected(r);
-    Animated.spring(sheetY, { toValue: 0, useNativeDriver: true, bounciness: 5, speed: 14 }).start();
-    Animated.spring(gpsY, { toValue: -(CARD_HEIGHT), useNativeDriver: true, bounciness: 5, speed: 14 }).start();
+    sheetRef.current?.snapToIndex(0);
+    liftGps(true);
     mapRef.current?.animateToRegion({
       latitude: r.lat - 0.006,
       longitude: r.lng,
@@ -297,12 +280,8 @@ export default function MapScreen() {
   }
 
   function closeSheet() {
-    sheetY.stopAnimation();
-    gpsY.stopAnimation();
-    Animated.timing(sheetY, { toValue: 400, duration: 240, easing: Easing.out(Easing.ease), useNativeDriver: true }).start(({ finished }) => {
-      if (finished) setSelected(null);
-    });
-    Animated.timing(gpsY, { toValue: 0, duration: 240, easing: Easing.out(Easing.ease), useNativeDriver: true }).start();
+    sheetRef.current?.close();
+    liftGps(false);
   }
 
   return (
@@ -411,13 +390,37 @@ export default function MapScreen() {
         </Pressable>
       </Animated.View>
 
-      {/* ── Restaurant card ── */}
-      <RestaurantCard
-        restaurant={selected}
-        translateY={sheetY}
-        onClose={closeSheet}
-        onViewProfile={() => selected && router.push(`/restaurant/${selected.id}`)}
-      />
+      {/* ── Restaurant card (bottom sheet) ── */}
+      <BottomSheet
+        ref={sheetRef}
+        index={-1}
+        snapPoints={sheetSnap}
+        detached
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        bottomInset={FLOATING_NAV_H + 24}
+        style={{ marginHorizontal: 12 }}
+        onClose={() => {
+          setSelected(null);
+          liftGps(false);
+        }}
+        handleIndicatorStyle={{ backgroundColor: C.outlineVariant, width: 32 }}
+        backgroundStyle={{
+          backgroundColor: C.surface,
+          borderRadius: 22,
+          borderWidth: 2,
+          borderColor: C.border,
+        }}
+      >
+        <BottomSheetView>
+          {selected && (
+            <RestaurantCard
+              restaurant={selected}
+              onViewProfile={() => router.push(`/restaurant/${selected.id}`)}
+            />
+          )}
+        </BottomSheetView>
+      </BottomSheet>
     </View>
   );
 }

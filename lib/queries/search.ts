@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import type { RestaurantCategory } from '@/lib/queries/restaurants';
-import { parseHours, type Hours } from '@/lib/hours';
+import { parseHours, type Hours } from "@/lib/hours";
+import type { RestaurantCategory } from "@/lib/queries/restaurants";
+import { supabase } from "@/lib/supabase";
+import { useQuery } from "@tanstack/react-query";
 
 export type SearchResult = {
   id: string;
@@ -17,12 +17,12 @@ export type SearchResult = {
 
 async function fetchActiveRestaurants(): Promise<SearchResult[]> {
   const { data, error } = await supabase
-    .from('restaurants')
+    .from("restaurants")
     .select(
       `id, name, address, price_level, rating_avg, rating_count, cover_url, hours,
        restaurant_categories ( categories ( slug, label, icon ) )`,
     )
-    .eq('is_active', true);
+    .eq("is_active", true);
 
   if (error) throw error;
 
@@ -35,14 +35,16 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
     rating_count: r.rating_count,
     cover_url: r.cover_url ?? null,
     hours: parseHours(r.hours),
-    categories: (r.restaurant_categories ?? []).map((rc: any) => rc.categories).filter(Boolean),
+    categories: (r.restaurant_categories ?? [])
+      .map((rc: any) => rc.categories)
+      .filter(Boolean),
   }));
 }
 
 // Small-city dataset: fetch active restaurants once, filter/sort on the client.
 export function useRestaurantSearch() {
   return useQuery({
-    queryKey: ['restaurant-search'],
+    queryKey: ["restaurant-search"],
     queryFn: fetchActiveRestaurants,
     staleTime: 2 * 60_000,
   });

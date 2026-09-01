@@ -1,7 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import type { RestaurantCategory } from '@/lib/queries/restaurants';
-import { parseHours, type Hours } from '@/lib/hours';
+import { parseHours, type Hours } from "@/lib/hours";
+import type { RestaurantCategory } from "@/lib/queries/restaurants";
+import { supabase } from "@/lib/supabase";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type OwnerRestaurant = {
   id: string;
@@ -24,7 +24,7 @@ export type OwnerRestaurant = {
   categories: RestaurantCategory[];
 };
 
-export const ownerRestaurantKey = ['owner-restaurant'] as const;
+export const ownerRestaurantKey = ["owner-restaurant"] as const;
 
 async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
   const { data: userData } = await supabase.auth.getUser();
@@ -32,15 +32,15 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
   if (!uid) return null;
 
   const { data, error } = await supabase
-    .from('restaurants')
+    .from("restaurants")
     .select(
       `id, name, description, address, phone, whatsapp, instagram, price_level,
        logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
        rating_avg, rating_count, created_at,
        restaurant_categories ( categories ( slug, label, icon ) )`,
     )
-    .eq('owner_id', uid)
-    .order('created_at', { ascending: true })
+    .eq("owner_id", uid)
+    .order("created_at", { ascending: true })
     .limit(1)
     .maybeSingle();
 
@@ -49,9 +49,11 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
 
   const { restaurant_categories, hours, ...rest } = data as any;
   return {
-    ...(rest as Omit<OwnerRestaurant, 'categories' | 'hours'>),
+    ...(rest as Omit<OwnerRestaurant, "categories" | "hours">),
     hours: parseHours(hours),
-    categories: (restaurant_categories ?? []).map((rc: any) => rc.categories).filter(Boolean),
+    categories: (restaurant_categories ?? [])
+      .map((rc: any) => rc.categories)
+      .filter(Boolean),
   };
 }
 
@@ -79,8 +81,11 @@ export function useUpdateMyRestaurant(restaurantId: string | undefined) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (patch: OwnerRestaurantPatch) => {
-      if (!restaurantId) throw new Error('Sin restaurante');
-      const { error } = await supabase.from('restaurants').update(patch).eq('id', restaurantId);
+      if (!restaurantId) throw new Error("Sin restaurante");
+      const { error } = await supabase
+        .from("restaurants")
+        .update(patch)
+        .eq("id", restaurantId);
       if (error) throw error;
     },
     onSuccess: () => {

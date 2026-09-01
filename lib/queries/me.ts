@@ -1,9 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { supabase } from "@/lib/supabase";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type MyProfile = {
   id: string;
-  role: 'customer' | 'restaurant_owner';
+  role: "customer" | "restaurant_owner";
   username: string | null;
   full_name: string | null;
   avatar_url: string | null;
@@ -22,9 +22,11 @@ async function fetchMyProfile(): Promise<MyProfile | null> {
   if (!uid) return null;
 
   const { data, error } = await supabase
-    .from('profiles')
-    .select('id, role, username, full_name, avatar_url, bio, level, xp, search_radius_km, settings, favorite_categories, created_at')
-    .eq('id', uid)
+    .from("profiles")
+    .select(
+      "id, role, username, full_name, avatar_url, bio, level, xp, search_radius_km, settings, favorite_categories, created_at",
+    )
+    .eq("id", uid)
     .maybeSingle();
 
   if (error) throw error;
@@ -37,7 +39,7 @@ async function fetchMyProfile(): Promise<MyProfile | null> {
 }
 
 export function useMyProfile() {
-  return useQuery({ queryKey: ['my-profile'], queryFn: fetchMyProfile });
+  return useQuery({ queryKey: ["my-profile"], queryFn: fetchMyProfile });
 }
 
 export function useUpdateSettings() {
@@ -45,23 +47,31 @@ export function useUpdateSettings() {
   return useMutation({
     mutationFn: async (patch: Record<string, boolean>) => {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error('No autenticado');
-      const current = qc.getQueryData<MyProfile | null>(['my-profile'])?.settings ?? {};
+      if (!userData.user) throw new Error("No autenticado");
+      const current =
+        qc.getQueryData<MyProfile | null>(["my-profile"])?.settings ?? {};
       const merged = { ...current, ...patch };
-      const { error } = await supabase.from('profiles').update({ settings: merged }).eq('id', userData.user.id);
+      const { error } = await supabase
+        .from("profiles")
+        .update({ settings: merged })
+        .eq("id", userData.user.id);
       if (error) throw error;
       return merged;
     },
     onMutate: async (patch) => {
-      await qc.cancelQueries({ queryKey: ['my-profile'] });
-      const prev = qc.getQueryData<MyProfile | null>(['my-profile']);
-      if (prev) qc.setQueryData(['my-profile'], { ...prev, settings: { ...prev.settings, ...patch } });
+      await qc.cancelQueries({ queryKey: ["my-profile"] });
+      const prev = qc.getQueryData<MyProfile | null>(["my-profile"]);
+      if (prev)
+        qc.setQueryData(["my-profile"], {
+          ...prev,
+          settings: { ...prev.settings, ...patch },
+        });
       return { prev };
     },
     onError: (_e, _p, ctx) => {
-      if (ctx?.prev) qc.setQueryData(['my-profile'], ctx.prev);
+      if (ctx?.prev) qc.setQueryData(["my-profile"], ctx.prev);
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: ['my-profile'] }),
+    onSettled: () => qc.invalidateQueries({ queryKey: ["my-profile"] }),
   });
 }
 
@@ -77,15 +87,19 @@ export function useUpdateMyProfile() {
   return useMutation({
     mutationFn: async (patch: MyProfilePatch) => {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error('No autenticado');
-      const { error } = await supabase.from('profiles').update(patch).eq('id', userData.user.id);
+      if (!userData.user) throw new Error("No autenticado");
+      const { error } = await supabase
+        .from("profiles")
+        .update(patch)
+        .eq("id", userData.user.id);
       if (error) {
-        if (error.code === '23505') throw new Error('Ese nombre de usuario ya está en uso.');
+        if (error.code === "23505")
+          throw new Error("Ese nombre de usuario ya está en uso.");
         throw error;
       }
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['my-profile'] });
+      qc.invalidateQueries({ queryKey: ["my-profile"] });
     },
   });
 }
@@ -104,15 +118,15 @@ async function fetchMyReviews(): Promise<MyReview[]> {
   if (!uid) return [];
 
   const { data, error } = await supabase
-    .from('reviews')
+    .from("reviews")
     .select(
       `id, rating, body, created_at,
        restaurant:restaurants!restaurant_id (
          id, name, restaurant_categories ( categories ( icon ) )
        )`,
     )
-    .eq('author_id', uid)
-    .order('created_at', { ascending: false });
+    .eq("author_id", uid)
+    .order("created_at", { ascending: false });
 
   if (error) throw error;
 
@@ -125,20 +139,24 @@ async function fetchMyReviews(): Promise<MyReview[]> {
       ? {
           id: r.restaurant.id,
           name: r.restaurant.name,
-          icon: r.restaurant.restaurant_categories?.[0]?.categories?.icon ?? 'silverware-fork-knife',
+          icon:
+            r.restaurant.restaurant_categories?.[0]?.categories?.icon ??
+            "silverware-fork-knife",
         }
       : null,
   }));
 }
 
 export function useMyReviews() {
-  return useQuery({ queryKey: ['my-reviews'], queryFn: fetchMyReviews });
+  return useQuery({ queryKey: ["my-reviews"], queryFn: fetchMyReviews });
 }
 
 // Quadratic curve — mirrors the DB functions.
 //   xpForLevel(L) = 50 * (L-1)^2 ;  levelForXp(xp) = floor(sqrt(xp/50)) + 1
-export const xpForLevel = (level: number) => 50 * Math.pow(Math.max(1, level) - 1, 2);
-export const levelForXp = (xp: number) => Math.max(1, Math.floor(Math.sqrt(Math.max(0, xp) / 50)) + 1);
+export const xpForLevel = (level: number) =>
+  50 * Math.pow(Math.max(1, level) - 1, 2);
+export const levelForXp = (xp: number) =>
+  Math.max(1, Math.floor(Math.sqrt(Math.max(0, xp) / 50)) + 1);
 
 export function levelProgress(level: number, xp: number) {
   const floor = xpForLevel(level);
@@ -148,12 +166,12 @@ export function levelProgress(level: number, xp: number) {
 }
 
 export const RANKS = [
-  { max: 3, name: 'Novato' },
-  { max: 8, name: 'Comensal' },
-  { max: 15, name: 'Explorador' },
-  { max: 24, name: 'Crítico Local' },
-  { max: 34, name: 'Gurú Gastronómico' },
-  { max: Infinity, name: 'Leyenda' },
+  { max: 3, name: "Novato" },
+  { max: 8, name: "Comensal" },
+  { max: 15, name: "Explorador" },
+  { max: 24, name: "Crítico Local" },
+  { max: 34, name: "Gurú Gastronómico" },
+  { max: Infinity, name: "Leyenda" },
 ] as const;
 
 export function rankForLevel(level: number): string {

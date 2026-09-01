@@ -253,10 +253,17 @@ export default function RegisterScreen() {
               </View>
 
               {/* Grid 2 columnas */}
-              <View className="flex-row flex-wrap gap-3">
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-between',
+                  rowGap: 12,
+                }}
+              >
                 {categoriesQ.isLoading &&
                   Array.from({ length: 8 }).map((_, i) => (
-                    <Skeleton key={i} width="47%" height={116} radius={24} />
+                    <Skeleton key={i} width="48%" height={116} radius={24} style={{ marginBottom: 0 }} />
                   ))}
                 {(categoriesQ.data ?? []).map(cat => {
                   const isSelected = selected.has(cat.id);
@@ -266,7 +273,7 @@ export default function RegisterScreen() {
                       onPress={() => toggleCategory(cat.id)}
                       className="items-center py-5 px-3 rounded-3xl border-2 gap-2"
                       style={{
-                        width: '47%',
+                        width: '48%',
                         borderColor: isSelected ? C.secondary : C.outlineVariant,
                         backgroundColor: isSelected ? C.secondaryContainer : C.surface,
                         ...(isSelected ? shadow.md : {}),

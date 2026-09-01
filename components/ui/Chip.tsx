@@ -1,6 +1,6 @@
-import { Pressable, Text, View } from 'react-native';
-import { Icon } from '@/components/ui/Icon';
-import { useTheme } from '@/lib/ThemeContext';
+import { Icon } from "@/components/ui/Icon";
+import { useTheme } from "@/lib/ThemeContext";
+import { Pressable, Text, View } from "react-native";
 
 /** Selectable pill — category / filter chips. */
 export function Chip({
@@ -8,22 +8,22 @@ export function Chip({
   active,
   onPress,
   icon,
-  tone = 'primary',
+  tone = "primary",
 }: {
   label: string;
   active: boolean;
   onPress: () => void;
   icon?: string;
-  tone?: 'primary' | 'secondary';
+  tone?: "primary" | "secondary";
 }) {
   const { C, shadow } = useTheme();
-  const activeBg = tone === 'secondary' ? C.secondary : C.primary;
+  const activeBg = tone === "secondary" ? C.secondary : C.primary;
   return (
     <Pressable
       onPress={onPress}
       style={{
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         gap: 6,
         paddingHorizontal: 14,
         paddingVertical: 8,
@@ -31,15 +31,21 @@ export function Chip({
         borderWidth: 2,
         borderColor: active ? C.border : C.outlineVariant,
         backgroundColor: active ? activeBg : C.surface,
-        ...(active ? (tone === 'secondary' ? shadow.sm : shadow.primary) : {}),
+        ...(active ? (tone === "secondary" ? shadow.sm : shadow.primary) : {}),
       }}
     >
-      {icon && <Icon name={icon} size={15} color={active ? '#fff' : C.onSurfaceVariant} />}
+      {icon && (
+        <Icon
+          name={icon}
+          size={15}
+          color={active ? "#fff" : C.onSurfaceVariant}
+        />
+      )}
       <Text
         style={{
-          fontFamily: 'PlusJakartaSans_700Bold',
+          fontFamily: "PlusJakartaSans_700Bold",
           fontSize: 13,
-          color: active ? '#fff' : C.onSurface,
+          color: active ? "#fff" : C.onSurface,
         }}
       >
         {label}
@@ -49,7 +55,13 @@ export function Chip({
 }
 
 /** Non-interactive tag. */
-export function Tag({ label, tone = 'neutral' }: { label: string; tone?: 'neutral' | 'accent' }) {
+export function Tag({
+  label,
+  tone = "neutral",
+}: {
+  label: string;
+  tone?: "neutral" | "accent";
+}) {
   const { C } = useTheme();
   return (
     <View
@@ -59,10 +71,16 @@ export function Tag({ label, tone = 'neutral' }: { label: string; tone?: 'neutra
         borderRadius: 99,
         borderWidth: 2,
         borderColor: C.border,
-        backgroundColor: tone === 'accent' ? C.secondaryContainer : C.surface,
+        backgroundColor: tone === "accent" ? C.secondaryContainer : C.surface,
       }}
     >
-      <Text style={{ fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: C.onSurface }}>
+      <Text
+        style={{
+          fontFamily: "PlusJakartaSans_700Bold",
+          fontSize: 12,
+          color: C.onSurface,
+        }}
+      >
         {label}
       </Text>
     </View>

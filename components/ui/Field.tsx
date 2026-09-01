@@ -1,4 +1,6 @@
-import { ReactNode, useState } from 'react';
+import { Icon } from "@/components/ui/Icon";
+import { useTheme } from "@/lib/ThemeContext";
+import { ReactNode, useState } from "react";
 import {
   Pressable,
   StyleProp,
@@ -7,9 +9,7 @@ import {
   TextInputProps,
   View,
   ViewStyle,
-} from 'react-native';
-import { Icon } from '@/components/ui/Icon';
-import { useTheme } from '@/lib/ThemeContext';
+} from "react-native";
 
 type FieldProps = {
   label?: string;
@@ -48,7 +48,7 @@ export function Field({
         <Text
           style={{
             color: C.onSurfaceVariant,
-            fontFamily: 'PlusJakartaSans_600SemiBold',
+            fontFamily: "PlusJakartaSans_600SemiBold",
             fontSize: 14,
             marginLeft: 4,
           }}
@@ -59,8 +59,8 @@ export function Field({
 
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: multiline ? 'flex-start' : 'center',
+          flexDirection: "row",
+          alignItems: multiline ? "flex-start" : "center",
           gap: 10,
           borderRadius: 16,
           borderWidth: 2,
@@ -96,10 +96,10 @@ export function Field({
             {
               flex: 1,
               paddingVertical: multiline ? 0 : 14,
-              fontFamily: 'PlusJakartaSans_400Regular',
+              fontFamily: "PlusJakartaSans_400Regular",
               fontSize: 15,
               color: C.onSurface,
-              textAlignVertical: multiline ? 'top' : 'center',
+              textAlignVertical: multiline ? "top" : "center",
               includeFontPadding: false,
             },
             style,
@@ -107,7 +107,11 @@ export function Field({
         />
         {secure && (
           <Pressable onPress={() => setShow((v) => !v)} hitSlop={8}>
-            <Icon name={show ? 'eye-off-outline' : 'eye-outline'} size={20} color={C.outline} />
+            <Icon
+              name={show ? "eye-off-outline" : "eye-outline"}
+              size={20}
+              color={C.outline}
+            />
           </Pressable>
         )}
         {right}
@@ -117,7 +121,7 @@ export function Field({
         <Text
           style={{
             color: error ? C.error : C.outline,
-            fontFamily: 'PlusJakartaSans_400Regular',
+            fontFamily: "PlusJakartaSans_400Regular",
             fontSize: 13,
             marginLeft: 4,
           }}

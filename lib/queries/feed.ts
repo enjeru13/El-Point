@@ -1,6 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import type { RestaurantCategory } from '@/lib/queries/restaurants';
+import type { RestaurantCategory } from "@/lib/queries/restaurants";
+import { supabase } from "@/lib/supabase";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type FeedRestaurant = {
   id: string;
@@ -35,7 +35,7 @@ function mapCategories(rc: any): RestaurantCategory[] {
 
 async function fetchFeed(): Promise<FeedItem[]> {
   const { data, error } = await supabase
-    .from('reviews')
+    .from("reviews")
     .select(
       `id, rating, body, created_at,
        restaurant:restaurants (
@@ -44,7 +44,7 @@ async function fetchFeed(): Promise<FeedItem[]> {
        ),
        author:profiles!author_id ( username, full_name, avatar_url, level )`,
     )
-    .order('created_at', { ascending: false })
+    .order("created_at", { ascending: false })
     .limit(60);
 
   if (error) throw error;
@@ -79,7 +79,7 @@ async function fetchFeed(): Promise<FeedItem[]> {
 }
 
 export function useHomeFeed() {
-  return useQuery({ queryKey: ['home-feed'], queryFn: fetchFeed });
+  return useQuery({ queryKey: ["home-feed"], queryFn: fetchFeed });
 }
 
 // ─── Favorites ──────────────────────────────────────────────────────────────
@@ -88,7 +88,7 @@ export type FavoriteRestaurant = FeedRestaurant & { favorited_at: string };
 
 async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
   const { data, error } = await supabase
-    .from('favorites')
+    .from("favorites")
     .select(
       `created_at,
        restaurant:restaurants (
@@ -96,7 +96,7 @@ async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
          restaurant_categories ( categories ( slug, label, icon ) )
        )`,
     )
-    .order('created_at', { ascending: false });
+    .order("created_at", { ascending: false });
 
   if (error) throw error;
 
@@ -116,14 +116,16 @@ async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
 }
 
 export function useFavorites() {
-  return useQuery({ queryKey: ['favorites'], queryFn: fetchFavorites });
+  return useQuery({ queryKey: ["favorites"], queryFn: fetchFavorites });
 }
 
 export function useFavoriteIds() {
   return useQuery({
-    queryKey: ['favorite-ids'],
+    queryKey: ["favorite-ids"],
     queryFn: async () => {
-      const { data, error } = await supabase.from('favorites').select('restaurant_id');
+      const { data, error } = await supabase
+        .from("favorites")
+        .select("restaurant_id");
       if (error) throw error;
       return new Set((data ?? []).map((f) => f.restaurant_id));
     },
@@ -133,28 +135,35 @@ export function useFavoriteIds() {
 export function useToggleFavorite() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ restaurantId, favorited }: { restaurantId: string; favorited: boolean }) => {
+    mutationFn: async ({
+      restaurantId,
+      favorited,
+    }: {
+      restaurantId: string;
+      favorited: boolean;
+    }) => {
       const { data: userData, error: userErr } = await supabase.auth.getUser();
-      if (userErr || !userData.user) throw userErr ?? new Error('No autenticado');
+      if (userErr || !userData.user)
+        throw userErr ?? new Error("No autenticado");
       const userId = userData.user.id;
 
       if (favorited) {
         const { error } = await supabase
-          .from('favorites')
+          .from("favorites")
           .delete()
-          .eq('user_id', userId)
-          .eq('restaurant_id', restaurantId);
+          .eq("user_id", userId)
+          .eq("restaurant_id", restaurantId);
         if (error) throw error;
       } else {
         const { error } = await supabase
-          .from('favorites')
+          .from("favorites")
           .insert({ user_id: userId, restaurant_id: restaurantId });
         if (error) throw error;
       }
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['favorite-ids'] });
-      qc.invalidateQueries({ queryKey: ['favorites'] });
+      qc.invalidateQueries({ queryKey: ["favorite-ids"] });
+      qc.invalidateQueries({ queryKey: ["favorites"] });
     },
   });
 }
