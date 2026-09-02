@@ -385,7 +385,9 @@ export default function HomeScreen() {
   const [userLoc, setUserLoc] = useState<LatLng | null>(null);
 
   const firstName = profileQ.data?.full_name?.trim().split(/\s+/)[0];
-  const greetName = firstName || profileQ.data?.username || "Comensal";
+  const greetName = profileQ.data?.username
+    ? `@${profileQ.data.username}`
+    : firstName || "Comensal";
 
   // Distance is opt-in; never prompt from the feed — only use a grant made elsewhere.
   useEffect(() => {
