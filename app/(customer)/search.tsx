@@ -143,56 +143,70 @@ function BestMatchCard({ item, onPress }: { item: SearchResult; onPress: () => v
   );
 }
 
-function ResultCard({ item, onPress }: { item: SearchResult; onPress: () => void }) {
+function PlaceRow({ item, onPress }: { item: SearchResult; onPress: () => void }) {
   const { C, shadow } = useTheme();
+  const open = item.hours ? isOpenNow(item.hours) : null;
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
-        flex: 1, backgroundColor: C.surface,
-        borderRadius: 20, overflow: 'hidden',
-        borderWidth: 2, borderColor: C.border,
-        opacity: pressed ? 0.88 : 1,
+        flexDirection: 'row',
+        gap: 12,
+        padding: 10,
+        borderRadius: 18,
+        backgroundColor: C.surface,
+        borderWidth: 2,
+        borderColor: C.border,
+        opacity: pressed ? 0.9 : 1,
         ...shadow.sm,
       })}
     >
-      <View style={{ height: 100, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{
+        width: 64, height: 64, borderRadius: 14, overflow: 'hidden',
+        backgroundColor: C.primaryFixed,
+        alignItems: 'center', justifyContent: 'center',
+        borderWidth: 2, borderColor: C.border,
+      }}>
         {item.cover_url ? (
-          <Image source={{ uri: item.cover_url }} style={{ position: 'absolute', width: '100%', height: '100%' }} contentFit="cover" transition={200} />
+          <Image source={{ uri: item.cover_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={200} />
         ) : (
-          <Icon name={catIcon(item)} size={44} color={C.onSurface} style={{ opacity: 0.18 }} />
+          <Icon name={catIcon(item)} size={28} color={C.onSurface} style={{ opacity: 0.4 }} />
         )}
-        {item.hours && (
-          <View style={{ position: 'absolute', top: 8, left: 8, width: 10, height: 10, borderRadius: 5, borderWidth: 2, borderColor: '#fff', backgroundColor: isOpenNow(item.hours).open ? '#22c55e' : '#ef4444' }} />
-        )}
-        <View style={{ position: 'absolute', top: 8, right: 8 }}>
-          <StarBadgeInline rating={item.rating_avg} count={item.rating_count} />
-        </View>
       </View>
-      <View style={{ padding: 12, gap: 4 }}>
-        <AppText variant="bodyStrong" style={{ fontSize: 14 }} numberOfLines={1}>
+
+      <View style={{ flex: 1, justifyContent: 'center', gap: 2 }}>
+        <AppText variant="bodyStrong" style={{ fontSize: 15 }} numberOfLines={1}>
           {item.name}
         </AppText>
-        <AppText variant="caption" color={C.onSurfaceVariant} style={{ fontSize: 12 }}>
-          {[catLabel(item), priceLabel(item.price_level)].filter(Boolean).join(' · ')}
+        <AppText variant="caption" color={C.onSurfaceVariant}>
+          {[catLabel(item), priceLabel(item.price_level)].filter(Boolean).join('  ·  ')}
         </AppText>
-        {item.address && (
-          <AppText variant="caption" color={C.outline} style={{ fontSize: 12 }} numberOfLines={1}>
-            {item.address}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Icon name="star" size={12} color={C.secondary} />
+          <AppText variant="caption" color={C.outline}>
+            {item.rating_count > 0
+              ? `${item.rating_avg.toFixed(1)} (${item.rating_count})`
+              : 'Sin ranks'}
           </AppText>
-        )}
+          {open && (
+            <>
+              <AppText variant="caption" color={C.outlineVariant}>·</AppText>
+              <AppText variant="caption" color={open.open ? C.secondary : C.error}>
+                {open.open ? 'Abierto' : 'Cerrado'}
+              </AppText>
+            </>
+          )}
+        </View>
+      </View>
+
+      <View style={{ justifyContent: 'center' }}>
+        <Icon name="chevron-right" size={20} color={C.outline} />
       </View>
     </Pressable>
   );
 }
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
-
-function chunkPairs(list: SearchResult[]): SearchResult[][] {
-  const pairs: SearchResult[][] = [];
-  for (let i = 0; i < list.length; i += 2) pairs.push(list.slice(i, i + 2));
-  return pairs;
-}
 
 export default function SearchScreen() {
   const { C, shadow } = useTheme();
@@ -234,13 +248,13 @@ export default function SearchScreen() {
   }, [all, query, activeCat, price, sort, onlyOpen]);
 
   const popular = useMemo(
-    () => [...all].sort((a, b) => b.rating_count - a.rating_count).slice(0, 6),
+    () => [...all].sort((a, b) => b.rating_count - a.rating_count).slice(0, 8),
     [all],
   );
 
-  const best = results[0] ?? null;
-  const rest = results.slice(1);
-  const pairs = chunkPairs(rest);
+  const hasQuery = !!query.trim();
+  const best = hasQuery ? (results[0] ?? null) : null;
+  const rest = best ? results.slice(1) : results;
 
   function clear() {
     setQuery('');
@@ -383,22 +397,16 @@ export default function SearchScreen() {
       )}
 
       {searchQ.isLoading ? (
-        <View style={{ padding: 16, gap: 12 }}>
-          <Skeleton height={260} radius={24} />
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <Skeleton height={150} radius={20} style={{ flex: 1 }} />
-            <Skeleton height={150} radius={20} style={{ flex: 1 }} />
-          </View>
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <Skeleton height={150} radius={20} style={{ flex: 1 }} />
-            <Skeleton height={150} radius={20} style={{ flex: 1 }} />
-          </View>
+        <View style={{ padding: 16, gap: 10 }}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} height={88} radius={18} />
+          ))}
         </View>
       ) : searching ? (
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
-          contentContainerStyle={{ padding: 16, gap: 24, paddingBottom: 100 }}
+          contentContainerStyle={{ padding: 16, gap: 20, paddingBottom: 100 }}
         >
           {results.length === 0 ? (
             <EmptyState
@@ -417,20 +425,13 @@ export default function SearchScreen() {
                 </View>
               )}
               {rest.length > 0 && (
-                <View style={{ gap: 12 }}>
+                <View style={{ gap: 10 }}>
                   <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>
-                    Más lugares ({rest.length})
+                    {best ? `Más lugares (${rest.length})` : `${rest.length} resultado${rest.length === 1 ? '' : 's'}`}
                   </AppText>
-                  <View style={{ gap: 10 }}>
-                    {pairs.map((pair, i) => (
-                      <View key={i} style={{ flexDirection: 'row', gap: 10 }}>
-                        {pair.map(r => (
-                          <ResultCard key={r.id} item={r} onPress={() => router.push(`/restaurant/${r.id}`)} />
-                        ))}
-                        {pair.length === 1 && <View style={{ flex: 1 }} />}
-                      </View>
-                    ))}
-                  </View>
+                  {rest.map(r => (
+                    <PlaceRow key={r.id} item={r} onPress={() => router.push(`/restaurant/${r.id}`)} />
+                  ))}
                 </View>
               )}
             </>
@@ -452,13 +453,8 @@ export default function SearchScreen() {
             </AppText>
           ) : (
             <View style={{ gap: 10 }}>
-              {chunkPairs(popular).map((pair, i) => (
-                <View key={i} style={{ flexDirection: 'row', gap: 10 }}>
-                  {pair.map(r => (
-                    <ResultCard key={r.id} item={r} onPress={() => router.push(`/restaurant/${r.id}`)} />
-                  ))}
-                  {pair.length === 1 && <View style={{ flex: 1 }} />}
-                </View>
+              {popular.map(r => (
+                <PlaceRow key={r.id} item={r} onPress={() => router.push(`/restaurant/${r.id}`)} />
               ))}
             </View>
           )}
