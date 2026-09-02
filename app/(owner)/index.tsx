@@ -1,6 +1,7 @@
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
-import { Pressable, ScrollView, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { Skeleton, SkeletonList } from '@/components/ui/Skeleton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -84,6 +85,16 @@ export default function OwnerHomeScreen() {
   const restaurant = restaurantQ.data ?? null;
   const reviewsQ = useReviews(restaurant?.id ?? '');
   const reviews = reviewsQ.data ?? [];
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function onRefresh() {
+    setRefreshing(true);
+    try {
+      await Promise.all([restaurantQ.refetch(), reviewsQ.refetch()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
   const reviewsToday = reviews.filter(r => new Date(r.created_at) >= startOfToday).length;
@@ -111,12 +122,15 @@ export default function OwnerHomeScreen() {
 
   if (!restaurant) {
     return (
-      <EmptyState
-        icon="store-outline"
-        title="Todavía no tienes un local registrado"
-        actionLabel="Reintentar"
-        onAction={() => restaurantQ.refetch()}
-      />
+      <View style={{ flex: 1, backgroundColor: C.surface, justifyContent: 'center' }}>
+        <EmptyState
+          icon="store-outline"
+          title="No encontramos tu local"
+          body="Puede ser un problema de conexión. Vuelve a intentarlo."
+          actionLabel="Reintentar"
+          onAction={() => restaurantQ.refetch()}
+        />
+      </View>
     );
   }
 
@@ -140,18 +154,25 @@ export default function OwnerHomeScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: FLOATING_NAV_H + 20, gap: 20 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />
+        }
       >
 
         {/* Banner estado */}
-        <View style={{
-          padding: 16, borderRadius: 20,
-          backgroundColor: restaurant.is_active ? C.primaryFixed : C.surfaceContainerHighest,
-          borderWidth: 2, borderColor: C.border,
-          flexDirection: 'row', alignItems: 'center', gap: 14,
-          ...shadow.sm,
-        }}>
+        <Pressable
+          onPress={() => router.push('/(owner)/profile')}
+          style={({ pressed }) => ({
+            padding: 16, borderRadius: 20,
+            backgroundColor: restaurant.is_active ? C.primaryFixed : C.surfaceContainerHighest,
+            borderWidth: 2, borderColor: C.border,
+            flexDirection: 'row', alignItems: 'center', gap: 14,
+            opacity: pressed ? 0.9 : 1,
+            ...shadow.sm,
+          })}
+        >
           <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: restaurant.is_active ? C.primary : C.outline, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
-            <Icon name="store-outline" size={24} color="#fff" />
+            <Icon name={restaurant.is_active ? 'store-outline' : 'eye-off-outline'} size={24} color="#fff" />
           </View>
           <View style={{ flex: 1 }}>
             <AppText variant="bodyStrong">
@@ -161,8 +182,8 @@ export default function OwnerHomeScreen() {
               {restaurant.is_active ? 'Visible para todos los comensales' : 'No aparece en el mapa ni en búsquedas'}
             </AppText>
           </View>
-          <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: restaurant.is_active ? '#22c55e' : C.outline, borderWidth: 2, borderColor: C.border }} />
-        </View>
+          <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: restaurant.is_active ? C.secondary : C.outline, borderWidth: 2, borderColor: C.border }} />
+        </Pressable>
 
         {/* Promo activa */}
         {restaurant.promo_text && (
@@ -202,15 +223,23 @@ export default function OwnerHomeScreen() {
                 key={a.label}
                 onPress={a.onPress}
                 style={({ pressed }) => ({
-                  flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8,
+                  flex: 1, alignItems: 'center', gap: 8,
                   paddingVertical: 16, borderRadius: 18,
-                  backgroundColor: C.surfaceContainerLow,
+                  backgroundColor: C.surface,
                   borderWidth: 2, borderColor: C.border,
-                  opacity: pressed ? 0.7 : 1,
+                  transform: [{ translateY: pressed ? 2 : 0 }],
+                  ...shadow.sm,
                 })}
               >
-                <Icon name={a.icon} size={22} color={C.primary} />
-                <AppText variant="caption" align="center" style={{ fontSize: 12 }}>{a.label}</AppText>
+                <View style={{
+                  width: 40, height: 40, borderRadius: 12,
+                  backgroundColor: C.primaryFixed,
+                  alignItems: 'center', justifyContent: 'center',
+                  borderWidth: 2, borderColor: C.border,
+                }}>
+                  <Icon name={a.icon} size={20} color={C.primary} />
+                </View>
+                <AppText variant="label" align="center">{a.label}</AppText>
               </Pressable>
             ))}
           </View>
@@ -218,16 +247,22 @@ export default function OwnerHomeScreen() {
 
         {/* Reseñas recientes */}
         <View style={{ gap: 12 }}>
-          <AppText variant="heading" style={{ fontSize: 17 }}>Reseñas recientes</AppText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <AppText variant="heading" style={{ fontSize: 17 }}>Reseñas recientes</AppText>
+            {reviews.length > 5 && (
+              <Pressable onPress={() => router.push(`/restaurant/${restaurant.id}`)} hitSlop={8}>
+                <AppText variant="label" color={C.primary}>Ver todas</AppText>
+              </Pressable>
+            )}
+          </View>
           {reviewsQ.isLoading ? (
             <SkeletonList count={3} kind="row" />
           ) : reviews.length === 0 ? (
-            <View style={{ alignItems: 'center', paddingVertical: 24, gap: 8 }}>
-              <Icon name="comment-text-multiple" size={32} color={C.outlineVariant} />
-              <AppText variant="bodySm" color={C.outline} align="center">
-                Aún no tienes reseñas. Comparte tu local para recibir las primeras.
-              </AppText>
-            </View>
+            <EmptyState
+              icon="comment-text-multiple"
+              title="Aún no tienes reseñas"
+              body="Comparte tu local para recibir las primeras."
+            />
           ) : (
             reviews.slice(0, 5).map(r => <ReviewRow key={r.id} review={r} />)
           )}
