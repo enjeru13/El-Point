@@ -6,19 +6,12 @@ import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/ThemeContext';
 import { THEMES, THEME_META, ThemeName } from '@/lib/themes';
 import { useMyProfile, useUpdateSettings } from '@/lib/queries/me';
+import { SETTING_DEFAULTS } from '@/lib/settings';
 import { AppText } from '@/components/ui/AppText';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 
 const THEME_NAMES = Object.keys(THEME_META) as ThemeName[];
-
-const DEFAULTS: Record<string, boolean> = {
-  // customer
-  notifRanks: true, notifReplies: true, notifLevelup: true, notifPromos: false,
-  soundEnabled: true, haptics: true, compactCards: false, showDistance: true,
-  // owner
-  notifReviews: true, notifWeekly: true,
-};
 
 function ThemeDot({ name, size = 44 }: { name: ThemeName; size?: number }) {
   const p = THEMES[name];
@@ -83,7 +76,7 @@ export default function SettingsScreen() {
   const updateSettings = useUpdateSettings();
   const isOwner = profileQ.data?.role === 'restaurant_owner';
   const saved = profileQ.data?.settings ?? {};
-  const s = (k: string) => saved[k] ?? DEFAULTS[k] ?? false;
+  const s = (k: keyof typeof SETTING_DEFAULTS) => saved[k] ?? SETTING_DEFAULTS[k];
   const set = (k: string) => (v: boolean) => updateSettings.mutate({ [k]: v });
 
   return (
@@ -169,17 +162,11 @@ export default function SettingsScreen() {
             </SectionCard>
           </View>
 
-          {/* Sonido y táctil */}
+          {/* Táctil */}
           <View style={{ gap: 10 }}>
-            <SectionLabel label="Sonido y táctil" />
+            <SectionLabel label="Táctil" />
             <SectionCard>
-              {!isOwner && (
-                <>
-                  <ToggleRow icon="volume-high" label="Sonidos de la app" value={s('soundEnabled')} onChange={set('soundEnabled')} />
-                  <Divider />
-                </>
-              )}
-              <ToggleRow icon="vibrate" label="Vibración háptica" value={s('haptics')} onChange={set('haptics')} />
+              <ToggleRow icon="vibrate" label="Vibración háptica" sublabel="Al tocar botones y acciones" value={s('haptics')} onChange={set('haptics')} />
             </SectionCard>
           </View>
 

@@ -2,9 +2,9 @@ import { AppText } from "@/components/ui/AppText";
 import { Icon } from "@/components/ui/Icon";
 import { useTheme } from "@/lib/ThemeContext";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import * as Haptics from "expo-haptics";
+import { impact } from "@/lib/haptics";
 import { useEffect, useRef } from "react";
-import { Animated, Platform, Pressable, View } from "react-native";
+import { Animated, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 /**
@@ -38,11 +38,7 @@ function TabItem({
   return (
     <Pressable
       onPress={() => {
-        if (!focused && Platform.OS !== "web") {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
-            () => {},
-          );
-        }
+        if (!focused) impact("light");
         onPress();
       }}
       onPressIn={() =>

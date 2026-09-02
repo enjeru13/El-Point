@@ -1,6 +1,6 @@
 import { Icon } from "@/components/ui/Icon";
 import { useTheme } from "@/lib/ThemeContext";
-import * as Haptics from "expo-haptics";
+import { notify } from "@/lib/haptics";
 import {
   createContext,
   useCallback,
@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Animated, Platform, Pressable, Text } from "react-native";
+import { Animated, Pressable, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type ToastKind = "success" | "error" | "info";
@@ -57,15 +57,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         damping: 16,
         stiffness: 220,
       }).start();
-      if (Platform.OS !== "web") {
-        const style =
-          kind === "error"
-            ? Haptics.NotificationFeedbackType.Error
-            : kind === "success"
-              ? Haptics.NotificationFeedbackType.Success
-              : Haptics.NotificationFeedbackType.Warning;
-        Haptics.notificationAsync(style).catch(() => {});
-      }
+      notify(kind === "error" ? "error" : kind === "success" ? "success" : "warning");
       hideTimer.current = setTimeout(dismiss, 3200);
     },
     [y, dismiss],

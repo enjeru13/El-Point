@@ -27,6 +27,7 @@ import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/query';
 import { ToastProvider } from '@/lib/toast';
 import { AppThemeProvider } from '@/lib/ThemeContext';
+import { SettingsBridge } from '@/components/SettingsBridge';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -126,6 +127,7 @@ export default function RootLayout() {
           <BottomSheetModalProvider>
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
               <ToastProvider>
+                <SettingsBridge />
                 <Slot />
               </ToastProvider>
               <StatusBar style="auto" />

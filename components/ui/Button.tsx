@@ -1,8 +1,9 @@
 import { Icon } from "@/components/ui/Icon";
 import { useTheme } from "@/lib/ThemeContext";
+import { impact } from "@/lib/haptics";
 import { useState } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
-import { ActivityIndicator, Platform, Pressable, Text } from "react-native";
+import { ActivityIndicator, Pressable, Text } from "react-native";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "md" | "sm";
@@ -56,17 +57,7 @@ export function Button({
 
   function handlePress() {
     if (off) return;
-    if (Platform.OS !== "web") {
-      try {
-        // lazily required so a missing native module can never break render
-        const Haptics = require("expo-haptics");
-        Haptics.impactAsync(
-          variant === "danger"
-            ? Haptics.ImpactFeedbackStyle.Medium
-            : Haptics.ImpactFeedbackStyle.Light,
-        ).catch(() => {});
-      } catch {}
-    }
+    impact(variant === "danger" ? "medium" : "light");
     onPress();
   }
 
