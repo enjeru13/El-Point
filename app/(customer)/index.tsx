@@ -302,6 +302,9 @@ function FavoriteRow({
   rating,
   icon,
   cover,
+  lat,
+  lng,
+  userLoc,
 }: {
   id: string;
   name: string;
@@ -309,9 +312,16 @@ function FavoriteRow({
   rating: number;
   icon: string;
   cover: string | null;
+  lat: number | null;
+  lng: number | null;
+  userLoc?: LatLng | null;
 }) {
   const { C, shadow } = useTheme();
   const router = useRouter();
+  const dist =
+    userLoc && lat != null && lng != null
+      ? fmtKm(distanceKm(userLoc, lat, lng))
+      : null;
   return (
     <Pressable
       onPress={() => router.push(`/restaurant/${id}`)}
@@ -351,11 +361,22 @@ function FavoriteRow({
         <AppText variant="bodyStrong" numberOfLines={1}>
           {name}
         </AppText>
-        {address && (
-          <AppText variant="caption" color={C.outline} numberOfLines={1}>
-            {address}
-          </AppText>
-        )}
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 1 }}>
+          {dist && (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+              <Icon name="map-marker-distance" size={11} color={C.primary} />
+              <AppText variant="caption" color={C.primary}>{dist}</AppText>
+            </View>
+          )}
+          {dist && address && (
+            <AppText variant="caption" color={C.outlineVariant}>·</AppText>
+          )}
+          {address && (
+            <AppText variant="caption" color={C.outline} numberOfLines={1} style={{ flex: 1 }}>
+              {address}
+            </AppText>
+          )}
+        </View>
       </View>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
         <Icon name="star" size={13} color={C.secondary} />
@@ -571,6 +592,9 @@ export default function HomeScreen() {
                   rating={f.rating_avg}
                   icon={f.categories[0]?.icon ?? "silverware-fork-knife"}
                   cover={f.cover_url}
+                  lat={f.lat}
+                  lng={f.lng}
+                  userLoc={userLoc}
                 />
               ))
             )

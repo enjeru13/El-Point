@@ -61,7 +61,7 @@ export function EmptyState({
           variant="secondary"
           size="sm"
           fullWidth={false}
-          style={{ marginTop: 6 }}
+          style={{ marginTop: 6, alignSelf: "center" }}
         />
       )}
     </View>
