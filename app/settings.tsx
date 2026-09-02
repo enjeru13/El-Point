@@ -175,7 +175,7 @@ export default function SettingsScreen() {
             <SectionLabel label="Cuenta" />
             <SectionCard>
               <Pressable
-                onPress={() => router.push('/(auth)/forgot-password')}
+                onPress={() => router.push('/change-password')}
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
               >
                 <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
@@ -184,6 +184,22 @@ export default function SettingsScreen() {
                 <AppText variant="bodyStrong" style={{ flex: 1 }}>Cambiar contraseña</AppText>
                 <Icon name="chevron-right" size={20} color={C.outline} />
               </Pressable>
+
+              {profileQ.data?.is_admin && (
+                <>
+                  <Divider />
+                  <Pressable
+                    onPress={() => router.push('/admin')}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
+                  >
+                    <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.error + '22', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+                      <Icon name="shield-alert-outline" size={20} color={C.error} />
+                    </View>
+                    <AppText variant="bodyStrong" style={{ flex: 1 }}>Panel de moderación</AppText>
+                    <Icon name="chevron-right" size={20} color={C.outline} />
+                  </Pressable>
+                </>
+              )}
             </SectionCard>
           </View>
 

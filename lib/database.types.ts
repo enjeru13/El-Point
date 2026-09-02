@@ -140,45 +140,54 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          banned_at: string | null
           bio: string | null
           created_at: string
           favorite_categories: number[]
           full_name: string | null
           id: string
+          is_admin: boolean
           level: number
           role: string
           search_radius_km: number
           settings: Json
+          strikes: number
           updated_at: string
           username: string | null
           xp: number
         }
         Insert: {
           avatar_url?: string | null
+          banned_at?: string | null
           bio?: string | null
           created_at?: string
           favorite_categories?: number[]
           full_name?: string | null
           id: string
+          is_admin?: boolean
           level?: number
           role?: string
           search_radius_km?: number
           settings?: Json
+          strikes?: number
           updated_at?: string
           username?: string | null
           xp?: number
         }
         Update: {
           avatar_url?: string | null
+          banned_at?: string | null
           bio?: string | null
           created_at?: string
           favorite_categories?: number[]
           full_name?: string | null
           id?: string
+          is_admin?: boolean
           level?: number
           role?: string
           search_radius_km?: number
           settings?: Json
+          strikes?: number
           updated_at?: string
           username?: string | null
           xp?: number
@@ -215,6 +224,48 @@ export type Database = {
           },
         ]
       }
+      restaurant_reports: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          reason: string
+          reporter_id: string
+          restaurant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          reason?: string
+          reporter_id: string
+          restaurant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          reason?: string
+          reporter_id?: string
+          restaurant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_reports_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurants: {
         Row: {
           address: string | null
@@ -237,7 +288,13 @@ export type Database = {
           promo_text: string | null
           rating_avg: number
           rating_count: number
+          reviewed_at: string | null
+          rif: string | null
+          status: string
+          status_reason: string | null
+          submitted_at: string
           updated_at: string
+          verification_photo_path: string | null
           whatsapp: string | null
         }
         Insert: {
@@ -261,7 +318,13 @@ export type Database = {
           promo_text?: string | null
           rating_avg?: number
           rating_count?: number
+          reviewed_at?: string | null
+          rif?: string | null
+          status?: string
+          status_reason?: string | null
+          submitted_at?: string
           updated_at?: string
+          verification_photo_path?: string | null
           whatsapp?: string | null
         }
         Update: {
@@ -285,7 +348,13 @@ export type Database = {
           promo_text?: string | null
           rating_avg?: number
           rating_count?: number
+          reviewed_at?: string | null
+          rif?: string | null
+          status?: string
+          status_reason?: string | null
+          submitted_at?: string
           updated_at?: string
+          verification_photo_path?: string | null
           whatsapp?: string | null
         }
         Relationships: [
@@ -405,6 +474,48 @@ export type Database = {
           },
         ]
       }
+      review_reports: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          reason: string
+          reporter_id: string
+          review_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          reason?: string
+          reporter_id: string
+          review_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          reason?: string
+          reporter_id?: string
+          review_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_reports_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           author_id: string
@@ -412,6 +523,8 @@ export type Database = {
           created_at: string
           helpful_count: number
           id: string
+          moderated_at: string | null
+          moderation: string
           rating: number
           restaurant_id: string
           updated_at: string
@@ -422,6 +535,8 @@ export type Database = {
           created_at?: string
           helpful_count?: number
           id?: string
+          moderated_at?: string | null
+          moderation?: string
           rating: number
           restaurant_id: string
           updated_at?: string
@@ -432,6 +547,8 @@ export type Database = {
           created_at?: string
           helpful_count?: number
           id?: string
+          moderated_at?: string | null
+          moderation?: string
           rating?: number
           restaurant_id?: string
           updated_at?: string
@@ -656,14 +773,16 @@ export type Database = {
       }
       create_owner_restaurant: {
         Args: {
-          p_address?: string
-          p_category_ids?: number[]
-          p_description?: string
-          p_instagram?: string
-          p_lat?: number
-          p_lng?: number
+          p_address: string
+          p_category_ids: number[]
+          p_description: string
+          p_instagram: string
+          p_lat: number
+          p_lng: number
           p_name: string
-          p_whatsapp?: string
+          p_rif?: string
+          p_verification_photo_path?: string
+          p_whatsapp: string
         }
         Returns: string
       }
@@ -700,6 +819,14 @@ export type Database = {
         | { Args: { table_name: string }; Returns: string }
       enablelongtransactions: { Args: never; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      evaluate_restaurant_reports: {
+        Args: { target: string }
+        Returns: undefined
+      }
+      evaluate_review_moderation: {
+        Args: { target: string }
+        Returns: undefined
+      }
       geometry: { Args: { "": string }; Returns: unknown }
       geometry_above: {
         Args: { geom1: unknown; geom2: unknown }
@@ -799,6 +926,7 @@ export type Database = {
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
       gettransactionid: { Args: never; Returns: unknown }
+      is_admin: { Args: { uid: string }; Returns: boolean }
       level_for_xp: { Args: { p_xp: number }; Returns: number }
       longtransactionsenabled: { Args: never; Returns: boolean }
       nearby_restaurants: {
@@ -865,6 +993,11 @@ export type Database = {
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
       rank_for_level: { Args: { p_level: number }; Returns: string }
+      resubmit_restaurant: {
+        Args: { p_restaurant_id: string }
+        Returns: undefined
+      }
+      send_weekly_owner_reports: { Args: never; Returns: undefined }
       st_3dclosestpoint: {
         Args: { geom1: unknown; geom2: unknown }
         Returns: unknown

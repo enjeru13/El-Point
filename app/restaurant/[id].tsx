@@ -12,12 +12,28 @@ import { useRestaurant } from "@/lib/queries/restaurants";
 import {
   useReviews,
   useSubmitReview,
+  useUpdateReview,
+  useDeleteReview,
+  useDeleteReply,
+  useReportReview,
   useToggleHelpful,
   useReplyToReview,
+  canEditReview,
+  REPORT_REASONS,
   type Review,
+  type ReportReason,
 } from "@/lib/queries/reviews";
+import {
+  useReportRestaurant,
+  RESTAURANT_REPORT_REASONS,
+  type RestaurantReportReason,
+} from "@/lib/queries/restaurants";
+import { ReportSheet, type ReportSheetHandle } from "@/components/ui/ReportSheet";
+import { whatsappUrl, instagramUrl, instagramHandle } from "@/lib/contact";
 import { useMyProfile } from "@/lib/queries/me";
+import { useFavoriteIds, useToggleFavorite } from "@/lib/queries/feed";
 import { useToast } from "@/lib/toast";
+import { impact } from "@/lib/haptics";
 import { isOpenNow, formatRange, DAY_LABELS_LONG } from "@/lib/hours";
 import { useTheme } from "@/lib/ThemeContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -30,11 +46,13 @@ import {
   useState,
 } from "react";
 import {
+  Alert,
   Animated,
   Linking,
   Pressable,
   RefreshControl,
   ScrollView,
+  Share,
   View,
 } from "react-native";
 import {
@@ -118,9 +136,10 @@ const ReviewSheet = forwardRef<
     restaurantName: string;
     submitting: boolean;
     errorMessage: string | null;
+    editing: { id: string; rating: number; body: string } | null;
     onSubmit: (rating: number, body: string, photoUris: string[]) => void;
   }
->(({ restaurantName, submitting, errorMessage, onSubmit }, ref) => {
+>(({ restaurantName, submitting, errorMessage, editing, onSubmit }, ref) => {
   const { C } = useTheme();
   const RATING_COLORS = [
     "",
@@ -144,11 +163,17 @@ const ReviewSheet = forwardRef<
 
   useImperativeHandle(ref, () => ({
     present: () => {
-      reset();
+      if (editing) {
+        setRating(editing.rating);
+        setComment(editing.body);
+        setPhotos([]);
+      } else {
+        reset();
+      }
       sheetRef.current?.present();
     },
     dismiss: () => sheetRef.current?.dismiss(),
-  }));
+  }), [editing, reset]);
 
   async function addPhotos() {
     const r = await ImagePicker.launchImageLibraryAsync({
@@ -200,7 +225,9 @@ const ReviewSheet = forwardRef<
           borderBottomColor: C.outlineVariant,
         }}
       >
-        <AppText variant="overline" color={C.onSurfaceVariant}>RANKEAR</AppText>
+        <AppText variant="overline" color={C.onSurfaceVariant}>
+          {editing ? "EDITAR TU RANK" : "RANKEAR"}
+        </AppText>
         <AppText variant="title" style={{ fontSize: 22, lineHeight: 27 }} numberOfLines={1}>
           {restaurantName}
         </AppText>
@@ -259,7 +286,7 @@ const ReviewSheet = forwardRef<
         </View>
 
         {/* Fotos */}
-        <View style={{ gap: 8 }}>
+        <View style={{ gap: 8, display: editing ? "none" : "flex" }}>
           <AppText variant="overline" color={C.onSurfaceVariant}>
             FOTOS (OPCIONAL)
           </AppText>
@@ -293,11 +320,19 @@ const ReviewSheet = forwardRef<
         )}
 
         <Button
-          label={submitting ? "Publicando…" : "Publicar Rank"}
+          label={
+            editing
+              ? submitting
+                ? "Guardando…"
+                : "Guardar cambios"
+              : submitting
+                ? "Publicando…"
+                : "Publicar Rank"
+          }
           onPress={() => onSubmit(rating, comment.trim(), photos)}
           disabled={!(rating > 0 && comment.trim().length >= 10)}
           loading={submitting}
-          icon="fire"
+          icon={editing ? "check" : "fire"}
         />
       </BottomSheetScrollView>
     </BottomSheetModal>
@@ -317,13 +352,70 @@ export default function RestaurantProfileScreen() {
   const restaurantQ = useRestaurant(id);
   const reviewsQ = useReviews(id);
   const submitReview = useSubmitReview(id);
+  const updateReview = useUpdateReview(id);
+  const deleteReview = useDeleteReview(id);
+  const deleteReply = useDeleteReply(id);
+  const reportReview = useReportReview(id);
+  const reportRestaurant = useReportRestaurant(id);
   const toggleHelpful = useToggleHelpful(id);
   const replyMut = useReplyToReview(id);
   const myProfileQ = useMyProfile();
+  const favIdsQ = useFavoriteIds();
+  const toggleFav = useToggleFavorite();
   const toast = useToast();
 
-  const [saved, setSaved] = useState(false);
+  const saved = !!id && (favIdsQ.data?.has(id) ?? false);
+  function onToggleSave() {
+    if (!id) return;
+    impact("light");
+    toggleFav.mutate(
+      { restaurantId: id, favorited: saved },
+      { onError: () => toast.error("No se pudo actualizar favoritos. ¿Iniciaste sesión?") },
+    );
+  }
+
+  async function onShare() {
+    const r = restaurantQ.data;
+    if (!r) return;
+
+    const mapsQuery = encodeURIComponent(
+      r.address ? `${r.name}, ${r.address}` : `${r.name}, San Cristóbal`,
+    );
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
+    const appUrl = `elpoint://restaurant/${r.id}`;
+
+    const cat = r.categories[0]?.label;
+    const ratingLine =
+      r.rating_count > 0
+        ? `★ ${r.rating_avg} (${r.rating_count} ${r.rating_count === 1 ? "rank" : "ranks"})${cat ? ` · ${cat}` : ""}`
+        : `Nuevo en El Point${cat ? ` · ${cat}` : ""}`;
+
+    const lines = [
+      r.name,
+      ratingLine,
+      r.address ? `📍 ${r.address}` : null,
+      "",
+      `Cómo llegar: ${mapsUrl}`,
+      `Abrir en El Point: ${appUrl}`,
+    ].filter((l) => l !== null);
+
+    try {
+      await Share.share({
+        title: `${r.name} · El Point`,
+        message: lines.join("\n"),
+        url: mapsUrl,
+      });
+    } catch {
+      // usuario canceló el diálogo
+    }
+  }
+
   const reviewSheetRef = useRef<ReviewSheetHandle>(null);
+  const reportSheetRef = useRef<ReportSheetHandle>(null);
+  const restaurantReportSheetRef = useRef<ReportSheetHandle>(null);
+  const [editingReview, setEditingReview] = useState<
+    { id: string; rating: number; body: string } | null
+  >(null);
   const [replyingId, setReplyingId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [hoursOpen, setHoursOpen] = useState(false);
@@ -408,15 +500,31 @@ export default function RestaurantProfileScreen() {
 
   const restaurant = restaurantQ.data;
   const reviews = reviewsQ.data ?? [];
+  // Distribución sólo con reseñas visibles (una oculta propia no debe sesgarla).
+  const ratedReviews = reviews.filter((r) => r.moderation === "visible");
   const isOwnerHere = !!myProfileQ.data?.id && myProfileQ.data.id === restaurant.owner_id;
   const heroIcon = restaurant.categories[0]?.icon ?? "silverware-fork-knife";
   const priceStr = priceLabel(restaurant.price_level);
   const dist = [5, 4, 3, 2, 1].map(
-    (s) => reviews.filter((r) => r.rating === s).length,
+    (s) => ratedReviews.filter((r) => r.rating === s).length,
   );
-  const totalRated = reviews.length || restaurant.rating_count;
+  const totalRated = ratedReviews.length || restaurant.rating_count;
 
   function handleSubmit(rating: number, body: string, photoUris: string[]) {
+    if (editingReview) {
+      updateReview.mutate(
+        { reviewId: editingReview.id, rating, body },
+        {
+          onSuccess: () => {
+            reviewSheetRef.current?.dismiss();
+            setEditingReview(null);
+            toast.success("Reseña actualizada");
+          },
+          onError: () => toast.error("No se pudo actualizar la reseña."),
+        },
+      );
+      return;
+    }
     submitReview.mutate(
       { rating, body, photoUris },
       {
@@ -426,6 +534,82 @@ export default function RestaurantProfileScreen() {
         },
         onError: () => toast.error("No se pudo publicar. ¿Iniciaste sesión?"),
       },
+    );
+  }
+
+  function startCreateReview() {
+    setEditingReview(null);
+    reviewSheetRef.current?.present();
+  }
+
+  function startEditReview(r: Review) {
+    setEditingReview({ id: r.id, rating: r.rating, body: r.body });
+    reviewSheetRef.current?.present();
+  }
+
+  function confirmDeleteReview(reviewId: string) {
+    Alert.alert(
+      "Eliminar reseña",
+      "Se borrará para siempre. ¿Continuar?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: () =>
+            deleteReview.mutate(reviewId, {
+              onSuccess: () => toast.success("Reseña eliminada"),
+              onError: () => toast.error("No se pudo eliminar."),
+            }),
+        },
+      ],
+    );
+  }
+
+  function handleReport(reviewId: string, reason: string, note: string) {
+    reportReview.mutate(
+      { reviewId, reason: reason as ReportReason, note },
+      {
+        onSuccess: () => {
+          reportSheetRef.current?.dismiss();
+          toast.success("Reporte enviado. Gracias por avisar.");
+        },
+        onError: (e: any) =>
+          toast.error(e?.message ?? "No se pudo enviar el reporte."),
+      },
+    );
+  }
+
+  function handleReportRestaurant(_id: string, reason: string, note: string) {
+    reportRestaurant.mutate(
+      { reason: reason as RestaurantReportReason, note },
+      {
+        onSuccess: () => {
+          restaurantReportSheetRef.current?.dismiss();
+          toast.success("Reporte enviado. Gracias por avisar.");
+        },
+        onError: (e: any) =>
+          toast.error(e?.message ?? "No se pudo enviar el reporte."),
+      },
+    );
+  }
+
+  function confirmDeleteReply(reviewId: string) {
+    Alert.alert(
+      "Eliminar respuesta",
+      "Se borrará tu respuesta a esta reseña. ¿Continuar?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: () =>
+            deleteReply.mutate(reviewId, {
+              onSuccess: () => toast.success("Respuesta eliminada"),
+              onError: () => toast.error("No se pudo eliminar."),
+            }),
+        },
+      ],
     );
   }
 
@@ -554,6 +738,39 @@ export default function RestaurantProfileScreen() {
 
         {/* ── Contenido ── */}
         <View style={{ padding: 16, gap: 20 }}>
+          {/* ── Aviso: es tu local ── */}
+          {isOwnerHere && (
+            <Pressable
+              onPress={() => router.push("/(owner)/profile")}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                padding: 12,
+                borderRadius: 16,
+                backgroundColor: C.primaryFixed,
+                borderWidth: 2,
+                borderColor: C.border,
+              }}
+            >
+              <Icon name="storefront-outline" size={18} color={C.primary} />
+              <View style={{ flex: 1 }}>
+                <AppText variant="label" color={C.primary}>
+                  Este es tu local
+                </AppText>
+                <AppText variant="caption" color={C.onSurfaceVariant}>
+                  Así es como lo ven los clientes
+                </AppText>
+              </View>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                <Icon name="pencil-outline" size={14} color={C.primary} />
+                <AppText variant="label" color={C.primary}>
+                  Editar
+                </AppText>
+              </View>
+            </Pressable>
+          )}
+
           {/* ── Promos ── */}
           {restaurant.promo_text && (
             <View
@@ -581,32 +798,34 @@ export default function RestaurantProfileScreen() {
           )}
 
           {/* ── Acciones ── */}
-          <View style={{ flexDirection: "row", gap: 10 }}>
-            <Button
-              label="Rankear"
-              onPress={() => reviewSheetRef.current?.present()}
-              icon="fire"
-              size="sm"
-              fullWidth={false}
-              style={{ flex: 2 }}
-            />
-            <Button
-              label="Ir"
-              onPress={() =>
-                restaurant.address &&
-                Linking.openURL(
-                  `https://maps.google.com/?q=${encodeURIComponent(restaurant.address)}`,
-                )
-              }
-              disabled={!restaurant.address}
-              variant="secondary"
-              icon="navigation-variant"
-              iconColor={C.secondary}
-              size="sm"
-              fullWidth={false}
-              style={{ flex: 1 }}
-            />
-          </View>
+          {!isOwnerHere && (
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Button
+                label="Rankear"
+                onPress={startCreateReview}
+                icon="fire"
+                size="sm"
+                fullWidth={false}
+                style={{ flex: 2 }}
+              />
+              <Button
+                label="Ir"
+                onPress={() =>
+                  restaurant.address &&
+                  Linking.openURL(
+                    `https://maps.google.com/?q=${encodeURIComponent(restaurant.address)}`,
+                  )
+                }
+                disabled={!restaurant.address}
+                variant="secondary"
+                icon="navigation-variant"
+                iconColor={C.secondary}
+                size="sm"
+                fullWidth={false}
+                style={{ flex: 1 }}
+              />
+            </View>
+          )}
 
           {/* ── Info ── */}
           <View
@@ -737,13 +956,9 @@ export default function RestaurantProfileScreen() {
             )}
 
             {/* WhatsApp */}
-            {restaurant.whatsapp && (
+            {whatsappUrl(restaurant.whatsapp) && (
               <Pressable
-                onPress={() =>
-                  Linking.openURL(
-                    `https://wa.me/${restaurant.whatsapp!.replace(/[^\d]/g, "")}`,
-                  )
-                }
+                onPress={() => Linking.openURL(whatsappUrl(restaurant.whatsapp)!)}
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
@@ -773,13 +988,9 @@ export default function RestaurantProfileScreen() {
             )}
 
             {/* Instagram */}
-            {restaurant.instagram && (
+            {instagramUrl(restaurant.instagram) && (
               <Pressable
-                onPress={() =>
-                  Linking.openURL(
-                    `https://instagram.com/${restaurant.instagram!.replace(/^@/, "")}`,
-                  )
-                }
+                onPress={() => Linking.openURL(instagramUrl(restaurant.instagram)!)}
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
@@ -800,9 +1011,7 @@ export default function RestaurantProfileScreen() {
                   <Icon name="instagram" size={18} color={C.tertiary} />
                 </View>
                 <AppText variant="bodyStrong" color={C.tertiary} style={{ flex: 1 }}>
-                  {restaurant.instagram.startsWith("@")
-                    ? restaurant.instagram
-                    : `@${restaurant.instagram}`}
+                  @{instagramHandle(restaurant.instagram)}
                 </AppText>
                 <Icon name="chevron-right" size={18} color={C.outline} />
               </Pressable>
@@ -897,6 +1106,15 @@ export default function RestaurantProfileScreen() {
                   Comunidad
                 </AppText>
               </View>
+              {!isOwnerHere && (
+                <Button
+                  label="Deja tu rank"
+                  onPress={startCreateReview}
+                  icon="fire"
+                  size="sm"
+                  fullWidth={false}
+                />
+              )}
             </View>
 
             {/* Rating summary */}
@@ -964,41 +1182,6 @@ export default function RestaurantProfileScreen() {
               </View>
             </View>
 
-            {/* CTA nueva reseña */}
-            <Pressable
-              onPress={() => reviewSheetRef.current?.present()}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 10,
-                padding: 14,
-                borderRadius: 16,
-                backgroundColor: C.surfaceContainerLow,
-                borderWidth: 2,
-                borderColor: C.outlineVariant,
-                borderStyle: "dashed",
-              }}
-            >
-              <View
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 18,
-                  backgroundColor: C.primaryFixed,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderWidth: 2,
-                  borderColor: C.border,
-                }}
-              >
-                <Icon name="account" size={20} color={C.primary} />
-              </View>
-              <AppText variant="body" color={C.outline} style={{ flex: 1 }}>
-                ¿Qué tal estuvo? Deja tu rank...
-              </AppText>
-              <Icon name="fire" size={20} color={C.primary} />
-            </Pressable>
-
             {/* Estado carga / vacío / lista */}
             {reviewsQ.isLoading ? (
               <View style={{ gap: 12 }}>
@@ -1036,11 +1219,21 @@ export default function RestaurantProfileScreen() {
                   color={C.outlineVariant}
                 />
                 <AppText variant="bodySm" color={C.outline} align="center">
-                  Todavía nadie rankea este lugar. Sé el primero.
+                  {isOwnerHere
+                    ? "Aún no tienes reseñas. Comparte tu local para recibir las primeras."
+                    : "Todavía nadie rankea este lugar. Sé el primero."}
                 </AppText>
               </View>
             ) : (
-              reviews.map((r) => (
+              reviews.map((r) => {
+                const isMine =
+                  !!myProfileQ.data?.id && myProfileQ.data.id === r.author?.id;
+                const reviewEdited =
+                  new Date(r.updated_at).getTime() -
+                    new Date(r.created_at).getTime() >
+                  60000;
+                const hiddenForMe = isMine && r.moderation !== "visible";
+                return (
                 <View
                   key={r.id}
                   style={{
@@ -1049,10 +1242,38 @@ export default function RestaurantProfileScreen() {
                     padding: 16,
                     gap: 12,
                     borderWidth: 2,
-                    borderColor: C.border,
+                    borderColor: hiddenForMe ? C.error : C.border,
                     ...shadow.sm,
                   }}
                 >
+                  {hiddenForMe && (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: 10,
+                        borderRadius: 12,
+                        backgroundColor: C.error + "22",
+                      }}
+                    >
+                      <Icon
+                        name={
+                          r.moderation === "removed"
+                            ? "close-circle"
+                            : "shield-alert-outline"
+                        }
+                        size={16}
+                        color={C.error}
+                      />
+                      <AppText variant="caption" color={C.error} style={{ flex: 1 }}>
+                        {r.moderation === "removed"
+                          ? "Eliminada por incumplir las normas de la comunidad. Solo tú ves esto."
+                          : "En revisión: recibimos reportes sobre esta reseña. Un moderador decidirá si se mantiene."}
+                      </AppText>
+                    </View>
+                  )}
+
                   {/* Header reviewer */}
                   <View
                     style={{
@@ -1074,6 +1295,7 @@ export default function RestaurantProfileScreen() {
                       <StarRow rating={r.rating} size={12} />
                       <AppText variant="label" color={C.outline}>
                         {timeAgo(r.created_at)}
+                        {reviewEdited ? " · editado" : ""}
                       </AppText>
                     </View>
                   </View>
@@ -1082,6 +1304,44 @@ export default function RestaurantProfileScreen() {
                   <AppText variant="body" color={C.onSurfaceVariant}>
                     {r.body}
                   </AppText>
+
+                  {/* Acciones del autor */}
+                  {isMine && (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        gap: 18,
+                        alignItems: "center",
+                      }}
+                    >
+                      {canEditReview(r) && (
+                        <Pressable
+                          onPress={() => startEditReview(r)}
+                          style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+                        >
+                          <Icon name="pencil-outline" size={15} color={C.primary} />
+                          <AppText variant="label" color={C.primary}>
+                            Editar
+                          </AppText>
+                        </Pressable>
+                      )}
+                      <Pressable
+                        onPress={() => confirmDeleteReview(r.id)}
+                        disabled={deleteReview.isPending}
+                        style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+                      >
+                        <Icon name="delete-outline" size={15} color={C.error} />
+                        <AppText variant="label" color={C.error}>
+                          Eliminar
+                        </AppText>
+                      </Pressable>
+                      {!canEditReview(r) && (
+                        <AppText variant="caption" color={C.outline} style={{ flex: 1 }}>
+                          Ya no se puede editar (pasaron 24 h)
+                        </AppText>
+                      )}
+                    </View>
+                  )}
 
                   {/* Fotos */}
                   {r.photos.length > 0 && (
@@ -1103,26 +1363,7 @@ export default function RestaurantProfileScreen() {
                   )}
 
                   {/* Respuesta del local */}
-                  {r.reply ? (
-                    <View
-                      style={{
-                        marginLeft: 12,
-                        padding: 12,
-                        borderRadius: 12,
-                        backgroundColor: C.surfaceContainerLow,
-                        borderLeftWidth: 3,
-                        borderLeftColor: C.secondary,
-                        gap: 4,
-                      }}
-                    >
-                      <AppText variant="caption" color={C.secondary} style={{ fontSize: 12 }}>
-                        RESPUESTA DEL LOCAL · {timeAgo(r.reply.created_at)}
-                      </AppText>
-                      <AppText variant="bodySm" style={{ fontSize: 14, lineHeight: 20 }}>
-                        {r.reply.body}
-                      </AppText>
-                    </View>
-                  ) : isOwnerHere && replyingId === r.id ? (
+                  {replyingId === r.id ? (
                     <View style={{ gap: 8 }}>
                       <Field
                         value={replyText}
@@ -1139,13 +1380,22 @@ export default function RestaurantProfileScreen() {
                           fullWidth={false}
                         />
                         <Button
-                          label="Enviar"
+                          label={r.reply ? "Guardar" : "Enviar"}
                           onPress={() =>
                             replyMut.mutate(
                               { reviewId: r.id, body: replyText },
                               {
-                                onSuccess: () => { setReplyingId(null); setReplyText(""); toast.success("Respuesta enviada"); },
-                                onError: () => toast.error("No se pudo enviar la respuesta"),
+                                onSuccess: () => {
+                                  setReplyingId(null);
+                                  setReplyText("");
+                                  toast.success(
+                                    r.reply
+                                      ? "Respuesta actualizada"
+                                      : "Respuesta enviada",
+                                  );
+                                },
+                                onError: () =>
+                                  toast.error("No se pudo enviar la respuesta"),
                               },
                             )
                           }
@@ -1157,6 +1407,62 @@ export default function RestaurantProfileScreen() {
                         />
                       </View>
                     </View>
+                  ) : r.reply ? (
+                    <View
+                      style={{
+                        marginLeft: 12,
+                        padding: 12,
+                        borderRadius: 12,
+                        backgroundColor: C.surfaceContainerLow,
+                        borderLeftWidth: 3,
+                        borderLeftColor: C.secondary,
+                        gap: 4,
+                      }}
+                    >
+                      <AppText variant="caption" color={C.secondary} style={{ fontSize: 12 }}>
+                        RESPUESTA DEL LOCAL · {timeAgo(r.reply.created_at)}
+                        {new Date(r.reply.updated_at).getTime() -
+                          new Date(r.reply.created_at).getTime() >
+                        60000
+                          ? " · editado"
+                          : ""}
+                      </AppText>
+                      <AppText variant="bodySm" style={{ fontSize: 14, lineHeight: 20 }}>
+                        {r.reply.body}
+                      </AppText>
+                      {isOwnerHere && (
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            gap: 18,
+                            marginTop: 4,
+                          }}
+                        >
+                          <Pressable
+                            onPress={() => {
+                              setReplyingId(r.id);
+                              setReplyText(r.reply!.body);
+                            }}
+                            style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+                          >
+                            <Icon name="pencil-outline" size={14} color={C.secondary} />
+                            <AppText variant="label" color={C.secondary}>
+                              Editar
+                            </AppText>
+                          </Pressable>
+                          <Pressable
+                            onPress={() => confirmDeleteReply(r.id)}
+                            disabled={deleteReply.isPending}
+                            style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+                          >
+                            <Icon name="delete-outline" size={14} color={C.error} />
+                            <AppText variant="label" color={C.error}>
+                              Eliminar
+                            </AppText>
+                          </Pressable>
+                        </View>
+                      )}
+                    </View>
                   ) : isOwnerHere ? (
                     <Pressable
                       onPress={() => { setReplyingId(r.id); setReplyText(""); }}
@@ -1167,38 +1473,102 @@ export default function RestaurantProfileScreen() {
                     </Pressable>
                   ) : null}
 
-                  {/* Helpful */}
-                  <Pressable
-                    onPress={() =>
-                      toggleHelpful.mutate({
-                        reviewId: r.id,
-                        marked: r.viewer_marked_helpful,
-                      })
-                    }
+                  {/* Útil + Reportar */}
+                  <View
                     style={{
                       flexDirection: "row",
                       alignItems: "center",
-                      gap: 6,
-                      alignSelf: "flex-start",
+                      justifyContent: "space-between",
+                      gap: 12,
                     }}
                   >
-                    <Icon
-                      name={
-                        r.viewer_marked_helpful
-                          ? "thumb-up"
-                          : "thumb-up-outline"
-                      }
-                      size={16}
-                      color={r.viewer_marked_helpful ? C.secondary : C.outline}
-                    />
-                    <AppText variant="label" color={r.viewer_marked_helpful ? C.secondary : C.outline}>
-                      {r.helpful_count} útil
-                    </AppText>
-                  </Pressable>
+                    {isMine ? (
+                      <AppText variant="label" color={C.outline}>
+                        {r.helpful_count > 0
+                          ? `${r.helpful_count} ${
+                              r.helpful_count === 1
+                                ? "persona la encontró útil"
+                                : "personas la encontraron útil"
+                            }`
+                          : ""}
+                      </AppText>
+                    ) : (
+                      <Pressable
+                        onPress={() => {
+                          impact("light");
+                          toggleHelpful.mutate({
+                            reviewId: r.id,
+                            marked: r.viewer_marked_helpful,
+                          });
+                        }}
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 7,
+                          paddingHorizontal: 14,
+                          paddingVertical: 8,
+                          borderRadius: 99,
+                          borderWidth: 2,
+                          borderColor: C.border,
+                          backgroundColor: r.viewer_marked_helpful
+                            ? C.secondaryContainer
+                            : C.surface,
+                          ...(r.viewer_marked_helpful ? shadow.sm : null),
+                        }}
+                      >
+                        <Icon
+                          name="thumb-up"
+                          size={16}
+                          color={r.viewer_marked_helpful ? C.secondary : C.outline}
+                          fill={r.viewer_marked_helpful ? C.secondary : undefined}
+                        />
+                        <AppText
+                          variant="label"
+                          color={r.viewer_marked_helpful ? C.secondary : C.onSurfaceVariant}
+                        >
+                          {r.viewer_marked_helpful ? "Te pareció útil" : "Marcar como útil"}
+                          {r.helpful_count > 0 ? ` · ${r.helpful_count}` : ""}
+                        </AppText>
+                      </Pressable>
+                    )}
+
+                    {!isMine && !!myProfileQ.data && (
+                      <Pressable
+                        onPress={() => reportSheetRef.current?.present(r.id)}
+                        hitSlop={8}
+                        style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+                      >
+                        <Icon name="flag-outline" size={13} color={C.outline} />
+                        <AppText variant="caption" color={C.outline}>
+                          Reportar
+                        </AppText>
+                      </Pressable>
+                    )}
+                  </View>
                 </View>
-              ))
+                );
+              })
             )}
           </View>
+
+          {!isOwnerHere && !!myProfileQ.data && (
+            <Pressable
+              onPress={() => restaurantReportSheetRef.current?.present(restaurant.id)}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                paddingVertical: 8,
+              }}
+            >
+              <Icon name="flag-outline" size={13} color={C.outline} />
+              <AppText variant="caption" color={C.outline}>
+                Reportar este local
+              </AppText>
+            </Pressable>
+          )}
         </View>
       </Animated.ScrollView>
 
@@ -1214,11 +1584,35 @@ export default function RestaurantProfileScreen() {
           paddingBottom: 8,
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "space-between",
           backgroundColor: headerBg,
           borderBottomWidth: headerBorder,
           borderBottomColor: C.outlineVariant,
         }}
       >
+        {/* Título centrado sobre todo el ancho, aparece al scrollear */}
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            left: 64,
+            right: 96,
+            top: insets.top,
+            bottom: 8,
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: titleOpacity,
+          }}
+        >
+          <AppText
+            variant="heading"
+            numberOfLines={1}
+            style={{ fontSize: 18, lineHeight: 23 }}
+          >
+            {restaurant.name}
+          </AppText>
+        </Animated.View>
+
         {/* Back */}
         <Animated.View
           style={{
@@ -1242,49 +1636,37 @@ export default function RestaurantProfileScreen() {
           </Pressable>
         </Animated.View>
 
-        {/* Título aparece al scrollear */}
-        <Animated.Text
-          style={{
-            flex: 1,
-            textAlign: "center",
-            fontFamily: "Outfit_700Bold",
-            fontSize: 18,
-            color: C.onSurface,
-            opacity: titleOpacity,
-            marginHorizontal: 8,
-          }}
-          numberOfLines={1}
-        >
-          {restaurant.name}
-        </Animated.Text>
-
         {/* Acciones derechas */}
         <View style={{ flexDirection: "row", gap: 8 }}>
-          <Animated.View
-            style={{
-              backgroundColor: btnBg,
-              borderRadius: 20,
-              borderWidth: btnBorder,
-              borderColor: C.border,
-            }}
-          >
-            <Pressable
-              onPress={() => setSaved((s) => !s)}
+          {!isOwnerHere && (
+            <Animated.View
               style={{
-                width: 40,
-                height: 40,
+                backgroundColor: btnBg,
                 borderRadius: 20,
-                alignItems: "center",
-                justifyContent: "center",
+                borderWidth: btnBorder,
+                borderColor: C.border,
               }}
             >
-              <Icon
-                name={saved ? "star" : "star-outline"}
-                size={20}
-                color={saved ? C.secondary : C.onSurface}
-              />
-            </Pressable>
-          </Animated.View>
+              <Pressable
+                onPress={onToggleSave}
+                disabled={toggleFav.isPending}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon
+                  name={saved ? "heart" : "heart-outline"}
+                  size={20}
+                  color={saved ? C.primary : C.onSurface}
+                  fill={saved ? C.primary : undefined}
+                />
+              </Pressable>
+            </Animated.View>
+          )}
 
           <Animated.View
             style={{
@@ -1295,6 +1677,7 @@ export default function RestaurantProfileScreen() {
             }}
           >
             <Pressable
+              onPress={onShare}
               style={{
                 width: 40,
                 height: 40,
@@ -1317,13 +1700,32 @@ export default function RestaurantProfileScreen() {
       <ReviewSheet
         ref={reviewSheetRef}
         restaurantName={restaurant.name}
-        submitting={submitReview.isPending}
+        editing={editingReview}
+        submitting={submitReview.isPending || updateReview.isPending}
         errorMessage={
-          submitReview.isError
-            ? "No se pudo publicar. ¿Iniciaste sesión?"
+          submitReview.isError || updateReview.isError
+            ? "No se pudo guardar. ¿Iniciaste sesión?"
             : null
         }
         onSubmit={handleSubmit}
+      />
+
+      {/* ── Report Sheets ── */}
+      <ReportSheet
+        ref={reportSheetRef}
+        title="Reportar reseña"
+        subtitle="Cuéntanos qué pasa con esta reseña. Un moderador la revisará."
+        reasons={REPORT_REASONS}
+        submitting={reportReview.isPending}
+        onSubmit={handleReport}
+      />
+      <ReportSheet
+        ref={restaurantReportSheetRef}
+        title="Reportar local"
+        subtitle="¿Algo no cuadra con este local? Un moderador lo revisará."
+        reasons={RESTAURANT_REPORT_REASONS}
+        submitting={reportRestaurant.isPending}
+        onSubmit={handleReportRestaurant}
       />
     </View>
   );

@@ -4,7 +4,15 @@ import { useSettings, type SettingKey } from "@/lib/settings";
 
 export type AppNotification = {
   id: string;
-  type: "like" | "reply" | "levelup" | "levelup_soon" | "promo" | "review" | "weekly";
+  type:
+    | "like"
+    | "reply"
+    | "levelup"
+    | "levelup_soon"
+    | "promo"
+    | "review"
+    | "weekly"
+    | "moderation";
   title: string;
   body: string | null;
   data: Record<string, any> | null;
@@ -15,7 +23,8 @@ export type AppNotification = {
 const KEY = ["notifications"] as const;
 
 // Which settings toggle mutes which notification type.
-const TYPE_SETTING: Record<AppNotification["type"], SettingKey> = {
+// Types absent here (e.g. 'moderation') can't be muted.
+const TYPE_SETTING: Partial<Record<AppNotification["type"], SettingKey>> = {
   like: "notifRanks",
   reply: "notifReplies",
   review: "notifReviews",
@@ -55,7 +64,10 @@ export function useVisibleNotifications() {
   const q = useNotifications();
   const settings = useSettings();
   const all = q.data ?? [];
-  const visible = all.filter((n) => settings[TYPE_SETTING[n.type]] !== false);
+  const visible = all.filter((n) => {
+    const key = TYPE_SETTING[n.type];
+    return !key || settings[key] !== false;
+  });
   return {
     ...q,
     all,

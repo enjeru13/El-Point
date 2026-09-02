@@ -13,6 +13,7 @@ import {
   BottomSheetScrollView,
   type BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
+import { useRouter } from "expo-router";
 import {
   forwardRef,
   useCallback,
@@ -21,6 +22,15 @@ import {
   useRef,
 } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
+
+/** Where a notification takes you when tapped (null = just mark read). */
+function notifTarget(notif: AppNotification) {
+  const rid = notif.data?.restaurant_id;
+  if (typeof rid === "string" && rid) {
+    return { pathname: "/restaurant/[id]" as const, params: { id: rid } };
+  }
+  return null;
+}
 
 function timeAgo(iso: string): string {
   const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
@@ -74,11 +84,14 @@ function DottedDivider({ label }: { label: string }) {
 function NotifCard({
   notif,
   onRead,
+  onOpen,
 }: {
   notif: AppNotification;
   onRead: (id: string) => void;
+  onOpen: (notif: AppNotification) => void;
 }) {
   const { C, shadow } = useTheme();
+  const canOpen = notifTarget(notif) !== null;
   const CONFIG: Record<
     AppNotification["type"],
     { icon: string; bg: string; color: string }
@@ -98,12 +111,20 @@ function NotifCard({
     },
     promo: { icon: "tag", bg: C.primaryContainer, color: "#fff" },
     weekly: { icon: "analytics", bg: C.primaryFixed, color: C.primary },
+    moderation: {
+      icon: "shield-alert-outline",
+      bg: C.error + "22",
+      color: C.error,
+    },
   };
   const cfg = CONFIG[notif.type] ?? CONFIG.like;
 
   return (
     <Pressable
-      onPress={() => !notif.read && onRead(notif.id)}
+      onPress={() => {
+        if (!notif.read) onRead(notif.id);
+        if (canOpen) onOpen(notif);
+      }}
       style={({ pressed }) => ({
         padding: 16,
         borderRadius: 18,
@@ -151,6 +172,9 @@ function NotifCard({
             }}
           />
         )}
+        {canOpen && (
+          <Icon name="chevron-right" size={16} color={C.outline} />
+        )}
       </View>
 
       <AppText
@@ -178,12 +202,23 @@ export interface NotificationsHandle {
 
 export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
   const { C } = useTheme();
+  const router = useRouter();
   const sheetRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ["70%"], []);
 
   const notifsQ = useVisibleNotifications();
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();
+
+  const handleOpen = useCallback(
+    (notif: AppNotification) => {
+      const target = notifTarget(notif);
+      if (!target) return;
+      sheetRef.current?.dismiss();
+      router.push(target);
+    },
+    [router],
+  );
 
   const notifs = notifsQ.visible;
   const unread = notifs.filter((n) => !n.read);
@@ -289,6 +324,7 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
                   key={n.id}
                   notif={n}
                   onRead={(id) => markRead.mutate(id)}
+                  onOpen={handleOpen}
                 />
               ))}
             </View>
@@ -301,6 +337,7 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
                   key={n.id}
                   notif={n}
                   onRead={(id) => markRead.mutate(id)}
+                  onOpen={handleOpen}
                 />
               ))}
             </View>

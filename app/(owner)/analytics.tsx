@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { AppText } from '@/components/ui/AppText';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews } from '@/lib/queries/reviews';
 
@@ -134,11 +135,14 @@ export default function AnalyticsScreen() {
 
   if (!restaurant) {
     return (
-      <View style={{ flex: 1, backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24 }}>
-        <Icon name="analytics" size={44} color={C.outline} />
-        <AppText variant="heading" align="center" style={{ fontSize: 16 }}>
-          No hay un local registrado
-        </AppText>
+      <View style={{ flex: 1, backgroundColor: C.surface, justifyContent: 'center' }}>
+        <EmptyState
+          icon="analytics"
+          title="Sin métricas todavía"
+          body="No encontramos un local en tu cuenta. Si crees que es un error, escríbenos."
+          actionLabel="Reintentar"
+          onAction={() => restaurantQ.refetch()}
+        />
       </View>
     );
   }

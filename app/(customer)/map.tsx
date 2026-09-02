@@ -18,8 +18,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FLOATING_NAV_H } from '@/lib/theme';
 import { useTheme } from '@/lib/ThemeContext';
 import { SearchBar } from '@/components/ui/SearchBar';
+import { StarRow } from '@/components/ui/StarRow';
 import { Chip } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
+import { useToast } from '@/lib/toast';
 import { useNearby, useRestaurantIcons, type NearbyRestaurant } from '@/lib/queries/nearby';
 import { useCategories } from '@/lib/queries/categories';
 
@@ -166,16 +168,9 @@ function RestaurantCard({
           <AppText variant="heading" style={{ fontSize: 17, lineHeight: 21 }} numberOfLines={1}>
             {restaurant.name}
           </AppText>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            {[1, 2, 3, 4, 5].map(i => (
-              <Icon
-                key={i}
-                name={i <= Math.round(restaurant.rating_avg) ? 'star' : 'star-outline'}
-                size={13}
-                color={C.secondary}
-              />
-            ))}
-            <AppText variant="caption" color={C.onSurfaceVariant} style={{ marginLeft: 2 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <StarRow rating={Math.round(restaurant.rating_avg)} size={13} />
+            <AppText variant="caption" color={C.onSurfaceVariant}>
               {restaurant.rating_count > 0
                 ? `${restaurant.rating_avg.toFixed(1)} (${restaurant.rating_count})`
                 : 'Sin ranks'}
@@ -211,6 +206,7 @@ export default function MapScreen() {
   const { C, shadow } = useTheme();
   const router  = useRouter();
   const insets  = useSafeAreaInsets();
+  const toast   = useToast();
 
   const [userLocation, setUserLocation]     = useState<{ latitude: number; longitude: number } | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
@@ -246,25 +242,54 @@ export default function MapScreen() {
 
   // Ping animation for user dot
   useEffect(() => {
-    Animated.loop(
+    const anim = Animated.loop(
       Animated.sequence([
         Animated.timing(pingAnim, { toValue: 1.8, duration: 1000, easing: Easing.out(Easing.ease), useNativeDriver: true }),
         Animated.timing(pingAnim, { toValue: 1,   duration: 800,  easing: Easing.in(Easing.ease),  useNativeDriver: true }),
       ])
-    ).start();
+    );
+    anim.start();
+    return () => anim.stop();
   }, []);
 
-  useEffect(() => { requestLocation(); }, []);
+  // On mount: only use the location we already have permission for — never prompt.
+  useEffect(() => { primeLocation(); }, []);
 
+  async function primeLocation() {
+    try {
+      const { status } = await Location.getForegroundPermissionsAsync();
+      if (status !== 'granted') return;
+      const last = await Location.getLastKnownPositionAsync();
+      const loc  = last ?? (await Location.getCurrentPositionAsync({}));
+      if (loc) {
+        setUserLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
+      }
+    } catch {
+      // sin ubicación: el mapa usa el centro de San Cristóbal
+    }
+  }
+
+  // GPS button: this is where we may prompt.
   async function requestLocation() {
     setLocLoading(true);
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') { setLocLoading(false); return; }
-    const loc    = await Location.getCurrentPositionAsync({});
-    const coords = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
-    setUserLocation(coords);
-    setLocLoading(false);
-    mapRef.current?.animateToRegion({ ...coords, latitudeDelta: 0.03, longitudeDelta: 0.03 }, 800);
+    try {
+      let { status } = await Location.getForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        ({ status } = await Location.requestForegroundPermissionsAsync());
+      }
+      if (status !== 'granted') {
+        toast.error('Activa el permiso de ubicación para centrarte en el mapa.');
+        return;
+      }
+      const loc    = await Location.getCurrentPositionAsync({});
+      const coords = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
+      setUserLocation(coords);
+      mapRef.current?.animateToRegion({ ...coords, latitudeDelta: 0.03, longitudeDelta: 0.03 }, 800);
+    } catch {
+      toast.error('No pudimos obtener tu ubicación.');
+    } finally {
+      setLocLoading(false);
+    }
   }
 
   const GPS_LIFT = CARD_H + 20;
@@ -370,14 +395,26 @@ export default function MapScreen() {
         </ScrollView>
 
         {/* Estado */}
-        {(nearbyQ.isLoading || (!nearbyQ.isLoading && filtered.length === 0)) && (
+        {nearbyQ.isLoading ? (
           <View style={{ alignSelf: 'center', marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
-            {nearbyQ.isLoading
-              ? <><ActivityIndicator size="small" color={C.primary} /><AppText variant="caption" color={C.onSurfaceVariant}>Buscando lugares...</AppText></>
-              : <AppText variant="caption" color={C.onSurfaceVariant}>Sin lugares en el área</AppText>
-            }
+            <ActivityIndicator size="small" color={C.primary} />
+            <AppText variant="caption" color={C.onSurfaceVariant}>Buscando lugares...</AppText>
           </View>
-        )}
+        ) : filtered.length === 0 ? (
+          <Pressable
+            onPress={userLocation ? undefined : requestLocation}
+            style={{ alignSelf: 'center', marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, ...shadow.sm }}
+          >
+            <Icon name={userLocation ? 'map-marker-outline' : 'crosshairs-gps'} size={13} color={C.outline} />
+            <AppText variant="caption" color={C.onSurfaceVariant}>
+              {search.trim()
+                ? 'Ningún lugar coincide'
+                : userLocation
+                  ? 'Sin lugares en el área'
+                  : 'Toca para usar tu ubicación'}
+            </AppText>
+          </Pressable>
+        ) : null}
       </View>
 
       {/* ── GPS button ── */}

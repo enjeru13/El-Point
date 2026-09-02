@@ -158,7 +158,66 @@ export default function OwnerHomeScreen() {
         }
       >
 
-        {/* Banner estado */}
+        {/* Banner de verificación (mientras no esté aprobado) */}
+        {restaurant.status !== 'approved' && (() => {
+          const map = {
+            pending: {
+              icon: 'clock-outline',
+              bg: C.tertiaryContainer,
+              title: 'Local en revisión',
+              body: 'Te avisaremos cuando lo aprobemos. Suele tardar menos de 24 h.',
+              cta: 'Ver perfil',
+            },
+            rejected: {
+              icon: 'close-circle',
+              bg: C.error + '22',
+              title: 'Local no aprobado',
+              body: restaurant.status_reason ?? 'Revisa los datos y vuelve a enviarlo.',
+              cta: 'Corregir y reenviar',
+            },
+            suspended: {
+              icon: 'shield-alert-outline',
+              bg: C.error + '22',
+              title: 'Local suspendido',
+              body: restaurant.status_reason ?? 'Escríbenos para resolverlo.',
+              cta: 'Ver perfil',
+            },
+          }[restaurant.status];
+          return (
+            <View style={{
+              borderRadius: 22, backgroundColor: map.bg,
+              borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm,
+            }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16 }}>
+                <View style={{
+                  width: 48, height: 48, borderRadius: 14,
+                  backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center',
+                  borderWidth: 2, borderColor: C.border,
+                }}>
+                  <Icon name={map.icon} size={24} color={C.onSurface} />
+                </View>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <AppText variant="bodyStrong">{map.title}</AppText>
+                  <AppText variant="bodySm" color={C.onSurfaceVariant}>{map.body}</AppText>
+                </View>
+              </View>
+              <Pressable
+                onPress={() => router.push('/(owner)/profile')}
+                android_ripple={{ color: C.outlineVariant }}
+                style={{
+                  flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                  gap: 6, paddingVertical: 12, borderTopWidth: 2, borderTopColor: C.border,
+                }}
+              >
+                <Icon name="cog-outline" size={16} color={C.onSurface} />
+                <AppText variant="label">{map.cta}</AppText>
+              </Pressable>
+            </View>
+          );
+        })()}
+
+        {/* Banner estado (solo si el local ya está aprobado) */}
+        {restaurant.status === 'approved' && (
         <View style={{
           borderRadius: 22,
           backgroundColor: restaurant.is_active ? C.primaryFixed : C.surfaceContainerHighest,
@@ -216,6 +275,7 @@ export default function OwnerHomeScreen() {
             </AppText>
           </Pressable>
         </View>
+        )}
 
         {/* Promo activa */}
         {restaurant.promo_text && (

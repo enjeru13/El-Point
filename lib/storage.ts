@@ -66,6 +66,34 @@ export async function uploadRestaurantMenu(restaurantId: string, uri: string) {
   return publicUrl(RESTAURANT_BUCKET, path, true);
 }
 
+// ─── Restaurant verification (private bucket) ───────────────────────────────
+
+const VERIFICATION_BUCKET = "restaurant-verification";
+
+/**
+ * Facade photo used by admins to verify the place is real.
+ * Path: "<ownerId>/<restaurantId>/facade" — matches the bucket's RLS
+ * (first folder must be the uploader's uid). Returns the storage path.
+ */
+export async function uploadRestaurantVerification(
+  ownerId: string,
+  restaurantId: string,
+  uri: string,
+): Promise<string> {
+  const path = `${ownerId}/${restaurantId}/facade`;
+  return putImage(VERIFICATION_BUCKET, path, uri);
+}
+
+/** Short-lived URL so an admin can view a private verification photo. */
+export async function verificationPhotoUrl(
+  storagePath: string,
+): Promise<string | null> {
+  const { data } = await supabase.storage
+    .from(VERIFICATION_BUCKET)
+    .createSignedUrl(storagePath, 3600);
+  return data?.signedUrl ?? null;
+}
+
 // ─── Avatars ────────────────────────────────────────────────────────────────
 
 export async function uploadAvatar(userId: string, uri: string) {

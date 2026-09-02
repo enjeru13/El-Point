@@ -25,7 +25,8 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
        latitude, longitude,
        restaurant_categories ( categories ( slug, label, icon ) )`,
     )
-    .eq("is_active", true);
+    .eq("is_active", true)
+    .eq("status", "approved");
 
   if (error) throw error;
 

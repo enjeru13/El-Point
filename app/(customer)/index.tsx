@@ -285,7 +285,7 @@ function ReviewCard({
               color={favorited ? "#fff" : C.primary}
             />
             <AppText variant="bodyStrong" color={favorited ? "#fff" : C.primary}>
-              Me sirve
+              Me gusta
             </AppText>
           </Pressable>
         </View>
@@ -580,7 +580,7 @@ export default function HomeScreen() {
               <EmptyState
                 icon="heart-outline"
                 title="Sin favoritos aún"
-                body='Marca "Me sirve" en las reseñas que más te gusten para guardarlas aquí.'
+                body='Toca "Me gusta" en las reseñas que más te gusten para guardarlas aquí.'
                 actionLabel="Explorar lugares"
                 onAction={() => setActiveTab("ranks")}
               />

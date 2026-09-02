@@ -1,6 +1,6 @@
 import { parseHours, type Hours } from "@/lib/hours";
 import { supabase } from "@/lib/supabase";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type RestaurantCategory = {
   slug: string;
@@ -24,6 +24,8 @@ export type RestaurantDetail = {
   promo_text: string | null;
   hours: Hours | null;
   is_active: boolean;
+  status: "pending" | "approved" | "rejected" | "suspended";
+  status_reason: string | null;
   rating_avg: number;
   rating_count: number;
   categories: RestaurantCategory[];
@@ -39,7 +41,7 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
     .select(
       `id, owner_id, name, description, address, whatsapp, instagram, phone,
        price_level, logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
-       rating_avg, rating_count,
+       status, status_reason, rating_avg, rating_count,
        restaurant_categories ( categories ( slug, label, icon ) )`,
     )
     .eq("id", id)
@@ -64,5 +66,55 @@ export function useRestaurant(id: string) {
     queryKey: restaurantKeys(id),
     queryFn: () => fetchRestaurant(id),
     enabled: !!id,
+  });
+}
+
+// ─── Reportar un local ──────────────────────────────────────────────────────
+
+export type RestaurantReportReason =
+  | "nonexistent"
+  | "closed"
+  | "fake_info"
+  | "duplicate"
+  | "other";
+
+export const RESTAURANT_REPORT_REASONS: {
+  key: RestaurantReportReason;
+  label: string;
+}[] = [
+  { key: "nonexistent", label: "El local no existe" },
+  { key: "closed", label: "Cerró de forma permanente" },
+  { key: "fake_info", label: "Datos falsos o engañosos" },
+  { key: "duplicate", label: "Está duplicado" },
+  { key: "other", label: "Otro motivo" },
+];
+
+export function useReportRestaurant(restaurantId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      reason,
+      note,
+    }: {
+      reason: RestaurantReportReason;
+      note?: string;
+    }) => {
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData.user)
+        throw userErr ?? new Error("No autenticado");
+      const { error } = await supabase.from("restaurant_reports").insert({
+        restaurant_id: restaurantId,
+        reporter_id: userData.user.id,
+        reason,
+        note: note?.trim() ? note.trim() : null,
+      });
+      if (error) {
+        if (error.code === "23505") throw new Error("Ya reportaste este local.");
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: restaurantKeys(restaurantId) });
+    },
   });
 }

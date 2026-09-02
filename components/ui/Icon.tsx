@@ -1,5 +1,4 @@
 import {
-  Aperture,
   Apple,
   ArrowLeft,
   ArrowRight,
@@ -35,6 +34,7 @@ import {
   EyeOff,
   FileText,
   Fish,
+  Flag,
   Flame,
   Globe,
   Grape,
@@ -54,7 +54,6 @@ import {
   MapPin,
   MapPinned,
   Medal,
-  MessageCircle,
   MessageSquare,
   MessagesSquare,
   Milk,
@@ -74,12 +73,14 @@ import {
   Settings,
   Share2,
   Shield,
+  ShieldAlert,
   ShieldCheck,
   SlidersHorizontal,
   Soup,
   Star,
   Store,
   Tag,
+  ThumbsUp,
   Trash2,
   TrendingUp,
   Trophy,
@@ -94,6 +95,8 @@ import {
   XCircle,
   type LucideIcon
 } from "lucide-react-native";
+import { View } from "react-native";
+import { BrandGlyph, BRAND_GLYPHS } from "@/components/ui/BrandGlyph";
 
 const MAP: Record<string, LucideIcon> = {
   // Tabs
@@ -123,10 +126,12 @@ const MAP: Record<string, LucideIcon> = {
   "lock-outline": Lock,
   logout: LogOut,
   "shield-outline": Shield,
+  "shield-alert-outline": ShieldAlert,
   "shield-lock-outline": ShieldCheck,
+  flag: Flag,
+  "flag-outline": Flag,
   google: Globe,
-  instagram: Aperture,
-  whatsapp: MessageCircle,
+  // instagram / whatsapp se pintan como marca real vía BrandGlyph (ver abajo).
   // Communication
   "bell-outline": Bell,
   "email-outline": Mail,
@@ -157,6 +162,8 @@ const MAP: Record<string, LucideIcon> = {
   medal: Medal,
   "trophy-outline": Trophy,
   "trending-up": TrendingUp,
+  "thumb-up": ThumbsUp,
+  "thumb-up-outline": ThumbsUp,
   "party-popper": PartyPopper,
   fire: Flame,
   heart: Heart,
@@ -236,6 +243,13 @@ export function Icon({
   fill?: string;
   style?: object;
 }) {
+  if (BRAND_GLYPHS.has(name)) {
+    return (
+      <View style={style}>
+        <BrandGlyph name={name as "whatsapp" | "instagram"} size={size} color={color} />
+      </View>
+    );
+  }
   const Component = MAP[name];
   if (!Component) return null;
   return (

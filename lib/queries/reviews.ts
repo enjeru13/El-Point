@@ -18,11 +18,29 @@ export type Review = {
   body: string;
   helpful_count: number;
   created_at: string;
+  updated_at: string;
+  moderation: "visible" | "hidden" | "removed";
   author: ReviewAuthor | null;
   viewer_marked_helpful: boolean;
   photos: string[];
-  reply: { body: string; created_at: string } | null;
+  reply: { body: string; created_at: string; updated_at: string } | null;
 };
+
+export type ReportReason = "offensive" | "spam" | "false" | "other";
+
+export const REPORT_REASONS: { key: ReportReason; label: string }[] = [
+  { key: "offensive", label: "Ofensiva o con insultos" },
+  { key: "spam", label: "Spam o publicidad" },
+  { key: "false", label: "Información falsa" },
+  { key: "other", label: "Otro motivo" },
+];
+
+// Cuánto tiempo tras publicar puede el autor editar su reseña.
+export const REVIEW_EDIT_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+export function canEditReview(r: Pick<Review, "created_at">): boolean {
+  return Date.now() - new Date(r.created_at).getTime() < REVIEW_EDIT_WINDOW_MS;
+}
 
 export function reviewKeys(restaurantId: string) {
   return ["reviews", restaurantId] as const;
@@ -35,10 +53,10 @@ async function fetchReviews(restaurantId: string): Promise<Review[]> {
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      `id, restaurant_id, rating, body, helpful_count, created_at,
+      `id, restaurant_id, rating, body, helpful_count, created_at, updated_at, moderation,
        author:profiles!author_id ( id, username, full_name, avatar_url, level ),
        review_photos ( storage_path, position ),
-       review_replies ( body, created_at )`,
+       review_replies ( body, created_at, updated_at )`,
     )
     .eq("restaurant_id", restaurantId)
     .order("created_at", { ascending: false });
@@ -65,6 +83,8 @@ async function fetchReviews(restaurantId: string): Promise<Review[]> {
     body: r.body,
     helpful_count: r.helpful_count,
     created_at: r.created_at,
+    updated_at: r.updated_at ?? r.created_at,
+    moderation: (r.moderation ?? "visible") as Review["moderation"],
     author: r.author ?? null,
     viewer_marked_helpful: markedIds.has(r.id),
     photos: ((r.review_photos ?? []) as any[])
@@ -135,6 +155,119 @@ export function useSubmitReview(restaurantId: string) {
       qc.invalidateQueries({ queryKey: ["favorites"] });
       qc.invalidateQueries({ queryKey: ["nearby"] });
       qc.invalidateQueries({ queryKey: ["restaurant-search"] });
+    },
+  });
+}
+
+// Refrescos tras crear/editar/borrar una reseña (rating_avg cambia en todos lados).
+function invalidateAfterReviewChange(
+  qc: ReturnType<typeof useQueryClient>,
+  restaurantId: string,
+) {
+  qc.invalidateQueries({ queryKey: reviewKeys(restaurantId) });
+  qc.invalidateQueries({ queryKey: restaurantKeys(restaurantId) });
+  qc.invalidateQueries({ queryKey: ["my-profile"] });
+  qc.invalidateQueries({ queryKey: ["my-reviews"] });
+  qc.invalidateQueries({ queryKey: ["home-feed"] });
+  qc.invalidateQueries({ queryKey: ["favorites"] });
+  qc.invalidateQueries({ queryKey: ["nearby"] });
+  qc.invalidateQueries({ queryKey: ["restaurant-search"] });
+}
+
+export function useUpdateReview(restaurantId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      reviewId,
+      rating,
+      body,
+    }: {
+      reviewId: string;
+      rating: number;
+      body: string;
+    }) => {
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData.user)
+        throw userErr ?? new Error("No autenticado");
+      const { error } = await supabase
+        .from("reviews")
+        .update({ rating, body: body.trim() })
+        .eq("id", reviewId)
+        .eq("author_id", userData.user.id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidateAfterReviewChange(qc, restaurantId),
+  });
+}
+
+export function useDeleteReview(restaurantId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (reviewId: string) => {
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData.user)
+        throw userErr ?? new Error("No autenticado");
+      const { error } = await supabase
+        .from("reviews")
+        .delete()
+        .eq("id", reviewId)
+        .eq("author_id", userData.user.id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidateAfterReviewChange(qc, restaurantId),
+  });
+}
+
+export function useReportReview(restaurantId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      reviewId,
+      reason,
+      note,
+    }: {
+      reviewId: string;
+      reason: ReportReason;
+      note?: string;
+    }) => {
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData.user)
+        throw userErr ?? new Error("No autenticado");
+      const { error } = await supabase.from("review_reports").insert({
+        review_id: reviewId,
+        reporter_id: userData.user.id,
+        reason,
+        note: note?.trim() ? note.trim() : null,
+      });
+      if (error) {
+        if (error.code === "23505")
+          throw new Error("Ya reportaste esta reseña.");
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: reviewKeys(restaurantId) });
+      qc.invalidateQueries({ queryKey: restaurantKeys(restaurantId) });
+    },
+  });
+}
+
+export function useDeleteReply(restaurantId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (reviewId: string) => {
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData.user)
+        throw userErr ?? new Error("No autenticado");
+      const { error } = await supabase
+        .from("review_replies")
+        .delete()
+        .eq("review_id", reviewId)
+        .eq("author_id", userData.user.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: reviewKeys(restaurantId) });
     },
   });
 }

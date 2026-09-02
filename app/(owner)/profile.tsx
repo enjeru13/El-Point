@@ -15,12 +15,21 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { useToast } from '@/lib/toast';
 import { AppText } from '@/components/ui/AppText';
+import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { TimePickerSheet, type TimePickerHandle } from '@/components/ui/TimePickerSheet';
-import { useMyRestaurant, useUpdateMyRestaurant } from '@/lib/queries/owner';
-import { uploadRestaurantImage, uploadRestaurantMenu } from '@/lib/storage';
+import { useMyRestaurant, useUpdateMyRestaurant, useResubmitRestaurant } from '@/lib/queries/owner';
+import {
+  uploadRestaurantImage,
+  uploadRestaurantMenu,
+  uploadRestaurantVerification,
+  verificationPhotoUrl,
+} from '@/lib/storage';
+import { supabase } from '@/lib/supabase';
 import { DEFAULT_HOURS, DAY_LABELS, DAY_LABELS_LONG, formatRange, to12h, type Hours } from '@/lib/hours';
+import { instagramHandle } from '@/lib/contact';
 
 function Divider() {
   const { C } = useTheme();
@@ -74,6 +83,7 @@ export default function OwnerProfileScreen() {
   const restaurantQ = useMyRestaurant();
   const restaurant = restaurantQ.data ?? null;
   const updateMut = useUpdateMyRestaurant(restaurant?.id);
+  const resubmit = useResubmitRestaurant();
 
   const [editing, setEditing] = useState(false);
   const [name, setName]           = useState('');
@@ -88,7 +98,49 @@ export default function OwnerProfileScreen() {
   const [hours, setHoursState]    = useState<Hours>(DEFAULT_HOURS);
   const [uploading, setUploading] = useState<'logo' | 'cover' | 'menu' | null>(null);
 
+  const [verifUploading, setVerifUploading] = useState(false);
+  const [verifUrl, setVerifUrl] = useState<string | null>(null);
+  const [rifDraft, setRifDraft] = useState('');
+
   const timePickerRef = useRef<TimePickerHandle>(null);
+
+  useEffect(() => {
+    let alive = true;
+    const path = restaurant?.verification_photo_path;
+    if (!path) { setVerifUrl(null); return; }
+    verificationPhotoUrl(path).then((u) => { if (alive) setVerifUrl(u); });
+    return () => { alive = false; };
+  }, [restaurant?.verification_photo_path]);
+
+  async function pickFacade() {
+    if (!restaurant) return;
+    const r = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.85,
+    });
+    if (r.canceled) return;
+    setVerifUploading(true);
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error('Sesión expirada');
+      const path = await uploadRestaurantVerification(u.user.id, restaurant.id, r.assets[0].uri);
+      updateMut.mutate({ verification_photo_path: path });
+      const signed = await verificationPhotoUrl(path);
+      setVerifUrl(signed ? `${signed}#${Date.now()}` : null);
+      toast.success('Foto de fachada actualizada');
+    } catch (e: any) {
+      toast.error(e?.message ?? 'No se pudo subir la foto');
+    } finally {
+      setVerifUploading(false);
+    }
+  }
+
+  function saveRif() {
+    updateMut.mutate(
+      { rif: rifDraft.trim() || null },
+      { onSuccess: () => toast.success('RIF guardado') },
+    );
+  }
 
   function setDay(dow: number, patch: Partial<Hours['days'][number]>) {
     setHoursState((h) => ({ days: h.days.map((d, i) => (i === dow ? { ...d, ...patch } : d)) }));
@@ -150,6 +202,7 @@ export default function OwnerProfileScreen() {
     setPriceLevel(restaurant.price_level ?? null);
     setIsActive(restaurant.is_active);
     setHoursState(restaurant.hours ?? DEFAULT_HOURS);
+    setRifDraft(restaurant.rif ?? '');
   }, [restaurant]);
 
   function cancel() {
@@ -180,7 +233,7 @@ export default function OwnerProfileScreen() {
         address: address.trim() || null,
         phone: phone.trim() || null,
         whatsapp: whatsapp.trim() || null,
-        instagram: instagram.trim() || null,
+        instagram: instagramHandle(instagram) ?? null,
         promo_text: promo.trim() || null,
         price_level: priceLevel,
         is_active: isActive,
@@ -206,11 +259,14 @@ export default function OwnerProfileScreen() {
 
   if (!restaurant) {
     return (
-      <View style={{ flex: 1, backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24 }}>
-        <Icon name="store-outline" size={44} color={C.outline} />
-        <AppText variant="heading" align="center" style={{ fontSize: 16 }}>
-          No hay un local registrado
-        </AppText>
+      <View style={{ flex: 1, backgroundColor: C.surface, justifyContent: 'center' }}>
+        <EmptyState
+          icon="storefront-outline"
+          title="Sin local registrado"
+          body="Tu cuenta es de socio pero no tiene un local. Si crees que es un error, escríbenos."
+          actionLabel="Reintentar"
+          onAction={() => restaurantQ.refetch()}
+        />
       </View>
     );
   }
@@ -269,6 +325,142 @@ export default function OwnerProfileScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20 }}>
+
+        {/* Verificación */}
+        {restaurant.status !== 'approved' && (
+          <View style={{
+            borderRadius: 18, padding: 16, gap: 10,
+            backgroundColor: restaurant.status === 'pending' ? C.tertiaryContainer : C.error + '22',
+            borderWidth: 2, borderColor: C.border,
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Icon
+                name={restaurant.status === 'pending' ? 'clock-outline' : restaurant.status === 'suspended' ? 'shield-alert-outline' : 'close-circle'}
+                size={18}
+                color={C.onSurface}
+              />
+              <AppText variant="bodyStrong" style={{ flex: 1 }}>
+                {restaurant.status === 'pending'
+                  ? 'Local en revisión'
+                  : restaurant.status === 'suspended'
+                    ? 'Local suspendido'
+                    : 'Local no aprobado'}
+              </AppText>
+            </View>
+            <AppText variant="bodySm" color={C.onSurfaceVariant}>
+              {restaurant.status === 'pending'
+                ? 'Estamos verificando tu local. Te avisaremos cuando lo aprobemos (suele tardar menos de 24 h). Mientras tanto no aparece para los comensales.'
+                : restaurant.status_reason ??
+                  (restaurant.status === 'suspended'
+                    ? 'Escríbenos para resolverlo.'
+                    : 'Revisa los datos y vuelve a enviarlo.')}
+            </AppText>
+            {(restaurant.status === 'pending' || restaurant.status === 'rejected') && (
+              <>
+                <View style={{ height: 1, backgroundColor: C.border, opacity: 0.4 }} />
+
+                {/* Foto de fachada */}
+                <View style={{ gap: 6 }}>
+                  <AppText variant="overline" color={C.onSurfaceVariant}>
+                    FOTO DE FACHADA
+                  </AppText>
+                  <Pressable
+                    onPress={pickFacade}
+                    disabled={verifUploading}
+                    style={{
+                      height: 130,
+                      borderRadius: 12,
+                      overflow: 'hidden',
+                      borderWidth: 2,
+                      borderColor: verifUrl ? C.border : C.outlineVariant,
+                      borderStyle: verifUrl ? 'solid' : 'dashed',
+                      backgroundColor: C.surface,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {verifUrl ? (
+                      <Image
+                        source={{ uri: verifUrl }}
+                        style={{ width: '100%', height: '100%' }}
+                        contentFit="cover"
+                        transition={150}
+                      />
+                    ) : (
+                      <View style={{ alignItems: 'center', gap: 4 }}>
+                        <Icon name="storefront-outline" size={26} color={C.outline} />
+                        <AppText variant="caption" color={C.outline}>
+                          Subir foto de la fachada
+                        </AppText>
+                      </View>
+                    )}
+                    {verifUrl && !verifUploading && (
+                      <View style={{
+                        position: 'absolute', bottom: 8, right: 8,
+                        paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99,
+                        backgroundColor: 'rgba(255,255,255,0.94)',
+                        borderWidth: 2, borderColor: C.border,
+                      }}>
+                        <AppText variant="label">Cambiar</AppText>
+                      </View>
+                    )}
+                    {verifUploading && (
+                      <View style={{
+                        position: 'absolute', inset: 0,
+                        backgroundColor: 'rgba(0,0,0,0.35)',
+                        alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <ActivityIndicator color="#fff" />
+                      </View>
+                    )}
+                  </Pressable>
+                  <AppText variant="caption" color={C.outline}>
+                    El frente del local con el letrero visible.
+                  </AppText>
+                </View>
+
+                {/* RIF */}
+                <View style={{ gap: 6 }}>
+                  <AppText variant="overline" color={C.onSurfaceVariant}>RIF</AppText>
+                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                    <AppTextInput
+                      value={rifDraft}
+                      onChangeText={setRifDraft}
+                      placeholder="J-12345678-9"
+                      autoCapitalize="characters"
+                      style={{ flex: 1 }}
+                    />
+                    {rifDraft.trim() !== (restaurant.rif ?? '') && (
+                      <Button
+                        label="Guardar"
+                        onPress={saveRif}
+                        loading={updateMut.isPending}
+                        size="sm"
+                        fullWidth={false}
+                      />
+                    )}
+                  </View>
+                </View>
+              </>
+            )}
+
+            {restaurant.status === 'rejected' && (
+              <Button
+                label="Reenviar a revisión"
+                onPress={() =>
+                  resubmit.mutate(restaurant.id, {
+                    onSuccess: () => toast.success('Local reenviado a revisión'),
+                    onError: () => toast.error('No se pudo reenviar'),
+                  })
+                }
+                loading={resubmit.isPending}
+                icon="check"
+                size="sm"
+                fullWidth={false}
+              />
+            )}
+          </View>
+        )}
 
         {/* Hero card */}
         <View style={{ borderRadius: 24, overflow: 'hidden', borderWidth: 2, borderColor: C.border, ...shadow.md }}>

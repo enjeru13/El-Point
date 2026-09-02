@@ -1,6 +1,10 @@
 import { Field } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
-import { uploadRestaurantImage, uploadRestaurantMenu } from "@/lib/storage";
+import {
+  uploadRestaurantImage,
+  uploadRestaurantMenu,
+  uploadRestaurantVerification,
+} from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/toast";
 import { useTheme } from "@/lib/ThemeContext";
@@ -49,7 +53,9 @@ export default function RegisterOwnerScreen() {
   );
   const [whatsapp, setWhatsapp] = useState("");
   const [instagram, setInstagram] = useState("");
+  const [rif, setRif] = useState("");
 
+  const [facadeUri, setFacadeUri] = useState<string | null>(null);
   const [logoUri, setLogoUri] = useState<string | null>(null);
   const [coverUri, setCoverUri] = useState<string | null>(null);
   const [menuPdfName, setMenuPdfName] = useState<string | null>(null);
@@ -109,7 +115,9 @@ export default function RegisterOwnerScreen() {
         ? !!(name.trim() && selectedCats.size > 0)
         : step === 2
           ? !!(address.trim() && coords)
-          : true;
+          : step === 3
+            ? !!facadeUri
+            : true;
 
   function handleContinue() {
     if (loading) return;
@@ -145,29 +153,21 @@ export default function RegisterOwnerScreen() {
       return;
     }
 
-    const rpcArgs: {
-      p_name: string;
-      p_category_ids: number[];
-      p_address?: string;
-      p_lat?: number;
-      p_lng?: number;
-      p_whatsapp?: string;
-      p_instagram?: string;
-    } = {
-      p_name: name.trim(),
-      p_category_ids: Array.from(selectedCats),
-    };
-    if (address.trim()) rpcArgs.p_address = address.trim();
-    if (coords) {
-      rpcArgs.p_lat = coords.lat;
-      rpcArgs.p_lng = coords.lng;
-    }
-    if (whatsapp.trim()) rpcArgs.p_whatsapp = whatsapp.trim();
-    if (instagram.trim()) rpcArgs.p_instagram = instagram.trim();
+    const ownerId = data.session.user.id;
 
     const { data: newId, error: rpcError } = await supabase.rpc(
       "create_owner_restaurant",
-      rpcArgs,
+      {
+        p_name: name.trim(),
+        p_description: "",
+        p_address: address.trim(),
+        p_lat: coords?.lat ?? 0,
+        p_lng: coords?.lng ?? 0,
+        p_whatsapp: whatsapp.trim(),
+        p_instagram: instagram.trim(),
+        p_category_ids: Array.from(selectedCats),
+        p_rif: rif.trim(),
+      },
     );
 
     if (rpcError || !newId) {
@@ -178,7 +178,24 @@ export default function RegisterOwnerScreen() {
       return;
     }
 
-    // Subir media elegida (best-effort; no bloquea el registro)
+    // Foto de fachada — obligatoria para la verificación.
+    try {
+      if (facadeUri) {
+        const path = await uploadRestaurantVerification(
+          ownerId,
+          newId,
+          facadeUri,
+        );
+        await supabase
+          .from("restaurants")
+          .update({ verification_photo_path: path })
+          .eq("id", newId);
+      }
+    } catch {
+      // el dueño puede volver a subirla desde su perfil
+    }
+
+    // Media de marketing (best-effort; no bloquea el registro)
     try {
       const patch: {
         logo_url?: string;
@@ -537,6 +554,16 @@ export default function RegisterOwnerScreen() {
                   value={instagram}
                   onChangeText={(t) => setInstagram(t.replace(/^@/, ''))}
                 />
+
+                <Field
+                  label="RIF (opcional)"
+                  icon="shield-outline"
+                  placeholder="J-12345678-9"
+                  autoCapitalize="characters"
+                  value={rif}
+                  onChangeText={setRif}
+                  hint="Acelera la verificación de tu local"
+                />
               </View>
             </>
           )}
@@ -546,15 +573,98 @@ export default function RegisterOwnerScreen() {
             <>
               <View style={{ marginBottom: 24 }}>
                 <AppText variant="title" style={{ marginBottom: 8 }}>
-                  Muestra tu cocina ✨
+                  Verificación y fotos
                 </AppText>
                 <AppText variant="body" color={C.onSurfaceVariant}>
-                  Fotos de calidad aumentan el engagement 40%. Todo es opcional
-                  pero recomendado.
+                  Revisamos cada local antes de publicarlo. Suele tardar menos
+                  de 24 h; te avisamos cuando quede aprobado.
                 </AppText>
               </View>
 
               <View style={{ gap: 20 }}>
+                {/* Foto de fachada — verificación */}
+                <View style={{ gap: 8 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      marginLeft: 4,
+                    }}
+                  >
+                    <AppText variant="bodyStrong" color={C.onSurfaceVariant}>
+                      Foto de la fachada *
+                    </AppText>
+                    <View
+                      style={{
+                        paddingHorizontal: 8,
+                        paddingVertical: 2,
+                        borderRadius: 99,
+                        backgroundColor: C.primaryFixed,
+                        borderWidth: 1,
+                        borderColor: C.primary,
+                      }}
+                    >
+                      <AppText variant="caption" color={C.primary}>
+                        OBLIGATORIA
+                      </AppText>
+                    </View>
+                  </View>
+                  <AppText variant="bodySm" color={C.outline} style={{ marginLeft: 4 }}>
+                    El frente del local con el letrero visible. La usamos solo
+                    para verificar que el local existe.
+                  </AppText>
+                  <Pressable
+                    onPress={() => pickImage(setFacadeUri)}
+                    style={{
+                      height: 180,
+                      borderRadius: 16,
+                      overflow: "hidden",
+                      borderWidth: 2,
+                      borderStyle: "dashed",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderColor: facadeUri ? C.primary : C.outlineVariant,
+                      backgroundColor: facadeUri
+                        ? C.primaryFixed + "20"
+                        : C.surfaceContainerLow,
+                    }}
+                  >
+                    {facadeUri ? (
+                      <Image
+                        source={{ uri: facadeUri }}
+                        style={{ width: "100%", height: "100%" }}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={{ alignItems: "center", gap: 8 }}>
+                        <View
+                          style={{
+                            padding: 16,
+                            borderRadius: 16,
+                            backgroundColor: C.primaryFixed,
+                            borderWidth: 2,
+                            borderColor: C.border,
+                            ...shadow.sm,
+                          }}
+                        >
+                          <Icon
+                            name="storefront-outline"
+                            size={36}
+                            color={C.primary}
+                          />
+                        </View>
+                        <AppText variant="bodyStrong" color={C.onSurfaceVariant}>
+                          Subir foto de la fachada
+                        </AppText>
+                        <AppText variant="bodySm" color={C.outline}>
+                          PNG, JPG · máx 10MB
+                        </AppText>
+                      </View>
+                    )}
+                  </Pressable>
+                </View>
+
                 {/* Logo */}
                 <View style={{ gap: 8 }}>
                   <AppText variant="bodyStrong" color={C.onSurfaceVariant} style={{ marginLeft: 4 }}>

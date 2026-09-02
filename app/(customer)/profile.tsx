@@ -8,6 +8,7 @@ import {
   Animated,
   Easing,
   Pressable,
+  RefreshControl,
   ScrollView,
   View,
 } from 'react-native';
@@ -16,6 +17,7 @@ import { useTheme } from '@/lib/ThemeContext';
 import { AppLogo } from '@/components/ui/AppLogo';
 import { AppText } from '@/components/ui/AppText';
 import { Skeleton, SkeletonList } from '@/components/ui/Skeleton';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Field } from '@/components/ui/Field';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { StarRow } from '@/components/ui/StarRow';
@@ -126,6 +128,14 @@ export default function ProfileScreen() {
 
   const busy = updateMut.isPending;
 
+  const refreshing =
+    profileQ.isRefetching || reviewsQ.isRefetching || favoritesQ.isRefetching;
+  function onRefresh() {
+    profileQ.refetch();
+    reviewsQ.refetch();
+    favoritesQ.refetch();
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: C.surface }}>
       <ScreenHeader
@@ -159,7 +169,13 @@ export default function ProfileScreen() {
           <SkeletonList count={2} kind="row" />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 96 }} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />
+          }
+        >
           <View style={{ padding: 20, gap: 20 }}>
 
             {/* Card perfil */}
@@ -233,11 +249,13 @@ export default function ProfileScreen() {
             {/* Stats */}
             <View style={{ flexDirection: 'row', gap: 12 }}>
               {[
-                { icon: 'medal', value: reviews.length, label: 'Ranks', color: C.primaryContainer },
-                { icon: 'heart', value: favorites.length, label: 'Favoritos', color: C.secondary },
+                { icon: 'medal', value: reviews.length, label: 'Ranks' },
+                { icon: 'heart', value: favorites.length, label: 'Favoritos' },
               ].map(stat => (
                 <View key={stat.label} style={{ flex: 1, backgroundColor: C.surface, borderRadius: 24, padding: 20, alignItems: 'center', gap: 6, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
-                  <Icon name={stat.icon} size={28} color={stat.color} />
+                  <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+                    <Icon name={stat.icon} size={20} color={C.primary} />
+                  </View>
                   <AppText variant="title">{stat.value}</AppText>
                   <AppText variant="label" color={C.onSurfaceVariant}>{stat.label}</AppText>
                 </View>
@@ -250,9 +268,13 @@ export default function ProfileScreen() {
               {favoritesQ.isLoading ? (
                 <SkeletonList count={2} kind="row" />
               ) : favorites.length === 0 ? (
-                <AppText variant="bodySm" color={C.outline}>
-                  Marca "Me sirve" en las reseñas para guardar lugares aquí.
-                </AppText>
+                <EmptyState
+                  icon="heart-outline"
+                  title="Sin favoritos todavía"
+                  body="Toca 'Me gusta' en un lugar para guardarlo aquí."
+                  actionLabel="Explorar lugares"
+                  onAction={() => router.push('/(customer)/search')}
+                />
               ) : (
                 <View style={{ gap: 10 }}>
                   {favorites.map(f => (
@@ -290,9 +312,13 @@ export default function ProfileScreen() {
               {reviewsQ.isLoading ? (
                 <SkeletonList count={2} kind="row" />
               ) : reviews.length === 0 ? (
-                <AppText variant="bodySm" color={C.outline}>
-                  Aún no has rankeado ningún lugar.
-                </AppText>
+                <EmptyState
+                  icon="comment-text-multiple"
+                  title="Aún no has rankeado nada"
+                  body="Visita un local y deja tu primera reseña para ganar XP."
+                  actionLabel="Buscar dónde comer"
+                  onAction={() => router.push('/(customer)/search')}
+                />
               ) : (
                 reviews.map(r => (
                   <Pressable

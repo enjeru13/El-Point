@@ -17,7 +17,7 @@ import { Slot, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
-import { useColorScheme, View } from 'react-native';
+import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -28,6 +28,7 @@ import { queryClient } from '@/lib/query';
 import { ToastProvider } from '@/lib/toast';
 import { AppThemeProvider } from '@/lib/ThemeContext';
 import { SettingsBridge } from '@/components/SettingsBridge';
+import { SplashScreenView } from '@/components/ui/SplashScreenView';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -53,9 +54,11 @@ export default function RootLayout() {
   const [ready, setReady]     = useState(false);
   const currentUid = useRef<string | null>(null);
 
+  // Keep the native splash up until fonts AND the initial auth/role check are
+  // done — so we go straight from splash to the right screen, no blank frame.
   useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync();
-  }, [fontsLoaded]);
+    if (fontsLoaded && ready) SplashScreen.hideAsync();
+  }, [fontsLoaded, ready]);
 
   useEffect(() => {
     function handle(session: Session | null) {
@@ -81,12 +84,19 @@ export default function RootLayout() {
     return () => subscription.unsubscribe();
   }, []);
 
-  async function fetchRole(userId: string) {
-    const { data } = await supabase
+  async function fetchRole(userId: string, attempt = 0) {
+    const { data, error } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', userId)
       .single();
+
+    // Transient failure (e.g. no network on cold start): retry once before
+    // falling back, so an owner isn't briefly routed as a customer.
+    if (error && attempt === 0) {
+      setTimeout(() => fetchRole(userId, 1), 900);
+      return;
+    }
     setRole((data?.role as UserRole) ?? 'customer');
     setReady(true);
   }
@@ -118,7 +128,7 @@ export default function RootLayout() {
   }, [ready, session, role, fontsLoaded, segments]);
 
   if (!ready || !fontsLoaded || (session && role === null))
-    return <View style={{ flex: 1, backgroundColor: '#fcf9f8' }} />;
+    return <SplashScreenView />;
 
   return (
     <QueryClientProvider client={queryClient}>

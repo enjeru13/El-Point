@@ -13,6 +13,9 @@ export type MyProfile = {
   search_radius_km: number;
   settings: Record<string, boolean>;
   favorite_categories: number[];
+  is_admin: boolean;
+  strikes: number;
+  banned_at: string | null;
   created_at: string;
 };
 
@@ -24,7 +27,7 @@ async function fetchMyProfile(): Promise<MyProfile | null> {
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "id, role, username, full_name, avatar_url, bio, level, xp, search_radius_km, settings, favorite_categories, created_at",
+      "id, role, username, full_name, avatar_url, bio, level, xp, search_radius_km, settings, favorite_categories, is_admin, strikes, banned_at, created_at",
     )
     .eq("id", uid)
     .maybeSingle();
@@ -35,6 +38,9 @@ async function fetchMyProfile(): Promise<MyProfile | null> {
     ...(data as any),
     settings: ((data as any).settings ?? {}) as Record<string, boolean>,
     favorite_categories: ((data as any).favorite_categories ?? []) as number[],
+    is_admin: !!(data as any).is_admin,
+    strikes: ((data as any).strikes ?? 0) as number,
+    banned_at: ((data as any).banned_at ?? null) as string | null,
   };
 }
 

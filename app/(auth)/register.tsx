@@ -51,9 +51,6 @@ export default function RegisterScreen() {
   const [radius, setRadius]       = useState(5);
   const [locGranted, setLocGranted] = useState(false);
 
-  // Step 0 — rol (card dueño)
-  const [role, setRole]           = useState<'customer' | 'restaurant_owner'>('customer');
-
   const [loading, setLoading]     = useState(false);
 
   function toggleCategory(id: number) {
@@ -87,7 +84,7 @@ export default function RegisterScreen() {
     }
 
     // Sesión activa → completar perfil (el trigger ya creó la fila)
-    await supabase
+    const { error: profileErr } = await supabase
       .from('profiles')
       .update({
         username: username.trim() || null,
@@ -97,6 +94,9 @@ export default function RegisterScreen() {
       .eq('id', data.user!.id);
 
     setLoading(false);
+    if (profileErr) {
+      toast.error('Cuenta creada, pero no pudimos guardar tus preferencias. Ajústalas en tu perfil.');
+    }
     // _layout detecta la sesión y redirige a /(customer)
   }
 
@@ -227,15 +227,14 @@ export default function RegisterScreen() {
                 <AppText variant="bodySm" color={C.onSurfaceVariant} align="center" style={{ marginBottom: 16 }}>
                   Gestiona tu menú, analíticas y llega a más comensales.
                 </AppText>
-                <Pressable onPress={() => { setRole('restaurant_owner'); router.push('/(auth)/register-owner'); }}>
-                  <AppText
-                    variant="label"
-                    color={C.primary}
-                    style={{ borderBottomWidth: 1, borderBottomColor: C.primary + '4d', paddingBottom: 1 }}
-                  >
-                    Regístrate como socio
-                  </AppText>
-                </Pressable>
+                <Button
+                  label="Regístrate como socio"
+                  onPress={() => router.push('/(auth)/register-owner')}
+                  variant="ghost"
+                  size="sm"
+                  icon="storefront-outline"
+                  fullWidth={false}
+                />
               </View>
             </>
           )}
@@ -265,6 +264,11 @@ export default function RegisterScreen() {
                   Array.from({ length: 8 }).map((_, i) => (
                     <Skeleton key={i} width="48%" height={116} radius={24} style={{ marginBottom: 0 }} />
                   ))}
+                {!categoriesQ.isLoading && (categoriesQ.data ?? []).length === 0 && (
+                  <AppText variant="bodySm" color={C.outline} style={{ width: '100%', paddingVertical: 20 }} align="center">
+                    No pudimos cargar las categorías. Puedes elegirlas luego en tu perfil.
+                  </AppText>
+                )}
                 {(categoriesQ.data ?? []).map(cat => {
                   const isSelected = selected.has(cat.id);
                   return (
@@ -423,24 +427,15 @@ export default function RegisterScreen() {
                 )}
               </View>
 
-              {/* Slider */}
+              {/* Radio de búsqueda */}
               <View className="gap-4">
-                <View className="flex-row justify-between items-end">
-                  <View>
-                    <AppText variant="subtitle">Radio de búsqueda</AppText>
-                    <AppText variant="bodySm" color={C.onSurfaceVariant}>
-                      ¿Qué tan lejos irías por comida?
-                    </AppText>
-                  </View>
-                  <View className="items-end">
-                    <AppText variant="display" color={C.primary} style={{ fontSize: 30, lineHeight: 34 }}>
-                      {radius}
-                    </AppText>
-                    <AppText variant="label" color={C.primary}>km</AppText>
-                  </View>
+                <View>
+                  <AppText variant="subtitle">Radio de búsqueda</AppText>
+                  <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                    ¿Qué tan lejos irías por comida?
+                  </AppText>
                 </View>
 
-                {/* Slider */}
                 <View className="py-2 gap-4">
                   <View className="h-3 rounded-full" style={{ backgroundColor: C.primaryFixed }}>
                     <View
@@ -527,11 +522,11 @@ export default function RegisterScreen() {
         ) : (
           <>
             <Button
-              label={loading ? 'Creando cuenta…' : step === 2 ? 'Crear cuenta' : step === 4 ? 'Empezar a explorar' : 'Continuar'}
+              label={loading ? 'Creando cuenta…' : step === 4 ? 'Empezar a explorar' : 'Continuar'}
               onPress={handleContinue}
               disabled={!canContinue}
               loading={loading}
-              iconTrailing={step === 2 || step === 4 ? 'check' : 'arrow-right'}
+              iconTrailing={step === 4 ? 'check' : 'arrow-right'}
             />
             {step === 0 && (
               <AppText variant="caption" color={C.onSurfaceVariant + '80'} align="center" style={{ marginTop: 10, lineHeight: 18 }}>

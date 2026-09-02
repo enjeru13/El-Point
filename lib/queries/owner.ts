@@ -18,6 +18,11 @@ export type OwnerRestaurant = {
   promo_text: string | null;
   hours: Hours | null;
   is_active: boolean;
+  status: "pending" | "approved" | "rejected" | "suspended";
+  status_reason: string | null;
+  submitted_at: string;
+  verification_photo_path: string | null;
+  rif: string | null;
   rating_avg: number;
   rating_count: number;
   created_at: string;
@@ -36,6 +41,7 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
     .select(
       `id, name, description, address, phone, whatsapp, instagram, price_level,
        logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
+       status, status_reason, submitted_at, verification_photo_path, rif,
        rating_avg, rating_count, created_at,
        restaurant_categories ( categories ( slug, label, icon ) )`,
     )
@@ -61,6 +67,22 @@ export function useMyRestaurant() {
   return useQuery({ queryKey: ownerRestaurantKey, queryFn: fetchMyRestaurant });
 }
 
+/** Owner resubmits a rejected listing after fixing it. */
+export function useResubmitRestaurant() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (restaurantId: string) => {
+      const { error } = await supabase.rpc("resubmit_restaurant", {
+        p_restaurant_id: restaurantId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ownerRestaurantKey });
+    },
+  });
+}
+
 export type OwnerRestaurantPatch = Partial<{
   name: string;
   description: string | null;
@@ -75,6 +97,8 @@ export type OwnerRestaurantPatch = Partial<{
   cover_url: string | null;
   menu_pdf_url: string | null;
   hours: Hours;
+  rif: string | null;
+  verification_photo_path: string | null;
 }>;
 
 export function useUpdateMyRestaurant(restaurantId: string | undefined) {
