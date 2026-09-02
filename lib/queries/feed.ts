@@ -37,34 +37,23 @@ function num(v: any): number | null {
   return typeof v === "number" ? v : null;
 }
 
-// latitude/longitude arrive in a later migration; try with, fall back without.
-function restaurantEmbed(withLatLng: boolean): string {
-  const base =
-    "id, name, address, rating_avg, rating_count, promo_text, cover_url";
-  const ll = withLatLng ? ", latitude, longitude" : "";
-  return `restaurant:restaurants ( ${base}${ll}, restaurant_categories ( categories ( slug, label, icon ) ) )`;
-}
+const RESTAURANT_EMBED = `restaurant:restaurants (
+  id, name, address, rating_avg, rating_count, promo_text, cover_url, latitude, longitude,
+  restaurant_categories ( categories ( slug, label, icon ) )
+)`;
 
 // ─── Home feed: recent reviews ───────────────────────────────────────────────
 
 async function fetchFeed(): Promise<FeedItem[]> {
-  const sel = (ll: boolean) =>
-    `id, rating, body, created_at, ${restaurantEmbed(ll)},
-     author:profiles!author_id ( username, full_name, avatar_url, level )`;
-
-  let { data, error }: { data: any; error: any } = await (supabase
+  const { data, error } = await supabase
     .from("reviews")
-    .select(sel(true)) as any)
+    .select(
+      `id, rating, body, created_at, ${RESTAURANT_EMBED},
+       author:profiles!author_id ( username, full_name, avatar_url, level )`,
+    )
     .order("created_at", { ascending: false })
     .limit(60);
 
-  if (error) {
-    ({ data, error } = await supabase
-      .from("reviews")
-      .select(sel(false))
-      .order("created_at", { ascending: false })
-      .limit(60));
-  }
   if (error) throw error;
 
   const mapped: FeedItem[] = (data ?? [])
@@ -107,19 +96,11 @@ export function useHomeFeed() {
 export type FavoriteRestaurant = FeedRestaurant & { favorited_at: string };
 
 async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
-  const sel = (ll: boolean) => `created_at, ${restaurantEmbed(ll)}`;
-
-  let { data, error }: { data: any; error: any } = await (supabase
+  const { data, error } = await supabase
     .from("favorites")
-    .select(sel(true)) as any)
+    .select(`created_at, ${RESTAURANT_EMBED}`)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    ({ data, error } = await supabase
-      .from("favorites")
-      .select(sel(false))
-      .order("created_at", { ascending: false }));
-  }
   if (error) throw error;
 
   return (data ?? [])

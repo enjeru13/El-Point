@@ -17,23 +17,16 @@ export type SearchResult = {
   categories: RestaurantCategory[];
 };
 
-const BASE_COLS = `id, name, address, price_level, rating_avg, rating_count, cover_url, hours,
-       restaurant_categories ( categories ( slug, label, icon ) )`;
-
 async function fetchActiveRestaurants(): Promise<SearchResult[]> {
-  // latitude/longitude land in a later migration; fall back gracefully if absent.
-  // `as any` on the select: the generated types don't know the columns yet.
-  let { data, error }: { data: any; error: any } = await (supabase
+  const { data, error } = await supabase
     .from("restaurants")
-    .select(`${BASE_COLS}, latitude, longitude`) as any)
+    .select(
+      `id, name, address, price_level, rating_avg, rating_count, cover_url, hours,
+       latitude, longitude,
+       restaurant_categories ( categories ( slug, label, icon ) )`,
+    )
     .eq("is_active", true);
 
-  if (error) {
-    ({ data, error } = await supabase
-      .from("restaurants")
-      .select(BASE_COLS)
-      .eq("is_active", true));
-  }
   if (error) throw error;
 
   return (data ?? []).map((r: any) => ({
