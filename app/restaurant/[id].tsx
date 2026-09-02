@@ -21,20 +21,28 @@ import { useToast } from "@/lib/toast";
 import { isOpenNow, formatRange, DAY_LABELS_LONG } from "@/lib/hours";
 import { useTheme } from "@/lib/ThemeContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Animated,
-  Keyboard,
-  KeyboardAvoidingView,
   Linking,
-  Modal,
-  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
-  TextInput,
   View,
 } from "react-native";
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetScrollView,
+  type BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -99,22 +107,21 @@ const RATING_LABELS = [
   "Excelente ⭐",
 ];
 
-function ReviewModal({
-  visible,
-  onClose,
-  restaurantName,
-  submitting,
-  errorMessage,
-  onSubmit,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  restaurantName: string;
-  submitting: boolean;
-  errorMessage: string | null;
-  onSubmit: (rating: number, body: string, photoUris: string[]) => void;
-}) {
-  const { C, shadow } = useTheme();
+export interface ReviewSheetHandle {
+  present: () => void;
+  dismiss: () => void;
+}
+
+const ReviewSheet = forwardRef<
+  ReviewSheetHandle,
+  {
+    restaurantName: string;
+    submitting: boolean;
+    errorMessage: string | null;
+    onSubmit: (rating: number, body: string, photoUris: string[]) => void;
+  }
+>(({ restaurantName, submitting, errorMessage, onSubmit }, ref) => {
+  const { C } = useTheme();
   const RATING_COLORS = [
     "",
     C.error,
@@ -123,11 +130,25 @@ function ReviewModal({
     C.primaryContainer,
     C.secondary,
   ];
-  const insets = useSafeAreaInsets();
+  const sheetRef = useRef<BottomSheetModal>(null);
+  const snapPoints = useMemo(() => ["88%"], []);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const reset = useCallback(() => {
+    setRating(0);
+    setComment("");
+    setPhotos([]);
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    present: () => {
+      reset();
+      sheetRef.current?.present();
+    },
+    dismiss: () => sheetRef.current?.dismiss(),
+  }));
 
   async function addPhotos() {
     const r = await ImagePicker.launchImageLibraryAsync({
@@ -139,241 +160,151 @@ function ReviewModal({
     if (r.canceled) return;
     setPhotos((prev) => [...prev, ...r.assets.map((a) => a.uri)].slice(0, 4));
   }
-  const scaleAnim = useRef(new Animated.Value(0.94)).current;
 
-  useEffect(() => {
-    if (visible) {
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 220,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          damping: 18,
-          stiffness: 220,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      setRating(0);
-      setComment("");
-      setPhotos([]);
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 180,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 0.94,
-          duration: 180,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [visible]);
-
-  const canSubmit = rating > 0 && comment.trim().length >= 10 && !submitting;
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+        pressBehavior="close"
+        opacity={0.45}
+      />
+    ),
+    [],
+  );
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      statusBarTranslucent
-      onRequestClose={() => {
-        Keyboard.dismiss();
-        onClose();
+    <BottomSheetModal
+      ref={sheetRef}
+      snapPoints={snapPoints}
+      enableDynamicSizing={false}
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
+      android_keyboardInputMode="adjustResize"
+      backdropComponent={renderBackdrop}
+      handleIndicatorStyle={{ backgroundColor: C.outlineVariant, width: 44 }}
+      backgroundStyle={{
+        backgroundColor: C.surface,
+        borderRadius: 28,
+        borderWidth: 2,
+        borderColor: C.border,
       }}
     >
-      {/* Backdrop — dismiss teclado primero, cerrar solo si ya estaba cerrado */}
-      <Animated.View
+      {/* Header */}
+      <View
         style={{
-          flex: 1,
-          backgroundColor: "rgba(28,27,27,0.65)",
-          opacity: fadeAnim,
+          paddingHorizontal: 20,
+          paddingBottom: 14,
+          borderBottomWidth: 2,
+          borderBottomColor: C.outlineVariant,
         }}
       >
-        <Pressable
-          style={{ flex: 1 }}
-          onPress={() => {
-            Keyboard.dismiss();
-          }}
-        />
-      </Animated.View>
+        <AppText variant="overline" color={C.onSurfaceVariant}>RANKEAR</AppText>
+        <AppText variant="title" style={{ fontSize: 22, lineHeight: 27 }} numberOfLines={1}>
+          {restaurantName}
+        </AppText>
+      </View>
 
-      {/* KeyboardAvoidingView empuja el panel cuando sube el teclado */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{
-          position: "absolute",
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          justifyContent: "center",
-          pointerEvents: "box-none",
-        }}
-        keyboardVerticalOffset={0}
+      <BottomSheetScrollView
+        contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: 48 }}
+        keyboardShouldPersistTaps="handled"
       >
-        <Animated.View
-          style={{
-            justifyContent: "center",
-            paddingHorizontal: 20,
-            paddingTop: insets.top + 8,
-            paddingBottom: insets.bottom + 8,
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }],
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: C.surface,
-              borderRadius: 28,
-              borderWidth: 2,
-              borderColor: C.border,
-              overflow: "hidden",
-              ...shadow.md,
-            }}
-          >
-            {/* Header con color primario */}
+        {/* Estrellas */}
+        <View style={{ alignItems: "center", gap: 12 }}>
+          <StarPicker value={rating} onChange={setRating} />
+          {rating > 0 ? (
             <View
               style={{
-                backgroundColor: C.primaryFixed,
-                borderBottomWidth: 2,
-                borderBottomColor: C.border,
-                padding: 20,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
+                paddingHorizontal: 14,
+                paddingVertical: 6,
+                borderRadius: 99,
+                backgroundColor: C.surfaceContainerLow,
+                borderWidth: 2,
+                borderColor: C.outlineVariant,
               }}
             >
-              <View style={{ gap: 2 }}>
-                <AppText variant="overline" color={C.onSurfaceVariant}>
-                  RANKEAR
-                </AppText>
-                <AppText variant="title" style={{ fontSize: 22, lineHeight: 27 }}>
-                  {restaurantName}
-                </AppText>
-              </View>
-              <Pressable
-                onPress={onClose}
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 18,
-                  backgroundColor: C.surface,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderWidth: 2,
-                  borderColor: C.border,
-                }}
-              >
-                <Icon name="close" size={18} color={C.onSurface} />
-              </Pressable>
+              <AppText variant="bodyStrong" color={RATING_COLORS[rating]}>
+                {RATING_LABELS[rating]}
+              </AppText>
             </View>
+          ) : (
+            <AppText variant="bodySm" color={C.outline}>
+              ¿Cuántas estrellas le das?
+            </AppText>
+          )}
+        </View>
 
-            <View style={{ padding: 20, gap: 20 }}>
-              {/* Estrellas */}
-              <View style={{ alignItems: "center", gap: 12 }}>
-                <StarPicker value={rating} onChange={setRating} />
-                {rating > 0 ? (
-                  <View
-                    style={{
-                      paddingHorizontal: 14,
-                      paddingVertical: 6,
-                      borderRadius: 99,
-                      backgroundColor: C.surfaceContainerLow,
-                      borderWidth: 2,
-                      borderColor: C.outlineVariant,
-                    }}
-                  >
-                    <AppText variant="bodyStrong" color={RATING_COLORS[rating]}>
-                      {RATING_LABELS[rating]}
-                    </AppText>
-                  </View>
-                ) : (
-                  <AppText variant="bodySm" color={C.outline}>
-                    ¿Cuántas estrellas le das?
-                  </AppText>
-                )}
-              </View>
+        <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
 
-              {/* Divider */}
-              <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
+        {/* Comentario */}
+        <View style={{ gap: 8 }}>
+          <Field
+            label="TU EXPERIENCIA"
+            value={comment}
+            onChangeText={(t) => setComment(t.slice(0, 500))}
+            placeholder="Cuéntale a la comunidad qué tal estuvo…"
+            multiline
+          />
+          <AppText
+            variant="caption"
+            color={comment.trim().length < 10 ? C.error : C.outline}
+            align="right"
+            style={{ fontSize: 12 }}
+          >
+            {comment.length < 10
+              ? `Mínimo 10 caracteres · ${comment.length} / 500`
+              : `${comment.length} / 500`}
+          </AppText>
+        </View>
 
-              {/* Comentario */}
-              <View style={{ gap: 8 }}>
-                <Field
-                  label="TU EXPERIENCIA"
-                  value={comment}
-                  onChangeText={(t) => setComment(t.slice(0, 500))}
-                  placeholder="Cuéntale a la comunidad qué tal estuvo…"
-                  multiline
-                />
-                <AppText
-                  variant="caption"
-                  color={comment.trim().length < 10 ? C.error : C.outline}
-                  align="right"
-                  style={{ fontSize: 12 }}
+        {/* Fotos */}
+        <View style={{ gap: 8 }}>
+          <AppText variant="overline" color={C.onSurfaceVariant}>
+            FOTOS (OPCIONAL)
+          </AppText>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            {photos.map((uri, i) => (
+              <View key={uri + i} style={{ width: 64, height: 64, borderRadius: 12, overflow: "hidden", borderWidth: 2, borderColor: C.border }}>
+                <Image source={{ uri }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+                <Pressable
+                  onPress={() => setPhotos((p) => p.filter((_, idx) => idx !== i))}
+                  style={{ position: "absolute", top: 2, right: 2, width: 18, height: 18, borderRadius: 9, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center" }}
                 >
-                  {comment.length < 10
-                    ? `Mínimo 10 caracteres · ${comment.length} / 500`
-                    : `${comment.length} / 500`}
-                </AppText>
+                  <Icon name="close" size={12} color="#fff" />
+                </Pressable>
               </View>
-
-              {/* Fotos */}
-              <View style={{ gap: 8 }}>
-                <AppText variant="overline" color={C.onSurfaceVariant}>
-                  FOTOS (OPCIONAL)
-                </AppText>
-                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-                  {photos.map((uri, i) => (
-                    <View key={uri + i} style={{ width: 64, height: 64, borderRadius: 12, overflow: "hidden", borderWidth: 2, borderColor: C.border }}>
-                      <Image source={{ uri }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
-                      <Pressable
-                        onPress={() => setPhotos((p) => p.filter((_, idx) => idx !== i))}
-                        style={{ position: "absolute", top: 2, right: 2, width: 18, height: 18, borderRadius: 9, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center" }}
-                      >
-                        <Icon name="close" size={12} color="#fff" />
-                      </Pressable>
-                    </View>
-                  ))}
-                  {photos.length < 4 && (
-                    <Pressable
-                      onPress={addPhotos}
-                      style={{ width: 64, height: 64, borderRadius: 12, borderWidth: 2, borderStyle: "dashed", borderColor: C.outlineVariant, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceContainerLow }}
-                    >
-                      <Icon name="camera-plus-outline" size={22} color={C.primary} />
-                    </Pressable>
-                  )}
-                </View>
-              </View>
-
-              {errorMessage && (
-                <AppText variant="label" color={C.error}>
-                  {errorMessage}
-                </AppText>
-              )}
-
-              {/* Submit */}
-              <Button
-                label={submitting ? "Publicando…" : "Publicar Rank"}
-                onPress={() => onSubmit(rating, comment.trim(), photos)}
-                disabled={!(rating > 0 && comment.trim().length >= 10)}
-                loading={submitting}
-                icon="fire"
-              />
-            </View>
+            ))}
+            {photos.length < 4 && (
+              <Pressable
+                onPress={addPhotos}
+                style={{ width: 64, height: 64, borderRadius: 12, borderWidth: 2, borderStyle: "dashed", borderColor: C.outlineVariant, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceContainerLow }}
+              >
+                <Icon name="camera-plus-outline" size={22} color={C.primary} />
+              </Pressable>
+            )}
           </View>
-        </Animated.View>
-      </KeyboardAvoidingView>
-    </Modal>
+        </View>
+
+        {errorMessage && (
+          <AppText variant="label" color={C.error}>
+            {errorMessage}
+          </AppText>
+        )}
+
+        <Button
+          label={submitting ? "Publicando…" : "Publicar Rank"}
+          onPress={() => onSubmit(rating, comment.trim(), photos)}
+          disabled={!(rating > 0 && comment.trim().length >= 10)}
+          loading={submitting}
+          icon="fire"
+        />
+      </BottomSheetScrollView>
+    </BottomSheetModal>
   );
-}
+});
+
+ReviewSheet.displayName = "ReviewSheet";
 
 // ─── Pantalla ─────────────────────────────────────────────────────────────────
 
@@ -392,7 +323,7 @@ export default function RestaurantProfileScreen() {
   const toast = useToast();
 
   const [saved, setSaved] = useState(false);
-  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const reviewSheetRef = useRef<ReviewSheetHandle>(null);
   const [replyingId, setReplyingId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [hoursOpen, setHoursOpen] = useState(false);
@@ -490,7 +421,7 @@ export default function RestaurantProfileScreen() {
       { rating, body, photoUris },
       {
         onSuccess: () => {
-          setReviewModalOpen(false);
+          reviewSheetRef.current?.dismiss();
           toast.success("¡Rank publicado! +10 XP");
         },
         onError: () => toast.error("No se pudo publicar. ¿Iniciaste sesión?"),
@@ -653,7 +584,7 @@ export default function RestaurantProfileScreen() {
           <View style={{ flexDirection: "row", gap: 10 }}>
             <Button
               label="Rankear"
-              onPress={() => setReviewModalOpen(true)}
+              onPress={() => reviewSheetRef.current?.present()}
               icon="fire"
               size="sm"
               fullWidth={false}
@@ -1035,7 +966,7 @@ export default function RestaurantProfileScreen() {
 
             {/* CTA nueva reseña */}
             <Pressable
-              onPress={() => setReviewModalOpen(true)}
+              onPress={() => reviewSheetRef.current?.present()}
               style={{
                 flexDirection: "row",
                 alignItems: "center",
@@ -1382,10 +1313,9 @@ export default function RestaurantProfileScreen() {
         </View>
       </Animated.View>
 
-      {/* ── Review Modal ── */}
-      <ReviewModal
-        visible={reviewModalOpen}
-        onClose={() => setReviewModalOpen(false)}
+      {/* ── Review Sheet ── */}
+      <ReviewSheet
+        ref={reviewSheetRef}
         restaurantName={restaurant.name}
         submitting={submitReview.isPending}
         errorMessage={
