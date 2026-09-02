@@ -23,7 +23,6 @@ import { useTheme } from "@/lib/ThemeContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Animated,
   Keyboard,
   KeyboardAvoidingView,
@@ -546,6 +545,13 @@ export default function RestaurantProfileScreen() {
             />
           )}
 
+          {/* Scrim degradado para legibilidad sobre la foto */}
+          <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 190 }}>
+            <View style={{ flex: 1, backgroundColor: "rgba(28,27,27,0.12)" }} />
+            <View style={{ flex: 1, backgroundColor: "rgba(28,27,27,0.34)" }} />
+            <View style={{ flex: 1, backgroundColor: "rgba(28,27,27,0.62)" }} />
+          </View>
+
           {/* Info overlay */}
           <View
             style={{
@@ -555,7 +561,6 @@ export default function RestaurantProfileScreen() {
               right: 0,
               padding: 20,
               gap: 8,
-              backgroundColor: "rgba(28,27,27,0.6)",
             }}
           >
             {/* Chips */}
@@ -693,11 +698,11 @@ export default function RestaurantProfileScreen() {
                     onPress={() => canExpand && setHoursOpen((v) => !v)}
                     style={{ flexDirection: "row", alignItems: "center", gap: 14, padding: 16 }}
                   >
-                    <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: os.open ? "rgba(34,197,94,0.15)" : "rgba(186,26,26,0.12)", alignItems: "center", justifyContent: "center" }}>
-                      <Icon name="clock-outline" size={18} color={os.open ? "#16a34a" : C.error} />
+                    <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: os.open ? C.secondaryContainer : C.error + "22", alignItems: "center", justifyContent: "center" }}>
+                      <Icon name="clock-outline" size={18} color={os.open ? C.secondary : C.error} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <AppText variant="bodyStrong" color={os.open ? "#16a34a" : C.error}>
+                      <AppText variant="bodyStrong" color={os.open ? C.secondary : C.error}>
                         {os.open ? "Abierto ahora" : "Cerrado"}
                       </AppText>
                       <AppText variant="bodySm" color={C.onSurfaceVariant}>
@@ -1065,8 +1070,30 @@ export default function RestaurantProfileScreen() {
 
             {/* Estado carga / vacío / lista */}
             {reviewsQ.isLoading ? (
-              <View style={{ paddingVertical: 32, alignItems: "center" }}>
-                <ActivityIndicator color={C.primary} />
+              <View style={{ gap: 12 }}>
+                {[0, 1].map((i) => (
+                  <View
+                    key={i}
+                    style={{
+                      backgroundColor: C.surface,
+                      borderRadius: 20,
+                      padding: 16,
+                      gap: 10,
+                      borderWidth: 2,
+                      borderColor: C.border,
+                      ...shadow.sm,
+                    }}
+                  >
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                      <Skeleton width={40} height={40} radius={20} />
+                      <View style={{ gap: 6 }}>
+                        <Skeleton width={120} height={14} />
+                        <Skeleton width={80} height={11} />
+                      </View>
+                    </View>
+                    <Skeleton height={40} radius={8} />
+                  </View>
+                ))}
               </View>
             ) : reviews.length === 0 ? (
               <View
