@@ -12,18 +12,28 @@ export type SearchResult = {
   rating_count: number;
   cover_url: string | null;
   hours: Hours | null;
+  lat: number | null;
+  lng: number | null;
   categories: RestaurantCategory[];
 };
 
+const BASE_COLS = `id, name, address, price_level, rating_avg, rating_count, cover_url, hours,
+       restaurant_categories ( categories ( slug, label, icon ) )`;
+
 async function fetchActiveRestaurants(): Promise<SearchResult[]> {
-  const { data, error } = await supabase
+  // latitude/longitude land in a later migration; fall back gracefully if absent.
+  // `as any` on the select: the generated types don't know the columns yet.
+  let { data, error }: { data: any; error: any } = await (supabase
     .from("restaurants")
-    .select(
-      `id, name, address, price_level, rating_avg, rating_count, cover_url, hours,
-       restaurant_categories ( categories ( slug, label, icon ) )`,
-    )
+    .select(`${BASE_COLS}, latitude, longitude`) as any)
     .eq("is_active", true);
 
+  if (error) {
+    ({ data, error } = await supabase
+      .from("restaurants")
+      .select(BASE_COLS)
+      .eq("is_active", true));
+  }
   if (error) throw error;
 
   return (data ?? []).map((r: any) => ({
@@ -35,6 +45,8 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
     rating_count: r.rating_count,
     cover_url: r.cover_url ?? null,
     hours: parseHours(r.hours),
+    lat: typeof r.latitude === "number" ? r.latitude : null,
+    lng: typeof r.longitude === "number" ? r.longitude : null,
     categories: (r.restaurant_categories ?? [])
       .map((rc: any) => rc.categories)
       .filter(Boolean),

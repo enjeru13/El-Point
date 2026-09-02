@@ -1,7 +1,9 @@
 import { Image } from 'expo-image';
 import * as SecureStore from 'expo-secure-store';
+import * as Location from 'expo-location';
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
+import { useToast } from '@/lib/toast';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Pressable,
@@ -20,8 +22,26 @@ import { isOpenNow } from '@/lib/hours';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Chip } from '@/components/ui/Chip';
 
-type SortKey = 'rank' | 'reviews' | null;
+type SortKey = 'rank' | 'reviews' | 'near' | null;
 type PriceKey = 1 | 2 | 3 | null;
+
+type LatLng = { latitude: number; longitude: number };
+
+function distanceKm(a: LatLng, lat: number, lng: number): number {
+  const R = 6371;
+  const dLat = ((lat - a.latitude) * Math.PI) / 180;
+  const dLng = ((lng - a.longitude) * Math.PI) / 180;
+  const s =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((a.latitude * Math.PI) / 180) *
+      Math.cos((lat * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
+}
+
+function fmtKm(km: number): string {
+  return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+}
 
 const RECENTS_KEY = 'elpoint_recent_searches';
 const RECENTS_MAX = 6;
@@ -99,15 +119,21 @@ function OpenPill({ hours }: { hours: SearchResult['hours'] }) {
 function PlaceCard({
   item,
   featured = false,
+  userLoc,
   onPress,
 }: {
   item: SearchResult;
   featured?: boolean;
+  userLoc?: LatLng | null;
   onPress: () => void;
 }) {
   const { C, shadow } = useTheme();
   const imgH = featured ? 190 : 132;
   const price = priceLabel(item.price_level);
+  const dist =
+    userLoc && item.lat != null && item.lng != null
+      ? fmtKm(distanceKm(userLoc, item.lat, item.lng))
+      : null;
 
   return (
     <Pressable
@@ -163,6 +189,12 @@ function PlaceCard({
               ? `${item.rating_count} ${item.rating_count === 1 ? 'rank' : 'ranks'}`
               : 'Nuevo'}
           </AppText>
+          {dist && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+              <Icon name="map-marker-distance" size={12} color={C.primary} />
+              <AppText variant="caption" color={C.primary}>{dist}</AppText>
+            </View>
+          )}
         </View>
 
         <AppText
@@ -221,6 +253,7 @@ export default function SearchScreen() {
   const { C, shadow } = useTheme();
   const insets   = useSafeAreaInsets();
   const router   = useRouter();
+  const toast    = useToast();
   const inputRef = useRef<TextInput>(null);
 
   const searchQ = useRestaurantSearch();
@@ -233,8 +266,31 @@ export default function SearchScreen() {
   const [price, setPrice]       = useState<PriceKey>(null);
   const [onlyOpen, setOnlyOpen] = useState(false);
   const [recents, setRecents]   = useState<string[]>([]);
+  const [userLoc, setUserLoc]   = useState<LatLng | null>(null);
+  const [locBusy, setLocBusy]   = useState(false);
 
   useEffect(() => { loadRecents().then(setRecents); }, []);
+
+  async function enableNear() {
+    if (userLoc) { setSort(s => (s === 'near' ? null : 'near')); return; }
+    setLocBusy(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        toast.error('Activa el permiso de ubicación para ordenar por cercanía.');
+        return;
+      }
+      const pos =
+        (await Location.getLastKnownPositionAsync()) ??
+        (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }));
+      setUserLoc({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+      setSort('near');
+    } catch {
+      toast.error('No pudimos obtener tu ubicación.');
+    } finally {
+      setLocBusy(false);
+    }
+  }
 
   function pushRecent(raw: string) {
     const q = raw.trim();
@@ -267,7 +323,11 @@ export default function SearchScreen() {
       const matchOpen = !onlyOpen || isOpenNow(r.hours).open;
       return matchQuery && matchCat && matchPrice && matchOpen;
     });
-    if (sort === 'rank') {
+    if (sort === 'near' && userLoc) {
+      const d = (r: SearchResult) =>
+        r.lat != null && r.lng != null ? distanceKm(userLoc, r.lat, r.lng) : Infinity;
+      list = [...list].sort((a, b) => d(a) - d(b));
+    } else if (sort === 'rank') {
       // rated places first, by average then by how many ranks back it up
       list = [...list].sort(
         (a, b) =>
@@ -294,7 +354,7 @@ export default function SearchScreen() {
       list = [...list].sort((a, b) => a.name.localeCompare(b.name, 'es'));
     }
     return list;
-  }, [all, query, activeCat, price, sort, onlyOpen]);
+  }, [all, query, activeCat, price, sort, onlyOpen, userLoc]);
 
   const popular = useMemo(
     () => [...all].sort((a, b) => b.rating_count - a.rating_count).slice(0, 8),
@@ -391,19 +451,25 @@ export default function SearchScreen() {
         }}>
           <View style={{ gap: 8 }}>
             <AppText variant="overline" color={C.onSurfaceVariant}>ORDENAR</AppText>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              {([
-                { key: 'rank' as SortKey,    label: 'Mejor rank',   icon: 'star-outline' },
-                { key: 'reviews' as SortKey, label: 'Más reseñas',  icon: 'comment-text' },
-              ]).map(opt => (
-                <Chip
-                  key={opt.key!}
-                  label={opt.label}
-                  icon={opt.icon}
-                  active={sort === opt.key}
-                  onPress={() => setSort(sort === opt.key ? null : opt.key)}
-                />
-              ))}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              <Chip
+                label={locBusy ? 'Ubicando…' : 'Cerca de mí'}
+                icon="crosshairs-gps"
+                active={sort === 'near'}
+                onPress={enableNear}
+              />
+              <Chip
+                label="Mejor rank"
+                icon="star-outline"
+                active={sort === 'rank'}
+                onPress={() => setSort(sort === 'rank' ? null : 'rank')}
+              />
+              <Chip
+                label="Más reseñas"
+                icon="comment-text"
+                active={sort === 'reviews'}
+                onPress={() => setSort(sort === 'reviews' ? null : 'reviews')}
+              />
             </View>
           </View>
 
@@ -477,12 +543,12 @@ export default function SearchScreen() {
                 </AppText>
                 {sort && (
                   <AppText variant="caption" color={C.primary}>
-                    {sort === 'rank' ? 'Mejor rank' : 'Más reseñas'}
+                    {sort === 'rank' ? 'Mejor rank' : sort === 'reviews' ? 'Más reseñas' : 'Cerca de mí'}
                   </AppText>
                 )}
               </View>
               {best && (
-                <PlaceCard featured item={best} onPress={() => goToPlace(best.id)} />
+                <PlaceCard featured userLoc={userLoc} item={best} onPress={() => goToPlace(best.id)} />
               )}
               {rest.length > 0 && best && (
                 <AppText variant="overline" color={C.outline} style={{ marginTop: 6 }}>
@@ -490,7 +556,7 @@ export default function SearchScreen() {
                 </AppText>
               )}
               {rest.map(r => (
-                <PlaceCard key={r.id} item={r} onPress={() => goToPlace(r.id)} />
+                <PlaceCard key={r.id} userLoc={userLoc} item={r} onPress={() => goToPlace(r.id)} />
               ))}
             </>
           )}
@@ -536,6 +602,7 @@ export default function SearchScreen() {
               <PlaceCard
                 key={r.id}
                 featured={i === 0}
+                userLoc={userLoc}
                 item={r}
                 onPress={() => goToPlace(r.id)}
               />
