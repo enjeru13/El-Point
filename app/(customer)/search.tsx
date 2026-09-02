@@ -1,7 +1,8 @@
 import { Image } from 'expo-image';
+import * as SecureStore from 'expo-secure-store';
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -21,6 +22,24 @@ import { Chip } from '@/components/ui/Chip';
 
 type SortKey = 'rank' | 'reviews' | null;
 type PriceKey = 1 | 2 | 3 | null;
+
+const RECENTS_KEY = 'elpoint_recent_searches';
+const RECENTS_MAX = 6;
+
+async function loadRecents(): Promise<string[]> {
+  try {
+    const raw = await SecureStore.getItemAsync(RECENTS_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter((s) => typeof s === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+async function saveRecents(list: string[]) {
+  try {
+    await SecureStore.setItemAsync(RECENTS_KEY, JSON.stringify(list));
+  } catch {}
+}
 
 function priceLabel(level: number | null): string {
   return level && level >= 1 ? '$'.repeat(Math.min(level, 3)) : '';
@@ -213,6 +232,23 @@ export default function SearchScreen() {
   const [sort, setSort]         = useState<SortKey>(null);
   const [price, setPrice]       = useState<PriceKey>(null);
   const [onlyOpen, setOnlyOpen] = useState(false);
+  const [recents, setRecents]   = useState<string[]>([]);
+
+  useEffect(() => { loadRecents().then(setRecents); }, []);
+
+  function pushRecent(raw: string) {
+    const q = raw.trim();
+    if (q.length < 2) return;
+    setRecents((prev) => {
+      const next = [q, ...prev.filter((r) => r.toLowerCase() !== q.toLowerCase())].slice(0, RECENTS_MAX);
+      saveRecents(next);
+      return next;
+    });
+  }
+  function clearRecents() {
+    setRecents([]);
+    saveRecents([]);
+  }
 
   const hasActiveFilters = sort !== null || price !== null || onlyOpen;
   const all = searchQ.data ?? [];
@@ -231,9 +267,32 @@ export default function SearchScreen() {
       const matchOpen = !onlyOpen || isOpenNow(r.hours).open;
       return matchQuery && matchCat && matchPrice && matchOpen;
     });
-    if (sort === 'rank') list = [...list].sort((a, b) => b.rating_avg - a.rating_avg);
-    if (sort === 'reviews') list = [...list].sort((a, b) => b.rating_count - a.rating_count);
-    else list = [...list].sort((a, b) => b.rating_count - a.rating_count);
+    if (sort === 'rank') {
+      // rated places first, by average then by how many ranks back it up
+      list = [...list].sort(
+        (a, b) =>
+          (b.rating_count > 0 ? 1 : 0) - (a.rating_count > 0 ? 1 : 0) ||
+          b.rating_avg - a.rating_avg ||
+          b.rating_count - a.rating_count,
+      );
+    } else if (sort === 'reviews') {
+      list = [...list].sort((a, b) => b.rating_count - a.rating_count || b.rating_avg - a.rating_avg);
+    } else if (query.trim()) {
+      // no explicit sort + text query → relevance
+      const q = query.trim().toLowerCase();
+      const score = (r: SearchResult) => {
+        const n = r.name.toLowerCase();
+        if (n === q) return 0;
+        if (n.startsWith(q)) return 1;
+        if (n.includes(q)) return 2;
+        if (r.categories.some(c => c.label.toLowerCase().includes(q))) return 3;
+        return 4;
+      };
+      list = [...list].sort((a, b) => score(a) - score(b) || b.rating_count - a.rating_count);
+    } else {
+      // category browse → alphabetical
+      list = [...list].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    }
     return list;
   }, [all, query, activeCat, price, sort, onlyOpen]);
 
@@ -256,6 +315,10 @@ export default function SearchScreen() {
     inputRef.current?.blur();
   }
   function resetFilters() { setSort(null); setPrice(null); setOnlyOpen(false); }
+  function goToPlace(id: string) {
+    if (query.trim()) pushRecent(query);
+    router.push(`/restaurant/${id}`);
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: C.surface }}>
@@ -276,7 +339,7 @@ export default function SearchScreen() {
               ref={inputRef}
               value={query}
               onChangeText={setQuery}
-              onSubmit={() => inputRef.current?.blur()}
+              onSubmit={() => { pushRecent(query); inputRef.current?.blur(); }}
               onClear={clear}
               variant="floating"
             />
@@ -408,11 +471,18 @@ export default function SearchScreen() {
             />
           ) : (
             <>
-              <AppText variant="overline" color={C.outline}>
-                {best ? 'MEJOR COINCIDENCIA' : `${results.length} ${results.length === 1 ? 'LUGAR' : 'LUGARES'}`}
-              </AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                <AppText variant="overline" color={C.outline}>
+                  {best ? 'MEJOR COINCIDENCIA' : `${results.length} ${results.length === 1 ? 'LUGAR' : 'LUGARES'}`}
+                </AppText>
+                {sort && (
+                  <AppText variant="caption" color={C.primary}>
+                    {sort === 'rank' ? 'Mejor rank' : 'Más reseñas'}
+                  </AppText>
+                )}
+              </View>
               {best && (
-                <PlaceCard featured item={best} onPress={() => router.push(`/restaurant/${best.id}`)} />
+                <PlaceCard featured item={best} onPress={() => goToPlace(best.id)} />
               )}
               {rest.length > 0 && best && (
                 <AppText variant="overline" color={C.outline} style={{ marginTop: 6 }}>
@@ -420,7 +490,7 @@ export default function SearchScreen() {
                 </AppText>
               )}
               {rest.map(r => (
-                <PlaceCard key={r.id} item={r} onPress={() => router.push(`/restaurant/${r.id}`)} />
+                <PlaceCard key={r.id} item={r} onPress={() => goToPlace(r.id)} />
               ))}
             </>
           )}
@@ -431,6 +501,28 @@ export default function SearchScreen() {
           keyboardDismissMode="on-drag"
           contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 14 }}
         >
+          {recents.length > 0 && (
+            <View style={{ gap: 10 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <AppText variant="overline" color={C.outline}>RECIENTES</AppText>
+                <Pressable onPress={clearRecents} hitSlop={8}>
+                  <AppText variant="caption" color={C.primary}>Borrar</AppText>
+                </Pressable>
+              </View>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {recents.map(term => (
+                  <Chip
+                    key={term}
+                    label={term}
+                    icon="magnify"
+                    active={false}
+                    onPress={() => { setQuery(term); inputRef.current?.blur(); }}
+                  />
+                ))}
+              </View>
+            </View>
+          )}
+
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
             <Icon name="trending-up" size={18} color={C.primary} />
             <AppText variant="heading">Populares en San Cristóbal</AppText>
@@ -445,7 +537,7 @@ export default function SearchScreen() {
                 key={r.id}
                 featured={i === 0}
                 item={r}
-                onPress={() => router.push(`/restaurant/${r.id}`)}
+                onPress={() => goToPlace(r.id)}
               />
             ))
           )}
