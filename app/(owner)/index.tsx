@@ -168,32 +168,32 @@ export default function OwnerHomeScreen() {
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16 }}>
             <View style={{
-              width: 52, height: 52, borderRadius: 16,
+              width: 48, height: 48, borderRadius: 14,
               backgroundColor: restaurant.is_active ? C.primary : C.outline,
               alignItems: 'center', justifyContent: 'center',
               borderWidth: 2, borderColor: C.border,
             }}>
-              <Icon name={restaurant.is_active ? 'store-outline' : 'eye-off-outline'} size={26} color="#fff" />
+              <Icon name={restaurant.is_active ? 'store-outline' : 'eye-off-outline'} size={24} color="#fff" />
             </View>
-            <View style={{ flex: 1, gap: 3 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <AppText variant="bodyStrong">
-                  {restaurant.is_active ? 'Local visible' : 'Local oculto'}
-                </AppText>
-                <View style={{
-                  paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99,
-                  backgroundColor: restaurant.is_active ? C.secondaryContainer : C.surface,
-                  borderWidth: 2, borderColor: C.border,
-                }}>
-                  <AppText variant="caption" color={restaurant.is_active ? C.onSurface : C.outline}>
-                    {restaurant.is_active ? 'ACTIVO' : 'PAUSADO'}
-                  </AppText>
-                </View>
-              </View>
+
+            <View style={{ flex: 1, gap: 2 }}>
+              <AppText variant="bodyStrong">
+                {restaurant.is_active ? 'Local visible' : 'Local oculto'}
+              </AppText>
               <AppText variant="bodySm" color={C.onSurfaceVariant}>
                 {restaurant.is_active
-                  ? 'Aparece en el mapa y en búsquedas de los comensales.'
-                  : 'Nadie puede encontrarlo hasta que lo actives.'}
+                  ? 'Visible en mapa y búsquedas'
+                  : 'No aparece para los comensales'}
+              </AppText>
+            </View>
+
+            <View style={{
+              paddingHorizontal: 9, paddingVertical: 3, borderRadius: 99,
+              backgroundColor: restaurant.is_active ? C.secondaryContainer : C.surface,
+              borderWidth: 2, borderColor: C.border,
+            }}>
+              <AppText variant="caption" color={restaurant.is_active ? C.onSurface : C.outline}>
+                {restaurant.is_active ? 'ACTIVO' : 'PAUSADO'}
               </AppText>
             </View>
           </View>
@@ -237,39 +237,6 @@ export default function OwnerHomeScreen() {
             <StatCard icon="star"         label="Calificación"   value={restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : '–'} color={C.primary} />
             <StatCard icon="comment-text" label="Reseñas hoy"    value={String(reviewsToday)} color={C.secondary} />
             <StatCard icon="trophy-outline" label="Total reseñas" value={String(restaurant.rating_count)} color={C.tertiary} />
-          </View>
-        </View>
-
-        {/* Acciones rápidas */}
-        <View style={{ gap: 8 }}>
-          <AppText variant="heading" style={{ fontSize: 17 }}>Acciones rápidas</AppText>
-          <View style={{
-            flexDirection: 'row',
-            backgroundColor: C.surface,
-            borderRadius: 18,
-            borderWidth: 2, borderColor: C.border,
-            overflow: 'hidden',
-            ...shadow.sm,
-          }}>
-            {[
-              { icon: 'pencil-outline', label: 'Editar', onPress: () => router.push('/(owner)/profile') },
-              { icon: 'analytics',      label: 'Métricas', onPress: () => router.push('/(owner)/analytics') },
-              { icon: 'store-outline',  label: 'Ver local', onPress: () => router.push(`/restaurant/${restaurant.id}`) },
-            ].map((a, i) => (
-              <Pressable
-                key={a.label}
-                onPress={a.onPress}
-                style={({ pressed }) => ({
-                  flex: 1, alignItems: 'center', gap: 7,
-                  paddingVertical: 16,
-                  borderLeftWidth: i === 0 ? 0 : 2, borderLeftColor: C.outlineVariant,
-                  backgroundColor: pressed ? C.surfaceContainerHigh : 'transparent',
-                })}
-              >
-                <Icon name={a.icon} size={24} color={C.primary} />
-                <AppText variant="label">{a.label}</AppText>
-              </Pressable>
-            ))}
           </View>
         </View>
 
