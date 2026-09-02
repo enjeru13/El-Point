@@ -4,7 +4,7 @@ import { useSettings, type SettingKey } from "@/lib/settings";
 
 export type AppNotification = {
   id: string;
-  type: "like" | "reply" | "levelup" | "levelup_soon" | "promo" | "review";
+  type: "like" | "reply" | "levelup" | "levelup_soon" | "promo" | "review" | "weekly";
   title: string;
   body: string | null;
   data: Record<string, any> | null;
@@ -22,6 +22,7 @@ const TYPE_SETTING: Record<AppNotification["type"], SettingKey> = {
   levelup: "notifLevelup",
   levelup_soon: "notifLevelup",
   promo: "notifPromos",
+  weekly: "notifWeekly",
 };
 
 async function fetchNotifications(): Promise<AppNotification[]> {

@@ -97,6 +97,7 @@ function NotifCard({
       color: C.tertiary,
     },
     promo: { icon: "tag", bg: C.primaryContainer, color: "#fff" },
+    weekly: { icon: "analytics", bg: C.primaryFixed, color: C.primary },
   };
   const cfg = CONFIG[notif.type] ?? CONFIG.like;
 
