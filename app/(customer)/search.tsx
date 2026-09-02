@@ -19,29 +19,12 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { useRestaurantSearch, type SearchResult } from '@/lib/queries/search';
 import { useCategories } from '@/lib/queries/categories';
 import { isOpenNow } from '@/lib/hours';
+import { distanceKm, fmtKm, type LatLng } from '@/lib/geo';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Chip } from '@/components/ui/Chip';
 
 type SortKey = 'rank' | 'reviews' | 'near' | null;
 type PriceKey = 1 | 2 | 3 | null;
-
-type LatLng = { latitude: number; longitude: number };
-
-function distanceKm(a: LatLng, lat: number, lng: number): number {
-  const R = 6371;
-  const dLat = ((lat - a.latitude) * Math.PI) / 180;
-  const dLng = ((lng - a.longitude) * Math.PI) / 180;
-  const s =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((a.latitude * Math.PI) / 180) *
-      Math.cos((lat * Math.PI) / 180) *
-      Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
-}
-
-function fmtKm(km: number): string {
-  return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
-}
 
 const RECENTS_KEY = 'elpoint_recent_searches';
 const RECENTS_MAX = 6;

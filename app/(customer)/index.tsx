@@ -17,9 +17,12 @@ import {
 } from "@/lib/queries/feed";
 import { useCategories } from "@/lib/queries/categories";
 import { useMyProfile } from "@/lib/queries/me";
+import { useSettings } from "@/lib/settings";
+import { distanceKm, fmtKm, type LatLng } from "@/lib/geo";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import * as Location from "expo-location";
 import {
   Pressable,
   RefreshControl,
@@ -58,16 +61,25 @@ function authorLabel(a: FeedItem["author"]): string {
 function ReviewCard({
   item,
   favorited,
+  compact = false,
+  userLoc,
   onToggleFavorite,
 }: {
   item: FeedItem;
   favorited: boolean;
+  compact?: boolean;
+  userLoc?: LatLng | null;
   onToggleFavorite: () => void;
 }) {
   const { C, shadow } = useTheme();
   const router = useRouter();
   const cat = item.restaurant.categories[0];
   const promo = item.restaurant.promo_text;
+  const r = item.restaurant;
+  const dist =
+    userLoc && r.lat != null && r.lng != null
+      ? fmtKm(distanceKm(userLoc, r.lat, r.lng))
+      : null;
 
   return (
     <Pressable
@@ -79,13 +91,13 @@ function ReviewCard({
         borderWidth: 2,
         borderColor: C.border,
         ...shadow.md,
-        marginBottom: 16,
+        marginBottom: compact ? 12 : 16,
       }}
     >
       {/* Imagen: portada real o icono */}
       <View
         style={{
-          height: 180,
+          height: compact ? 118 : 180,
           width: "100%",
           backgroundColor: C.primaryFixed,
           alignItems: "center",
@@ -180,10 +192,28 @@ function ReviewCard({
       </View>
 
       {/* Contenido */}
-      <View style={{ padding: 16, gap: 10 }}>
-        <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>
+      <View style={{ padding: compact ? 12 : 16, gap: compact ? 6 : 10 }}>
+        <AppText
+          variant="heading"
+          style={{ fontSize: compact ? 17 : 20, lineHeight: compact ? 21 : 25 }}
+          numberOfLines={1}
+        >
           {item.restaurant.name}
         </AppText>
+
+        {(dist || cat) && (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            {cat && (
+              <AppText variant="caption" color={C.outline}>{cat.label}</AppText>
+            )}
+            {dist && (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                <Icon name="map-marker-distance" size={12} color={C.primary} />
+                <AppText variant="caption" color={C.primary}>{dist}</AppText>
+              </View>
+            )}
+          </View>
+        )}
 
         {/* Franja de promo */}
         {promo && (
@@ -208,24 +238,26 @@ function ReviewCard({
         )}
 
         {/* Quote */}
-        <View
-          style={{
-            padding: 12,
-            borderRadius: 12,
-            backgroundColor: C.surfaceContainerLow,
-            borderLeftWidth: 3,
-            borderLeftColor: C.primary,
-          }}
-        >
-          <AppText
-            variant="body"
-            color={C.onSurfaceVariant}
-            style={{ lineHeight: 22, fontStyle: "italic" }}
-            numberOfLines={3}
+        {!compact && (
+          <View
+            style={{
+              padding: 12,
+              borderRadius: 12,
+              backgroundColor: C.surfaceContainerLow,
+              borderLeftWidth: 3,
+              borderLeftColor: C.primary,
+            }}
           >
-            "{item.body}"
-          </AppText>
-        </View>
+            <AppText
+              variant="body"
+              color={C.onSurfaceVariant}
+              style={{ lineHeight: 22, fontStyle: "italic" }}
+              numberOfLines={3}
+            >
+              "{item.body}"
+            </AppText>
+          </View>
+        )}
 
         {/* Reviewer */}
         <View
@@ -365,10 +397,31 @@ export default function HomeScreen() {
   const profileQ = useMyProfile();
   const categoriesQ = useCategories();
 
+  const { compactCards, showDistance } = useSettings();
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeTab, setActiveTab] = useState<"ranks" | "favorites">("ranks");
   const [search, setSearch] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [userLoc, setUserLoc] = useState<LatLng | null>(null);
+
+  // Distance is opt-in; never prompt from the feed — only use a grant made elsewhere.
+  useEffect(() => {
+    if (!showDistance) { setUserLoc(null); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const perm = await Location.getForegroundPermissionsAsync();
+        if (!perm.granted) return;
+        const pos =
+          (await Location.getLastKnownPositionAsync()) ??
+          (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low }));
+        if (!cancelled && pos) {
+          setUserLoc({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [showDistance]);
 
   async function onRefresh() {
     setRefreshing(true);
@@ -566,6 +619,8 @@ export default function HomeScreen() {
                 key={item.id}
                 item={item}
                 favorited={favIds.has(item.restaurant.id)}
+                compact={compactCards}
+                userLoc={userLoc}
                 onToggleFavorite={() => {
                   impact("light");
                   toggleFav.mutate({

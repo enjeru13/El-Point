@@ -10,6 +10,8 @@ export type FeedRestaurant = {
   rating_count: number;
   promo_text: string | null;
   cover_url: string | null;
+  lat: number | null;
+  lng: number | null;
   categories: RestaurantCategory[];
 };
 
@@ -31,22 +33,38 @@ function mapCategories(rc: any): RestaurantCategory[] {
   return (rc ?? []).map((row: any) => row.categories).filter(Boolean);
 }
 
+function num(v: any): number | null {
+  return typeof v === "number" ? v : null;
+}
+
+// latitude/longitude arrive in a later migration; try with, fall back without.
+function restaurantEmbed(withLatLng: boolean): string {
+  const base =
+    "id, name, address, rating_avg, rating_count, promo_text, cover_url";
+  const ll = withLatLng ? ", latitude, longitude" : "";
+  return `restaurant:restaurants ( ${base}${ll}, restaurant_categories ( categories ( slug, label, icon ) ) )`;
+}
+
 // ─── Home feed: recent reviews ───────────────────────────────────────────────
 
 async function fetchFeed(): Promise<FeedItem[]> {
-  const { data, error } = await supabase
+  const sel = (ll: boolean) =>
+    `id, rating, body, created_at, ${restaurantEmbed(ll)},
+     author:profiles!author_id ( username, full_name, avatar_url, level )`;
+
+  let { data, error }: { data: any; error: any } = await (supabase
     .from("reviews")
-    .select(
-      `id, rating, body, created_at,
-       restaurant:restaurants (
-         id, name, address, rating_avg, rating_count, promo_text, cover_url,
-         restaurant_categories ( categories ( slug, label, icon ) )
-       ),
-       author:profiles!author_id ( username, full_name, avatar_url, level )`,
-    )
+    .select(sel(true)) as any)
     .order("created_at", { ascending: false })
     .limit(60);
 
+  if (error) {
+    ({ data, error } = await supabase
+      .from("reviews")
+      .select(sel(false))
+      .order("created_at", { ascending: false })
+      .limit(60));
+  }
   if (error) throw error;
 
   const mapped: FeedItem[] = (data ?? [])
@@ -65,6 +83,8 @@ async function fetchFeed(): Promise<FeedItem[]> {
         rating_count: r.restaurant.rating_count,
         promo_text: r.restaurant.promo_text ?? null,
         cover_url: r.restaurant.cover_url ?? null,
+        lat: num(r.restaurant.latitude),
+        lng: num(r.restaurant.longitude),
         categories: mapCategories(r.restaurant.restaurant_categories),
       },
     }));
@@ -87,17 +107,19 @@ export function useHomeFeed() {
 export type FavoriteRestaurant = FeedRestaurant & { favorited_at: string };
 
 async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
-  const { data, error } = await supabase
+  const sel = (ll: boolean) => `created_at, ${restaurantEmbed(ll)}`;
+
+  let { data, error }: { data: any; error: any } = await (supabase
     .from("favorites")
-    .select(
-      `created_at,
-       restaurant:restaurants (
-         id, name, address, rating_avg, rating_count, promo_text, cover_url,
-         restaurant_categories ( categories ( slug, label, icon ) )
-       )`,
-    )
+    .select(sel(true)) as any)
     .order("created_at", { ascending: false });
 
+  if (error) {
+    ({ data, error } = await supabase
+      .from("favorites")
+      .select(sel(false))
+      .order("created_at", { ascending: false }));
+  }
   if (error) throw error;
 
   return (data ?? [])
@@ -110,6 +132,8 @@ async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
       rating_count: f.restaurant.rating_count,
       promo_text: f.restaurant.promo_text ?? null,
       cover_url: f.restaurant.cover_url ?? null,
+      lat: num(f.restaurant.latitude),
+      lng: num(f.restaurant.longitude),
       categories: mapCategories(f.restaurant.restaurant_categories),
       favorited_at: f.created_at,
     }));
