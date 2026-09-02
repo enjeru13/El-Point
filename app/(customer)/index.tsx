@@ -453,6 +453,7 @@ export default function HomeScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
+        stickyHeaderIndices={[1]}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -462,7 +463,7 @@ export default function HomeScreen() {
           />
         }
       >
-        {/* ── Saludo + búsqueda ── */}
+        {/* ── 0: Saludo + búsqueda ── */}
         <View
           style={{
             paddingHorizontal: 20,
@@ -487,68 +488,68 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        {/* ── Categorías scroll horizontal ── */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingVertical: 12,
-            gap: 8,
-          }}
-        >
-          {[...PINNED, ...(categoriesQ.data ?? [])].map((cat) => (
-            <Chip
-              key={cat.slug}
-              label={cat.label}
-              icon={cat.icon}
-              active={activeCategory === cat.slug}
-              onPress={() => setActiveCategory(cat.slug)}
-            />
-          ))}
-        </ScrollView>
+        {/* ── 1: Filtros pegajosos (categorías + tabs) ── */}
+        <View style={{ backgroundColor: C.surface }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingVertical: 12,
+              gap: 8,
+            }}
+          >
+            {[...PINNED, ...(categoriesQ.data ?? [])].map((cat) => (
+              <Chip
+                key={cat.slug}
+                label={cat.label}
+                icon={cat.icon}
+                active={activeCategory === cat.slug}
+                onPress={() => setActiveCategory(cat.slug)}
+              />
+            ))}
+          </ScrollView>
 
-        {/* ── Tabs ── */}
-        <View
-          style={{
-            flexDirection: "row",
-            paddingHorizontal: 20,
-            gap: 24,
-            borderBottomWidth: 2,
-            borderBottomColor: C.outlineVariant,
-            marginBottom: 16,
-          }}
-        >
-          {(
-            [
-              { key: "ranks", label: "Últimos Ranks" },
-              { key: "favorites", label: "Tus Favoritos" },
-            ] as const
-          ).map((tab) => (
-            <Pressable
-              key={tab.key}
-              onPress={() => setActiveTab(tab.key)}
-              style={{
-                paddingBottom: 10,
-                paddingTop: 4,
-                borderBottomWidth: 3,
-                borderBottomColor:
-                  activeTab === tab.key ? C.primary : "transparent",
-                marginBottom: -2,
-              }}
-            >
-              <AppText
-                variant="heading"
-                color={activeTab === tab.key ? C.primary : C.outline}
+          <View
+            style={{
+              flexDirection: "row",
+              paddingHorizontal: 20,
+              gap: 24,
+              borderBottomWidth: 2,
+              borderBottomColor: C.outlineVariant,
+            }}
+          >
+            {(
+              [
+                { key: "ranks", label: "Últimos Ranks" },
+                { key: "favorites", label: "Tus Favoritos" },
+              ] as const
+            ).map((tab) => (
+              <Pressable
+                key={tab.key}
+                onPress={() => setActiveTab(tab.key)}
+                style={{
+                  paddingBottom: 10,
+                  paddingTop: 4,
+                  borderBottomWidth: 3,
+                  borderBottomColor:
+                    activeTab === tab.key ? C.primary : "transparent",
+                  marginBottom: -2,
+                }}
               >
-                {tab.label}
-              </AppText>
-            </Pressable>
-          ))}
+                <AppText
+                  variant="heading"
+                  color={activeTab === tab.key ? C.primary : C.outline}
+                >
+                  {tab.label}
+                </AppText>
+              </Pressable>
+            ))}
+          </View>
         </View>
 
-        {/* ── Feed ── */}
-        <View style={{ paddingHorizontal: 20 }}>
+        {/* ── 2: Feed ── */}
+        <View style={{ paddingHorizontal: 20, paddingTop: 16 }}>
           {activeTab === "favorites" ? (
             favoritesQ.isLoading ? (
               <SkeletonList count={4} kind="row" />
