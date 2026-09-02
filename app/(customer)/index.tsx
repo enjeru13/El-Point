@@ -30,6 +30,7 @@ import {
   View,
 } from "react-native";
 import { AppText } from "@/components/ui/AppText";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { SkeletonList } from "@/components/ui/Skeleton";
 
 // ─── Filtros fijos; el resto sale de la DB (useCategories) ───────────────────
@@ -145,50 +146,29 @@ function ReviewCard({
           </AppText>
         </View>
 
-        {/* Etiquetas arriba-izquierda: PROMO + categoría */}
-        <View
-          style={{
-            position: "absolute",
-            top: 12,
-            left: 12,
-            gap: 6,
-            alignItems: "flex-start",
-          }}
-        >
-          {promo && (
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 4,
-                paddingHorizontal: 10,
-                paddingVertical: 4,
-                borderRadius: 99,
-                backgroundColor: C.primaryContainer,
-                borderWidth: 2,
-                borderColor: C.border,
-                ...shadow.sm,
-              }}
-            >
-              <Icon name="tag" size={13} color={C.onSurface} />
-              <AppText variant="caption">PROMO</AppText>
-            </View>
-          )}
-          {cat && (
-            <View
-              style={{
-                paddingHorizontal: 10,
-                paddingVertical: 4,
-                borderRadius: 99,
-                backgroundColor: C.surface,
-                borderWidth: 2,
-                borderColor: C.border,
-              }}
-            >
-              <AppText variant="label">{cat.label}</AppText>
-            </View>
-          )}
-        </View>
+        {/* PROMO badge */}
+        {promo && (
+          <View
+            style={{
+              position: "absolute",
+              top: 12,
+              left: 12,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 4,
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderRadius: 99,
+              backgroundColor: C.primaryContainer,
+              borderWidth: 2,
+              borderColor: C.border,
+              ...shadow.sm,
+            }}
+          >
+            <Icon name="tag" size={13} color={C.onSurface} />
+            <AppText variant="caption">PROMO</AppText>
+          </View>
+        )}
       </View>
 
       {/* Contenido */}
@@ -389,6 +369,7 @@ function FavoriteRow({
 
 export default function HomeScreen() {
   const { C, shadow } = useTheme();
+  const router = useRouter();
 
   const feedQ = useHomeFeed();
   const favIdsQ = useFavoriteIds();
@@ -400,9 +381,11 @@ export default function HomeScreen() {
   const { compactCards, showDistance } = useSettings();
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeTab, setActiveTab] = useState<"ranks" | "favorites">("ranks");
-  const [search, setSearch] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [userLoc, setUserLoc] = useState<LatLng | null>(null);
+
+  const firstName = profileQ.data?.full_name?.trim().split(/\s+/)[0];
+  const greetName = firstName || profileQ.data?.username || "Comensal";
 
   // Distance is opt-in; never prompt from the feed — only use a grant made elsewhere.
   useEffect(() => {
@@ -448,26 +431,13 @@ export default function HomeScreen() {
 
   const filtered = feed
     .filter((item) => {
-      if (activeCategory === "promo") {
-        if (!item.restaurant.promo_text) return false;
-      } else if (
-        activeCategory !== "all" &&
-        !item.restaurant.categories.some((c) => c.slug === activeCategory)
-      ) {
-        return false;
-      }
-      if (search.trim()) {
-        const q = search.toLowerCase();
-        return (
-          item.restaurant.name.toLowerCase().includes(q) ||
-          item.body.toLowerCase().includes(q)
-        );
-      }
-      return true;
+      if (activeCategory === "promo") return !!item.restaurant.promo_text;
+      if (activeCategory === "all") return true;
+      return item.restaurant.categories.some((c) => c.slug === activeCategory);
     })
     .sort((a, b) => {
-      // Solo re-ordena en "Todo" y sin búsqueda; respeta recencia dentro de cada grupo.
-      if (activeCategory !== "all" || search.trim() || prefSlugs.size === 0) return 0;
+      // Solo re-ordena en "Todo"; respeta recencia dentro de cada grupo.
+      if (activeCategory !== "all" || prefSlugs.size === 0) return 0;
       const am = a.restaurant.categories.some((c) => prefSlugs.has(c.slug)) ? 0 : 1;
       const bm = b.restaurant.categories.some((c) => prefSlugs.has(c.slug)) ? 0 : 1;
       return am - bm;
@@ -500,15 +470,19 @@ export default function HomeScreen() {
           }}
         >
           <AppText variant="title" style={{ fontSize: 26, lineHeight: 31 }}>
-            ¡Hola, Comensal! 👋
+            ¡Hola, {greetName}! 👋
           </AppText>
 
-          <SearchBar
-            value={search}
-            onChangeText={setSearch}
-            placeholder="Encuentra tu próximo antojo..."
-            variant="floating"
-          />
+          <Pressable onPress={() => router.push("/(customer)/search")}>
+            <View pointerEvents="none">
+              <SearchBar
+                value=""
+                onChangeText={() => {}}
+                placeholder="Encuentra tu próximo antojo..."
+                variant="floating"
+              />
+            </View>
+          </Pressable>
         </View>
 
         {/* ── Categorías scroll horizontal ── */}
@@ -577,18 +551,13 @@ export default function HomeScreen() {
             favoritesQ.isLoading ? (
               <SkeletonList count={4} kind="row" />
             ) : (favoritesQ.data ?? []).length === 0 ? (
-              <View
-                style={{ alignItems: "center", paddingVertical: 48, gap: 12 }}
-              >
-                <Icon name="heart-outline" size={48} color={C.outline} />
-                <AppText variant="heading" color={C.onSurfaceVariant}>
-                  Sin favoritos aún
-                </AppText>
-                <AppText variant="body" color={C.outline} align="center" style={{ maxWidth: 240 }}>
-                  Marca "Me sirve" en las reseñas que más te gusten para
-                  guardarlas aquí.
-                </AppText>
-              </View>
+              <EmptyState
+                icon="heart-outline"
+                title="Sin favoritos aún"
+                body='Marca "Me sirve" en las reseñas que más te gusten para guardarlas aquí.'
+                actionLabel="Explorar lugares"
+                onAction={() => setActiveTab("ranks")}
+              />
             ) : (
               (favoritesQ.data ?? []).map((f) => (
                 <FavoriteRow
@@ -605,14 +574,13 @@ export default function HomeScreen() {
           ) : feedQ.isLoading ? (
             <SkeletonList count={3} kind="card" />
           ) : feedQ.isError ? (
-            <View style={{ alignItems: "center", paddingVertical: 48, gap: 8 }}>
-              <Icon name="food-off-outline" size={48} color={C.outline} />
-              <AppText variant="bodySm" color={C.error} align="center">
-                {String(
-                  (feedQ.error as any)?.message ?? "Error al cargar el feed",
-                )}
-              </AppText>
-            </View>
+            <EmptyState
+              icon="food-off-outline"
+              title="No pudimos cargar el feed"
+              body="Revisa tu conexión e inténtalo de nuevo."
+              actionLabel="Reintentar"
+              onAction={() => feedQ.refetch()}
+            />
           ) : filtered.length > 0 ? (
             filtered.map((item) => (
               <ReviewCard
@@ -630,22 +598,20 @@ export default function HomeScreen() {
                 }}
               />
             ))
+          ) : feed.length === 0 ? (
+            <EmptyState
+              icon="food-off-outline"
+              title="Todavía no hay ranks"
+              body="Sé el primero: abre un lugar y deja tu rank."
+            />
           ) : (
-            <View
-              style={{ alignItems: "center", paddingVertical: 48, gap: 12 }}
-            >
-              <Icon name="food-off-outline" size={48} color={C.outline} />
-              <AppText variant="heading" color={C.onSurfaceVariant}>
-                {feed.length === 0
-                  ? "Todavía no hay ranks"
-                  : "Nada en esta categoría"}
-              </AppText>
-              <AppText variant="bodySm" color={C.outline} align="center" style={{ maxWidth: 250 }}>
-                {feed.length === 0
-                  ? "Sé el primero: abre un lugar y deja tu rank."
-                  : "Prueba otra categoría o quita el filtro."}
-              </AppText>
-            </View>
+            <EmptyState
+              icon="food-off-outline"
+              title="Nada en esta categoría"
+              body="Prueba otra categoría o quita el filtro."
+              actionLabel="Ver todo"
+              onAction={() => setActiveCategory("all")}
+            />
           )}
         </View>
       </ScrollView>
