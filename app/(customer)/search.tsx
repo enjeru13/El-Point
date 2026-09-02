@@ -259,58 +259,61 @@ export default function SearchScreen() {
       {/* ── Header ── */}
       <View style={{
         paddingTop: insets.top + 10,
-        paddingHorizontal: 16,
-        paddingBottom: 14,
+        paddingBottom: 12,
         backgroundColor: C.surface,
         borderBottomWidth: 2, borderBottomColor: C.outlineVariant,
-        flexDirection: 'row', alignItems: 'center', gap: 10,
       }}>
-        <View style={{ flex: 1 }}>
-          <SearchBar
-            ref={inputRef}
-            value={query}
-            onChangeText={setQuery}
-            onSubmit={() => inputRef.current?.blur()}
-            onClear={clear}
-            variant="floating"
-          />
+        <View style={{
+          paddingHorizontal: 16,
+          flexDirection: 'row', alignItems: 'center', gap: 10,
+        }}>
+          <View style={{ flex: 1 }}>
+            <SearchBar
+              ref={inputRef}
+              value={query}
+              onChangeText={setQuery}
+              onSubmit={() => inputRef.current?.blur()}
+              onClear={clear}
+              variant="floating"
+            />
+          </View>
+
+          <Pressable
+            onPress={() => setFilter(f => !f)}
+            style={{
+              width: 48, height: 48, borderRadius: 24,
+              alignItems: 'center', justifyContent: 'center',
+              backgroundColor: (filterOpen || hasActiveFilters) ? C.primary : C.surface,
+              borderWidth: 2, borderColor: (filterOpen || hasActiveFilters) ? C.border : C.outlineVariant,
+              ...((filterOpen || hasActiveFilters) ? shadow.primary : {}),
+            }}
+          >
+            <Icon name="tune-variant" size={20} color={(filterOpen || hasActiveFilters) ? '#fff' : C.onSurfaceVariant} />
+            {hasActiveFilters && !filterOpen && (
+              <View style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: 4, backgroundColor: C.primaryContainer, borderWidth: 1.5, borderColor: C.surface }} />
+            )}
+          </Pressable>
         </View>
 
-        <Pressable
-          onPress={() => setFilter(f => !f)}
-          style={{
-            width: 48, height: 48, borderRadius: 24,
-            alignItems: 'center', justifyContent: 'center',
-            backgroundColor: (filterOpen || hasActiveFilters) ? C.primary : C.surface,
-            borderWidth: 2, borderColor: (filterOpen || hasActiveFilters) ? C.border : C.outlineVariant,
-            ...((filterOpen || hasActiveFilters) ? shadow.primary : {}),
-          }}
+        {/* ── Chips de categoría ── */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, gap: 8, alignItems: 'center' }}
+          style={{ marginTop: 12, height: 44 }}
         >
-          <Icon name="tune-variant" size={20} color={(filterOpen || hasActiveFilters) ? '#fff' : C.onSurfaceVariant} />
-          {hasActiveFilters && !filterOpen && (
-            <View style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: 4, backgroundColor: C.primaryContainer, borderWidth: 1.5, borderColor: C.surface }} />
-          )}
-        </Pressable>
+          <Chip label="Todo" active={!activeCat} onPress={() => setActiveCat(null)} />
+          {(categoriesQ.data ?? []).map(cat => (
+            <Chip
+              key={cat.slug}
+              label={cat.label}
+              icon={cat.icon}
+              active={activeCat === cat.slug}
+              onPress={() => setActiveCat(activeCat === cat.slug ? null : cat.slug)}
+            />
+          ))}
+        </ScrollView>
       </View>
-
-      {/* ── Chips de categoría ── */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12, gap: 8 }}
-        style={{ flexGrow: 0, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}
-      >
-        <Chip label="Todo" active={!activeCat} onPress={() => setActiveCat(null)} />
-        {(categoriesQ.data ?? []).map(cat => (
-          <Chip
-            key={cat.slug}
-            label={cat.label}
-            icon={cat.icon}
-            active={activeCat === cat.slug}
-            onPress={() => setActiveCat(activeCat === cat.slug ? null : cat.slug)}
-          />
-        ))}
-      </ScrollView>
 
       {/* ── Panel de filtros ── */}
       {filterOpen && (
