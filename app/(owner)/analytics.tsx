@@ -1,6 +1,6 @@
 import { Icon } from '@/components/ui/Icon';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { AppText } from '@/components/ui/AppText';
@@ -57,18 +57,22 @@ function buildBars(dates: Date[], period: Period): { label: string; value: numbe
   });
 }
 
-function MetricCard({ icon, label, value, color }: { icon: string; label: string; value: string; color: string }) {
+function MetricCard({ icon, label, value }: { icon: string; label: string; value: string }) {
   const { C, shadow } = useTheme();
   return (
     <View style={{
       flex: 1, padding: 14, borderRadius: 18,
       backgroundColor: C.surface, borderWidth: 2, borderColor: C.border,
-      gap: 4, ...shadow.sm,
+      gap: 8, ...shadow.sm,
     }}>
-      <View style={{ width: 32, height: 32, borderRadius: 9, backgroundColor: color + '22', alignItems: 'center', justifyContent: 'center' }}>
-        <Icon name={icon} size={16} color={color} />
+      <View style={{
+        width: 34, height: 34, borderRadius: 10,
+        backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border,
+        alignItems: 'center', justifyContent: 'center',
+      }}>
+        <Icon name={icon} size={16} color={C.primary} />
       </View>
-      <AppText variant="heading" style={{ fontSize: 20, lineHeight: 24, marginTop: 4 }}>{value}</AppText>
+      <AppText variant="title" style={{ fontSize: 24, lineHeight: 26 }} numberOfLines={1}>{value}</AppText>
       <AppText variant="caption" color={C.onSurfaceVariant}>{label}</AppText>
     </View>
   );
@@ -78,24 +82,40 @@ export default function AnalyticsScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const [period, setPeriod] = useState<Period>('Semana');
+  const [refreshing, setRefreshing] = useState(false);
 
   const restaurantQ = useMyRestaurant();
   const restaurant = restaurantQ.data ?? null;
   const reviewsQ = useReviews(restaurant?.id ?? '');
   const reviews = reviewsQ.data ?? [];
 
+  async function onRefresh() {
+    setRefreshing(true);
+    try {
+      await Promise.all([restaurantQ.refetch(), reviewsQ.refetch()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
+  const periodDays = period === 'Semana' ? 7 : period === 'Mes' ? 28 : 365;
+  const since = Date.now() - periodDays * DAY;
+  const periodReviews = useMemo(
+    () => reviews.filter(r => new Date(r.created_at).getTime() >= since),
+    [reviews, since],
+  );
+  const periodWord = period === 'Semana' ? 'esta semana' : period === 'Mes' ? 'este mes' : 'este año';
+
   const dates = useMemo(() => reviews.map(r => new Date(r.created_at)), [reviews]);
   const bars = useMemo(() => buildBars(dates, period), [dates, period]);
   const maxVal = Math.max(1, ...bars.map(b => b.value));
   const BAR_H = 120;
 
-  const periodDays = period === 'Semana' ? 7 : period === 'Mes' ? 28 : 365;
-  const since = Date.now() - periodDays * DAY;
-  const inPeriod = reviews.filter(r => new Date(r.created_at).getTime() >= since).length;
+  const inPeriod = periodReviews.length;
   const lastReview = reviews[0]?.created_at;
 
-  const dist = [5, 4, 3, 2, 1].map(s => reviews.filter(r => r.rating === s).length);
-  const total = reviews.length;
+  const dist = [5, 4, 3, 2, 1].map(s => periodReviews.filter(r => r.rating === s).length);
+  const total = periodReviews.length;
 
   if (restaurantQ.isLoading) {
     return (
@@ -132,19 +152,25 @@ export default function AnalyticsScreen() {
         <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 2 }}>{restaurant.name}</AppText>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />
+        }
+      >
 
         {/* Period selector */}
-        <View style={{ flexDirection: 'row', gap: 8, padding: 4, borderRadius: 20, backgroundColor: C.surfaceContainerLow, borderWidth: 2, borderColor: C.border }}>
+        <View style={{ flexDirection: 'row', gap: 6, padding: 4, borderRadius: 20, backgroundColor: C.surfaceContainerLow, borderWidth: 2, borderColor: C.border }}>
           {PERIODS.map(p => (
             <Pressable
               key={p}
               onPress={() => setPeriod(p)}
               style={{
-                flex: 1, paddingVertical: 8, borderRadius: 16, alignItems: 'center',
+                flex: 1, paddingVertical: 8, borderRadius: 15, alignItems: 'center',
                 backgroundColor: period === p ? C.primary : 'transparent',
-                borderWidth: period === p ? 2 : 0,
-                borderColor: C.border,
+                borderWidth: 2,
+                borderColor: period === p ? C.border : 'transparent',
               }}
             >
               <AppText variant="bodyStrong" color={period === p ? '#fff' : C.onSurfaceVariant} style={{ fontSize: 14 }}>{p}</AppText>
@@ -152,35 +178,45 @@ export default function AnalyticsScreen() {
           ))}
         </View>
 
-        {/* Metric cards */}
+        {/* Metric cards — nivel local (histórico) */}
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          <MetricCard icon="star"         label="Calificación"  value={restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : '–'} color={C.primary} />
-          <MetricCard icon="comment-text" label="Total reseñas" value={String(restaurant.rating_count)} color={C.secondary} />
+          <MetricCard icon="star"         label="Calificación"  value={restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : '–'} />
+          <MetricCard icon="comment-text" label="Reseñas totales" value={String(restaurant.rating_count)} />
         </View>
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          <MetricCard icon="trending-up"   label={`Reseñas (${period.toLowerCase()})`} value={String(inPeriod)} color={C.tertiary} />
-          <MetricCard icon="clock-outline" label="Última reseña" value={lastReview ? timeAgo(lastReview) : '—'} color={C.primary} />
+          <MetricCard icon="trending-up"   label={`Reseñas ${periodWord}`} value={String(inPeriod)} />
+          <MetricCard icon="clock-outline" label="Última reseña" value={lastReview ? timeAgo(lastReview) : '—'} />
         </View>
 
         {/* Bar chart - reseñas */}
-        <View style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, gap: 16, ...shadow.sm }}>
-          <AppText variant="bodyStrong">Reseñas por período</AppText>
+        <View style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, gap: 4, ...shadow.sm }}>
+          <AppText variant="heading" style={{ fontSize: 17 }}>Reseñas por período</AppText>
+          <AppText variant="caption" color={C.outline}>{periodWord}</AppText>
           {total === 0 ? (
-            <AppText variant="bodySm" color={C.outline}>Aún no hay datos.</AppText>
+            <View style={{ alignItems: 'center', paddingVertical: 28, gap: 6 }}>
+              <Icon name="analytics" size={28} color={C.outlineVariant} />
+              <AppText variant="bodySm" color={C.outline}>Sin reseñas en este período.</AppText>
+            </View>
           ) : (
-            <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: BAR_H + 24 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: BAR_H + 26, marginTop: 12 }}>
               {bars.map((b, i) => {
-                const h = b.value === 0 ? 4 : Math.max(8, (b.value / maxVal) * BAR_H);
+                const h = b.value === 0 ? 3 : Math.max(10, (b.value / maxVal) * BAR_H);
                 const isLast = i === bars.length - 1;
                 return (
-                  <View key={i} style={{ flex: 1, alignItems: 'center', gap: 4 }}>
-                    <AppText variant="caption" color={C.onSurfaceVariant} style={{ fontSize: 10 }}>{b.value}</AppText>
+                  <View key={i} style={{ flex: 1, alignItems: 'center', gap: 5 }}>
+                    <AppText
+                      variant="caption"
+                      color={b.value === 0 ? C.outlineVariant : C.onSurfaceVariant}
+                      style={{ fontSize: 10 }}
+                    >
+                      {b.value}
+                    </AppText>
                     <View style={{
-                      width: '100%', height: h, borderRadius: 8,
-                      backgroundColor: b.value === 0 ? C.surfaceContainerHighest : isLast ? C.primary : C.primaryFixed,
-                      borderWidth: 1.5, borderColor: C.border,
+                      width: '100%', height: h, borderTopLeftRadius: 6, borderTopRightRadius: 6,
+                      borderBottomLeftRadius: b.value === 0 ? 6 : 0, borderBottomRightRadius: b.value === 0 ? 6 : 0,
+                      backgroundColor: b.value === 0 ? C.surfaceContainerHighest : isLast ? C.primary : C.primaryFixedDim,
                     }} />
-                    <AppText variant="caption" color={C.outline} style={{ fontSize: 10 }}>{b.label}</AppText>
+                    <AppText variant="caption" color={isLast ? C.primary : C.outline} style={{ fontSize: 10 }}>{b.label}</AppText>
                   </View>
                 );
               })}
@@ -189,12 +225,17 @@ export default function AnalyticsScreen() {
         </View>
 
         {/* Distribución de estrellas */}
-        <View style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, gap: 14, ...shadow.sm }}>
-          <AppText variant="bodyStrong">Distribución de estrellas</AppText>
+        <View style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, gap: 4, ...shadow.sm }}>
+          <AppText variant="heading" style={{ fontSize: 17 }}>Distribución de estrellas</AppText>
+          <AppText variant="caption" color={C.outline}>{periodWord} · {total} {total === 1 ? 'reseña' : 'reseñas'}</AppText>
           {total === 0 ? (
-            <AppText variant="bodySm" color={C.outline}>Aún no hay reseñas.</AppText>
+            <View style={{ alignItems: 'center', paddingVertical: 28, gap: 6 }}>
+              <Icon name="star-outline" size={28} color={C.outlineVariant} />
+              <AppText variant="bodySm" color={C.outline}>Sin reseñas en este período.</AppText>
+            </View>
           ) : (
-            [5, 4, 3, 2, 1].map((star, idx) => {
+            <View style={{ gap: 12, marginTop: 10 }}>
+            {[5, 4, 3, 2, 1].map((star, idx) => {
               const count = dist[idx];
               const pct = Math.round((count / total) * 100);
               return (
@@ -210,7 +251,8 @@ export default function AnalyticsScreen() {
                   <AppText variant="caption" color={C.onSurfaceVariant} align="right" style={{ fontSize: 12, width: 44 }}>{count} · {pct}%</AppText>
                 </View>
               );
-            })
+            })}
+            </View>
           )}
         </View>
 
