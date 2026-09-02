@@ -508,7 +508,7 @@ export default function SearchScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
-          contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 110 }}
+          contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: insets.bottom + 96 }}
         >
           {results.length === 0 ? (
             <EmptyState
@@ -548,7 +548,7 @@ export default function SearchScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
-          contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 14 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 96, gap: 14 }}
         >
           {recents.length > 0 && (
             <View style={{ gap: 10 }}>

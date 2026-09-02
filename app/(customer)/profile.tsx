@@ -11,6 +11,7 @@ import {
   ScrollView,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { AppLogo } from '@/components/ui/AppLogo';
 import { AppText } from '@/components/ui/AppText';
@@ -53,6 +54,7 @@ function XPBar({ pct }: { pct: number }) {
 export default function ProfileScreen() {
   const { C, shadow } = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const profileQ = useMyProfile();
   const reviewsQ = useMyReviews();
@@ -157,7 +159,7 @@ export default function ProfileScreen() {
           <SkeletonList count={2} kind="row" />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 96 }} showsVerticalScrollIndicator={false}>
           <View style={{ padding: 20, gap: 20 }}>
 
             {/* Card perfil */}

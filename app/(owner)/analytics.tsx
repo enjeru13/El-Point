@@ -5,7 +5,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { AppText } from '@/components/ui/AppText';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { FLOATING_NAV_H } from '@/lib/theme';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews } from '@/lib/queries/reviews';
 
@@ -133,7 +132,7 @@ export default function AnalyticsScreen() {
         <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 2 }}>{restaurant.name}</AppText>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: FLOATING_NAV_H + 20, gap: 20 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20 }}>
 
         {/* Period selector */}
         <View style={{ flexDirection: 'row', gap: 8, padding: 4, borderRadius: 20, backgroundColor: C.surfaceContainerLow, borderWidth: 2, borderColor: C.border }}>

@@ -29,6 +29,7 @@ import {
   ScrollView,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "@/components/ui/AppText";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SkeletonList } from "@/components/ui/Skeleton";
@@ -391,6 +392,7 @@ function FavoriteRow({
 export default function HomeScreen() {
   const { C, shadow } = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const feedQ = useHomeFeed();
   const favIdsQ = useFavoriteIds();
@@ -473,7 +475,7 @@ export default function HomeScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}
         stickyHeaderIndices={[1]}
         refreshControl={
           <RefreshControl

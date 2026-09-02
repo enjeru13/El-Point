@@ -6,7 +6,6 @@ import { AppText } from '@/components/ui/AppText';
 import { Skeleton, SkeletonList } from '@/components/ui/Skeleton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
-import { FLOATING_NAV_H } from '@/lib/theme';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews, type Review } from '@/lib/queries/reviews';
 import { NotificationBell } from '@/components/ui/NotificationBell';
@@ -153,48 +152,79 @@ export default function OwnerHomeScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: FLOATING_NAV_H + 20, gap: 20 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />
         }
       >
 
         {/* Banner estado */}
-        <Pressable
-          onPress={() => router.push('/(owner)/profile')}
-          style={({ pressed }) => ({
-            padding: 16, borderRadius: 20,
-            backgroundColor: restaurant.is_active ? C.primaryFixed : C.surfaceContainerHighest,
-            borderWidth: 2, borderColor: C.border,
-            flexDirection: 'row', alignItems: 'center', gap: 14,
-            opacity: pressed ? 0.9 : 1,
-            ...shadow.sm,
-          })}
-        >
-          <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: restaurant.is_active ? C.primary : C.outline, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
-            <Icon name={restaurant.is_active ? 'store-outline' : 'eye-off-outline'} size={24} color="#fff" />
+        <View style={{
+          borderRadius: 22,
+          backgroundColor: restaurant.is_active ? C.primaryFixed : C.surfaceContainerHighest,
+          borderWidth: 2, borderColor: C.border,
+          overflow: 'hidden',
+          ...shadow.sm,
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16 }}>
+            <View style={{
+              width: 52, height: 52, borderRadius: 16,
+              backgroundColor: restaurant.is_active ? C.primary : C.outline,
+              alignItems: 'center', justifyContent: 'center',
+              borderWidth: 2, borderColor: C.border,
+            }}>
+              <Icon name={restaurant.is_active ? 'store-outline' : 'eye-off-outline'} size={26} color="#fff" />
+            </View>
+            <View style={{ flex: 1, gap: 3 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <AppText variant="bodyStrong">
+                  {restaurant.is_active ? 'Local visible' : 'Local oculto'}
+                </AppText>
+                <View style={{
+                  paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99,
+                  backgroundColor: restaurant.is_active ? C.secondaryContainer : C.surface,
+                  borderWidth: 2, borderColor: C.border,
+                }}>
+                  <AppText variant="caption" color={restaurant.is_active ? C.onSurface : C.outline}>
+                    {restaurant.is_active ? 'ACTIVO' : 'PAUSADO'}
+                  </AppText>
+                </View>
+              </View>
+              <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                {restaurant.is_active
+                  ? 'Aparece en el mapa y en búsquedas de los comensales.'
+                  : 'Nadie puede encontrarlo hasta que lo actives.'}
+              </AppText>
+            </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <AppText variant="bodyStrong">
-              {restaurant.is_active ? 'Tu local está activo' : 'Tu local está oculto'}
+          <Pressable
+            onPress={() => router.push('/(owner)/profile')}
+            style={({ pressed }) => ({
+              flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+              paddingVertical: 12,
+              borderTopWidth: 2, borderTopColor: C.border,
+              backgroundColor: pressed ? C.surfaceContainerHigh : 'transparent',
+            })}
+          >
+            <Icon name="cog-outline" size={16} color={C.onSurface} />
+            <AppText variant="label">
+              {restaurant.is_active ? 'Pausar o editar en Perfil' : 'Activar en Perfil'}
             </AppText>
-            <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 2 }}>
-              {restaurant.is_active ? 'Visible para todos los comensales' : 'No aparece en el mapa ni en búsquedas'}
-            </AppText>
-          </View>
-          <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: restaurant.is_active ? C.secondary : C.outline, borderWidth: 2, borderColor: C.border }} />
-        </Pressable>
+          </Pressable>
+        </View>
 
         {/* Promo activa */}
         {restaurant.promo_text && (
           <View style={{
-            flexDirection: 'row', alignItems: 'center', gap: 10,
-            padding: 14, borderRadius: 16,
+            padding: 14, borderRadius: 16, gap: 4,
             backgroundColor: C.primaryContainer,
             borderWidth: 2, borderColor: C.border, borderLeftWidth: 6,
           }}>
-            <Icon name="tag" size={18} color={C.onSurface} />
-            <AppText variant="bodyStrong" style={{ flex: 1, fontSize: 14 }} numberOfLines={2}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Icon name="tag" size={14} color={C.onSurface} />
+              <AppText variant="overline">PROMO ACTIVA</AppText>
+            </View>
+            <AppText variant="bodyStrong" style={{ fontSize: 15 }} numberOfLines={2}>
               {restaurant.promo_text}
             </AppText>
           </View>
@@ -213,33 +243,31 @@ export default function OwnerHomeScreen() {
         {/* Acciones rápidas */}
         <View style={{ gap: 8 }}>
           <AppText variant="heading" style={{ fontSize: 17 }}>Acciones rápidas</AppText>
-          <View style={{ flexDirection: 'row', gap: 10 }}>
+          <View style={{
+            flexDirection: 'row',
+            backgroundColor: C.surface,
+            borderRadius: 18,
+            borderWidth: 2, borderColor: C.border,
+            overflow: 'hidden',
+            ...shadow.sm,
+          }}>
             {[
-              { icon: 'pencil-outline', label: 'Editar perfil', onPress: () => router.push('/(owner)/profile') },
-              { icon: 'analytics',      label: 'Métricas',      onPress: () => router.push('/(owner)/analytics') },
-              { icon: 'store-outline',  label: 'Ver local',     onPress: () => router.push(`/restaurant/${restaurant.id}`) },
-            ].map(a => (
+              { icon: 'pencil-outline', label: 'Editar', onPress: () => router.push('/(owner)/profile') },
+              { icon: 'analytics',      label: 'Métricas', onPress: () => router.push('/(owner)/analytics') },
+              { icon: 'store-outline',  label: 'Ver local', onPress: () => router.push(`/restaurant/${restaurant.id}`) },
+            ].map((a, i) => (
               <Pressable
                 key={a.label}
                 onPress={a.onPress}
                 style={({ pressed }) => ({
-                  flex: 1, alignItems: 'center', gap: 8,
-                  paddingVertical: 16, borderRadius: 18,
-                  backgroundColor: C.surface,
-                  borderWidth: 2, borderColor: C.border,
-                  transform: [{ translateY: pressed ? 2 : 0 }],
-                  ...shadow.sm,
+                  flex: 1, alignItems: 'center', gap: 7,
+                  paddingVertical: 16,
+                  borderLeftWidth: i === 0 ? 0 : 2, borderLeftColor: C.outlineVariant,
+                  backgroundColor: pressed ? C.surfaceContainerHigh : 'transparent',
                 })}
               >
-                <View style={{
-                  width: 40, height: 40, borderRadius: 12,
-                  backgroundColor: C.primaryFixed,
-                  alignItems: 'center', justifyContent: 'center',
-                  borderWidth: 2, borderColor: C.border,
-                }}>
-                  <Icon name={a.icon} size={20} color={C.primary} />
-                </View>
-                <AppText variant="label" align="center">{a.label}</AppText>
+                <Icon name={a.icon} size={24} color={C.primary} />
+                <AppText variant="label">{a.label}</AppText>
               </Pressable>
             ))}
           </View>
