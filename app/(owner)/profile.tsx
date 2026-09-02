@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -17,9 +17,10 @@ import { useToast } from '@/lib/toast';
 import { AppText } from '@/components/ui/AppText';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { AppTextInput } from '@/components/ui/AppTextInput';
+import { TimePickerSheet, type TimePickerHandle } from '@/components/ui/TimePickerSheet';
 import { useMyRestaurant, useUpdateMyRestaurant } from '@/lib/queries/owner';
 import { uploadRestaurantImage, uploadRestaurantMenu } from '@/lib/storage';
-import { DEFAULT_HOURS, DAY_LABELS, formatRange, type Hours } from '@/lib/hours';
+import { DEFAULT_HOURS, DAY_LABELS, DAY_LABELS_LONG, formatRange, to12h, type Hours } from '@/lib/hours';
 
 function Divider() {
   const { C } = useTheme();
@@ -87,8 +88,19 @@ export default function OwnerProfileScreen() {
   const [hours, setHoursState]    = useState<Hours>(DEFAULT_HOURS);
   const [uploading, setUploading] = useState<'logo' | 'cover' | 'menu' | null>(null);
 
+  const timePickerRef = useRef<TimePickerHandle>(null);
+
   function setDay(dow: number, patch: Partial<Hours['days'][number]>) {
     setHoursState((h) => ({ days: h.days.map((d, i) => (i === dow ? { ...d, ...patch } : d)) }));
+  }
+
+  function openTimePicker(dow: number, which: 'open' | 'close') {
+    const d = hours.days[dow];
+    timePickerRef.current?.present({
+      title: `${DAY_LABELS_LONG[dow]} · ${which === 'open' ? 'abre' : 'cierra'}`,
+      value: d[which],
+      onPick: (hhmm) => setDay(dow, { [which]: hhmm }),
+    });
   }
 
   async function pickPhoto(kind: 'logo' | 'cover') {
@@ -396,21 +408,19 @@ export default function OwnerProfileScreen() {
                         <AppText variant="bodySm" color={C.outline} style={{ flex: 1 }}>Cerrado</AppText>
                       ) : (
                         <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                          <AppTextInput
-                            value={d.open}
-                            onChangeText={(t) => setDay(dow, { open: t.slice(0, 5) })}
-                            placeholder="12:00"
-                            keyboardType="numbers-and-punctuation"
-                            style={{ fontSize: 13, textAlign: 'center', backgroundColor: C.surfaceContainerLow, borderRadius: 8, borderWidth: 1, borderColor: C.outlineVariant, paddingVertical: 6, minWidth: 56 }}
-                          />
+                          <Pressable
+                            onPress={() => openTimePicker(dow, 'open')}
+                            style={{ flex: 1, backgroundColor: C.surfaceContainerLow, borderRadius: 10, borderWidth: 2, borderColor: C.outlineVariant, paddingVertical: 8, alignItems: 'center' }}
+                          >
+                            <AppText variant="label" style={{ fontSize: 13 }}>{to12h(d.open)}</AppText>
+                          </Pressable>
                           <AppText variant="bodySm" color={C.outline}>–</AppText>
-                          <AppTextInput
-                            value={d.close}
-                            onChangeText={(t) => setDay(dow, { close: t.slice(0, 5) })}
-                            placeholder="22:00"
-                            keyboardType="numbers-and-punctuation"
-                            style={{ fontSize: 13, textAlign: 'center', backgroundColor: C.surfaceContainerLow, borderRadius: 8, borderWidth: 1, borderColor: C.outlineVariant, paddingVertical: 6, minWidth: 56 }}
-                          />
+                          <Pressable
+                            onPress={() => openTimePicker(dow, 'close')}
+                            style={{ flex: 1, backgroundColor: C.surfaceContainerLow, borderRadius: 10, borderWidth: 2, borderColor: C.outlineVariant, paddingVertical: 8, alignItems: 'center' }}
+                          >
+                            <AppText variant="label" style={{ fontSize: 13 }}>{to12h(d.close)}</AppText>
+                          </Pressable>
                         </View>
                       )}
                     </>
@@ -562,6 +572,8 @@ export default function OwnerProfileScreen() {
         </View>
 
       </ScrollView>
+
+      <TimePickerSheet ref={timePickerRef} />
     </View>
   );
 }

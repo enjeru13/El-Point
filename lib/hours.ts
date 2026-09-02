@@ -45,6 +45,23 @@ const toMin = (hhmm: string) => {
   return (h || 0) * 60 + (m || 0);
 };
 
+/** "20:30" -> "8:30 p. m." (Spanish 12-hour). */
+export function to12h(hhmm: string): string {
+  const [hRaw, mRaw] = hhmm.split(":").map(Number);
+  const h = hRaw || 0;
+  const m = mRaw || 0;
+  const period = h < 12 ? "a. m." : "p. m.";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+/** Every 15 minutes as "HH:MM", for a picker. */
+export const TIME_SLOTS: string[] = Array.from({ length: 96 }, (_, i) => {
+  const h = Math.floor(i / 4);
+  const m = (i % 4) * 15;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+});
+
 export type OpenState = { open: boolean; label: string };
 
 export function isOpenNow(raw: unknown, now = new Date()): OpenState {
@@ -62,7 +79,7 @@ export function isOpenNow(raw: unknown, now = new Date()): OpenState {
     toMin(yest.close) < toMin(yest.open) &&
     nowMin < toMin(yest.close)
   ) {
-    return { open: true, label: `Abierto · cierra ${yest.close}` };
+    return { open: true, label: `Abierto · cierra ${to12h(yest.close)}` };
   }
 
   if (!today.closed) {
@@ -70,9 +87,9 @@ export function isOpenNow(raw: unknown, now = new Date()): OpenState {
     const c = toMin(today.close);
     const overnight = c < o;
     const isOpen = overnight ? nowMin >= o : nowMin >= o && nowMin < c;
-    if (isOpen) return { open: true, label: `Abierto · cierra ${today.close}` };
+    if (isOpen) return { open: true, label: `Abierto · cierra ${to12h(today.close)}` };
     if (nowMin < o)
-      return { open: false, label: `Cerrado · abre hoy ${today.open}` };
+      return { open: false, label: `Cerrado · abre hoy ${to12h(today.open)}` };
   }
 
   // Find the next day that opens.
@@ -81,12 +98,12 @@ export function isOpenNow(raw: unknown, now = new Date()): OpenState {
     if (!d.closed) {
       const when =
         i === 1 ? "mañana" : DAY_LABELS_LONG[(dow + i) % 7].toLowerCase();
-      return { open: false, label: `Cerrado · abre ${when} ${d.open}` };
+      return { open: false, label: `Cerrado · abre ${when} ${to12h(d.open)}` };
     }
   }
   return { open: false, label: "Cerrado" };
 }
 
 export function formatRange(d: DayHours): string {
-  return d.closed ? "Cerrado" : `${d.open} – ${d.close}`;
+  return d.closed ? "Cerrado" : `${to12h(d.open)} – ${to12h(d.close)}`;
 }
