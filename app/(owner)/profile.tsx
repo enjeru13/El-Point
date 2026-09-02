@@ -490,14 +490,17 @@ export default function OwnerProfileScreen() {
           <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
             <AppText variant="bodyStrong">Fotos y menú</AppText>
           </View>
-          <View style={{ padding: 18, gap: 14 }}>
 
-            {/* Portada */}
+          {/* Portada */}
+          <View style={{ padding: 18, gap: 8, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
+            <AppText variant="overline" color={C.outline}>FOTO DE PORTADA</AppText>
+            <AppText variant="caption" color={C.onSurfaceVariant}>Se muestra grande arriba de tu perfil.</AppText>
             <Pressable
               onPress={() => pickPhoto('cover')}
               disabled={uploading !== null}
               style={{
-                height: 150, borderRadius: 16, overflow: 'hidden',
+                marginTop: 4,
+                height: 150, borderRadius: 14, overflow: 'hidden',
                 borderWidth: 2, borderColor: C.border, borderStyle: restaurant.cover_url ? 'solid' : 'dashed',
                 alignItems: 'center', justifyContent: 'center',
                 backgroundColor: C.surfaceContainerLow,
@@ -507,8 +510,14 @@ export default function OwnerProfileScreen() {
                 <Image source={{ uri: restaurant.cover_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
               ) : (
                 <View style={{ alignItems: 'center', gap: 6 }}>
-                  <Icon name="camera-plus-outline" size={30} color={C.primary} />
-                  <AppText variant="label" color={C.onSurfaceVariant}>Subir foto de portada</AppText>
+                  <Icon name="camera-plus-outline" size={28} color={C.primary} />
+                  <AppText variant="label" color={C.onSurfaceVariant}>Elegir foto</AppText>
+                </View>
+              )}
+              {restaurant.cover_url && uploading !== 'cover' && (
+                <View style={{ position: 'absolute', bottom: 8, right: 8, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.94)', borderWidth: 2, borderColor: C.border }}>
+                  <Icon name="camera-plus-outline" size={12} color={C.onSurface} />
+                  <AppText variant="caption" style={{ fontSize: 11 }}>Cambiar</AppText>
                 </View>
               )}
               {uploading === 'cover' && (
@@ -517,58 +526,58 @@ export default function OwnerProfileScreen() {
                 </View>
               )}
             </Pressable>
-
-            <View style={{ flexDirection: 'row', gap: 14 }}>
-              {/* Logo */}
-              <Pressable
-                onPress={() => pickPhoto('logo')}
-                disabled={uploading !== null}
-                style={{
-                  width: 88, height: 88, borderRadius: 16, overflow: 'hidden',
-                  borderWidth: 2, borderColor: C.border, borderStyle: restaurant.logo_url ? 'solid' : 'dashed',
-                  alignItems: 'center', justifyContent: 'center',
-                  backgroundColor: C.surfaceContainerLow,
-                }}
-              >
-                {restaurant.logo_url ? (
-                  <Image source={{ uri: restaurant.logo_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
-                ) : (
-                  <Icon name="image-plus" size={24} color={C.primary} />
-                )}
-                {uploading === 'logo' && (
-                  <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.35)', alignItems: 'center', justifyContent: 'center' }}>
-                    <ActivityIndicator color="#fff" size="small" />
-                  </View>
-                )}
-              </Pressable>
-
-              {/* Menú PDF */}
-              <Pressable
-                onPress={pickMenu}
-                disabled={uploading !== null}
-                style={{
-                  flex: 1, borderRadius: 16, padding: 14,
-                  borderWidth: 2, borderColor: C.border, borderStyle: restaurant.menu_pdf_url ? 'solid' : 'dashed',
-                  backgroundColor: C.surfaceContainerLow,
-                  flexDirection: 'row', alignItems: 'center', gap: 12,
-                }}
-              >
-                <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: restaurant.menu_pdf_url ? C.primary : C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
-                  {uploading === 'menu'
-                    ? <ActivityIndicator size="small" color={restaurant.menu_pdf_url ? '#fff' : C.primary} />
-                    : <Icon name={restaurant.menu_pdf_url ? 'file-check' : 'file-pdf-box'} size={22} color={restaurant.menu_pdf_url ? '#fff' : C.primary} />}
-                </View>
-                <View style={{ flex: 1 }}>
-                  <AppText variant="bodyStrong" style={{ fontSize: 14 }}>
-                    {restaurant.menu_pdf_url ? 'Menú cargado' : 'Subir menú PDF'}
-                  </AppText>
-                  <AppText variant="caption" color={C.outline} style={{ fontSize: 12, marginTop: 1 }}>
-                    {restaurant.menu_pdf_url ? 'Toca para reemplazar' : 'Tus clientes lo verán en tu perfil'}
-                  </AppText>
-                </View>
-              </Pressable>
-            </View>
           </View>
+
+          {/* Logo */}
+          <Pressable
+            onPress={() => pickPhoto('logo')}
+            disabled={uploading !== null}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}
+          >
+            <View style={{
+              width: 56, height: 56, borderRadius: 16, overflow: 'hidden',
+              borderWidth: 2, borderColor: C.border, borderStyle: restaurant.logo_url ? 'solid' : 'dashed',
+              alignItems: 'center', justifyContent: 'center', backgroundColor: C.primaryFixed,
+            }}>
+              {restaurant.logo_url ? (
+                <Image source={{ uri: restaurant.logo_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+              ) : (
+                <Icon name="image-plus" size={22} color={C.primary} />
+              )}
+              {uploading === 'logo' && (
+                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.35)', alignItems: 'center', justifyContent: 'center' }}>
+                  <ActivityIndicator color="#fff" size="small" />
+                </View>
+              )}
+            </View>
+            <View style={{ flex: 1 }}>
+              <AppText variant="bodyStrong">Logo del local</AppText>
+              <AppText variant="caption" color={C.outline} style={{ fontSize: 12, marginTop: 1 }}>
+                {restaurant.logo_url ? 'Toca para cambiarlo' : 'Aparece junto a tu nombre'}
+              </AppText>
+            </View>
+            <Icon name="chevron-right" size={18} color={C.outline} />
+          </Pressable>
+
+          {/* Menú PDF */}
+          <Pressable
+            onPress={pickMenu}
+            disabled={uploading !== null}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18 }}
+          >
+            <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: restaurant.menu_pdf_url ? C.primary : C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+              {uploading === 'menu'
+                ? <ActivityIndicator size="small" color={restaurant.menu_pdf_url ? '#fff' : C.primary} />
+                : <Icon name={restaurant.menu_pdf_url ? 'file-check' : 'file-pdf-box'} size={24} color={restaurant.menu_pdf_url ? '#fff' : C.primary} />}
+            </View>
+            <View style={{ flex: 1 }}>
+              <AppText variant="bodyStrong">Menú (PDF)</AppText>
+              <AppText variant="caption" color={C.outline} style={{ fontSize: 12, marginTop: 1 }}>
+                {restaurant.menu_pdf_url ? 'Cargado · toca para reemplazar' : 'Sube tu carta para los clientes'}
+              </AppText>
+            </View>
+            <Icon name="chevron-right" size={18} color={C.outline} />
+          </Pressable>
         </View>
 
       </ScrollView>
