@@ -4,7 +4,7 @@ import { useTheme } from "@/lib/ThemeContext";
 import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
-  useNotifications,
+  useVisibleNotifications,
   type AppNotification,
 } from "@/lib/queries/notifications";
 import {
@@ -180,11 +180,11 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
   const sheetRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ["70%"], []);
 
-  const notifsQ = useNotifications();
+  const notifsQ = useVisibleNotifications();
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();
 
-  const notifs = notifsQ.data ?? [];
+  const notifs = notifsQ.visible;
   const unread = notifs.filter((n) => !n.read);
   const read = notifs.filter((n) => n.read);
   const unreadCount = unread.length;

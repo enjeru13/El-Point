@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSettings, type SettingKey } from "@/lib/settings";
 
 export type AppNotification = {
   id: string;
@@ -12,6 +13,16 @@ export type AppNotification = {
 };
 
 const KEY = ["notifications"] as const;
+
+// Which settings toggle mutes which notification type.
+const TYPE_SETTING: Record<AppNotification["type"], SettingKey> = {
+  like: "notifRanks",
+  reply: "notifReplies",
+  review: "notifReviews",
+  levelup: "notifLevelup",
+  levelup_soon: "notifLevelup",
+  promo: "notifPromos",
+};
 
 async function fetchNotifications(): Promise<AppNotification[]> {
   const { data: userData } = await supabase.auth.getUser();
@@ -33,6 +44,23 @@ export function useNotifications() {
     queryFn: fetchNotifications,
     staleTime: 20_000,
   });
+}
+
+/**
+ * Notifications the user hasn't muted via settings, plus the unread count
+ * over that visible set. Use this for the bell badge and the sheet list.
+ */
+export function useVisibleNotifications() {
+  const q = useNotifications();
+  const settings = useSettings();
+  const all = q.data ?? [];
+  const visible = all.filter((n) => settings[TYPE_SETTING[n.type]] !== false);
+  return {
+    ...q,
+    all,
+    visible,
+    unread: visible.filter((n) => !n.read).length,
+  };
 }
 
 export function useMarkNotificationRead() {

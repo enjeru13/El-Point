@@ -3,7 +3,7 @@ import {
   NotificationsHandle,
   NotificationsSheet,
 } from "@/components/ui/NotificationsSheet";
-import { useNotifications } from "@/lib/queries/notifications";
+import { useVisibleNotifications } from "@/lib/queries/notifications";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRef } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -11,8 +11,7 @@ import { Pressable, Text, View } from "react-native";
 export function NotificationBell() {
   const { C } = useTheme();
   const ref = useRef<NotificationsHandle>(null);
-  const { data } = useNotifications();
-  const unread = (data ?? []).filter((n) => !n.read).length;
+  const { unread } = useVisibleNotifications();
 
   return (
     <>
