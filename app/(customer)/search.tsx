@@ -61,148 +61,138 @@ function catIcon(item: SearchResult): string {
   return item.categories[0]?.icon ?? 'silverware-fork-knife';
 }
 
-function BestMatchCard({ item, onPress }: { item: SearchResult; onPress: () => void }) {
+function OpenPill({ hours }: { hours: SearchResult['hours'] }) {
+  const { C } = useTheme();
+  if (!hours) return null;
+  const open = isOpenNow(hours).open;
+  return (
+    <View style={{
+      flexDirection: 'row', alignItems: 'center', gap: 5,
+      paddingHorizontal: 9, paddingVertical: 4, borderRadius: 99,
+      backgroundColor: 'rgba(255,255,255,0.94)', borderWidth: 2, borderColor: C.border,
+    }}>
+      <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: open ? C.secondary : C.error }} />
+      <AppText variant="caption" style={{ fontSize: 11 }}>{open ? 'Abierto' : 'Cerrado'}</AppText>
+    </View>
+  );
+}
+
+function PlaceCard({
+  item,
+  featured = false,
+  onPress,
+}: {
+  item: SearchResult;
+  featured?: boolean;
+  onPress: () => void;
+}) {
   const { C, shadow } = useTheme();
+  const imgH = featured ? 190 : 132;
+  const price = priceLabel(item.price_level);
+
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
         backgroundColor: C.surface,
-        borderRadius: 24, overflow: 'hidden',
-        borderWidth: 2, borderColor: C.border,
-        opacity: pressed ? 0.93 : 1,
-        ...shadow.md,
+        borderRadius: 22,
+        overflow: 'hidden',
+        borderWidth: 2,
+        borderColor: C.border,
+        transform: [{ translateY: pressed ? 2 : 0 }],
+        ...(featured ? shadow.md : shadow.sm),
       })}
     >
-      <View style={{ height: 180, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center' }}>
+      {/* Cover */}
+      <View style={{ height: imgH, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center' }}>
         {item.cover_url ? (
           <Image source={{ uri: item.cover_url }} style={{ position: 'absolute', width: '100%', height: '100%' }} contentFit="cover" transition={200} />
         ) : (
-          <Icon name={catIcon(item)} size={100} color={C.onSurface} style={{ opacity: 0.12 }} />
+          <Icon name={catIcon(item)} size={featured ? 88 : 56} color={C.onSurface} style={{ opacity: 0.14 }} />
         )}
-        {item.hours && (
-          <View style={{
-            position: 'absolute', top: 14, left: 14,
-            flexDirection: 'row', alignItems: 'center', gap: 5,
-            paddingHorizontal: 10, paddingVertical: 5, borderRadius: 99,
-            backgroundColor: 'rgba(251,248,255,0.92)', borderWidth: 2, borderColor: C.border,
-          }}>
-            <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: isOpenNow(item.hours).open ? '#22c55e' : '#ef4444' }} />
-            <AppText variant="caption" style={{ fontSize: 12 }}>
-              {isOpenNow(item.hours).open ? 'Abierto' : 'Cerrado'}
-            </AppText>
-          </View>
-        )}
-        <View style={{ position: 'absolute', top: 14, right: 14 }}>
+
+        {/* bottom scrim so any future overlay text reads */}
+        <View pointerEvents="none" style={{
+          position: 'absolute', left: 0, right: 0, bottom: 0, height: 56,
+          backgroundColor: 'rgba(28,27,27,0.18)',
+        }} />
+
+        <View style={{ position: 'absolute', top: 12, left: 12 }}>
+          <OpenPill hours={item.hours} />
+        </View>
+        <View style={{ position: 'absolute', top: 12, right: 12 }}>
           <StarBadgeInline rating={item.rating_avg} count={item.rating_count} />
         </View>
       </View>
 
-      <View style={{ padding: 18, gap: 10 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99, backgroundColor: C.surfaceContainerHighest }}>
-            <AppText variant="caption" color={C.onSurfaceVariant} style={{ fontSize: 12 }}>
+      {/* Body */}
+      <View style={{ padding: featured ? 16 : 14, gap: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <View style={{
+            paddingHorizontal: 9, paddingVertical: 3, borderRadius: 99,
+            backgroundColor: C.secondaryContainer, borderWidth: 1.5, borderColor: C.border,
+          }}>
+            <AppText variant="caption" color={C.onSurface} style={{ fontSize: 11 }}>
               {catLabel(item)}
             </AppText>
           </View>
-          {priceLabel(item.price_level) !== '' && (
-            <>
-              <AppText variant="caption" color={C.outlineVariant} style={{ fontSize: 12 }}>·</AppText>
-              <AppText variant="caption" color={C.onSurfaceVariant} style={{ fontSize: 12 }}>
-                {priceLabel(item.price_level)}
-              </AppText>
-            </>
+          {!!price && (
+            <AppText variant="caption" color={C.outline}>{price}</AppText>
           )}
+          <AppText variant="caption" color={C.outline}>
+            {item.rating_count > 0
+              ? `${item.rating_count} ${item.rating_count === 1 ? 'rank' : 'ranks'}`
+              : 'Nuevo'}
+          </AppText>
         </View>
 
-        <AppText variant="title" style={{ fontSize: 26, lineHeight: 30 }}>
+        <AppText
+          variant={featured ? 'title' : 'heading'}
+          style={featured ? { fontSize: 24, lineHeight: 28 } : { fontSize: 18, lineHeight: 22 }}
+          numberOfLines={2}
+        >
           {item.name}
         </AppText>
 
         {item.address && (
-          <AppText variant="bodySm" color={C.onSurfaceVariant} numberOfLines={2}>
-            {item.address}
-          </AppText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <Icon name="map-marker-outline" size={13} color={C.outline} />
+            <AppText variant="bodySm" color={C.onSurfaceVariant} numberOfLines={1} style={{ flex: 1 }}>
+              {item.address}
+            </AppText>
+          </View>
         )}
 
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTopWidth: 1, borderTopColor: C.outlineVariant }}>
-          <AppText variant="label" color={C.outline}>
-            {item.rating_count} {item.rating_count === 1 ? 'rank' : 'ranks'}
-          </AppText>
+        {featured && (
           <View style={{
+            marginTop: 6, alignSelf: 'flex-start',
             flexDirection: 'row', alignItems: 'center', gap: 6,
             paddingHorizontal: 16, paddingVertical: 9, borderRadius: 99,
             backgroundColor: C.primaryContainer, borderWidth: 2, borderColor: C.border,
           }}>
-            <AppText variant="bodyStrong" style={{ fontSize: 14 }}>Ver lugar</AppText>
+            <AppText variant="bodyStrong" style={{ fontSize: 14 }}>Ver restaurante</AppText>
             <Icon name="arrow-right" size={15} color={C.onSurface} />
           </View>
-        </View>
+        )}
       </View>
     </Pressable>
   );
 }
 
-function PlaceRow({ item, onPress }: { item: SearchResult; onPress: () => void }) {
+function CardSkeleton({ featured = false }: { featured?: boolean }) {
   const { C, shadow } = useTheme();
-  const open = item.hours ? isOpenNow(item.hours) : null;
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => ({
-        flexDirection: 'row',
-        gap: 12,
-        padding: 10,
-        borderRadius: 18,
-        backgroundColor: C.surface,
-        borderWidth: 2,
-        borderColor: C.border,
-        opacity: pressed ? 0.9 : 1,
-        ...shadow.sm,
-      })}
-    >
-      <View style={{
-        width: 64, height: 64, borderRadius: 14, overflow: 'hidden',
-        backgroundColor: C.primaryFixed,
-        alignItems: 'center', justifyContent: 'center',
-        borderWidth: 2, borderColor: C.border,
-      }}>
-        {item.cover_url ? (
-          <Image source={{ uri: item.cover_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={200} />
-        ) : (
-          <Icon name={catIcon(item)} size={28} color={C.onSurface} style={{ opacity: 0.4 }} />
-        )}
+    <View style={{
+      backgroundColor: C.surface, borderRadius: 22, overflow: 'hidden',
+      borderWidth: 2, borderColor: C.border, ...shadow.sm,
+    }}>
+      <Skeleton height={featured ? 190 : 132} radius={0} />
+      <View style={{ padding: 14, gap: 8 }}>
+        <Skeleton width={90} height={16} radius={99} />
+        <Skeleton width="75%" height={featured ? 24 : 18} />
+        <Skeleton width="55%" height={13} />
       </View>
-
-      <View style={{ flex: 1, justifyContent: 'center', gap: 2 }}>
-        <AppText variant="bodyStrong" style={{ fontSize: 15 }} numberOfLines={1}>
-          {item.name}
-        </AppText>
-        <AppText variant="caption" color={C.onSurfaceVariant}>
-          {[catLabel(item), priceLabel(item.price_level)].filter(Boolean).join('  ·  ')}
-        </AppText>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Icon name="star" size={12} color={C.secondary} />
-          <AppText variant="caption" color={C.outline}>
-            {item.rating_count > 0
-              ? `${item.rating_avg.toFixed(1)} (${item.rating_count})`
-              : 'Sin ranks'}
-          </AppText>
-          {open && (
-            <>
-              <AppText variant="caption" color={C.outlineVariant}>·</AppText>
-              <AppText variant="caption" color={open.open ? C.secondary : C.error}>
-                {open.open ? 'Abierto' : 'Cerrado'}
-              </AppText>
-            </>
-          )}
-        </View>
-      </View>
-
-      <View style={{ justifyContent: 'center' }}>
-        <Icon name="chevron-right" size={20} color={C.outline} />
-      </View>
-    </Pressable>
+    </View>
   );
 }
 
@@ -397,16 +387,16 @@ export default function SearchScreen() {
       )}
 
       {searchQ.isLoading ? (
-        <View style={{ padding: 16, gap: 10 }}>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} height={88} radius={18} />
-          ))}
+        <View style={{ padding: 16, gap: 14 }}>
+          <CardSkeleton featured />
+          <CardSkeleton />
+          <CardSkeleton />
         </View>
       ) : searching ? (
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
-          contentContainerStyle={{ padding: 16, gap: 20, paddingBottom: 100 }}
+          contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 110 }}
         >
           {results.length === 0 ? (
             <EmptyState
@@ -418,22 +408,20 @@ export default function SearchScreen() {
             />
           ) : (
             <>
+              <AppText variant="overline" color={C.outline}>
+                {best ? 'MEJOR COINCIDENCIA' : `${results.length} ${results.length === 1 ? 'LUGAR' : 'LUGARES'}`}
+              </AppText>
               {best && (
-                <View style={{ gap: 12 }}>
-                  <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>Mejor coincidencia</AppText>
-                  <BestMatchCard item={best} onPress={() => router.push(`/restaurant/${best.id}`)} />
-                </View>
+                <PlaceCard featured item={best} onPress={() => router.push(`/restaurant/${best.id}`)} />
               )}
-              {rest.length > 0 && (
-                <View style={{ gap: 10 }}>
-                  <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>
-                    {best ? `Más lugares (${rest.length})` : `${rest.length} resultado${rest.length === 1 ? '' : 's'}`}
-                  </AppText>
-                  {rest.map(r => (
-                    <PlaceRow key={r.id} item={r} onPress={() => router.push(`/restaurant/${r.id}`)} />
-                  ))}
-                </View>
+              {rest.length > 0 && best && (
+                <AppText variant="overline" color={C.outline} style={{ marginTop: 6 }}>
+                  MÁS LUGARES ({rest.length})
+                </AppText>
               )}
+              {rest.map(r => (
+                <PlaceCard key={r.id} item={r} onPress={() => router.push(`/restaurant/${r.id}`)} />
+              ))}
             </>
           )}
         </ScrollView>
@@ -441,9 +429,9 @@ export default function SearchScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
-          contentContainerStyle={{ padding: 16, paddingBottom: 100, gap: 12 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 14 }}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
             <Icon name="trending-up" size={18} color={C.primary} />
             <AppText variant="heading">Populares en San Cristóbal</AppText>
           </View>
@@ -452,11 +440,14 @@ export default function SearchScreen() {
               Aún no hay lugares. Vuelve pronto.
             </AppText>
           ) : (
-            <View style={{ gap: 10 }}>
-              {popular.map(r => (
-                <PlaceRow key={r.id} item={r} onPress={() => router.push(`/restaurant/${r.id}`)} />
-              ))}
-            </View>
+            popular.map((r, i) => (
+              <PlaceCard
+                key={r.id}
+                featured={i === 0}
+                item={r}
+                onPress={() => router.push(`/restaurant/${r.id}`)}
+              />
+            ))
           )}
         </ScrollView>
       )}
