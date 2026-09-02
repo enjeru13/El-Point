@@ -14,21 +14,13 @@ import { AppText } from '@/components/ui/AppText';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { useRestaurantSearch, type SearchResult } from '@/lib/queries/search';
+import { useCategories } from '@/lib/queries/categories';
 import { isOpenNow } from '@/lib/hours';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Chip } from '@/components/ui/Chip';
 
 type SortKey = 'rank' | 'reviews' | null;
 type PriceKey = 1 | 2 | 3 | null;
-
-const TRENDING: string[] = [
-  'Smash burgers',
-  'Pizza artesanal',
-  'Arepas',
-  'Perros calientes',
-  'Café',
-  'Alta cocina',
-];
 
 function priceLabel(level: number | null): string {
   return level && level >= 1 ? '$'.repeat(Math.min(level, 3)) : '';
@@ -196,6 +188,12 @@ function ResultCard({ item, onPress }: { item: SearchResult; onPress: () => void
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
+function chunkPairs(list: SearchResult[]): SearchResult[][] {
+  const pairs: SearchResult[][] = [];
+  for (let i = 0; i < list.length; i += 2) pairs.push(list.slice(i, i + 2));
+  return pairs;
+}
+
 export default function SearchScreen() {
   const { C, shadow } = useTheme();
   const insets   = useSafeAreaInsets();
@@ -203,9 +201,10 @@ export default function SearchScreen() {
   const inputRef = useRef<TextInput>(null);
 
   const searchQ = useRestaurantSearch();
+  const categoriesQ = useCategories();
 
   const [query, setQuery]       = useState('');
-  const [showResults, setShow]  = useState(false);
+  const [activeCat, setActiveCat] = useState<string | null>(null);
   const [filterOpen, setFilter] = useState(false);
   const [sort, setSort]         = useState<SortKey>(null);
   const [price, setPrice]       = useState<PriceKey>(null);
@@ -213,6 +212,7 @@ export default function SearchScreen() {
 
   const hasActiveFilters = sort !== null || price !== null || onlyOpen;
   const all = searchQ.data ?? [];
+  const searching = !!query.trim() || !!activeCat || hasActiveFilters;
 
   const results = useMemo(() => {
     let list = all.filter(r => {
@@ -222,22 +222,35 @@ export default function SearchScreen() {
         r.name.toLowerCase().includes(q) ||
         r.categories.some(c => c.label.toLowerCase().includes(q) || c.slug.includes(q)) ||
         (r.address ?? '').toLowerCase().includes(q);
+      const matchCat = !activeCat || r.categories.some(c => c.slug === activeCat);
       const matchPrice = !price || r.price_level === price;
       const matchOpen = !onlyOpen || isOpenNow(r.hours).open;
-      return matchQuery && matchPrice && matchOpen;
+      return matchQuery && matchCat && matchPrice && matchOpen;
     });
     if (sort === 'rank') list = [...list].sort((a, b) => b.rating_avg - a.rating_avg);
     if (sort === 'reviews') list = [...list].sort((a, b) => b.rating_count - a.rating_count);
+    else list = [...list].sort((a, b) => b.rating_count - a.rating_count);
     return list;
-  }, [all, query, price, sort, onlyOpen]);
+  }, [all, query, activeCat, price, sort, onlyOpen]);
+
+  const popular = useMemo(
+    () => [...all].sort((a, b) => b.rating_count - a.rating_count).slice(0, 6),
+    [all],
+  );
 
   const best = results[0] ?? null;
   const rest = results.slice(1);
-  const pairs: SearchResult[][] = [];
-  for (let i = 0; i < rest.length; i += 2) pairs.push(rest.slice(i, i + 2));
+  const pairs = chunkPairs(rest);
 
-  function go(label: string) { setQuery(label); setShow(true); }
-  function clear() { setQuery(''); setShow(false); setFilter(false); setSort(null); setPrice(null); setOnlyOpen(false); }
+  function clear() {
+    setQuery('');
+    setActiveCat(null);
+    setFilter(false);
+    setSort(null);
+    setPrice(null);
+    setOnlyOpen(false);
+    inputRef.current?.blur();
+  }
   function resetFilters() { setSort(null); setPrice(null); setOnlyOpen(false); }
 
   return (
@@ -256,8 +269,8 @@ export default function SearchScreen() {
           <SearchBar
             ref={inputRef}
             value={query}
-            onChangeText={t => { setQuery(t); if (t.trim()) setShow(true); }}
-            onSubmit={() => { if (query.trim()) setShow(true); }}
+            onChangeText={setQuery}
+            onSubmit={() => inputRef.current?.blur()}
             onClear={clear}
             variant="floating"
           />
@@ -279,6 +292,25 @@ export default function SearchScreen() {
           )}
         </Pressable>
       </View>
+
+      {/* ── Chips de categoría ── */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12, gap: 8 }}
+        style={{ flexGrow: 0, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}
+      >
+        <Chip label="Todo" active={!activeCat} onPress={() => setActiveCat(null)} />
+        {(categoriesQ.data ?? []).map(cat => (
+          <Chip
+            key={cat.slug}
+            label={cat.label}
+            icon={cat.icon}
+            active={activeCat === cat.slug}
+            onPress={() => setActiveCat(activeCat === cat.slug ? null : cat.slug)}
+          />
+        ))}
+      </ScrollView>
 
       {/* ── Panel de filtros ── */}
       {filterOpen && (
@@ -328,12 +360,12 @@ export default function SearchScreen() {
             style={{
               flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start',
               paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99,
-              backgroundColor: onlyOpen ? '#dcfce7' : C.surface,
-              borderWidth: 2, borderColor: onlyOpen ? '#16a34a' : C.outlineVariant,
+              backgroundColor: onlyOpen ? C.secondaryContainer : C.surface,
+              borderWidth: 2, borderColor: onlyOpen ? C.border : C.outlineVariant,
             }}
           >
-            <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: onlyOpen ? '#16a34a' : C.outline }} />
-            <AppText variant="label" color={onlyOpen ? '#16a34a' : C.onSurfaceVariant}>
+            <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: onlyOpen ? C.secondary : C.outline }} />
+            <AppText variant="label" color={onlyOpen ? C.onSurface : C.onSurfaceVariant}>
               Abiertos ahora
             </AppText>
           </Pressable>
@@ -359,14 +391,18 @@ export default function SearchScreen() {
             <Skeleton height={150} radius={20} style={{ flex: 1 }} />
           </View>
         </View>
-      ) : showResults ? (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 24, paddingBottom: 100 }}>
+      ) : searching ? (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          keyboardDismissMode="on-drag"
+          contentContainerStyle={{ padding: 16, gap: 24, paddingBottom: 100 }}
+        >
           {results.length === 0 ? (
             <EmptyState
               icon="food-off-outline"
               title="Sin resultados"
               body="Prueba con otro término o quita filtros"
-              actionLabel="Ver tendencias"
+              actionLabel="Limpiar"
               onAction={clear}
             />
           ) : (
@@ -379,7 +415,9 @@ export default function SearchScreen() {
               )}
               {rest.length > 0 && (
                 <View style={{ gap: 12 }}>
-                  <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>Más lugares</AppText>
+                  <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>
+                    Más lugares ({rest.length})
+                  </AppText>
                   <View style={{ gap: 10 }}>
                     {pairs.map((pair, i) => (
                       <View key={i} style={{ flexDirection: 'row', gap: 10 }}>
@@ -396,41 +434,31 @@ export default function SearchScreen() {
           )}
         </ScrollView>
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-          <View style={{ paddingHorizontal: 16, paddingTop: 24 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-              <Icon name="trending-up" size={18} color={C.primary} />
-              <AppText variant="heading" style={{ marginLeft: 6 }}>Tendencias</AppText>
-            </View>
-            {TRENDING.map((label, i) => (
-              <Pressable
-                key={label}
-                onPress={() => go(label)}
-                style={({ pressed }) => ({
-                  opacity: pressed ? 0.6 : 1,
-                  borderBottomWidth: i < TRENDING.length - 1 ? 1 : 0,
-                  borderBottomColor: C.outlineVariant,
-                })}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 14 }}>
-                  <AppText
-                    variant="heading"
-                    color={i === 0 ? C.primary : i < 3 ? C.onSurface : C.outline}
-                    style={{ width: 28, fontSize: i < 3 ? 18 : 15 }}
-                  >
-                    {i + 1}
-                  </AppText>
-                  <AppText
-                    variant={i < 3 ? 'bodyStrong' : 'subtitle'}
-                    style={{ flex: 1, fontSize: 15 }}
-                  >
-                    {label}
-                  </AppText>
-                  <Icon name={i < 3 ? 'fire' : 'arrow-right'} size={i < 3 ? 18 : 15} color={i < 3 ? C.primaryContainer : C.outlineVariant} />
-                </View>
-              </Pressable>
-            ))}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          keyboardDismissMode="on-drag"
+          contentContainerStyle={{ padding: 16, paddingBottom: 100, gap: 12 }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Icon name="trending-up" size={18} color={C.primary} />
+            <AppText variant="heading">Populares en San Cristóbal</AppText>
           </View>
+          {popular.length === 0 ? (
+            <AppText variant="bodySm" color={C.outline}>
+              Aún no hay lugares. Vuelve pronto.
+            </AppText>
+          ) : (
+            <View style={{ gap: 10 }}>
+              {chunkPairs(popular).map((pair, i) => (
+                <View key={i} style={{ flexDirection: 'row', gap: 10 }}>
+                  {pair.map(r => (
+                    <ResultCard key={r.id} item={r} onPress={() => router.push(`/restaurant/${r.id}`)} />
+                  ))}
+                  {pair.length === 1 && <View style={{ flex: 1 }} />}
+                </View>
+              ))}
+            </View>
+          )}
         </ScrollView>
       )}
     </View>
