@@ -199,12 +199,16 @@ export default function OwnerHomeScreen() {
           </View>
           <Pressable
             onPress={() => router.push('/(owner)/profile')}
-            style={({ pressed }) => ({
-              flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+            android_ripple={{ color: C.outlineVariant }}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
               paddingVertical: 12,
-              borderTopWidth: 2, borderTopColor: C.border,
-              backgroundColor: pressed ? C.surfaceContainerHigh : 'transparent',
-            })}
+              borderTopWidth: 2,
+              borderTopColor: C.border,
+            }}
           >
             <Icon name="cog-outline" size={16} color={C.onSurface} />
             <AppText variant="label">
