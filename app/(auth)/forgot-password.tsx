@@ -73,15 +73,16 @@ export default function ForgotPasswordScreen() {
     }
 
     const { error: updError } = await supabase.auth.updateUser({ password });
-    await supabase.auth.signOut();
     setLoading(false);
 
     if (updError) {
       toast.error(updError.message);
       return;
     }
-    toast.success("Contraseña actualizada. Inicia sesión.");
-    router.replace("/(auth)/login");
+    // Ya se verificó el código y quedó una sesión válida con la contraseña
+    // nueva — dejarlo entrar directo en vez de forzar un segundo login.
+    // El layout raíz detecta la sesión y redirige solo a su home.
+    toast.success("Contraseña actualizada");
   }
 
   return (

@@ -1,7 +1,7 @@
 import { Icon } from '@/components/ui/Icon';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
@@ -11,9 +11,10 @@ import {
   View,
 } from 'react-native';
 import { Image } from 'expo-image';
+import { captureRef } from 'react-native-view-shot';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { AppText } from '@/components/ui/AppText';
-import MapView, { Callout, Circle, Marker } from 'react-native-maps';
+import MapView, { Circle, Marker } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FLOATING_NAV_H } from '@/lib/theme';
 import { useTheme } from '@/lib/ThemeContext';
@@ -55,81 +56,101 @@ const MAP_STYLE = [
   { featureType: 'transit',                              stylers: [{ visibility: 'off' }] },
 ];
 
-// ─── Marker ────────────────────────────────────────────────────────────────────
+// ─── Marker image factory ───────────────────────────────────────────────────
+// Android map markers need a real bitmap. A live custom View can get frozen
+// mid-paint by react-native-maps' own snapshot step and render corrupted —
+// e.g. only the top-left quarter of the circle. So instead we render each
+// marker's look once, off-screen, capture it to a PNG ourselves with
+// react-native-view-shot, and hand the Marker a plain `image` — no live view,
+// nothing for react-native-maps to (mis)snapshot, ever.
 
-const RestaurantMarker = memo(function RestaurantMarker({
-  restaurant, isSelected, isDimmed, onPress,
-}: {
-  restaurant: Restaurant; isSelected: boolean; isDimmed: boolean; onPress: () => void;
-}) {
+const MARKER_W = 70;
+const MARKER_H = 92;
+
+function markerCacheKey(r: Restaurant): string {
+  const rating = r.rating_count > 0 ? r.rating_avg.toFixed(1) : '-';
+  return `${r.id}:${r.icon}:${rating}`;
+}
+
+function MarkerTemplate({ restaurant }: { restaurant: Restaurant }) {
   const { C, shadow } = useTheme();
-  // Brief tracksViewChanges window only when this marker's selected state flips,
-  // then back to false so the native view stops re-rendering (perf + crash guard).
-  const [tracking, setTracking] = useState(true);
-  const first = useRef(true);
-  useEffect(() => {
-    if (first.current) { first.current = false; }
-    setTracking(true);
-    const t = setTimeout(() => setTracking(false), 250);
-    return () => clearTimeout(t);
-  }, [isSelected]);
+  return (
+    <View style={{ width: MARKER_W, height: MARKER_H, alignItems: 'center', justifyContent: 'flex-end' }}>
+      <View style={{
+        width: 46, height: 46, borderRadius: 23,
+        backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center',
+        borderWidth: 2.5, borderColor: C.outlineVariant,
+        ...shadow.sm,
+      }}>
+        <Icon name={restaurant.icon} size={22} color={C.primary} />
+      </View>
+      <View style={{
+        width: 0, height: 0,
+        borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 8,
+        borderLeftColor: 'transparent', borderRightColor: 'transparent',
+        borderTopColor: C.surface,
+        marginTop: -1,
+      }} />
+      <View style={{
+        marginTop: 2,
+        backgroundColor: C.surface,
+        borderWidth: 1.5, borderColor: C.outlineVariant,
+        paddingHorizontal: 6, paddingVertical: 2, borderRadius: 99,
+        flexDirection: 'row', alignItems: 'center',
+      }}>
+        <Icon name="star" size={9} color={C.secondary} />
+        <AppText variant="caption" color={C.onSurface} style={{ marginLeft: 2 }}>
+          {restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : '–'}
+        </AppText>
+      </View>
+    </View>
+  );
+}
+
+function MarkerImageFactory({
+  pending,
+  onReady,
+}: {
+  pending: Restaurant[];
+  onReady: (key: string, uri: string) => void;
+}) {
+  const refs = useRef<Record<string, View | null>>({});
+  const started = useRef<Set<string>>(new Set());
+
+  async function capture(key: string) {
+    const node = refs.current[key];
+    if (!node) return;
+    try {
+      const uri = await captureRef(node, { format: 'png', quality: 1, result: 'data-uri' });
+      onReady(key, uri);
+    } catch {
+      started.current.delete(key); // deja reintentar en el próximo render
+    }
+  }
 
   return (
-    <Marker
-      coordinate={{ latitude: restaurant.lat, longitude: restaurant.lng }}
-      anchor={{ x: 0.5, y: 1 }}
-      tracksViewChanges={tracking}
-      onPress={onPress}
-    >
-      <View style={{ alignItems: 'center', opacity: isDimmed ? 0.35 : 1 }}>
-        {/* Bubble */}
-        <View style={{
-          width: isSelected ? 54 : 46,
-          height: isSelected ? 54 : 46,
-          borderRadius: isSelected ? 27 : 23,
-          backgroundColor: isSelected ? C.primary : C.surface,
-          alignItems: 'center', justifyContent: 'center',
-          borderWidth: 2.5,
-          borderColor: isSelected ? C.border : C.outlineVariant,
-          ...(isSelected ? shadow.primary : shadow.sm),
-        }}>
-          <Icon
-            name={restaurant.icon}
-            size={isSelected ? 26 : 22}
-            color={isSelected ? C.onPrimary : C.primary}
-          />
-        </View>
-
-        {/* Pointy tail */}
-        <View style={{
-          width: 0, height: 0,
-          borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 8,
-          borderLeftColor: 'transparent', borderRightColor: 'transparent',
-          borderTopColor: isSelected ? C.primary : C.surface,
-          marginTop: -1,
-        }} />
-
-        {/* Rating pill */}
-        <View style={{
-          marginTop: 2,
-          backgroundColor: isSelected ? C.primary : C.surface,
-          borderWidth: 1.5, borderColor: isSelected ? C.border : C.outlineVariant,
-          paddingHorizontal: 6, paddingVertical: 2, borderRadius: 99,
-          flexDirection: 'row', alignItems: 'center',
-        }}>
-          <Icon
-            name="star" size={9}
-            color={isSelected ? C.secondaryContainer : C.secondary}
-          />
-          <AppText variant="caption" color={isSelected ? C.onPrimary : C.onSurface} style={{ marginLeft: 2 }}>
-            {restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : '–'}
-          </AppText>
-        </View>
-      </View>
-      <Callout tooltip><View /></Callout>
-    </Marker>
+    <View pointerEvents="none" style={{ position: 'absolute', top: -1000, left: -1000, opacity: 0 }}>
+      {pending.map(r => {
+        const key = markerCacheKey(r);
+        return (
+          <View
+            key={key}
+            ref={(node) => { refs.current[key] = node; }}
+            collapsable={false}
+            onLayout={() => {
+              if (started.current.has(key)) return;
+              started.current.add(key);
+              // Dos frames de margen para que Android termine de pintar antes de capturar.
+              requestAnimationFrame(() => requestAnimationFrame(() => capture(key)));
+            }}
+          >
+            <MarkerTemplate restaurant={r} />
+          </View>
+        );
+      })}
+    </View>
   );
-});
+}
 
 // ─── Bottom card ──────────────────────────────────────────────────────────────
 
@@ -239,6 +260,13 @@ export default function MapScreen() {
     const q = search.toLowerCase();
     return restaurants.filter(r => r.name.toLowerCase().includes(q));
   }, [restaurants, search]);
+
+  // Pre-rendered marker bitmaps (see MarkerImageFactory above).
+  const [markerImages, setMarkerImages] = useState<Record<string, string>>({});
+  const pendingImages = useMemo(
+    () => filtered.filter(r => !markerImages[markerCacheKey(r)]),
+    [filtered, markerImages],
+  );
 
   // Ping animation for user dot
   useEffect(() => {
@@ -362,16 +390,42 @@ export default function MapScreen() {
         )}
 
         {/* Restaurant markers */}
-        {filtered.map(r => (
-          <RestaurantMarker
-            key={r.id}
-            restaurant={r}
-            isSelected={selected?.id === r.id}
-            isDimmed={!!selected && selected.id !== r.id}
-            onPress={() => selected?.id === r.id ? closeSheet() : openSheet(r)}
-          />
-        ))}
+        {filtered.map(r => {
+          const uri = markerImages[markerCacheKey(r)];
+          if (!uri) return null; // aún capturando su bitmap
+          const isSelected = selected?.id === r.id;
+          return (
+            <Fragment key={r.id}>
+              {isSelected && (
+                <Circle
+                  center={{ latitude: r.lat, longitude: r.lng }}
+                  radius={35}
+                  fillColor={`${C.primary}33`}
+                  strokeColor={`${C.primary}66`}
+                  strokeWidth={2}
+                />
+              )}
+              <Marker
+                coordinate={{ latitude: r.lat, longitude: r.lng }}
+                anchor={{ x: 0.5, y: 1 }}
+                image={{ uri }}
+                opacity={!!selected && !isSelected ? 0.4 : 1}
+                tracksViewChanges={false}
+                onPress={() => (isSelected ? closeSheet() : openSheet(r))}
+              />
+            </Fragment>
+          );
+        })}
       </MapView>
+
+      {pendingImages.length > 0 && (
+        <MarkerImageFactory
+          pending={pendingImages}
+          onReady={(key, uri) =>
+            setMarkerImages(prev => (prev[key] ? prev : { ...prev, [key]: uri }))
+          }
+        />
+      )}
 
       {/* ── Search + chips ── */}
       <View style={{ position: 'absolute', top: insets.top + 8, left: 0, right: 0, gap: 8 }}>

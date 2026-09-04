@@ -57,15 +57,20 @@ export function Chip({
 /** Non-interactive tag. */
 export function Tag({
   label,
+  icon,
   tone = "neutral",
 }: {
   label: string;
+  icon?: string;
   tone?: "neutral" | "accent";
 }) {
   const { C } = useTheme();
   return (
     <View
       style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 5,
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 99,
@@ -74,6 +79,7 @@ export function Tag({
         backgroundColor: tone === "accent" ? C.secondaryContainer : C.surface,
       }}
     >
+      {icon && <Icon name={icon} size={12} color={C.onSurfaceVariant} />}
       <Text
         style={{
           fontFamily: "PlusJakartaSans_700Bold",

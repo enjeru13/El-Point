@@ -8,7 +8,6 @@ export type AppNotification = {
     | "like"
     | "reply"
     | "levelup"
-    | "levelup_soon"
     | "promo"
     | "review"
     | "weekly"
@@ -29,7 +28,6 @@ const TYPE_SETTING: Partial<Record<AppNotification["type"], SettingKey>> = {
   reply: "notifReplies",
   review: "notifReviews",
   levelup: "notifLevelup",
-  levelup_soon: "notifLevelup",
   promo: "notifPromos",
   weekly: "notifWeekly",
 };

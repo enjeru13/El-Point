@@ -112,7 +112,7 @@ export default function SettingsScreen() {
             <SectionCard>
               <View style={{ padding: 18, gap: 16 }}>
                 <AppText variant="bodyStrong">Tema de color</AppText>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}>
                   {THEME_NAMES.map((name) => {
                     const active = name === themeName;
                     return (

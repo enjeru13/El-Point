@@ -13,7 +13,7 @@ import {
   PlusJakartaSans_700Bold,
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { useFonts } from 'expo-font';
-import { Slot, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
@@ -65,13 +65,17 @@ export default function RootLayout() {
       setSession(session);
       const uid = session?.user.id ?? null;
       if (uid && uid !== currentUid.current) {
-        // new user — clear the old role so we never route on a stale one
+        // new user — clear the old role AND every cached query (profile,
+        // favorites, reviews, notifications, feed...) so nothing from the
+        // previous account flashes on screen before it refetches.
         currentUid.current = uid;
         setRole(null);
+        queryClient.clear();
         fetchRole(uid);
       } else if (!uid) {
         currentUid.current = null;
         setRole(null);
+        queryClient.clear();
         setReady(true);
       }
       // same uid (e.g. token refresh) — keep role as is
@@ -138,7 +142,7 @@ export default function RootLayout() {
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
               <ToastProvider>
                 <SettingsBridge />
-                <Slot />
+                <Stack screenOptions={{ headerShown: false }} />
               </ToastProvider>
               <StatusBar style="auto" />
             </ThemeProvider>

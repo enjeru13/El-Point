@@ -1,7 +1,7 @@
 import { Icon } from '@/components/ui/Icon';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
@@ -26,8 +26,10 @@ import { SectionTitle } from '@/components/ui/SectionTitle';
 import { useMyProfile, useMyReviews, useUpdateMyProfile, levelProgress } from '@/lib/queries/me';
 import { RankBadge } from '@/components/ui/RankBadge';
 import { Button } from '@/components/ui/Button';
+import { Chip, Tag } from '@/components/ui/Chip';
 import { uploadAvatar } from '@/lib/storage';
 import { useFavorites } from '@/lib/queries/feed';
+import { useCategories } from '@/lib/queries/categories';
 import { useToast } from '@/lib/toast';
 
 function timeAgo(iso: string): string {
@@ -61,6 +63,7 @@ export default function ProfileScreen() {
   const profileQ = useMyProfile();
   const reviewsQ = useMyReviews();
   const favoritesQ = useFavorites();
+  const categoriesQ = useCategories();
 
   const updateMut = useUpdateMyProfile();
   const toast = useToast();
@@ -79,19 +82,39 @@ export default function ProfileScreen() {
   const [fullName, setFullName] = useState('');
   const [bio, setBio]           = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
+  const [favCats, setFavCats] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     if (!profile) return;
     setUsername(profile.username ?? '');
     setFullName(profile.full_name ?? '');
     setBio(profile.bio ?? '');
+    setFavCats(new Set(profile.favorite_categories));
   }, [profile]);
+
+  // Orden estable mientras se edita: las ya elegidas (al entrar a editar)
+  // van primero, para no tener que buscarlas entre todas. No se recalcula
+  // con cada toque, para que los chips no salten de lugar al seleccionar.
+  const editSortedCats = useMemo(() => {
+    const data = categoriesQ.data ?? [];
+    const persisted = new Set(profile?.favorite_categories ?? []);
+    return [...data].sort((a, b) => Number(persisted.has(b.id)) - Number(persisted.has(a.id)));
+  }, [categoriesQ.data, profile]);
+
+  function toggleFavCat(id: number) {
+    setFavCats(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
 
   function cancelEdit() {
     if (profile) {
       setUsername(profile.username ?? '');
       setFullName(profile.full_name ?? '');
       setBio(profile.bio ?? '');
+      setFavCats(new Set(profile.favorite_categories));
     }
     setEditing(false);
   }
@@ -103,7 +126,12 @@ export default function ProfileScreen() {
       return;
     }
     updateMut.mutate(
-      { username: u || null, full_name: fullName.trim() || null, bio: bio.trim() || null },
+      {
+        username: u || null,
+        full_name: fullName.trim() || null,
+        bio: bio.trim() || null,
+        favorite_categories: Array.from(favCats),
+      },
       {
         onSuccess: () => { setEditing(false); toast.success('Perfil actualizado'); },
         onError: (e: any) => toast.error(e?.message ?? 'No se pudo guardar'),
@@ -260,6 +288,46 @@ export default function ProfileScreen() {
                   <AppText variant="label" color={C.onSurfaceVariant}>{stat.label}</AppText>
                 </View>
               ))}
+            </View>
+
+            {/* Perfil de sabor */}
+            <View style={{ gap: 12 }}>
+              <SectionTitle icon="silverware-fork-knife" label="Tu perfil de sabor" />
+              <View style={{ backgroundColor: C.surface, borderRadius: 24, padding: 18, gap: 12, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
+                {categoriesQ.isLoading ? (
+                  <Skeleton height={32} radius={16} />
+                ) : editing ? (
+                  <>
+                    <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                      Elige tus categorías favoritas.
+                    </AppText>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: 10, columnGap: 8 }}>
+                      {editSortedCats.map(cat => (
+                        <Chip
+                          key={cat.id}
+                          label={cat.label}
+                          icon={cat.icon}
+                          tone="secondary"
+                          active={favCats.has(cat.id)}
+                          onPress={() => toggleFavCat(cat.id)}
+                        />
+                      ))}
+                    </View>
+                  </>
+                ) : favCats.size === 0 ? (
+                  <AppText variant="bodySm" color={C.outline}>
+                    Aún no elegiste tus categorías favoritas. Toca "Editar perfil" para elegirlas.
+                  </AppText>
+                ) : (
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: 10, columnGap: 8 }}>
+                    {(categoriesQ.data ?? [])
+                      .filter(cat => favCats.has(cat.id))
+                      .map(cat => (
+                        <Tag key={cat.id} label={cat.label} icon={cat.icon} tone="accent" />
+                      ))}
+                  </View>
+                )}
+              </View>
             </View>
 
             {/* Favoritos */}

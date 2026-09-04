@@ -111,6 +111,7 @@ function PlaceCard({
   onPress: () => void;
 }) {
   const { C, shadow } = useTheme();
+  const [pressed, setPressed] = useState(false);
   const imgH = featured ? 190 : 132;
   const price = priceLabel(item.price_level);
   const dist =
@@ -121,15 +122,19 @@ function PlaceCard({
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => ({
-        backgroundColor: C.surface,
-        borderRadius: 22,
-        overflow: 'hidden',
-        borderWidth: 2,
-        borderColor: C.border,
-        transform: [{ translateY: pressed ? 2 : 0 }],
-        ...(featured ? shadow.md : shadow.sm),
-      })}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      style={[
+        {
+          backgroundColor: C.surface,
+          borderRadius: 22,
+          overflow: 'hidden',
+          borderWidth: 2,
+          borderColor: C.border,
+        },
+        { transform: [{ translateY: pressed ? 2 : 0 }] },
+        featured ? shadow.md : shadow.sm,
+      ]}
     >
       {/* Cover */}
       <View style={{ height: imgH, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center' }}>

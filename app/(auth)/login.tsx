@@ -4,10 +4,13 @@ import { Button } from "@/components/ui/Button";
 import { useToast } from "@/lib/toast";
 import { Field } from "@/components/ui/Field";
 import { supabase } from "@/lib/supabase";
+import { signInWithGoogle } from "@/lib/oauth";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  Animated,
+  Easing,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -24,7 +27,18 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const toast = useToast();
+
+  const cardAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(cardAnim, {
+      toValue: 1,
+      duration: 480,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   async function handleLogin() {
     if (!email.trim() || !password.trim()) return;
@@ -42,6 +56,20 @@ export default function LoginScreen() {
       );
     }
     // _layout.tsx detecta session y redirige automáticamente
+  }
+
+  async function handleGoogleLogin() {
+    setGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+      // _layout.tsx detecta la sesión nueva y redirige automáticamente
+    } catch (e: any) {
+      if (e?.message !== 'CANCELLED') {
+        toast.error(e?.message ?? 'No se pudo iniciar sesión con Google');
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
   }
 
   return (
@@ -83,90 +111,104 @@ export default function LoginScreen() {
         </View>
 
         {/* Card neo-brutalist */}
-        <View
+        <Animated.View
           style={{
             width: "100%",
-            borderRadius: 32,
-            padding: 24,
-            gap: 20,
-            backgroundColor: C.surface,
-            borderWidth: 2,
-            borderColor: C.border,
-            ...shadow.md,
+            opacity: cardAnim,
+            transform: [
+              {
+                translateY: cardAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [24, 0],
+                }),
+              },
+            ],
           }}
         >
-          <Field
-            label="Correo electrónico"
-            icon="email-outline"
-            placeholder="hambriento@elpoint.app"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={email}
-            onChangeText={setEmail}
-          />
-
-          <Field
-            label="Contraseña"
-            icon="lock-outline"
-            placeholder="••••••••"
-            secure
-            value={password}
-            onChangeText={setPassword}
-          />
-
-          <Pressable
-            onPress={() => router.push("/(auth)/forgot-password")}
-            style={{ alignSelf: "flex-end", marginTop: -8 }}
-          >
-            <AppText variant="bodyStrong" color={C.primary}>
-              ¿Olvidaste tu contraseña?
-            </AppText>
-          </Pressable>
-
-          {/* Botón ingresar */}
-          <Button
-            label={loading ? "Ingresando…" : "Ingresar"}
-            onPress={handleLogin}
-            loading={loading}
-            iconTrailing="arrow-right"
-          />
-
-          {/* Divisor */}
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-            <View
-              style={{ flex: 1, height: 1, backgroundColor: C.outlineVariant }}
-            />
-            <AppText variant="overline" color={C.outline}>
-              O CONTINÚA CON
-            </AppText>
-            <View
-              style={{ flex: 1, height: 1, backgroundColor: C.outlineVariant }}
-            />
-          </View>
-
-          {/* Google */}
-          <Button
-            label="Continuar con Google"
-            onPress={() => {}}
-            variant="secondary"
-            icon="google"
-            iconColor="#EA4335"
-          />
-
-          {/* Registro */}
           <View
-            style={{ flexDirection: "row", justifyContent: "center", gap: 4 }}
+            style={{
+              borderRadius: 32,
+              padding: 24,
+              gap: 20,
+              backgroundColor: C.surface,
+              borderWidth: 2,
+              borderColor: C.border,
+              ...shadow.md,
+            }}
           >
-            <AppText variant="body" color={C.onSurfaceVariant}>
-              ¿No tienes cuenta?
-            </AppText>
-            <Pressable onPress={() => router.push("/(auth)/register")}>
+            <Field
+              label="Correo electrónico"
+              icon="email-outline"
+              placeholder="hambriento@elpoint.app"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
+            />
+
+            <Field
+              label="Contraseña"
+              icon="lock-outline"
+              placeholder="••••••••"
+              secure
+              value={password}
+              onChangeText={setPassword}
+            />
+
+            <Pressable
+              onPress={() => router.push("/(auth)/forgot-password")}
+              style={{ alignSelf: "flex-end", marginTop: -8 }}
+            >
               <AppText variant="bodyStrong" color={C.primary}>
-                Regístrate
+                ¿Olvidaste tu contraseña?
               </AppText>
             </Pressable>
+
+            {/* Botón ingresar */}
+            <Button
+              label={loading ? "Ingresando…" : "Ingresar"}
+              onPress={handleLogin}
+              loading={loading}
+              iconTrailing="arrow-right"
+            />
+
+            {/* Divisor */}
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+              <View
+                style={{ flex: 1, height: 1, backgroundColor: C.outlineVariant }}
+              />
+              <AppText variant="overline" color={C.outline}>
+                O CONTINÚA CON
+              </AppText>
+              <View
+                style={{ flex: 1, height: 1, backgroundColor: C.outlineVariant }}
+              />
+            </View>
+
+            {/* Google */}
+            <Button
+              label={googleLoading ? "Conectando…" : "Continuar con Google"}
+              onPress={handleGoogleLogin}
+              loading={googleLoading}
+              variant="secondary"
+              icon="google"
+            />
+
+            {/* Registro */}
+            <View
+              style={{ flexDirection: "row", justifyContent: "center", gap: 4 }}
+            >
+              <AppText variant="body" color={C.onSurfaceVariant}>
+                ¿No tienes cuenta?
+              </AppText>
+              <Pressable onPress={() => router.push("/(auth)/register")}>
+                <AppText variant="bodyStrong" color={C.primary}>
+                  Regístrate
+                </AppText>
+              </Pressable>
+            </View>
           </View>
-        </View>
+        </Animated.View>
       </KeyboardAvoidingView>
     </View>
   );

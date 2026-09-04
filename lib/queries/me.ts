@@ -86,6 +86,7 @@ export type MyProfilePatch = Partial<{
   full_name: string | null;
   bio: string | null;
   avatar_url: string | null;
+  favorite_categories: number[];
 }>;
 
 export function useUpdateMyProfile() {

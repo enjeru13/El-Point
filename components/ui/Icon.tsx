@@ -36,7 +36,6 @@ import {
   Fish,
   Flag,
   Flame,
-  Globe,
   Grape,
   Ham,
   Hamburger,
@@ -96,7 +95,7 @@ import {
   type LucideIcon
 } from "lucide-react-native";
 import { View } from "react-native";
-import { BrandGlyph, BRAND_GLYPHS } from "@/components/ui/BrandGlyph";
+import { BrandGlyph, BRAND_GLYPHS, GoogleGlyph } from "@/components/ui/BrandGlyph";
 
 const MAP: Record<string, LucideIcon> = {
   // Tabs
@@ -130,8 +129,7 @@ const MAP: Record<string, LucideIcon> = {
   "shield-lock-outline": ShieldCheck,
   flag: Flag,
   "flag-outline": Flag,
-  google: Globe,
-  // instagram / whatsapp se pintan como marca real vía BrandGlyph (ver abajo).
+  // google / instagram / whatsapp se pintan como marca real vía BrandGlyph (ver abajo).
   // Communication
   "bell-outline": Bell,
   "email-outline": Mail,
@@ -243,6 +241,13 @@ export function Icon({
   fill?: string;
   style?: object;
 }) {
+  if (name === "google") {
+    return (
+      <View style={style}>
+        <GoogleGlyph size={size} />
+      </View>
+    );
+  }
   if (BRAND_GLYPHS.has(name)) {
     return (
       <View style={style}>

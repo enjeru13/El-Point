@@ -20,6 +20,7 @@ import {
   useImperativeHandle,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
 
@@ -92,6 +93,7 @@ function NotifCard({
 }) {
   const { C, shadow } = useTheme();
   const canOpen = notifTarget(notif) !== null;
+  const [pressed, setPressed] = useState(false);
   const CONFIG: Record<
     AppNotification["type"],
     { icon: string; bg: string; color: string }
@@ -104,11 +106,6 @@ function NotifCard({
       color: C.secondary,
     },
     levelup: { icon: "star-circle", bg: C.primaryContainer, color: "#fff" },
-    levelup_soon: {
-      icon: "trending-up",
-      bg: C.tertiaryContainer,
-      color: C.tertiary,
-    },
     promo: { icon: "tag", bg: C.primaryContainer, color: "#fff" },
     weekly: { icon: "analytics", bg: C.primaryFixed, color: C.primary },
     moderation: {
@@ -125,15 +122,19 @@ function NotifCard({
         if (!notif.read) onRead(notif.id);
         if (canOpen) onOpen(notif);
       }}
-      style={({ pressed }) => ({
-        padding: 16,
-        borderRadius: 18,
-        backgroundColor: notif.read ? C.surfaceContainerLow : C.surface,
-        borderWidth: 2,
-        borderColor: notif.read ? C.outlineVariant : C.border,
-        opacity: pressed ? 0.7 : 1,
-        ...(notif.read ? {} : shadow.sm),
-      })}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      style={[
+        {
+          padding: 16,
+          borderRadius: 18,
+          backgroundColor: notif.read ? C.surfaceContainerLow : C.surface,
+          borderWidth: 2,
+          borderColor: notif.read ? C.outlineVariant : C.border,
+        },
+        pressed ? { opacity: 0.7 } : null,
+        notif.read ? null : shadow.sm,
+      ]}
     >
       <View
         style={{

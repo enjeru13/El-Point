@@ -14,6 +14,7 @@ import {
 import { AppText } from '@/components/ui/AppText';
 import { Field } from '@/components/ui/Field';
 import { supabase } from '@/lib/supabase';
+import { signInWithGoogle } from '@/lib/oauth';
 import { useToast } from '@/lib/toast';
 import { useTheme } from '@/lib/ThemeContext';
 import { Button } from '@/components/ui/Button';
@@ -52,6 +53,23 @@ export default function RegisterScreen() {
   const [locGranted, setLocGranted] = useState(false);
 
   const [loading, setLoading]     = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  async function handleGoogleRegister() {
+    setGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+      // Google ya trae correo verificado — crea la cuenta y entra directo,
+      // sin pasar por el resto del wizard. Categorías/tema/radio quedan con
+      // sus valores por defecto y se pueden ajustar luego desde el perfil.
+    } catch (e: any) {
+      if (e?.message !== 'CANCELLED') {
+        toast.error(e?.message ?? 'No se pudo continuar con Google');
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
 
   function toggleCategory(id: number) {
     setSelected(prev => {
@@ -205,6 +223,21 @@ export default function RegisterScreen() {
                   onChangeText={setEmail}
                 />
               </View>
+
+              {/* Divisor + Google */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 20 }}>
+                <View style={{ flex: 1, height: 1, backgroundColor: C.outlineVariant }} />
+                <AppText variant="overline" color={C.outline}>O CONTINÚA CON</AppText>
+                <View style={{ flex: 1, height: 1, backgroundColor: C.outlineVariant }} />
+              </View>
+              <Button
+                label={googleLoading ? 'Conectando…' : 'Continuar con Google'}
+                onPress={handleGoogleRegister}
+                loading={googleLoading}
+                variant="secondary"
+                icon="google"
+                style={{ marginTop: 16 }}
+              />
 
               {/* Partner card */}
               <View
