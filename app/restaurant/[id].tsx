@@ -176,11 +176,31 @@ const ReviewSheet = forwardRef<
     dismiss: () => sheetRef.current?.dismiss(),
   }), [editing, reset]);
 
-  async function addPhotos() {
+  function addPhotos() {
+    const remaining = 4 - photos.length;
+    Alert.alert("Agregar foto", undefined, [
+      { text: "Tomar foto", onPress: () => addFromCamera() },
+      { text: "Elegir de galería", onPress: () => addFromLibrary(remaining) },
+      { text: "Cancelar", style: "cancel" },
+    ]);
+  }
+
+  async function addFromCamera() {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) return;
+    const r = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      quality: 0.8,
+    });
+    if (r.canceled) return;
+    setPhotos((prev) => [...prev, ...r.assets.map((a) => a.uri)].slice(0, 4));
+  }
+
+  async function addFromLibrary(limit: number) {
     const r = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsMultipleSelection: true,
-      selectionLimit: 4,
+      selectionLimit: limit,
       quality: 0.8,
     });
     if (r.canceled) return;
