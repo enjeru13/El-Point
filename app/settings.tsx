@@ -144,8 +144,6 @@ export default function SettingsScreen() {
                 <>
                   <ToggleRow icon="star" label="Nuevas reseñas" sublabel="Cuando alguien califica tu local" value={s('notifReviews')} onChange={set('notifReviews')} />
                   <Divider />
-                  <ToggleRow icon="reply-outline" label="Respuestas" sublabel="Cuando responden tus comentarios" value={s('notifReplies')} onChange={set('notifReplies')} />
-                  <Divider />
                   <ToggleRow icon="analytics" label="Reporte semanal" sublabel="Resumen de métricas cada semana" value={s('notifWeekly')} onChange={set('notifWeekly')} />
                 </>
               ) : (

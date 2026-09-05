@@ -202,11 +202,10 @@ export function useAdminCounts(enabled: boolean) {
     queryKey: ["admin-counts"],
     enabled,
     queryFn: async (): Promise<AdminCounts> => {
-      const [reviews, restaurants, reported] = await Promise.all([
-        supabase
-          .from("reviews")
-          .select("id", { count: "exact", head: true })
-          .eq("moderation", "hidden"),
+      const [reportedReviewIds, restaurants, reported] = await Promise.all([
+        // Cualquier reseña con al menos un reporte (no solo las ya
+        // auto-ocultadas) — mismo criterio que useModerationQueue.
+        supabase.from("review_reports").select("review_id"),
         supabase
           .from("restaurants")
           .select("id", { count: "exact", head: true })
@@ -216,8 +215,11 @@ export function useAdminCounts(enabled: boolean) {
           .select("id", { count: "exact", head: true })
           .eq("status", "suspended"),
       ]);
+      const distinctReviews = new Set(
+        (reportedReviewIds.data ?? []).map((r) => r.review_id),
+      );
       return {
-        reviews: reviews.count ?? 0,
+        reviews: distinctReviews.size,
         restaurants: restaurants.count ?? 0,
         reported: reported.count ?? 0,
       };

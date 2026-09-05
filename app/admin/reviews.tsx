@@ -61,6 +61,20 @@ function QueueCard({
         <StarRow rating={item.rating} size={12} />
       </View>
 
+      <View
+        style={{
+          alignSelf: "flex-start",
+          paddingHorizontal: 8,
+          paddingVertical: 3,
+          borderRadius: 99,
+          backgroundColor: item.moderation === "hidden" ? C.error + "22" : C.surfaceContainerHighest,
+        }}
+      >
+        <AppText variant="label" color={item.moderation === "hidden" ? C.error : C.onSurfaceVariant} style={{ fontSize: 11 }}>
+          {item.moderation === "hidden" ? "OCULTA AUTOMÁTICAMENTE" : "AÚN VISIBLE"}
+        </AppText>
+      </View>
+
       <AppText variant="caption" color={C.outline}>
         {item.author_name} · {timeAgo(item.created_at)}
       </AppText>

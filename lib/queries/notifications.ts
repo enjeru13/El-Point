@@ -1,6 +1,8 @@
 import { supabase } from "@/lib/supabase";
+import { queryClient } from "@/lib/query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSettings, type SettingKey } from "@/lib/settings";
+import { useEffect } from "react";
 
 export type AppNotification = {
   id: string;
@@ -72,6 +74,36 @@ export function useVisibleNotifications() {
     visible,
     unread: visible.filter((n) => !n.read).length,
   };
+}
+
+/**
+ * Subscribes to new notifications for this user in real time so the bell
+ * badge/list update instantly instead of waiting for a remount or manual
+ * pull. Mount once near the root (see app/_layout.tsx) — null uid is a no-op.
+ */
+export function useNotificationsRealtime(uid: string | null) {
+  useEffect(() => {
+    if (!uid) return;
+    const channel = supabase
+      .channel(`notifications:${uid}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `recipient_id=eq.${uid}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: KEY });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [uid]);
 }
 
 export function useMarkNotificationRead() {

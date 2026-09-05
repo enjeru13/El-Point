@@ -166,7 +166,7 @@ export default function AdminHubScreen() {
               <Row
                 icon="comment-text-multiple"
                 label="Reseñas reportadas"
-                sub="Ocultas pendientes de revisión"
+                sub="Pendientes de revisión"
                 count={c.reviews}
                 onPress={() => router.push("/admin/reviews")}
               />

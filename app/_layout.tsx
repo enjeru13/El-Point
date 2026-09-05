@@ -25,6 +25,7 @@ import 'react-native-reanimated';
 
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/query';
+import { useNotificationsRealtime } from '@/lib/queries/notifications';
 import { ToastProvider } from '@/lib/toast';
 import { AppThemeProvider } from '@/lib/ThemeContext';
 import { SettingsBridge } from '@/components/SettingsBridge';
@@ -54,6 +55,8 @@ export default function RootLayout() {
   const [ready, setReady]     = useState(false);
   const [navReady, setNavReady] = useState(false);
   const currentUid = useRef<string | null>(null);
+
+  useNotificationsRealtime(session?.user.id ?? null);
 
   // Hand off from the native (static) splash to our animated JS one as soon
   // as fonts are ready — the JS screen then bridges the remaining auth/role
