@@ -179,7 +179,7 @@ export default function RegisterScreen() {
           className="flex-1"
           contentContainerStyle={{
             paddingTop: insets.top + 70,
-            paddingBottom: 120,
+            paddingBottom: insets.bottom + 120,
             paddingHorizontal: 20,
           }}
           showsVerticalScrollIndicator={false}

@@ -2,39 +2,74 @@ import { useEffect, useRef } from "react";
 import { Animated, Easing, Text, View } from "react-native";
 
 /**
- * Branded loading screen shown while fonts + auth/role resolve. Rendered before
- * the theme providers mount, so every colour here is hard-coded (and matches the
- * native splash background so the handoff is seamless).
+ * Branded loading screen shown while auth/role resolve, after the native
+ * (static) splash hands off. Rendered before the theme providers mount, so
+ * every colour here is hard-coded (and the background matches the native
+ * splash's so the handoff is seamless).
  */
 const BG = "#ffffff";
 const INK = "#1c1b1b";
 const MUTED = "#6f5b54";
 const BORDER = "#1c1b1b";
-const DOT = "#ffb59e";
+const ACCENT = "#c8451f";
+
+function LoaderDot({ anim }: { anim: Animated.Value }) {
+  return (
+    <Animated.View
+      style={{
+        width: 7,
+        height: 7,
+        borderRadius: 99,
+        backgroundColor: ACCENT,
+        opacity: anim,
+        transform: [
+          {
+            translateY: anim.interpolate({
+              inputRange: [0.3, 1],
+              outputRange: [0, -4],
+            }),
+          },
+        ],
+      }}
+    />
+  );
+}
 
 export function SplashScreenView() {
-  const pulse = useRef(new Animated.Value(0.5)).current;
+  const entrance = useRef(new Animated.Value(0)).current;
+  const dots = useRef([0, 1, 2].map(() => new Animated.Value(0.3))).current;
 
   useEffect(() => {
-    const anim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, {
-          toValue: 1,
-          duration: 700,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulse, {
-          toValue: 0.5,
-          duration: 700,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ]),
+    Animated.timing(entrance, {
+      toValue: 1,
+      duration: 420,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+
+    const loops = dots.map((dot, i) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(i * 140),
+          Animated.timing(dot, {
+            toValue: 1,
+            duration: 380,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(dot, {
+            toValue: 0.3,
+            duration: 380,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.delay((2 - i) * 140),
+        ]),
+      ),
     );
-    anim.start();
-    return () => anim.stop();
-  }, [pulse]);
+    loops.forEach((l) => l.start());
+    return () => loops.forEach((l) => l.stop());
+  }, [entrance, dots]);
 
   return (
     <View
@@ -43,6 +78,7 @@ export function SplashScreenView() {
         backgroundColor: BG,
         alignItems: "center",
         justifyContent: "center",
+        gap: 28,
       }}
     >
       <Animated.View
@@ -50,7 +86,21 @@ export function SplashScreenView() {
           flexDirection: "row",
           alignItems: "flex-end",
           gap: 3,
-          opacity: pulse,
+          opacity: entrance,
+          transform: [
+            {
+              translateY: entrance.interpolate({
+                inputRange: [0, 1],
+                outputRange: [12, 0],
+              }),
+            },
+            {
+              scale: entrance.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.94, 1],
+              }),
+            },
+          ],
         }}
       >
         <View
@@ -91,7 +141,7 @@ export function SplashScreenView() {
               width: 9,
               height: 9,
               borderRadius: 99,
-              backgroundColor: DOT,
+              backgroundColor: ACCENT,
               borderWidth: 2,
               borderColor: BORDER,
               marginBottom: 3,
@@ -99,6 +149,18 @@ export function SplashScreenView() {
             }}
           />
         </View>
+      </Animated.View>
+
+      <Animated.View
+        style={{
+          flexDirection: "row",
+          gap: 7,
+          opacity: entrance,
+        }}
+      >
+        {dots.map((d, i) => (
+          <LoaderDot key={i} anim={d} />
+        ))}
       </Animated.View>
     </View>
   );

@@ -202,6 +202,23 @@ function PlaceCard({
           </View>
         )}
 
+        {item.amenities.length > 0 && (
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {item.amenities.slice(0, 3).map((a) => (
+              <View
+                key={a.slug}
+                style={{
+                  width: 26, height: 26, borderRadius: 8,
+                  alignItems: 'center', justifyContent: 'center',
+                  backgroundColor: C.surfaceContainerHighest,
+                }}
+              >
+                <Icon name={a.icon} size={14} color={C.onSurfaceVariant} />
+              </View>
+            ))}
+          </View>
+        )}
+
         {featured && (
           <View style={{
             marginTop: 6, alignSelf: 'flex-start',

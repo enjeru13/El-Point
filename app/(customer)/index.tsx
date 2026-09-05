@@ -196,6 +196,23 @@ function ReviewCard({
           </View>
         )}
 
+        {r.amenities.length > 0 && (
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            {r.amenities.slice(0, 3).map((a) => (
+              <View
+                key={a.slug}
+                style={{
+                  width: 26, height: 26, borderRadius: 8,
+                  alignItems: "center", justifyContent: "center",
+                  backgroundColor: C.surfaceContainerLow,
+                }}
+              >
+                <Icon name={a.icon} size={14} color={C.onSurfaceVariant} />
+              </View>
+            ))}
+          </View>
+        )}
+
         {/* Franja de promo */}
         {promo && (
           <View

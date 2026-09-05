@@ -1085,6 +1085,39 @@ export default function RestaurantProfileScreen() {
             </View>
           )}
 
+          {/* ── Comodidades ── */}
+          {restaurant.amenities.length > 0 && (
+            <View style={{ gap: 12 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Icon name="check-circle" size={18} color={C.primary} />
+                <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>
+                  Comodidades
+                </AppText>
+              </View>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+                {restaurant.amenities.map((a) => (
+                  <View
+                    key={a.slug}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                      paddingHorizontal: 14,
+                      paddingVertical: 10,
+                      borderRadius: 16,
+                      backgroundColor: C.surface,
+                      borderWidth: 2,
+                      borderColor: C.border,
+                    }}
+                  >
+                    <Icon name={a.icon} size={17} color={C.primary} />
+                    <AppText variant="bodySm">{a.label}</AppText>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
           {/* ── Comunidad / Reviews ── */}
           <View style={{ gap: 12 }}>
             <View

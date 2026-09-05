@@ -8,6 +8,13 @@ export type RestaurantCategory = {
   icon: string;
 };
 
+export type RestaurantAmenity = {
+  id: number;
+  slug: string;
+  label: string;
+  icon: string;
+};
+
 export type RestaurantDetail = {
   id: string;
   owner_id: string | null;
@@ -29,6 +36,7 @@ export type RestaurantDetail = {
   rating_avg: number;
   rating_count: number;
   categories: RestaurantCategory[];
+  amenities: RestaurantAmenity[];
 };
 
 export function restaurantKeys(id: string) {
@@ -42,7 +50,8 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
       `id, owner_id, name, description, address, whatsapp, instagram, phone,
        price_level, logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
        status, status_reason, rating_avg, rating_count,
-       restaurant_categories ( categories ( slug, label, icon ) )`,
+       restaurant_categories ( categories ( slug, label, icon ) ),
+       restaurant_amenities ( amenities ( id, slug, label, icon ) )`,
     )
     .eq("id", id)
     .single();
@@ -52,12 +61,16 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
   const categories: RestaurantCategory[] = (data.restaurant_categories ?? [])
     .map((rc: any) => rc.categories)
     .filter(Boolean);
+  const amenities: RestaurantAmenity[] = (data.restaurant_amenities ?? [])
+    .map((ra: any) => ra.amenities)
+    .filter(Boolean);
 
-  const { restaurant_categories, hours, ...rest } = data as any;
+  const { restaurant_categories, restaurant_amenities, hours, ...rest } = data as any;
   return {
-    ...(rest as Omit<RestaurantDetail, "categories" | "hours">),
+    ...(rest as Omit<RestaurantDetail, "categories" | "amenities" | "hours">),
     hours: parseHours(hours),
     categories,
+    amenities,
   };
 }
 

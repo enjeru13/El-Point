@@ -20,7 +20,9 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { TimePickerSheet, type TimePickerHandle } from '@/components/ui/TimePickerSheet';
-import { useMyRestaurant, useUpdateMyRestaurant, useResubmitRestaurant } from '@/lib/queries/owner';
+import { useMyRestaurant, useUpdateMyRestaurant, useUpdateRestaurantAmenities, useResubmitRestaurant } from '@/lib/queries/owner';
+import { useAmenities } from '@/lib/queries/amenities';
+import { Chip } from '@/components/ui/Chip';
 import {
   uploadRestaurantImage,
   uploadRestaurantMenu,
@@ -83,7 +85,9 @@ export default function OwnerProfileScreen() {
   const restaurantQ = useMyRestaurant();
   const restaurant = restaurantQ.data ?? null;
   const updateMut = useUpdateMyRestaurant(restaurant?.id);
+  const updateAmenitiesMut = useUpdateRestaurantAmenities(restaurant?.id);
   const resubmit = useResubmitRestaurant();
+  const amenitiesQ = useAmenities();
 
   const [editing, setEditing] = useState(false);
   const [name, setName]           = useState('');
@@ -96,6 +100,7 @@ export default function OwnerProfileScreen() {
   const [priceLevel, setPriceLevel] = useState<number | null>(null);
   const [isActive, setIsActive]   = useState(true);
   const [hours, setHoursState]    = useState<Hours>(DEFAULT_HOURS);
+  const [amenityIds, setAmenityIds] = useState<Set<number>>(new Set());
   const [uploading, setUploading] = useState<'logo' | 'cover' | 'menu' | null>(null);
 
   const [verifUploading, setVerifUploading] = useState(false);
@@ -203,7 +208,16 @@ export default function OwnerProfileScreen() {
     setIsActive(restaurant.is_active);
     setHoursState(restaurant.hours ?? DEFAULT_HOURS);
     setRifDraft(restaurant.rif ?? '');
+    setAmenityIds(new Set(restaurant.amenities.map((a) => a.id)));
   }, [restaurant]);
+
+  function toggleAmenity(id: number) {
+    setAmenityIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
 
   function cancel() {
     if (!restaurant) return;
@@ -217,6 +231,7 @@ export default function OwnerProfileScreen() {
     setPriceLevel(restaurant.price_level ?? null);
     setIsActive(restaurant.is_active);
     setHoursState(restaurant.hours ?? DEFAULT_HOURS);
+    setAmenityIds(new Set(restaurant.amenities.map((a) => a.id)));
     setEditing(false);
   }
 
@@ -244,6 +259,9 @@ export default function OwnerProfileScreen() {
         onError: (e: any) => toast.error(e?.message ?? 'No se pudo guardar'),
       },
     );
+    updateAmenitiesMut.mutate(Array.from(amenityIds), {
+      onError: (e: any) => toast.error(e?.message ?? 'No se pudieron guardar las comodidades'),
+    });
   }
 
   if (restaurantQ.isLoading) {
@@ -572,6 +590,42 @@ export default function OwnerProfileScreen() {
                 </AppText>
               )}
             </View>
+          </View>
+        </View>
+
+        {/* Comodidades */}
+        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
+            <AppText variant="bodyStrong">Comodidades</AppText>
+          </View>
+          <View style={{ padding: 18 }}>
+            {editing ? (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {(amenitiesQ.data ?? []).map((am) => (
+                  <Chip
+                    key={am.id}
+                    label={am.label}
+                    icon={am.icon}
+                    tone="secondary"
+                    active={amenityIds.has(am.id)}
+                    onPress={() => toggleAmenity(am.id)}
+                  />
+                ))}
+              </View>
+            ) : restaurant.amenities.length > 0 ? (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                {restaurant.amenities.map((a) => (
+                  <View key={a.slug} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 99, backgroundColor: C.secondaryContainer, borderWidth: 2, borderColor: C.border }}>
+                    <Icon name={a.icon} size={14} color={C.onSurface} />
+                    <AppText variant="caption" style={{ fontSize: 12 }}>{a.label}</AppText>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <AppText variant="bodySm" color={C.outline}>
+                Aún no marcaste comodidades. Toca "Editar" para agregar.
+              </AppText>
+            )}
           </View>
         </View>
 

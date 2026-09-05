@@ -39,6 +39,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      amenities: {
+        Row: {
+          icon: string
+          id: number
+          label: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          icon: string
+          id: number
+          label: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          icon?: string
+          id?: number
+          label?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           icon: string
@@ -193,6 +217,36 @@ export type Database = {
           xp?: number
         }
         Relationships: []
+      }
+      restaurant_amenities: {
+        Row: {
+          amenity_id: number
+          restaurant_id: string
+        }
+        Insert: {
+          amenity_id: number
+          restaurant_id: string
+        }
+        Update: {
+          amenity_id?: number
+          restaurant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_amenities_amenity_id_fkey"
+            columns: ["amenity_id"]
+            isOneToOne: false
+            referencedRelation: "amenities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_amenities_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       restaurant_categories: {
         Row: {
@@ -370,20 +424,30 @@ export type Database = {
       review_helpful: {
         Row: {
           created_at: string
+          review_author_id: string | null
           review_id: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          review_author_id?: string | null
           review_id: string
           user_id: string
         }
         Update: {
           created_at?: string
+          review_author_id?: string | null
           review_id?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "review_helpful_review_author_id_fkey"
+            columns: ["review_author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "review_helpful_review_id_fkey"
             columns: ["review_id"]
@@ -528,6 +592,7 @@ export type Database = {
           rating: number
           restaurant_id: string
           updated_at: string
+          xp_reverted: boolean
         }
         Insert: {
           author_id: string
@@ -540,6 +605,7 @@ export type Database = {
           rating: number
           restaurant_id: string
           updated_at?: string
+          xp_reverted?: boolean
         }
         Update: {
           author_id?: string
@@ -552,6 +618,7 @@ export type Database = {
           rating?: number
           restaurant_id?: string
           updated_at?: string
+          xp_reverted?: boolean
         }
         Relationships: [
           {
@@ -774,6 +841,7 @@ export type Database = {
       create_owner_restaurant: {
         Args: {
           p_address: string
+          p_amenity_ids?: number[]
           p_category_ids: number[]
           p_description: string
           p_instagram: string
@@ -927,6 +995,7 @@ export type Database = {
       geomfromewkt: { Args: { "": string }; Returns: unknown }
       gettransactionid: { Args: never; Returns: unknown }
       is_admin: { Args: { uid: string }; Returns: boolean }
+      is_trusted_writer: { Args: never; Returns: boolean }
       level_for_xp: { Args: { p_xp: number }; Returns: number }
       longtransactionsenabled: { Args: never; Returns: boolean }
       nearby_restaurants: {
@@ -998,6 +1067,10 @@ export type Database = {
         Returns: undefined
       }
       send_weekly_owner_reports: { Args: never; Returns: undefined }
+      set_restaurant_amenities: {
+        Args: { p_amenity_ids: number[]; p_restaurant_id: string }
+        Returns: undefined
+      }
       st_3dclosestpoint: {
         Args: { geom1: unknown; geom2: unknown }
         Returns: unknown

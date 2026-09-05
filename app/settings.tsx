@@ -210,6 +210,15 @@ export default function SettingsScreen() {
             icon="logout"
           />
 
+          <Pressable
+            onPress={() => router.push('/delete-account')}
+            style={{ alignSelf: 'center', paddingVertical: 8 }}
+          >
+            <AppText variant="bodySm" color={C.error}>
+              Eliminar mi cuenta
+            </AppText>
+          </Pressable>
+
           <AppText variant="bodySm" color={C.outline} align="center">
             El Point v0.1.0
           </AppText>

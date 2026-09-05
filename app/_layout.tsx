@@ -52,13 +52,16 @@ export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole]       = useState<UserRole>(null);
   const [ready, setReady]     = useState(false);
+  const [navReady, setNavReady] = useState(false);
   const currentUid = useRef<string | null>(null);
 
-  // Keep the native splash up until fonts AND the initial auth/role check are
-  // done — so we go straight from splash to the right screen, no blank frame.
+  // Hand off from the native (static) splash to our animated JS one as soon
+  // as fonts are ready — the JS screen then bridges the remaining auth/role
+  // check. The app itself (Stack) only mounts once ready+navReady, so there's
+  // no flash of the wrong route in between.
   useEffect(() => {
-    if (fontsLoaded && ready) SplashScreen.hideAsync();
-  }, [fontsLoaded, ready]);
+    if (fontsLoaded) SplashScreen.hideAsync();
+  }, [fontsLoaded]);
 
   useEffect(() => {
     function handle(session: Session | null) {
@@ -114,6 +117,7 @@ export default function RootLayout() {
 
     if (!session) {
       if (!inAuth) router.replace('/(auth)/login');
+      setNavReady(true);
       return;
     }
 
@@ -129,9 +133,10 @@ export default function RootLayout() {
     } else if (role === 'customer' && inOwner) {
       router.replace('/(customer)');
     }
+    setNavReady(true);
   }, [ready, session, role, fontsLoaded, segments]);
 
-  if (!ready || !fontsLoaded || (session && role === null))
+  if (!ready || !fontsLoaded || (session && role === null) || !navReady)
     return <SplashScreenView />;
 
   return (

@@ -11,6 +11,7 @@ import { useTheme } from "@/lib/ThemeContext";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { useCategories } from "@/lib/queries/categories";
+import { useAmenities } from "@/lib/queries/amenities";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
@@ -46,6 +47,8 @@ export default function RegisterOwnerScreen() {
   const [name, setName] = useState("");
   const [selectedCats, setSelectedCats] = useState<Set<number>>(new Set());
   const categoriesQ = useCategories();
+  const [selectedAmenities, setSelectedAmenities] = useState<Set<number>>(new Set());
+  const amenitiesQ = useAmenities();
 
   const [address, setAddress] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
@@ -63,6 +66,14 @@ export default function RegisterOwnerScreen() {
 
   function toggleCat(id: number) {
     setSelectedCats((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAmenity(id: number) {
+    setSelectedAmenities((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
@@ -167,6 +178,7 @@ export default function RegisterOwnerScreen() {
         p_instagram: instagram.trim(),
         p_category_ids: Array.from(selectedCats),
         p_rif: rif.trim(),
+        p_amenity_ids: Array.from(selectedAmenities),
       },
     );
 
@@ -280,7 +292,7 @@ export default function RegisterOwnerScreen() {
           style={{ flex: 1 }}
           contentContainerStyle={{
             paddingTop: insets.top + 70,
-            paddingBottom: 120,
+            paddingBottom: insets.bottom + 120,
             paddingHorizontal: 20,
           }}
           showsVerticalScrollIndicator={false}
@@ -427,6 +439,30 @@ export default function RegisterOwnerScreen() {
                         tone="secondary"
                         active={selectedCats.has(cat.id)}
                         onPress={() => toggleCat(cat.id)}
+                      />
+                    ))}
+                  </View>
+                </View>
+
+                {/* Comodidades */}
+                <View style={{ gap: 12 }}>
+                  <AppText variant="bodyStrong" color={C.onSurfaceVariant} style={{ marginLeft: 4 }}>
+                    Comodidades{" "}
+                    <AppText variant="body" color={C.outline}>
+                      (opcional)
+                    </AppText>
+                  </AppText>
+                  <View
+                    style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}
+                  >
+                    {(amenitiesQ.data ?? []).map((am) => (
+                      <Chip
+                        key={am.id}
+                        label={am.label}
+                        icon={am.icon}
+                        tone="secondary"
+                        active={selectedAmenities.has(am.id)}
+                        onPress={() => toggleAmenity(am.id)}
                       />
                     ))}
                   </View>

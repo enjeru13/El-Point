@@ -1,5 +1,5 @@
 import { parseHours, type Hours } from "@/lib/hours";
-import type { RestaurantCategory } from "@/lib/queries/restaurants";
+import type { RestaurantAmenity, RestaurantCategory } from "@/lib/queries/restaurants";
 import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 
@@ -15,6 +15,7 @@ export type SearchResult = {
   lat: number | null;
   lng: number | null;
   categories: RestaurantCategory[];
+  amenities: RestaurantAmenity[];
 };
 
 async function fetchActiveRestaurants(): Promise<SearchResult[]> {
@@ -23,7 +24,8 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
     .select(
       `id, name, address, price_level, rating_avg, rating_count, cover_url, hours,
        latitude, longitude,
-       restaurant_categories ( categories ( slug, label, icon ) )`,
+       restaurant_categories ( categories ( slug, label, icon ) ),
+       restaurant_amenities ( amenities ( id, slug, label, icon ) )`,
     )
     .eq("is_active", true)
     .eq("status", "approved");
@@ -43,6 +45,9 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
     lng: typeof r.longitude === "number" ? r.longitude : null,
     categories: (r.restaurant_categories ?? [])
       .map((rc: any) => rc.categories)
+      .filter(Boolean),
+    amenities: (r.restaurant_amenities ?? [])
+      .map((ra: any) => ra.amenities)
       .filter(Boolean),
   }));
 }

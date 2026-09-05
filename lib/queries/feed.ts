@@ -1,4 +1,4 @@
-import type { RestaurantCategory } from "@/lib/queries/restaurants";
+import type { RestaurantAmenity, RestaurantCategory } from "@/lib/queries/restaurants";
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -13,6 +13,7 @@ export type FeedRestaurant = {
   lat: number | null;
   lng: number | null;
   categories: RestaurantCategory[];
+  amenities: RestaurantAmenity[];
 };
 
 export type FeedItem = {
@@ -33,13 +34,18 @@ function mapCategories(rc: any): RestaurantCategory[] {
   return (rc ?? []).map((row: any) => row.categories).filter(Boolean);
 }
 
+function mapAmenities(ra: any): RestaurantAmenity[] {
+  return (ra ?? []).map((row: any) => row.amenities).filter(Boolean);
+}
+
 function num(v: any): number | null {
   return typeof v === "number" ? v : null;
 }
 
 const RESTAURANT_EMBED = `restaurant:restaurants (
   id, name, address, rating_avg, rating_count, promo_text, cover_url, latitude, longitude,
-  restaurant_categories ( categories ( slug, label, icon ) )
+  restaurant_categories ( categories ( slug, label, icon ) ),
+  restaurant_amenities ( amenities ( id, slug, label, icon ) )
 )`;
 
 // ─── Home feed: recent reviews ───────────────────────────────────────────────
@@ -75,6 +81,7 @@ async function fetchFeed(): Promise<FeedItem[]> {
         lat: num(r.restaurant.latitude),
         lng: num(r.restaurant.longitude),
         categories: mapCategories(r.restaurant.restaurant_categories),
+        amenities: mapAmenities(r.restaurant.restaurant_amenities),
       },
     }));
 
@@ -116,6 +123,7 @@ async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
       lat: num(f.restaurant.latitude),
       lng: num(f.restaurant.longitude),
       categories: mapCategories(f.restaurant.restaurant_categories),
+      amenities: mapAmenities(f.restaurant.restaurant_amenities),
       favorited_at: f.created_at,
     }));
 }

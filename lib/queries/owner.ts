@@ -1,5 +1,5 @@
 import { parseHours, type Hours } from "@/lib/hours";
-import type { RestaurantCategory } from "@/lib/queries/restaurants";
+import type { RestaurantAmenity, RestaurantCategory } from "@/lib/queries/restaurants";
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -27,6 +27,7 @@ export type OwnerRestaurant = {
   rating_count: number;
   created_at: string;
   categories: RestaurantCategory[];
+  amenities: RestaurantAmenity[];
 };
 
 export const ownerRestaurantKey = ["owner-restaurant"] as const;
@@ -43,7 +44,8 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
        logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
        status, status_reason, submitted_at, verification_photo_path, rif,
        rating_avg, rating_count, created_at,
-       restaurant_categories ( categories ( slug, label, icon ) )`,
+       restaurant_categories ( categories ( slug, label, icon ) ),
+       restaurant_amenities ( amenities ( id, slug, label, icon ) )`,
     )
     .eq("owner_id", uid)
     .order("created_at", { ascending: true })
@@ -53,12 +55,15 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
   if (error) throw error;
   if (!data) return null;
 
-  const { restaurant_categories, hours, ...rest } = data as any;
+  const { restaurant_categories, restaurant_amenities, hours, ...rest } = data as any;
   return {
-    ...(rest as Omit<OwnerRestaurant, "categories" | "hours">),
+    ...(rest as Omit<OwnerRestaurant, "categories" | "amenities" | "hours">),
     hours: parseHours(hours),
     categories: (restaurant_categories ?? [])
       .map((rc: any) => rc.categories)
+      .filter(Boolean),
+    amenities: (restaurant_amenities ?? [])
+      .map((ra: any) => ra.amenities)
       .filter(Boolean),
   };
 }
@@ -110,6 +115,24 @@ export function useUpdateMyRestaurant(restaurantId: string | undefined) {
         .from("restaurants")
         .update(patch)
         .eq("id", restaurantId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ownerRestaurantKey });
+    },
+  });
+}
+
+/** Replaces the restaurant's full amenity set atomically (server-side RPC). */
+export function useUpdateRestaurantAmenities(restaurantId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (amenityIds: number[]) => {
+      if (!restaurantId) throw new Error("Sin restaurante");
+      const { error } = await supabase.rpc("set_restaurant_amenities", {
+        p_restaurant_id: restaurantId,
+        p_amenity_ids: amenityIds,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
