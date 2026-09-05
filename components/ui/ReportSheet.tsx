@@ -6,18 +6,18 @@ import { useTheme } from "@/lib/ThemeContext";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
-  BottomSheetView,
+  BottomSheetScrollView,
   type BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
 import {
   forwardRef,
   useCallback,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import { Pressable, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export interface ReportSheetHandle {
   present: (targetId: string) => void;
@@ -35,8 +35,8 @@ export const ReportSheet = forwardRef<
   }
 >(({ title = "Reportar", subtitle, reasons, submitting, onSubmit }, ref) => {
   const { C } = useTheme();
+  const insets = useSafeAreaInsets();
   const sheetRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => ["62%"], []);
 
   const [targetId, setTargetId] = useState<string | null>(null);
   const [reason, setReason] = useState<string>(reasons[0]?.key ?? "other");
@@ -68,8 +68,7 @@ export const ReportSheet = forwardRef<
   return (
     <BottomSheetModal
       ref={sheetRef}
-      snapPoints={snapPoints}
-      enableDynamicSizing={false}
+      enableDynamicSizing
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
       backdropComponent={renderBackdrop}
@@ -81,7 +80,11 @@ export const ReportSheet = forwardRef<
         borderColor: C.border,
       }}
     >
-      <BottomSheetView style={{ padding: 20, gap: 16 }}>
+      <BottomSheetScrollView
+        style={{ maxHeight: "100%" }}
+        contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 20, gap: 16 }}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           <Icon name="flag" size={20} color={C.error} />
           <AppText variant="title" style={{ fontSize: 20, lineHeight: 25 }}>
@@ -137,7 +140,7 @@ export const ReportSheet = forwardRef<
           disabled={!targetId}
           icon="flag"
         />
-      </BottomSheetView>
+      </BottomSheetScrollView>
     </BottomSheetModal>
   );
 });

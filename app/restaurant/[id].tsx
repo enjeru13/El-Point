@@ -141,6 +141,7 @@ const ReviewSheet = forwardRef<
   }
 >(({ restaurantName, submitting, errorMessage, editing, onSubmit }, ref) => {
   const { C } = useTheme();
+  const insets = useSafeAreaInsets();
   const RATING_COLORS = [
     "",
     C.error,
@@ -234,7 +235,7 @@ const ReviewSheet = forwardRef<
       </View>
 
       <BottomSheetScrollView
-        contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: 48 }}
+        contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: insets.bottom + 48 }}
         keyboardShouldPersistTaps="handled"
       >
         {/* Estrellas */}

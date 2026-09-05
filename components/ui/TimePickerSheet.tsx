@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { Pressable, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -26,6 +27,7 @@ export interface TimePickerHandle {
 
 export const TimePickerSheet = forwardRef<TimePickerHandle>((_, ref) => {
   const { C } = useTheme();
+  const insets = useSafeAreaInsets();
   const sheetRef = useRef<BottomSheetModal>(null);
   const scrollRef = useRef<any>(null);
   const snapPoints = useMemo(() => ["70%"], []);
@@ -74,7 +76,7 @@ export const TimePickerSheet = forwardRef<TimePickerHandle>((_, ref) => {
         <AppText variant="title" style={{ fontSize: 20, lineHeight: 24 }}>{state?.title ?? ""}</AppText>
       </View>
 
-      <BottomSheetScrollView ref={scrollRef} contentContainerStyle={{ padding: 12, paddingBottom: 40 }}>
+      <BottomSheetScrollView ref={scrollRef} contentContainerStyle={{ padding: 12, paddingBottom: insets.bottom + 40 }}>
         {TIME_SLOTS.map((slot) => {
           const active = slot === state?.value;
           return (

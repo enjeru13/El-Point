@@ -23,6 +23,7 @@ import {
   useState,
 } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 /** Where a notification takes you when tapped (null = just mark read). */
 function notifTarget(notif: AppNotification) {
@@ -203,6 +204,7 @@ export interface NotificationsHandle {
 
 export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
   const { C } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const sheetRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ["70%"], []);
@@ -303,7 +305,7 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
 
       {/* List */}
       <BottomSheetScrollView
-        contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 40 }}
         showsVerticalScrollIndicator={false}
       >
         {notifsQ.isLoading ? (

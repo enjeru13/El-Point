@@ -502,7 +502,7 @@ export default function MapScreen() {
         detached
         enableDynamicSizing={false}
         enablePanDownToClose
-        bottomInset={FLOATING_NAV_H + 24}
+        bottomInset={FLOATING_NAV_H + Math.max(insets.bottom, 12)}
         style={{ marginHorizontal: 12 }}
         onClose={() => {
           setSelected(null);
