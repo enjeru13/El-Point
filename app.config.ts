@@ -56,6 +56,7 @@ const config: ExpoConfig = {
     ],
     "expo-secure-store",
     "expo-font",
+    ["expo-notifications", { color: "#c8451f" }],
   ],
   experiments: {
     typedRoutes: true,

@@ -172,6 +172,7 @@ export type Database = {
           id: string
           is_admin: boolean
           level: number
+          push_token: string | null
           role: string
           search_radius_km: number
           settings: Json
@@ -190,6 +191,7 @@ export type Database = {
           id: string
           is_admin?: boolean
           level?: number
+          push_token?: string | null
           role?: string
           search_radius_km?: number
           settings?: Json
@@ -208,6 +210,7 @@ export type Database = {
           id?: string
           is_admin?: boolean
           level?: number
+          push_token?: string | null
           role?: string
           search_radius_km?: number
           settings?: Json

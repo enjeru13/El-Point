@@ -28,6 +28,7 @@ import { useNotificationsRealtime } from '@/lib/queries/notifications';
 import { ToastProvider } from '@/lib/toast';
 import { AppThemeProvider, useTheme } from '@/lib/ThemeContext';
 import { SettingsBridge } from '@/components/SettingsBridge';
+import { PushBridge } from '@/components/PushBridge';
 import { SplashScreenView } from '@/components/ui/SplashScreenView';
 
 SplashScreen.preventAutoHideAsync();
@@ -166,6 +167,7 @@ function NavShell() {
     <ThemeProvider value={navTheme}>
       <ToastProvider>
         <SettingsBridge />
+        <PushBridge />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: C.background } }} />
       </ToastProvider>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />

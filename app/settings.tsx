@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, Switch, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
+import { unregisterPush } from '@/lib/push';
 import { useTheme } from '@/lib/ThemeContext';
 import { THEME_MODE_META } from '@/lib/themes';
 import { useMyProfile, useUpdateSettings } from '@/lib/queries/me';
@@ -202,7 +203,11 @@ export default function SettingsScreen() {
 
           <Button
             label="Cerrar sesión"
-            onPress={() => supabase.auth.signOut()}
+            onPress={async () => {
+              const { data } = await supabase.auth.getUser();
+              if (data.user) await unregisterPush(data.user.id);
+              await supabase.auth.signOut();
+            }}
             variant="danger"
             icon="logout"
           />
