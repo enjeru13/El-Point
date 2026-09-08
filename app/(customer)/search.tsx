@@ -484,11 +484,18 @@ export default function SearchScreen() {
 
       {/* ── Panel de filtros ── */}
       {filterOpen && (
-        <View style={{
-          backgroundColor: C.background,
-          borderBottomWidth: 1, borderBottomColor: C.outlineVariant,
-          paddingHorizontal: 16, paddingVertical: 14, gap: 14,
-        }}>
+        <ScrollView
+          style={{
+            maxHeight: 340,
+            backgroundColor: C.background,
+            borderBottomWidth: 1,
+            borderBottomColor: C.outlineVariant,
+          }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 14, gap: 14 }}
+          showsVerticalScrollIndicator
+          nestedScrollEnabled
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={{ gap: 8 }}>
             <AppText variant="overline" color={C.onSurfaceVariant}>ORDENAR</AppText>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -572,7 +579,7 @@ export default function SearchScreen() {
               <AppText variant="label" color={C.outline}>Limpiar filtros</AppText>
             </Pressable>
           )}
-        </View>
+        </ScrollView>
       )}
 
       {searchQ.isLoading ? (
