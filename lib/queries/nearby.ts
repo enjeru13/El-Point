@@ -42,6 +42,31 @@ export function useNearby(
   });
 }
 
+export type NearbyAmenity = { slug: string; label: string; icon: string };
+
+// The RPC does not return amenities; this builds restaurant_id -> amenity[].
+export function useRestaurantAmenitiesMap() {
+  return useQuery({
+    queryKey: ["restaurant-amenities-map"],
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("restaurant_amenities")
+        .select("restaurant_id, amenities ( slug, label, icon )");
+      if (error) throw error;
+      const m = new Map<string, NearbyAmenity[]>();
+      for (const row of (data ?? []) as any[]) {
+        const a = row.amenities;
+        if (!a) continue;
+        const list = m.get(row.restaurant_id) ?? [];
+        list.push({ slug: a.slug, label: a.label, icon: a.icon });
+        m.set(row.restaurant_id, list);
+      }
+      return m;
+    },
+  });
+}
+
 // The RPC does not return categories; this builds restaurant_id -> icon.
 export function useRestaurantIcons() {
   return useQuery({

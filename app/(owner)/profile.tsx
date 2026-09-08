@@ -532,13 +532,29 @@ export default function OwnerProfileScreen() {
             )}
 
             {editing ? (
-              <AppTextInput
-                value={description}
-                onChangeText={setDesc}
-                placeholder="Cuéntale a la comunidad sobre tu local…"
-                multiline
-                style={{ fontSize: 14, marginTop: 10, minHeight: 60, textAlignVertical: 'top' }}
-              />
+              <View style={{ marginTop: 12, gap: 6 }}>
+                <AppText variant="overline" color={C.outline}>DESCRIPCIÓN DEL LOCAL</AppText>
+                <AppTextInput
+                  value={description}
+                  onChangeText={(t) => setDesc(t.slice(0, 400))}
+                  placeholder="Ej. Comida casera venezolana, ambiente familiar, 15 años en el sector…"
+                  multiline
+                  style={{
+                    fontSize: 14,
+                    minHeight: 72,
+                    textAlignVertical: 'top',
+                    backgroundColor: C.surfaceContainerLow,
+                    borderWidth: 1,
+                    borderColor: C.outlineVariant,
+                    borderRadius: 12,
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                  }}
+                />
+                <AppText variant="caption" color={C.outline} align="right" style={{ fontSize: 12 }}>
+                  {description.length}/400
+                </AppText>
+              </View>
             ) : restaurant.description ? (
               <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 8, lineHeight: 20 }}>
                 {restaurant.description}

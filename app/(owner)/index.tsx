@@ -47,15 +47,18 @@ function StatCard({ icon, label, value, color }: { icon: string; label: string; 
   );
 }
 
-function ReviewRow({ review }: { review: Review }) {
+function ReviewRow({ review, onPress }: { review: Review; onPress: () => void }) {
   const { C, shadow } = useTheme();
   return (
-    <View style={{
-      padding: 14, borderRadius: 18,
-      backgroundColor: C.surface,
-      borderWidth: 1, borderColor: C.border,
-      gap: 8, ...shadow.sm,
-    }}>
+    <Pressable
+      onPress={onPress}
+      android_ripple={{ color: C.outlineVariant }}
+      style={{
+        padding: 14, borderRadius: 18,
+        backgroundColor: C.surface,
+        borderWidth: 1, borderColor: C.border,
+        gap: 8, ...shadow.sm,
+      }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
         <Avatar uri={review.author?.avatar_url} size={36} />
         <View style={{ flex: 1 }}>
@@ -67,11 +70,12 @@ function ReviewRow({ review }: { review: Review }) {
           </View>
         </View>
         <AppText variant="caption" color={C.outline} style={{ fontSize: 12 }}>{timeAgo(review.created_at)}</AppText>
+        <Icon name="chevron-right" size={16} color={C.outline} />
       </View>
       <AppText variant="bodySm" color={C.onSurfaceVariant} numberOfLines={3}>
         {review.body}
       </AppText>
-    </View>
+    </Pressable>
   );
 }
 
@@ -324,7 +328,13 @@ export default function OwnerHomeScreen() {
               body="Comparte tu local para recibir las primeras."
             />
           ) : (
-            reviews.slice(0, 5).map(r => <ReviewRow key={r.id} review={r} />)
+            reviews.slice(0, 5).map(r => (
+              <ReviewRow
+                key={r.id}
+                review={r}
+                onPress={() => router.push(`/restaurant/${restaurant.id}`)}
+              />
+            ))
           )}
         </View>
 

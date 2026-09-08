@@ -1537,7 +1537,8 @@ export default function RestaurantProfileScreen() {
                     </Pressable>
                   ) : null}
 
-                  {/* Útil + Reportar */}
+                  {/* Útil + Reportar — se omite entera si es la mía y nadie la marcó útil */}
+                  {!(isMine && r.helpful_count === 0) && (
                   <View
                     style={{
                       flexDirection: "row",
@@ -1548,13 +1549,11 @@ export default function RestaurantProfileScreen() {
                   >
                     {isMine ? (
                       <AppText variant="label" color={C.outline}>
-                        {r.helpful_count > 0
-                          ? `${r.helpful_count} ${
-                              r.helpful_count === 1
-                                ? "persona la encontró útil"
-                                : "personas la encontraron útil"
-                            }`
-                          : ""}
+                        {`${r.helpful_count} ${
+                          r.helpful_count === 1
+                            ? "persona la encontró útil"
+                            : "personas la encontraron útil"
+                        }`}
                       </AppText>
                     ) : (
                       <Pressable
@@ -1610,6 +1609,7 @@ export default function RestaurantProfileScreen() {
                       </Pressable>
                     )}
                   </View>
+                  )}
                 </View>
                 );
               })

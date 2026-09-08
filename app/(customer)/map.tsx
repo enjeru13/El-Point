@@ -23,7 +23,7 @@ import { StarRow } from '@/components/ui/StarRow';
 import { Chip } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/lib/toast';
-import { useNearby, useRestaurantIcons, type NearbyRestaurant } from '@/lib/queries/nearby';
+import { useNearby, useRestaurantIcons, useRestaurantAmenitiesMap, type NearbyRestaurant, type NearbyAmenity } from '@/lib/queries/nearby';
 import { useCategories } from '@/lib/queries/categories';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -32,7 +32,7 @@ import { useCategories } from '@/lib/queries/categories';
 const DEFAULT_ORIGIN = { latitude: 7.7669, longitude: -72.2251 };
 const RADIUS_KM = 8;
 
-type Restaurant = NearbyRestaurant & { icon: string; distanceLabel: string };
+type Restaurant = NearbyRestaurant & { icon: string; distanceLabel: string; amenities: NearbyAmenity[] };
 
 function fmtDistance(m: number): string {
   return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
@@ -168,7 +168,7 @@ function MarkerImageFactory({
 
 // ─── Bottom card ──────────────────────────────────────────────────────────────
 
-const CARD_H = 196;
+const CARD_H = 222;
 
 function RestaurantCard({
   restaurant,
@@ -225,6 +225,30 @@ function RestaurantCard({
         </AppText>
       </View>
 
+      {/* amenities resumidas (solo iconos para que quepan) */}
+      {restaurant.amenities.length > 0 && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          {restaurant.amenities.slice(0, 6).map((a) => (
+            <View
+              key={a.slug}
+              style={{
+                width: 26, height: 26, borderRadius: 8,
+                alignItems: 'center', justifyContent: 'center',
+                backgroundColor: C.surfaceContainerLow,
+                borderWidth: 1, borderColor: C.outlineVariant,
+              }}
+            >
+              <Icon name={a.icon} size={13} color={C.onSurfaceVariant} />
+            </View>
+          ))}
+          {restaurant.amenities.length > 6 && (
+            <AppText variant="caption" color={C.outline} style={{ fontSize: 11 }}>
+              +{restaurant.amenities.length - 6}
+            </AppText>
+          )}
+        </View>
+      )}
+
       <Button
         label="Ver restaurante"
         onPress={onViewProfile}
@@ -259,15 +283,18 @@ export default function MapScreen() {
   const origin = userLocation ?? DEFAULT_ORIGIN;
   const nearbyQ = useNearby(origin, RADIUS_KM, activeCategory === 'all' ? null : activeCategory);
   const iconsQ = useRestaurantIcons();
+  const amenitiesMapQ = useRestaurantAmenitiesMap();
 
   const restaurants: Restaurant[] = useMemo(() => {
     const icons = iconsQ.data;
+    const am = amenitiesMapQ.data;
     return (nearbyQ.data ?? []).map(r => ({
       ...r,
       icon: icons?.get(r.id) ?? 'silverware-fork-knife',
       distanceLabel: fmtDistance(r.distance_m),
+      amenities: am?.get(r.id) ?? [],
     }));
-  }, [nearbyQ.data, iconsQ.data]);
+  }, [nearbyQ.data, iconsQ.data, amenitiesMapQ.data]);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return restaurants;

@@ -622,6 +622,10 @@ export default function RegisterOwnerScreen() {
                   Revisamos cada local antes de publicarlo. Suele tardar menos
                   de 24 h; te avisamos cuando quede aprobado.
                 </AppText>
+                <AppText variant="bodySm" color={C.outline} style={{ marginTop: 8 }}>
+                  Solo la foto de la fachada es obligatoria. El logo, la portada y
+                  el menú los puedes agregar ahora o después desde tu perfil.
+                </AppText>
               </View>
 
               <View style={{ gap: 20 }}>
@@ -713,6 +717,10 @@ export default function RegisterOwnerScreen() {
                   <AppText variant="bodyStrong" color={C.onSurfaceVariant} style={{ marginLeft: 4 }}>
                     Logo del restaurante
                   </AppText>
+                  <AppText variant="bodySm" color={C.outline} style={{ marginLeft: 4 }}>
+                    Imagen cuadrada. Aparece junto al nombre de tu local en las
+                    búsquedas.
+                  </AppText>
                   <Pressable
                     onPress={() => pickImage(setLogoUri)}
                     style={{
@@ -788,6 +796,10 @@ export default function RegisterOwnerScreen() {
                       </AppText>
                     </View>
                   </View>
+                  <AppText variant="bodySm" color={C.outline} style={{ marginLeft: 4 }}>
+                    Imagen horizontal. Es la foto grande que se ve arriba de tu
+                    perfil. Usa tu mejor plato o el ambiente del local.
+                  </AppText>
                   <Pressable
                     onPress={() => pickImage(setCoverUri)}
                     style={{
