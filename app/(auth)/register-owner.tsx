@@ -228,7 +228,8 @@ export default function RegisterOwnerScreen() {
     }
 
     setLoading(false);
-    // _layout detecta la sesión (role owner) y redirige a /(owner)
+    // Pantalla de bienvenida para dueños; su CTA entra a /(owner).
+    router.replace("/(auth)/welcome?role=owner");
   }
 
   return (

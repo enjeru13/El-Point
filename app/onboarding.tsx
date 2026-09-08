@@ -23,25 +23,39 @@ const { width: W } = Dimensions.get("window");
 
 function HeroDiscover() {
   const { C, shadow } = useTheme();
+  const road = C.outlineVariant;
   return (
     <View style={{ width: 260, height: 220, alignItems: "center", justifyContent: "center" }}>
-      {/* "mapa" */}
+      {/* mapa estilizado */}
       <View
         style={{
-          width: 220,
-          height: 170,
+          width: 230,
+          height: 180,
           borderRadius: 28,
+          overflow: "hidden",
           backgroundColor: C.surfaceContainerHigh,
           borderWidth: 1,
           borderColor: C.border,
           ...shadow.md,
         }}
-      />
-      {/* pines */}
+      >
+        {/* manzana / parque */}
+        <View style={{ position: "absolute", left: 18, top: 20, width: 74, height: 52, borderRadius: 12, backgroundColor: C.secondary + "26" }} />
+        <View style={{ position: "absolute", right: 20, bottom: 24, width: 60, height: 44, borderRadius: 12, backgroundColor: C.tertiary + "22" }} />
+        {/* calles */}
+        <View style={{ position: "absolute", left: -10, right: -10, top: 66, height: 10, backgroundColor: road, transform: [{ rotate: "-4deg" }] }} />
+        <View style={{ position: "absolute", left: -10, right: -10, bottom: 40, height: 8, backgroundColor: road }} />
+        <View style={{ position: "absolute", top: -10, bottom: -10, left: 96, width: 10, backgroundColor: road, transform: [{ rotate: "5deg" }] }} />
+        {/* ruta */}
+        <View style={{ position: "absolute", left: 40, top: 40, width: 120, height: 3, borderRadius: 99, backgroundColor: C.primary, transform: [{ rotate: "22deg" }] }} />
+        <View style={{ position: "absolute", left: 150, top: 84, width: 60, height: 3, borderRadius: 99, backgroundColor: C.primary, transform: [{ rotate: "70deg" }] }} />
+      </View>
+
+      {/* pines dentro del mapa */}
       {[
-        { x: 30, y: 20, icon: "hamburger", tone: C.primary },
-        { x: 150, y: 45, icon: "pizza", tone: C.secondary },
-        { x: 80, y: 110, icon: "coffee", tone: C.tertiary },
+        { x: 34, y: 26, icon: "hamburger", tone: C.primary },
+        { x: 150, y: 40, icon: "pizza", tone: C.secondary },
+        { x: 92, y: 104, icon: "coffee", tone: C.tertiary },
       ].map((p) => (
         <View
           key={p.icon}
@@ -49,9 +63,9 @@ function HeroDiscover() {
             position: "absolute",
             left: p.x,
             top: p.y,
-            width: 46,
-            height: 46,
-            borderRadius: 16,
+            width: 44,
+            height: 44,
+            borderRadius: 15,
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: C.surface,
@@ -60,14 +74,15 @@ function HeroDiscover() {
             ...shadow.sm,
           }}
         >
-          <Icon name={p.icon} size={22} color={p.tone} />
+          <Icon name={p.icon} size={21} color={p.tone} />
         </View>
       ))}
+
       {/* search pill */}
       <View
         style={{
           position: "absolute",
-          bottom: 6,
+          bottom: 2,
           flexDirection: "row",
           alignItems: "center",
           gap: 8,
@@ -159,61 +174,91 @@ function HeroFavorites() {
   const { C, shadow } = useTheme();
   return (
     <View style={{ width: 260, height: 220, alignItems: "center", justifyContent: "center" }}>
-      <View
-        style={{
-          width: 130,
-          height: 130,
-          borderRadius: 44,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: C.primary + "1f",
-          borderWidth: 1,
-          borderColor: C.primary + "40",
-        }}
-      >
-        <Icon name="heart" size={62} color={C.primary} fill={C.primary} />
-      </View>
-      {/* promo tag */}
+      {/* tarjeta del corazón (opaca, con la card "guardada" detrás) */}
       <View
         style={{
           position: "absolute",
-          top: 24,
-          right: 18,
-          flexDirection: "row",
+          width: 150,
+          height: 110,
+          borderRadius: 24,
+          backgroundColor: C.surfaceContainerHigh,
+          borderWidth: 1,
+          borderColor: C.border,
+          transform: [{ rotate: "-8deg" }, { translateX: -14 }, { translateY: 10 }],
+          ...shadow.sm,
+        }}
+      />
+      <View
+        style={{
+          width: 158,
+          height: 118,
+          borderRadius: 26,
           alignItems: "center",
-          gap: 5,
-          paddingHorizontal: 12,
-          paddingVertical: 7,
-          borderRadius: 99,
+          justifyContent: "center",
           backgroundColor: C.surface,
           borderWidth: 1,
           borderColor: C.border,
           ...shadow.md,
         }}
       >
-        <Icon name="tag" size={14} color={C.primary} />
-        <AppText variant="caption" color={C.onSurface}>
-          2x1 hoy
-        </AppText>
-      </View>
-      {/* bell */}
-      <View
-        style={{
-          position: "absolute",
-          bottom: 22,
-          left: 26,
-          width: 44,
-          height: 44,
-          borderRadius: 16,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: C.surface,
-          borderWidth: 1,
-          borderColor: C.border,
-          ...shadow.sm,
-        }}
-      >
-        <Icon name="bell-outline" size={20} color={C.secondary} />
+        <View
+          style={{
+            width: 76,
+            height: 76,
+            borderRadius: 26,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: C.primaryFixed,
+            borderWidth: 1,
+            borderColor: C.border,
+          }}
+        >
+          <Icon name="heart" size={40} color={C.primary} fill={C.primary} />
+        </View>
+
+        {/* promo tag — enganchada a la esquina superior derecha */}
+        <View
+          style={{
+            position: "absolute",
+            top: -12,
+            right: -18,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 5,
+            paddingHorizontal: 11,
+            paddingVertical: 6,
+            borderRadius: 99,
+            backgroundColor: C.primary,
+            borderWidth: 1,
+            borderColor: C.border,
+            ...shadow.sm,
+          }}
+        >
+          <Icon name="tag" size={13} color={C.onPrimary} />
+          <AppText variant="caption" color={C.onPrimary}>
+            2x1 hoy
+          </AppText>
+        </View>
+
+        {/* campana — enganchada a la esquina inferior izquierda */}
+        <View
+          style={{
+            position: "absolute",
+            bottom: -14,
+            left: -14,
+            width: 40,
+            height: 40,
+            borderRadius: 14,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: C.secondaryContainer,
+            borderWidth: 1,
+            borderColor: C.border,
+            ...shadow.sm,
+          }}
+        >
+          <Icon name="bell-outline" size={18} color={C.secondary} />
+        </View>
       </View>
     </View>
   );

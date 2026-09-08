@@ -115,7 +115,8 @@ export default function RegisterScreen() {
     if (profileErr) {
       toast.error('Cuenta creada, pero no pudimos guardar tus preferencias. Ajústalas en tu perfil.');
     }
-    // _layout detecta la sesión y redirige a /(customer)
+    // Pantalla de bienvenida; su CTA entra a /(customer).
+    router.replace('/(auth)/welcome');
   }
 
   function handleContinue() {
