@@ -26,6 +26,8 @@ const config: ExpoConfig = {
   },
   android: {
     package: "com.elpoint.app",
+    googleServicesFile:
+      process.env.GOOGLE_SERVICES_JSON ?? "./google-services.json",
     adaptiveIcon: {
       backgroundColor: "#E6F4FE",
       foregroundImage: "./assets/images/android-icon-foreground.png",

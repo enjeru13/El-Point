@@ -42,3 +42,6 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Firebase Android config (subido a EAS como file secret)
+google-services.json
