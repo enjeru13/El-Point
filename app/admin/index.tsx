@@ -91,7 +91,7 @@ export default function AdminHubScreen() {
   const profileQ = useMyProfile();
   const isAdmin = !!profileQ.data?.is_admin;
   const countsQ = useAdminCounts(isAdmin);
-  const c = countsQ.data ?? { reviews: 0, restaurants: 0, reported: 0 };
+  const c = countsQ.data ?? { reviews: 0, restaurants: 0, reported: 0, support: 0 };
 
   return (
     <View style={{ flex: 1, backgroundColor: C.background }}>
@@ -176,6 +176,13 @@ export default function AdminHubScreen() {
                 sub="Suspendidos por reportes de la comunidad"
                 count={c.reported}
                 onPress={() => router.push("/admin/restaurant-reports")}
+              />
+              <Row
+                icon="comment-text"
+                label="Mensajes de soporte"
+                sub="Contacto de los usuarios"
+                count={c.support}
+                onPress={() => router.push("/admin/support")}
               />
             </>
           )}
