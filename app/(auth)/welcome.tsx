@@ -1,38 +1,51 @@
-import { Icon } from '@/components/ui/Icon';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useRef } from 'react';
+import { Icon } from "@/components/ui/Icon";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useMemo, useRef } from "react";
 import {
   Animated,
   Dimensions,
   Easing,
-  Pressable,
+  ScrollView,
   View,
-} from 'react-native';
-import { useTheme } from '@/lib/ThemeContext';
-import { AppText } from '@/components/ui/AppText';
-import { Button } from '@/components/ui/Button';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+} from "react-native";
+import { useTheme } from "@/lib/ThemeContext";
+import { useMyProfile } from "@/lib/queries/me";
+import { AppText } from "@/components/ui/AppText";
+import { Button } from "@/components/ui/Button";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const { width: W, height: H } = Dimensions.get('window');
-const CONFETTI_COUNT = 36;
+const { width: W, height: H } = Dimensions.get("window");
+const CONFETTI_COUNT = 44;
 
-function ConfettiParticle({ x, color, size, delay, duration, rotation }: {
-  x: number; color: string; size: number; delay: number; duration: number; rotation: number;
+function ConfettiParticle({
+  x,
+  color,
+  size,
+  delay,
+  duration,
+  rotation,
+}: {
+  x: number;
+  color: string;
+  size: number;
+  delay: number;
+  duration: number;
+  rotation: number;
 }) {
-  const translateY = useRef(new Animated.Value(-20)).current;
-  const rotate     = useRef(new Animated.Value(0)).current;
-  const opacity    = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(-24)).current;
+  const rotate = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const run = () => {
-      translateY.setValue(-20);
+      translateY.setValue(-24);
       rotate.setValue(0);
       opacity.setValue(0);
       Animated.parallel([
-        Animated.timing(translateY, { toValue: H + 20, duration, delay, easing: Easing.linear, useNativeDriver: true }),
-        Animated.timing(rotate,     { toValue: 1, duration, delay, easing: Easing.linear, useNativeDriver: true }),
+        Animated.timing(translateY, { toValue: H + 24, duration, delay, easing: Easing.linear, useNativeDriver: true }),
+        Animated.timing(rotate, { toValue: 1, duration, delay, easing: Easing.linear, useNativeDriver: true }),
         Animated.sequence([
-          Animated.timing(opacity, { toValue: 0.85, duration: 200, delay, useNativeDriver: true }),
+          Animated.timing(opacity, { toValue: 0.9, duration: 180, delay, useNativeDriver: true }),
           Animated.timing(opacity, { toValue: 0, duration: 400, delay: delay + duration - 400, useNativeDriver: true }),
         ]),
       ]).start(() => run());
@@ -43,118 +56,304 @@ function ConfettiParticle({ x, color, size, delay, duration, rotation }: {
   return (
     <Animated.View
       style={{
-        position: 'absolute', left: x, top: 0,
-        width: size, height: size, borderRadius: 2,
-        backgroundColor: color, opacity,
+        position: "absolute",
+        left: x,
+        top: 0,
+        width: size,
+        height: size * 0.5,
+        borderRadius: 2,
+        backgroundColor: color,
+        opacity,
         transform: [
           { translateY },
-          { rotate: rotate.interpolate({ inputRange: [0, 1], outputRange: [`${rotation}deg`, `${rotation + 360}deg`] }) },
+          { rotate: rotate.interpolate({ inputRange: [0, 1], outputRange: [`${rotation}deg`, `${rotation + 540}deg`] }) },
         ],
       }}
     />
   );
 }
 
+function Step({ icon, label, xp, tone }: { icon: string; label: string; xp?: string; tone: string }) {
+  const { C } = useTheme();
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+      <View
+        style={{
+          width: 34,
+          height: 34,
+          borderRadius: 11,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: tone + "22",
+        }}
+      >
+        <Icon name={icon} size={17} color={tone} />
+      </View>
+      <AppText variant="bodySm" style={{ flex: 1 }}>
+        {label}
+      </AppText>
+      {xp && (
+        <View
+          style={{
+            paddingHorizontal: 8,
+            paddingVertical: 3,
+            borderRadius: 99,
+            backgroundColor: C.primary + "1f",
+          }}
+        >
+          <AppText variant="caption" color={C.primary}>
+            {xp}
+          </AppText>
+        </View>
+      )}
+    </View>
+  );
+}
+
 export default function WelcomeScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
-  const router  = useRouter();
+  const router = useRouter();
   const { role } = useLocalSearchParams<{ role?: string }>();
-  const isOwner = role === 'owner';
+  const isOwner = role === "owner";
+  const profileQ = useMyProfile();
+  const username = profileQ.data?.username;
+  const greet = username ? `@${username}` : isOwner ? "Socio" : "Comensal";
 
   const confetti = useMemo(() => {
-    const colors = [C.primary, C.primaryContainer, '#ffd167', C.secondary, C.primaryFixedDim, C.tertiaryContainer];
+    const colors = [C.primary, C.primaryContainer, C.secondary, C.tertiary, "#ffd167", C.primaryFixedDim];
     return Array.from({ length: CONFETTI_COUNT }, (_, i) => ({
       id: i,
       x: Math.random() * W,
       color: colors[i % colors.length],
-      size: 6 + Math.random() * 8,
-      delay: Math.random() * 2000,
-      duration: 3000 + Math.random() * 2000,
+      size: 7 + Math.random() * 9,
+      delay: Math.random() * 900,
+      duration: 2600 + Math.random() * 1800,
       rotation: Math.random() * 360,
     }));
   }, [C.primary]);
 
-  const floatY  = useRef(new Animated.Value(0)).current;
-  const fadeIn  = useRef(new Animated.Value(0)).current;
-  const slideUp = useRef(new Animated.Value(30)).current;
+  const pop = useRef(new Animated.Value(0)).current;
+  const glow = useRef(new Animated.Value(0)).current;
+  const b1 = useRef(new Animated.Value(0)).current;
+  const b2 = useRef(new Animated.Value(0)).current;
+  const b3 = useRef(new Animated.Value(0)).current;
+  const b4 = useRef(new Animated.Value(0)).current;
   const xpWidth = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    Animated.spring(pop, { toValue: 1, delay: 120, damping: 9, stiffness: 140, useNativeDriver: true }).start();
     Animated.loop(
       Animated.sequence([
-        Animated.timing(floatY, { toValue: -14, duration: 2200, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-        Animated.timing(floatY, { toValue: 0,   duration: 2200, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-      ])
+        Animated.timing(glow, { toValue: 1, duration: 1400, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        Animated.timing(glow, { toValue: 0, duration: 1400, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+      ]),
     ).start();
-    Animated.parallel([
-      Animated.timing(fadeIn,  { toValue: 1, duration: 700, delay: 200, useNativeDriver: true }),
-      Animated.timing(slideUp, { toValue: 0, duration: 700, delay: 200, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-    ]).start();
-    Animated.timing(xpWidth, { toValue: 0.25, duration: 1200, delay: 800, easing: Easing.out(Easing.quad), useNativeDriver: false }).start();
+    Animated.stagger(
+      110,
+      [b1, b2, b3, b4].map((v) =>
+        Animated.timing(v, { toValue: 1, duration: 460, delay: 260, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      ),
+    ).start();
+    if (!isOwner) {
+      Animated.timing(xpWidth, { toValue: 0.16, duration: 1100, delay: 900, easing: Easing.out(Easing.quad), useNativeDriver: false }).start();
+    }
   }, []);
+
+  const rise = (v: Animated.Value) => ({
+    opacity: v,
+    transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }],
+  });
 
   return (
     <View style={{ flex: 1, backgroundColor: C.background }}>
-      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden' }}>
-        {confetti.map(p => <ConfettiParticle key={p.id} {...p} />)}
+      <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, overflow: "hidden" }}>
+        {confetti.map((p) => (
+          <ConfettiParticle key={p.id} {...p} />
+        ))}
       </View>
 
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: insets.top + 16, paddingBottom: 40 }}>
-
-        <View style={{ height: 6 }} />
-
-        <Animated.View style={{ alignItems: 'center', justifyContent: 'center', transform: [{ translateY: floatY }] }}>
-          <View style={{ position: 'absolute', width: 240, height: 240, borderRadius: 120, backgroundColor: isOwner ? C.secondary : C.primary, opacity: 0.08, transform: [{ scaleX: 1.3 }] }} />
-          <View style={{ width: 224, height: 224, borderRadius: 40, alignItems: 'center', justifyContent: 'center', backgroundColor: isOwner ? C.secondaryContainer : C.primaryFixed, borderWidth: 1, borderColor: C.border, ...shadow.lg }}>
-            <Icon name={isOwner ? 'storefront' : 'silverware-fork-knife'} size={80} color={isOwner ? C.secondary : C.primary} />
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 28,
+          paddingTop: insets.top + 24,
+          paddingBottom: insets.bottom + 24,
+          gap: 22,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Medalla */}
+        <Animated.View
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }],
+            opacity: pop,
+          }}
+        >
+          <Animated.View
+            style={{
+              position: "absolute",
+              width: 150,
+              height: 150,
+              borderRadius: 75,
+              backgroundColor: (isOwner ? C.secondary : C.primary) + "1f",
+              transform: [{ scale: glow.interpolate({ inputRange: [0, 1], outputRange: [1, 1.22] }) }],
+              opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [0.5, 0] }),
+            }}
+          />
+          <View
+            style={{
+              width: 116,
+              height: 116,
+              borderRadius: 38,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: isOwner ? C.secondaryContainer : C.primaryFixed,
+              borderWidth: 1,
+              borderColor: C.border,
+              ...shadow.lg,
+            }}
+          >
+            <Icon
+              name={isOwner ? "storefront" : "medal"}
+              size={58}
+              color={isOwner ? C.secondary : C.primary}
+            />
           </View>
-          <View style={{ position: 'absolute', bottom: -16, right: -16, width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', backgroundColor: isOwner ? C.primaryFixed : C.secondaryContainer, borderWidth: 1, borderColor: C.border, ...shadow.md }}>
-            <Icon name={isOwner ? 'fire' : 'food-fork-drink'} size={30} color={isOwner ? C.primary : C.secondary} />
-          </View>
-        </Animated.View>
-
-        <Animated.View style={{ alignItems: 'center', gap: 12, opacity: fadeIn, transform: [{ translateY: slideUp }] }}>
-          <AppText variant="display" color={C.primary} align="center">
-            {isOwner ? '¡Tu local está en El Point!' : '¡Bienvenido a El Point!'}
-          </AppText>
-          <AppText variant="body" color={C.onSurfaceVariant} align="center" style={{ lineHeight: 24, maxWidth: 280 }}>
-            {isOwner
-              ? 'Tu restaurante ya está visible. Empieza a recibir reseñas y conectar con tu comunidad.'
-              : <>Todo listo, <AppText variant="bodyStrong" color={C.onSurface}>Comensal</AppText>. Los mejores sabores de tu barrio te esperan.</>
-            }
-          </AppText>
-        </Animated.View>
-
-        <Animated.View style={{ width: '100%', padding: 20, borderRadius: 28, flexDirection: 'row', alignItems: 'center', gap: 16, backgroundColor: C.surfaceContainerLow, borderWidth: 1, borderColor: C.border, ...shadow.md, opacity: fadeIn, transform: [{ translateY: slideUp }] }}>
-          <View style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: isOwner ? C.primaryFixed : C.secondaryContainer, borderWidth: 1, borderColor: C.border }}>
-            <Icon name={isOwner ? 'chart-line' : 'star'} size={24} color={isOwner ? C.primary : C.secondary} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <AppText variant="bodyStrong" style={{ marginBottom: 6 }}>
-              {isOwner ? 'Rango: Local Nuevo 🏪' : 'Nivel 1 · Novato'}
-            </AppText>
-            <View style={{ height: 10, borderRadius: 99, overflow: 'hidden', backgroundColor: isOwner ? C.primaryFixed : C.secondaryContainer }}>
-              <Animated.View style={{ height: '100%', borderRadius: 99, backgroundColor: isOwner ? C.primary : C.secondary, width: xpWidth.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }} />
+          {!isOwner && (
+            <View
+              style={{
+                position: "absolute",
+                bottom: -8,
+                right: -8,
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+                borderRadius: 99,
+                backgroundColor: C.primary,
+                borderWidth: 1,
+                borderColor: C.border,
+              }}
+            >
+              <AppText variant="caption" color={C.onPrimary}>
+                NV 1
+              </AppText>
             </View>
-            <AppText variant="body" color={C.onSurfaceVariant} style={{ marginTop: 4 }}>
-              {isOwner ? '¡Consigue tu primera reseña para subir de rango!' : '¡Haz tu primera reseña para subir de nivel!'}
-            </AppText>
-          </View>
+          )}
         </Animated.View>
 
-        <Animated.View style={{ width: '100%', gap: 12, opacity: fadeIn }}>
+        {/* Saludo */}
+        <Animated.View style={[{ alignItems: "center", gap: 8 }, rise(b1)]}>
+          <AppText variant="display" color={C.primary} align="center" style={{ fontSize: 30, lineHeight: 34 }}>
+            {isOwner ? "¡Tu local está en camino!" : `¡Listo, ${greet}!`}
+          </AppText>
+          <AppText variant="body" color={C.onSurfaceVariant} align="center" style={{ lineHeight: 22, maxWidth: 300 }}>
+            {isOwner
+              ? "Ya recibimos tu solicitud. Un moderador la revisa y te avisamos apenas quede aprobada."
+              : "Estás dentro. San Cristóbal tiene mucho sabor esperándote — y tu opinión ya cuenta."}
+          </AppText>
+        </Animated.View>
+
+        {/* Tarjeta de estado / nivel */}
+        <Animated.View
+          style={[
+            {
+              width: "100%",
+              padding: 18,
+              borderRadius: 22,
+              gap: 12,
+              backgroundColor: C.surface,
+              borderWidth: 1,
+              borderColor: C.border,
+              ...shadow.sm,
+            },
+            rise(b2),
+          ]}
+        >
+          {isOwner ? (
+            <>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: C.tertiary }} />
+                <AppText variant="bodyStrong">En revisión</AppText>
+              </View>
+              <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                Suele tardar poco. Mientras tanto, deja tu perfil listo para
+                salir con todo.
+              </AppText>
+            </>
+          ) : (
+            <>
+              <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
+                <AppText variant="display" color={C.primary} style={{ fontSize: 34, lineHeight: 36 }}>
+                  1
+                </AppText>
+                <AppText variant="bodyStrong" color={C.onSurfaceVariant} style={{ marginBottom: 4 }}>
+                  Nivel · Novato
+                </AppText>
+              </View>
+              <View style={{ height: 8, borderRadius: 99, overflow: "hidden", backgroundColor: C.surfaceContainerHighest }}>
+                <Animated.View
+                  style={{
+                    height: "100%",
+                    borderRadius: 99,
+                    backgroundColor: C.primary,
+                    width: xpWidth.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"] }),
+                  }}
+                />
+              </View>
+              <AppText variant="caption" color={C.outline}>
+                Tu primer rank te acerca al Nivel 2.
+              </AppText>
+            </>
+          )}
+        </Animated.View>
+
+        {/* Próximos pasos */}
+        <Animated.View
+          style={[
+            {
+              width: "100%",
+              padding: 18,
+              borderRadius: 22,
+              gap: 14,
+              backgroundColor: C.surface,
+              borderWidth: 1,
+              borderColor: C.border,
+              ...shadow.sm,
+            },
+            rise(b3),
+          ]}
+        >
+          <AppText variant="overline" color={C.outline}>
+            PRÓXIMOS PASOS
+          </AppText>
+          {isOwner ? (
+            <>
+              <Step icon="image-plus" label="Sube tu logo y portada" tone={C.primary} />
+              <Step icon="file-pdf-box" label="Agrega tu menú en PDF" tone={C.secondary} />
+              <Step icon="clock-outline" label="Define tu horario de atención" tone={C.tertiary} />
+            </>
+          ) : (
+            <>
+              <Step icon="fire" label="Deja tu primer rank" xp="+10 XP" tone={C.primary} />
+              <Step icon="heart-outline" label="Guarda un local en favoritos" tone={C.secondary} />
+              <Step icon="map-marker" label="Explora el mapa de tu zona" tone={C.tertiary} />
+            </>
+          )}
+        </Animated.View>
+
+        {/* CTA */}
+        <Animated.View style={[{ width: "100%" }, rise(b4)]}>
           <Button
-            label={isOwner ? 'Ver mi panel' : 'Explorar ahora'}
-            onPress={() => router.replace(isOwner ? '/(owner)' : '/(customer)')}
+            label={isOwner ? "Ir a mi panel" : "Empezar a explorar"}
+            onPress={() => router.replace(isOwner ? "/(owner)" : "/(customer)")}
             iconTrailing="arrow-right"
           />
-          <AppText variant="body" color={C.outline} align="center">
-            {isOwner ? '¿Listo para recibir a tus primeros clientes?' : '¿Listo para encontrar tu nuevo lugar favorito?'}
-          </AppText>
         </Animated.View>
-
-      </View>
+      </ScrollView>
     </View>
   );
 }

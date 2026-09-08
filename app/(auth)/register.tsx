@@ -325,7 +325,7 @@ export default function RegisterScreen() {
                     <Pressable
                       key={cat.id}
                       onPress={() => toggleCategory(cat.id)}
-                      className="items-center py-5 px-3 rounded-3xl border-2 gap-2"
+                      className="items-center py-5 px-3 rounded-3xl border gap-2"
                       style={{
                         width: '48%',
                         borderColor: isSelected ? C.secondary : C.outlineVariant,
@@ -418,7 +418,7 @@ export default function RegisterScreen() {
 
               {/* Mapa placeholder con círculo animado */}
               <View
-                className="w-full rounded-[32px] overflow-hidden mb-8 items-center justify-center border-2"
+                className="w-full rounded-[32px] overflow-hidden mb-8 items-center justify-center border"
                 style={{
                   height: 280,
                   backgroundColor: C.surfaceContainerHighest,
@@ -462,14 +462,18 @@ export default function RegisterScreen() {
 
                 {/* Badge ubicación */}
                 {locGranted ? (
-                  <View className="absolute top-4 left-4 flex-row items-center gap-2 bg-white/80 px-3 py-2 rounded-full">
+                  <View
+                    className="absolute top-4 left-4 flex-row items-center gap-2 px-3 py-2 rounded-full"
+                    style={{ backgroundColor: C.surface, borderWidth: 1, borderColor: C.border }}
+                  >
                     <Icon name="check-circle" size={16} color={C.primary} />
                     <AppText variant="caption" color={C.primary}>Ubicación activa</AppText>
                   </View>
                 ) : (
                   <Pressable
                     onPress={requestLocation}
-                    className="absolute top-4 left-4 flex-row items-center gap-2 bg-white/80 px-3 py-2 rounded-full"
+                    className="absolute top-4 left-4 flex-row items-center gap-2 px-3 py-2 rounded-full"
+                    style={{ backgroundColor: C.surface, borderWidth: 1, borderColor: C.border }}
                   >
                     <Icon name="crosshairs-gps" size={16} color={C.primary} />
                     <AppText variant="caption" color={C.primary}>Activar ubicación</AppText>
@@ -504,7 +508,7 @@ export default function RegisterScreen() {
                   <View className="flex-row items-center justify-center gap-6">
                     <Pressable
                       onPress={() => setRadius(r => Math.max(1, r - 1))}
-                      className="w-12 h-12 rounded-full items-center justify-center border-2"
+                      className="w-12 h-12 rounded-full items-center justify-center border"
                       style={{ borderColor: C.outlineVariant }}
                     >
                       <Icon name="minus" size={22} color={C.onSurfaceVariant} />
@@ -517,7 +521,7 @@ export default function RegisterScreen() {
                     </View>
                     <Pressable
                       onPress={() => setRadius(r => Math.min(15, r + 1))}
-                      className="w-12 h-12 rounded-full items-center justify-center border-2"
+                      className="w-12 h-12 rounded-full items-center justify-center border"
                       style={{ borderColor: C.outlineVariant }}
                     >
                       <Icon name="plus" size={22} color={C.onSurfaceVariant} />
