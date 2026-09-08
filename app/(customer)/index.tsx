@@ -208,8 +208,8 @@ function ReviewCard({
         )}
 
         {r.amenities.length > 0 && (
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            {r.amenities.slice(0, 3).map((a) => (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            {r.amenities.slice(0, 4).map((a) => (
               <View
                 key={a.slug}
                 style={{
@@ -221,6 +221,11 @@ function ReviewCard({
                 <Icon name={a.icon} size={14} color={C.onSurfaceVariant} />
               </View>
             ))}
+            {r.amenities.length > 4 && (
+              <AppText variant="caption" color={C.outline} style={{ fontSize: 11 }}>
+                +{r.amenities.length - 4}
+              </AppText>
+            )}
           </View>
         )}
 
