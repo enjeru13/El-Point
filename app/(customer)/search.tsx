@@ -19,6 +19,7 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { useRestaurantSearch, type SearchResult } from '@/lib/queries/search';
 import { isBoosted } from '@/lib/queries/restaurants';
 import { useCategories } from '@/lib/queries/categories';
+import { useAmenities } from '@/lib/queries/amenities';
 import { isOpenNow } from '@/lib/hours';
 import { distanceKm, fmtKm, type LatLng } from '@/lib/geo';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -275,6 +276,7 @@ export default function SearchScreen() {
 
   const searchQ = useRestaurantSearch();
   const categoriesQ = useCategories();
+  const amenitiesQ = useAmenities();
 
   const [query, setQuery]       = useState('');
   const [activeCat, setActiveCat] = useState<string | null>(null);
@@ -282,6 +284,7 @@ export default function SearchScreen() {
   const [sort, setSort]         = useState<SortKey>(null);
   const [price, setPrice]       = useState<PriceKey>(null);
   const [onlyOpen, setOnlyOpen] = useState(false);
+  const [amenitySlugs, setAmenitySlugs] = useState<Set<string>>(new Set());
   const [recents, setRecents]   = useState<string[]>([]);
   const [userLoc, setUserLoc]   = useState<LatLng | null>(null);
   const [locBusy, setLocBusy]   = useState(false);
@@ -323,7 +326,15 @@ export default function SearchScreen() {
     saveRecents([]);
   }
 
-  const hasActiveFilters = sort !== null || price !== null || onlyOpen;
+  const hasActiveFilters = sort !== null || price !== null || onlyOpen || amenitySlugs.size > 0;
+
+  function toggleAmenity(slug: string) {
+    setAmenitySlugs((prev) => {
+      const next = new Set(prev);
+      next.has(slug) ? next.delete(slug) : next.add(slug);
+      return next;
+    });
+  }
   const all = searchQ.data ?? [];
   const searching = !!query.trim() || !!activeCat || hasActiveFilters;
 
@@ -338,7 +349,10 @@ export default function SearchScreen() {
       const matchCat = !activeCat || r.categories.some(c => c.slug === activeCat);
       const matchPrice = !price || r.price_level === price;
       const matchOpen = !onlyOpen || isOpenNow(r.hours).open;
-      return matchQuery && matchCat && matchPrice && matchOpen;
+      const matchAmenities =
+        amenitySlugs.size === 0 ||
+        [...amenitySlugs].every(s => r.amenities.some(a => a.slug === s));
+      return matchQuery && matchCat && matchPrice && matchOpen && matchAmenities;
     });
     if (sort === 'near' && userLoc) {
       const d = (r: SearchResult) =>
@@ -380,7 +394,7 @@ export default function SearchScreen() {
       );
     }
     return list;
-  }, [all, query, activeCat, price, sort, onlyOpen, userLoc]);
+  }, [all, query, activeCat, price, sort, onlyOpen, amenitySlugs, userLoc]);
 
   const popular = useMemo(
     () => [...all].sort((a, b) => b.rating_count - a.rating_count).slice(0, 8),
@@ -400,7 +414,7 @@ export default function SearchScreen() {
     setOnlyOpen(false);
     inputRef.current?.blur();
   }
-  function resetFilters() { setSort(null); setPrice(null); setOnlyOpen(false); }
+  function resetFilters() { setSort(null); setPrice(null); setOnlyOpen(false); setAmenitySlugs(new Set()); }
   function goToPlace(id: string) {
     if (query.trim()) pushRecent(query);
     router.push(`/restaurant/${id}`);
@@ -531,6 +545,26 @@ export default function SearchScreen() {
               Abiertos ahora
             </AppText>
           </Pressable>
+
+          {(amenitiesQ.data ?? []).length > 0 && (
+            <>
+              <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
+              <View style={{ gap: 8 }}>
+                <AppText variant="overline" color={C.onSurfaceVariant}>COMODIDADES</AppText>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {(amenitiesQ.data ?? []).map(am => (
+                    <Chip
+                      key={am.slug}
+                      label={am.label}
+                      icon={am.icon}
+                      active={amenitySlugs.has(am.slug)}
+                      onPress={() => toggleAmenity(am.slug)}
+                    />
+                  ))}
+                </View>
+              </View>
+            </>
+          )}
 
           {hasActiveFilters && (
             <Pressable onPress={resetFilters} style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4 }}>

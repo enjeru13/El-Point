@@ -58,9 +58,11 @@ import {
 } from "react-native";
 import {
   BottomSheetBackdrop,
+  BottomSheetFooter,
   BottomSheetModal,
   BottomSheetScrollView,
   type BottomSheetBackdropProps,
+  type BottomSheetFooterProps,
 } from "@gorhom/bottom-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -101,16 +103,27 @@ function StarPicker({
 }) {
   const { C } = useTheme();
   return (
-    <View style={{ flexDirection: "row", gap: 6 }}>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Pressable key={i} onPress={() => onChange(i)}>
-          <Icon
-            name={i <= value ? "star" : "star-outline"}
-            size={36}
-            color={i <= value ? C.secondary : C.outlineVariant}
-          />
-        </Pressable>
-      ))}
+    <View style={{ flexDirection: "row", gap: 10 }}>
+      {[1, 2, 3, 4, 5].map((i) => {
+        const on = i <= value;
+        return (
+          <Pressable
+            key={i}
+            onPress={() => onChange(i)}
+            hitSlop={6}
+            style={({ pressed }) => ({
+              transform: [{ scale: pressed ? 0.88 : 1 }],
+            })}
+          >
+            <Icon
+              name={on ? "star" : "star-outline"}
+              size={42}
+              color={on ? C.secondary : C.outlineVariant}
+              fill={on ? C.secondary : "none"}
+            />
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -152,7 +165,6 @@ const ReviewSheet = forwardRef<
     C.secondary,
   ];
   const sheetRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => ["88%"], []);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
@@ -221,15 +233,63 @@ const ReviewSheet = forwardRef<
     [],
   );
 
+  const canSubmit = rating > 0 && comment.trim().length >= 10;
+
+  const renderFooter = useCallback(
+    (props: BottomSheetFooterProps) => (
+      <BottomSheetFooter {...props} bottomInset={0}>
+        <View
+          style={{
+            paddingHorizontal: 20,
+            paddingTop: 12,
+            paddingBottom: insets.bottom + 12,
+            backgroundColor: C.surface,
+            borderTopWidth: 1,
+            borderTopColor: C.outlineVariant,
+          }}
+        >
+          <Button
+            label={
+              editing
+                ? submitting
+                  ? "Guardando…"
+                  : "Guardar cambios"
+                : submitting
+                  ? "Publicando…"
+                  : "Publicar rank"
+            }
+            onPress={() => onSubmit(rating, comment.trim(), photos)}
+            disabled={!canSubmit}
+            loading={submitting}
+            icon={editing ? "check" : "fire"}
+          />
+          {!canSubmit && (
+            <AppText
+              variant="caption"
+              color={C.outline}
+              align="center"
+              style={{ marginTop: 6, fontSize: 12 }}
+            >
+              {rating === 0
+                ? "Elige las estrellas para continuar"
+                : `Faltan ${10 - comment.trim().length} caracteres`}
+            </AppText>
+          )}
+        </View>
+      </BottomSheetFooter>
+    ),
+    [C, insets.bottom, editing, submitting, rating, comment, photos, canSubmit, onSubmit],
+  );
+
   return (
     <BottomSheetModal
       ref={sheetRef}
-      snapPoints={snapPoints}
-      enableDynamicSizing={false}
+      enableDynamicSizing
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustResize"
       backdropComponent={renderBackdrop}
+      footerComponent={renderFooter}
       handleIndicatorStyle={{ backgroundColor: C.outlineVariant, width: 44 }}
       backgroundStyle={{
         backgroundColor: C.surface,
@@ -238,53 +298,46 @@ const ReviewSheet = forwardRef<
         borderColor: C.border,
       }}
     >
-      {/* Header */}
-      <View
-        style={{
-          paddingHorizontal: 20,
-          paddingBottom: 14,
-          borderBottomWidth: 1,
-          borderBottomColor: C.outlineVariant,
-        }}
-      >
-        <AppText variant="overline" color={C.onSurfaceVariant}>
-          {editing ? "EDITAR TU RANK" : "RANKEAR"}
-        </AppText>
-        <AppText variant="title" style={{ fontSize: 22, lineHeight: 27 }} numberOfLines={1}>
-          {restaurantName}
-        </AppText>
-      </View>
-
       <BottomSheetScrollView
-        contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: insets.bottom + 48 }}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 4,
+          paddingBottom: 132,
+          gap: 22,
+        }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Estrellas */}
-        <View style={{ alignItems: "center", gap: 12 }}>
-          <StarPicker value={rating} onChange={setRating} />
-          {rating > 0 ? (
-            <View
-              style={{
-                paddingHorizontal: 14,
-                paddingVertical: 6,
-                borderRadius: 99,
-                backgroundColor: C.surfaceContainerLow,
-                borderWidth: 1,
-                borderColor: C.outlineVariant,
-              }}
-            >
-              <AppText variant="bodyStrong" color={RATING_COLORS[rating]}>
-                {RATING_LABELS[rating]}
-              </AppText>
-            </View>
-          ) : (
-            <AppText variant="bodySm" color={C.outline}>
-              ¿Cuántas estrellas le das?
-            </AppText>
-          )}
+        {/* Título */}
+        <View style={{ gap: 2 }}>
+          <AppText variant="overline" color={C.onSurfaceVariant}>
+            {editing ? "EDITAR TU RANK" : "TU RANK"}
+          </AppText>
+          <AppText variant="title" style={{ fontSize: 21, lineHeight: 26 }} numberOfLines={1}>
+            {restaurantName}
+          </AppText>
         </View>
 
-        <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
+        {/* Estrellas + etiqueta */}
+        <View
+          style={{
+            alignItems: "center",
+            gap: 14,
+            paddingVertical: 20,
+            borderRadius: 20,
+            backgroundColor: C.surfaceContainerLow,
+            borderWidth: 1,
+            borderColor: C.outlineVariant,
+          }}
+        >
+          <StarPicker value={rating} onChange={setRating} />
+          <AppText
+            variant="bodyStrong"
+            color={rating > 0 ? RATING_COLORS[rating] : C.outline}
+            style={{ fontSize: 15 }}
+          >
+            {rating > 0 ? RATING_LABELS[rating] : "Toca para calificar"}
+          </AppText>
+        </View>
 
         {/* Comentario */}
         <View style={{ gap: 8 }}>
@@ -292,7 +345,7 @@ const ReviewSheet = forwardRef<
             label="TU EXPERIENCIA"
             value={comment}
             onChangeText={(t) => setComment(t.slice(0, 500))}
-            placeholder="Cuéntale a la comunidad qué tal estuvo…"
+            placeholder="¿Qué pediste? ¿Cómo estuvo la atención, el ambiente, los precios?"
             multiline
           />
           <AppText
@@ -301,61 +354,50 @@ const ReviewSheet = forwardRef<
             align="right"
             style={{ fontSize: 12 }}
           >
-            {comment.length < 10
-              ? `Mínimo 10 caracteres · ${comment.length} / 500`
-              : `${comment.length} / 500`}
+            {comment.trim().length < 10
+              ? `Mínimo 10 caracteres · ${comment.length}/500`
+              : `${comment.length}/500`}
           </AppText>
         </View>
 
         {/* Fotos */}
-        <View style={{ gap: 8, display: editing ? "none" : "flex" }}>
-          <AppText variant="overline" color={C.onSurfaceVariant}>
-            FOTOS (OPCIONAL)
-          </AppText>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-            {photos.map((uri, i) => (
-              <View key={uri + i} style={{ width: 64, height: 64, borderRadius: 12, overflow: "hidden", borderWidth: 1, borderColor: C.border }}>
-                <Image source={{ uri }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+        {!editing && (
+          <View style={{ gap: 8 }}>
+            <AppText variant="overline" color={C.onSurfaceVariant}>
+              FOTOS (OPCIONAL)
+            </AppText>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+              {photos.map((uri, i) => (
+                <View key={uri + i} style={{ width: 72, height: 72, borderRadius: 14, overflow: "hidden", borderWidth: 1, borderColor: C.border }}>
+                  <Image source={{ uri }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+                  <Pressable
+                    onPress={() => setPhotos((p) => p.filter((_, idx) => idx !== i))}
+                    style={{ position: "absolute", top: 3, right: 3, width: 20, height: 20, borderRadius: 10, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center" }}
+                  >
+                    <Icon name="close" size={13} color="#fff" />
+                  </Pressable>
+                </View>
+              ))}
+              {photos.length < 4 && (
                 <Pressable
-                  onPress={() => setPhotos((p) => p.filter((_, idx) => idx !== i))}
-                  style={{ position: "absolute", top: 2, right: 2, width: 18, height: 18, borderRadius: 9, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center" }}
+                  onPress={addPhotos}
+                  style={{ width: 72, height: 72, borderRadius: 14, borderWidth: 1, borderStyle: "dashed", borderColor: C.outlineVariant, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceContainerLow, gap: 3 }}
                 >
-                  <Icon name="close" size={12} color="#fff" />
+                  <Icon name="camera-plus-outline" size={22} color={C.primary} />
+                  <AppText variant="caption" color={C.outline} style={{ fontSize: 10 }}>
+                    Agregar
+                  </AppText>
                 </Pressable>
-              </View>
-            ))}
-            {photos.length < 4 && (
-              <Pressable
-                onPress={addPhotos}
-                style={{ width: 64, height: 64, borderRadius: 12, borderWidth: 1, borderStyle: "dashed", borderColor: C.outlineVariant, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceContainerLow }}
-              >
-                <Icon name="camera-plus-outline" size={22} color={C.primary} />
-              </Pressable>
-            )}
+              )}
+            </View>
           </View>
-        </View>
+        )}
 
         {errorMessage && (
           <AppText variant="label" color={C.error}>
             {errorMessage}
           </AppText>
         )}
-
-        <Button
-          label={
-            editing
-              ? submitting
-                ? "Guardando…"
-                : "Guardar cambios"
-              : submitting
-                ? "Publicando…"
-                : "Publicar Rank"
-          }
-          onPress={() => onSubmit(rating, comment.trim(), photos)}
-          disabled={!(rating > 0 && comment.trim().length >= 10)}
-          loading={submitting}
-          icon={editing ? "check" : "fire"}
-        />
       </BottomSheetScrollView>
     </BottomSheetModal>
   );
