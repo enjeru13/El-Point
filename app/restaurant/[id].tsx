@@ -61,6 +61,7 @@ import {
   BottomSheetFooter,
   BottomSheetModal,
   BottomSheetScrollView,
+  BottomSheetTextInput,
   type BottomSheetBackdropProps,
   type BottomSheetFooterProps,
 } from "@gorhom/bottom-sheet";
@@ -341,12 +342,28 @@ const ReviewSheet = forwardRef<
 
         {/* Comentario */}
         <View style={{ gap: 8 }}>
-          <Field
-            label="TU EXPERIENCIA"
+          <AppText variant="overline" color={C.onSurfaceVariant} style={{ marginLeft: 4 }}>
+            TU EXPERIENCIA
+          </AppText>
+          <BottomSheetTextInput
             value={comment}
             onChangeText={(t) => setComment(t.slice(0, 500))}
             placeholder="¿Qué pediste? ¿Cómo estuvo la atención, el ambiente, los precios?"
+            placeholderTextColor={C.outline}
             multiline
+            style={{
+              minHeight: 110,
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: C.outlineVariant,
+              backgroundColor: C.surfaceContainerLow,
+              paddingHorizontal: 14,
+              paddingVertical: 12,
+              fontFamily: "PlusJakartaSans_400Regular",
+              fontSize: 15,
+              color: C.onSurface,
+              textAlignVertical: "top",
+            }}
           />
           <AppText
             variant="caption"
