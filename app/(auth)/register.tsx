@@ -186,7 +186,7 @@ export default function RegisterScreen() {
           className="flex-1"
           contentContainerStyle={{
             paddingTop: insets.top + 70,
-            paddingBottom: insets.bottom + 120,
+            paddingBottom: insets.bottom + (step === 0 ? 172 : 120),
             paddingHorizontal: 20,
           }}
           showsVerticalScrollIndicator={false}
@@ -247,34 +247,44 @@ export default function RegisterScreen() {
               />
 
               {/* Partner card */}
-              <View
-                className="mt-10 p-6 rounded-3xl items-center border-2"
-                style={{
-                  backgroundColor: C.surfaceContainerLow,
-                  borderColor: C.border,
-                  ...shadow.md,
-                }}
-              >
-                <View
-                  className="w-12 h-12 rounded-full items-center justify-center mb-3"
-                  style={{ backgroundColor: C.tertiaryContainer }}
-                >
-                  <Icon name="storefront-outline" size={24} color="#fff" />
-                </View>
-                <AppText variant="subtitle" align="center" style={{ marginBottom: 4 }}>
-                  ¿Eres dueño de un restaurante?
+              <View style={{ marginTop: 36, gap: 8 }}>
+                <AppText variant="overline" color={C.outline} style={{ marginLeft: 4 }}>
+                  ¿ERES DUEÑO?
                 </AppText>
-                <AppText variant="bodySm" color={C.onSurfaceVariant} align="center" style={{ marginBottom: 16 }}>
-                  Gestiona tu menú, analíticas y llega a más comensales.
-                </AppText>
-                <Button
-                  label="Regístrate como socio"
+                <Pressable
                   onPress={() => router.push('/(auth)/register-owner')}
-                  variant="ghost"
-                  size="sm"
-                  icon="storefront-outline"
-                  fullWidth={false}
-                />
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 14,
+                    padding: 16,
+                    borderRadius: 20,
+                    backgroundColor: C.surface,
+                    borderWidth: 1,
+                    borderColor: C.border,
+                    ...shadow.sm,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 46,
+                      height: 46,
+                      borderRadius: 15,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: C.tertiary + '22',
+                    }}
+                  >
+                    <Icon name="storefront-outline" size={22} color={C.tertiary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <AppText variant="bodyStrong">Registra tu restaurante</AppText>
+                    <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 2 }}>
+                      Menú, analíticas y más comensales.
+                    </AppText>
+                  </View>
+                  <Icon name="chevron-right" size={20} color={C.outline} />
+                </Pressable>
               </View>
             </>
           )}
