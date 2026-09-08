@@ -202,6 +202,45 @@ export default function SettingsScreen() {
             </SectionCard>
           </View>
 
+          {/* Más */}
+          <View style={{ gap: 10 }}>
+            <SectionLabel label="Más" />
+            <SectionCard>
+              <Pressable
+                onPress={() => router.push('/support')}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
+              >
+                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
+                  <Icon name="comment-text" size={20} color={C.primary} />
+                </View>
+                <AppText variant="bodyStrong" style={{ flex: 1 }}>Contacto y soporte</AppText>
+                <Icon name="chevron-right" size={20} color={C.outline} />
+              </Pressable>
+              <Divider />
+              <Pressable
+                onPress={() => router.push('/changelog')}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
+              >
+                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
+                  <Icon name="party-popper" size={20} color={C.primary} />
+                </View>
+                <AppText variant="bodyStrong" style={{ flex: 1 }}>Novedades</AppText>
+                <Icon name="chevron-right" size={20} color={C.outline} />
+              </Pressable>
+              <Divider />
+              <Pressable
+                onPress={() => router.push('/donate')}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
+              >
+                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
+                  <Icon name="heart" size={20} color={C.primary} />
+                </View>
+                <AppText variant="bodyStrong" style={{ flex: 1 }}>Apoya el proyecto</AppText>
+                <Icon name="chevron-right" size={20} color={C.outline} />
+              </Pressable>
+            </SectionCard>
+          </View>
+
           {/* Legal */}
           <View style={{ gap: 10 }}>
             <SectionLabel label="Legal" />
