@@ -227,7 +227,7 @@ export default function ProfileScreen() {
                   </View>
                 ) : (
                   <View style={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: C.primaryContainer, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
-                    <AppText variant="caption" style={{ fontSize: 12 }}>{level}</AppText>
+                    <AppText variant="caption" color={C.onPrimary} style={{ fontSize: 12 }}>{level}</AppText>
                   </View>
                 )}
               </Pressable>

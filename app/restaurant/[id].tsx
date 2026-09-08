@@ -1074,7 +1074,7 @@ export default function RestaurantProfileScreen() {
                   borderColor: C.border,
                 }}
               >
-                <Icon name="file-pdf-box" size={26} color={C.onSurface} />
+                <Icon name="file-pdf-box" size={26} color={C.onPrimary} />
               </View>
               <View style={{ flex: 1 }}>
                 <AppText variant="heading" style={{ fontSize: 17 }}>

@@ -227,8 +227,8 @@ function PlaceCard({
             paddingHorizontal: 16, paddingVertical: 9, borderRadius: 99,
             backgroundColor: C.primaryContainer, borderWidth: 1, borderColor: C.border,
           }}>
-            <AppText variant="bodyStrong" style={{ fontSize: 14 }}>Ver restaurante</AppText>
-            <Icon name="arrow-right" size={15} color={C.onSurface} />
+            <AppText variant="bodyStrong" color={C.onPrimary} style={{ fontSize: 14 }}>Ver restaurante</AppText>
+            <Icon name="arrow-right" size={15} color={C.onPrimary} />
           </View>
         )}
       </View>

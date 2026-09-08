@@ -288,7 +288,7 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
                 borderColor: C.border,
               }}
             >
-              <AppText variant="caption" style={{ fontSize: 12 }}>
+              <AppText variant="caption" color={C.onPrimary} style={{ fontSize: 12 }}>
                 {unreadCount}
               </AppText>
             </View>

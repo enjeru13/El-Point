@@ -50,7 +50,7 @@ export function NotificationBell() {
               style={{
                 fontSize: 9,
                 fontFamily: "PlusJakartaSans_700Bold",
-                color: C.onSurface,
+                color: C.onPrimary,
               }}
             >
               {unread > 9 ? "9+" : unread}
