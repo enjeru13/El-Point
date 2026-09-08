@@ -913,11 +913,25 @@ export default function RegisterOwnerScreen() {
         />
         {step === STEPS - 1 && (
           <AppText variant="caption" color={C.outline} align="center" style={{ marginTop: 10, lineHeight: 18 }}>
-            Al registrarte, aceptas los{" "}
-            <AppText variant="caption" color={C.primary} style={{ textDecorationLine: "underline" }}>
-              Términos de Socio
+            Al registrar tu local, aceptas los{" "}
+            <AppText
+              variant="caption"
+              color={C.primary}
+              style={{ textDecorationLine: "underline" }}
+              onPress={() => router.push("/legal/terms")}
+            >
+              Términos de Servicio
             </AppText>{" "}
-            de El Point.
+            y la{" "}
+            <AppText
+              variant="caption"
+              color={C.primary}
+              style={{ textDecorationLine: "underline" }}
+              onPress={() => router.push("/legal/privacy")}
+            >
+              Política de Privacidad
+            </AppText>
+            .
           </AppText>
         )}
       </View>

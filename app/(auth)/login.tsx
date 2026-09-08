@@ -180,6 +180,26 @@ export default function LoginScreen() {
                 </AppText>
               </Pressable>
             </View>
+
+            <AppText variant="caption" color={C.outline} align="center" style={{ lineHeight: 16 }}>
+              <AppText
+                variant="caption"
+                color={C.outline}
+                style={{ textDecorationLine: "underline" }}
+                onPress={() => router.push("/legal/terms")}
+              >
+                Términos
+              </AppText>
+              {"   ·   "}
+              <AppText
+                variant="caption"
+                color={C.outline}
+                style={{ textDecorationLine: "underline" }}
+                onPress={() => router.push("/legal/privacy")}
+              >
+                Privacidad
+              </AppText>
+            </AppText>
           </View>
         </Animated.View>
       </KeyboardAvoidingView>

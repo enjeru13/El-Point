@@ -27,6 +27,7 @@ import { queryClient } from '@/lib/query';
 import { useNotificationsRealtime } from '@/lib/queries/notifications';
 import { ToastProvider } from '@/lib/toast';
 import { AppThemeProvider, useTheme } from '@/lib/ThemeContext';
+import { hasSeenOnboarding } from '@/lib/onboarding';
 import { SettingsBridge } from '@/components/SettingsBridge';
 import { PushBridge } from '@/components/PushBridge';
 import { SplashScreenView } from '@/components/ui/SplashScreenView';
@@ -53,7 +54,12 @@ export default function RootLayout() {
   const [role, setRole]       = useState<UserRole>(null);
   const [ready, setReady]     = useState(false);
   const [navReady, setNavReady] = useState(false);
+  const [onboardingSeen, setOnboardingSeen] = useState<boolean | null>(null);
   const currentUid = useRef<string | null>(null);
+
+  useEffect(() => {
+    hasSeenOnboarding().then(setOnboardingSeen);
+  }, []);
 
   useNotificationsRealtime(session?.user.id ?? null);
 
@@ -111,14 +117,20 @@ export default function RootLayout() {
   }
 
   useEffect(() => {
-    if (!ready || !fontsLoaded) return;
+    if (!ready || !fontsLoaded || onboardingSeen === null) return;
     const root = segments[0];
     const inAuth = root === '(auth)';
     const inOwner = root === '(owner)';
     const inCustomer = root === '(customer)';
+    // Screens a signed-out user is allowed to sit on without being bounced.
+    const openWhileOut = inAuth || root === 'legal' || root === 'onboarding';
 
     if (!session) {
-      if (!inAuth) router.replace('/(auth)/login');
+      if (!onboardingSeen) {
+        if (!openWhileOut) router.replace('/onboarding');
+      } else if (!openWhileOut || root === 'onboarding') {
+        router.replace('/(auth)/login');
+      }
       setNavReady(true);
       return;
     }
@@ -136,7 +148,7 @@ export default function RootLayout() {
       router.replace('/(customer)');
     }
     setNavReady(true);
-  }, [ready, session, role, fontsLoaded, segments]);
+  }, [ready, session, role, fontsLoaded, segments, onboardingSeen]);
 
   if (!ready || !fontsLoaded || (session && role === null) || !navReady)
     return <SplashScreenView />;

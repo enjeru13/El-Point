@@ -201,6 +201,34 @@ export default function SettingsScreen() {
             </SectionCard>
           </View>
 
+          {/* Legal */}
+          <View style={{ gap: 10 }}>
+            <SectionLabel label="Legal" />
+            <SectionCard>
+              <Pressable
+                onPress={() => router.push('/legal/terms')}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
+              >
+                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
+                  <Icon name="file-check" size={20} color={C.primary} />
+                </View>
+                <AppText variant="bodyStrong" style={{ flex: 1 }}>Términos de Servicio</AppText>
+                <Icon name="chevron-right" size={20} color={C.outline} />
+              </Pressable>
+              <Divider />
+              <Pressable
+                onPress={() => router.push('/legal/privacy')}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
+              >
+                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
+                  <Icon name="shield-lock-outline" size={20} color={C.primary} />
+                </View>
+                <AppText variant="bodyStrong" style={{ flex: 1 }}>Política de Privacidad</AppText>
+                <Icon name="chevron-right" size={20} color={C.outline} />
+              </Pressable>
+            </SectionCard>
+          </View>
+
           <Button
             label="Cerrar sesión"
             onPress={async () => {

@@ -563,7 +563,25 @@ export default function RegisterScreen() {
             />
             {step === 0 && (
               <AppText variant="caption" color={C.onSurfaceVariant + '80'} align="center" style={{ marginTop: 10, lineHeight: 18 }}>
-                Al continuar, aceptas nuestros <AppText variant="caption" style={{ textDecorationLine: 'underline' }}>Términos de Servicio</AppText> y <AppText variant="caption" style={{ textDecorationLine: 'underline' }}>Política de Privacidad</AppText>.
+                Al crear tu cuenta, aceptas nuestros{' '}
+                <AppText
+                  variant="caption"
+                  color={C.primary}
+                  style={{ textDecorationLine: 'underline' }}
+                  onPress={() => router.push('/legal/terms')}
+                >
+                  Términos de Servicio
+                </AppText>{' '}
+                y la{' '}
+                <AppText
+                  variant="caption"
+                  color={C.primary}
+                  style={{ textDecorationLine: 'underline' }}
+                  onPress={() => router.push('/legal/privacy')}
+                >
+                  Política de Privacidad
+                </AppText>
+                .
               </AppText>
             )}
           </>
