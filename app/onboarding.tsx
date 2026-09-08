@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -250,6 +250,13 @@ export default function OnboardingScreen() {
   const scrollX = useRef(new Animated.Value(0)).current;
   const [page, setPage] = useState(0);
 
+  // Keep at least one listener attached so the JS-driven Animated.event
+  // doesn't log "onAnimatedValueUpdate with no listeners registered".
+  useEffect(() => {
+    const id = scrollX.addListener(() => {});
+    return () => scrollX.removeListener(id);
+  }, [scrollX]);
+
   const last = page === SLIDES.length - 1;
 
   function finish() {
@@ -258,7 +265,9 @@ export default function OnboardingScreen() {
   }
   function goRegister() {
     markOnboardingSeen();
-    router.replace("/(auth)/register");
+    router.replace("/(auth)/login");
+    // Stack register on top of login so "back" from register lands on login.
+    setTimeout(() => router.push("/(auth)/register"), 0);
   }
   function next() {
     if (last) return goRegister();

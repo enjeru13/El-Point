@@ -251,7 +251,13 @@ export default function RegisterOwnerScreen() {
         }}
       >
         <Pressable
-          onPress={() => (step > 0 ? setStep(step - 1) : router.back())}
+          onPress={() =>
+            step > 0
+              ? setStep(step - 1)
+              : router.canGoBack()
+                ? router.back()
+                : router.replace("/(auth)/login")
+          }
           style={{
             width: 40,
             height: 40,

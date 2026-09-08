@@ -147,7 +147,13 @@ export default function RegisterScreen() {
         style={{ backgroundColor: C.surface + 'e0', paddingTop: insets.top, height: insets.top + 56 }}
       >
         <Pressable
-          onPress={() => step > 0 ? setStep(step - 1) : router.back()}
+          onPress={() =>
+            step > 0
+              ? setStep(step - 1)
+              : router.canGoBack()
+                ? router.back()
+                : router.replace('/(auth)/login')
+          }
           className="w-10 h-10 items-center justify-center"
         >
           <Icon name="arrow-left" size={24} color={C.onSurfaceVariant} />
