@@ -1,4 +1,9 @@
 import {
+  BRAND_GLYPHS,
+  BrandGlyph,
+  GoogleGlyph,
+} from "@/components/ui/BrandGlyph";
+import {
   Accessibility,
   AirVent,
   Apple,
@@ -19,9 +24,9 @@ import {
   Carrot,
   Check,
   CheckCircle2,
-  ChevronDown,
   ChefHat,
   Cherry,
+  ChevronDown,
   ChevronRight,
   Circle,
   CircleParking,
@@ -61,11 +66,11 @@ import {
   MapPinned,
   Medal,
   MessageSquare,
-  Monitor,
-  Moon,
   MessagesSquare,
   Milk,
   Minus,
+  Monitor,
+  Moon,
   Navigation,
   Nut,
   PartyPopper,
@@ -84,6 +89,7 @@ import {
   Shield,
   ShieldAlert,
   ShieldCheck,
+  Shrimp,
   SlidersHorizontal,
   Soup,
   Star,
@@ -105,10 +111,9 @@ import {
   Wine,
   X,
   XCircle,
-  type LucideIcon
+  type LucideIcon,
 } from "lucide-react-native";
 import { View } from "react-native";
-import { BrandGlyph, BRAND_GLYPHS, GoogleGlyph } from "@/components/ui/BrandGlyph";
 
 const MAP: Record<string, LucideIcon> = {
   // Tabs
@@ -209,6 +214,8 @@ const MAP: Record<string, LucideIcon> = {
   egg: Egg,
   "egg-fried": EggFried,
   fish: Fish,
+  shrimp: Shrimp,
+  "food-shrimp": Shrimp,
   "food-apple": Apple,
   cherries: Cherry,
   carrot: Carrot,
@@ -278,7 +285,11 @@ export function Icon({
   if (BRAND_GLYPHS.has(name)) {
     return (
       <View style={style}>
-        <BrandGlyph name={name as "whatsapp" | "instagram"} size={size} color={color} />
+        <BrandGlyph
+          name={name as "whatsapp" | "instagram"}
+          size={size}
+          color={color}
+        />
       </View>
     );
   }

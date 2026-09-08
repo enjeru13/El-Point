@@ -62,8 +62,9 @@ function StarBadgeInline({ rating, count }: { rating: number; count: number }) {
       </View>
     );
   }
-  const bg = rating >= 5.0 ? C.secondary : rating >= 4.5 ? C.primaryContainer : C.secondaryContainer;
-  const text = rating >= 5.0 ? '#fff' : C.onSurface;
+  const strong = rating >= 4.5;
+  const bg = rating >= 5.0 ? C.secondary : strong ? C.primaryContainer : C.secondaryContainer;
+  const text = strong ? '#fff' : C.onSurface;
   return (
     <View style={{
       flexDirection: 'row', alignItems: 'center', gap: 4,
@@ -91,10 +92,10 @@ function OpenPill({ hours }: { hours: SearchResult['hours'] }) {
     <View style={{
       flexDirection: 'row', alignItems: 'center', gap: 5,
       paddingHorizontal: 9, paddingVertical: 4, borderRadius: 99,
-      backgroundColor: 'rgba(255,255,255,0.94)', borderWidth: 1, borderColor: C.border,
+      backgroundColor: C.surface, borderWidth: 1, borderColor: C.border,
     }}>
       <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: open ? C.secondary : C.error }} />
-      <AppText variant="caption" style={{ fontSize: 11 }}>{open ? 'Abierto' : 'Cerrado'}</AppText>
+      <AppText variant="caption" color={C.onSurface} style={{ fontSize: 11 }}>{open ? 'Abierto' : 'Cerrado'}</AppText>
     </View>
   );
 }

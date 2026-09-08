@@ -16,7 +16,7 @@ function tierStyle(rank: string, C: any): Pair {
     case "Gurú Gastronómico":
       return { bg: C.tertiaryContainer, fg: C.tertiary };
     case "Leyenda":
-      return { bg: C.tertiary, fg: "#fff" };
+      return { bg: C.tertiary, fg: C.onTertiary };
     default:
       return { bg: C.surfaceContainerHighest, fg: C.onSurfaceVariant }; // Novato
   }

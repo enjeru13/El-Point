@@ -416,10 +416,10 @@ export default function OwnerProfileScreen() {
                       <View style={{
                         position: 'absolute', bottom: 8, right: 8,
                         paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99,
-                        backgroundColor: 'rgba(255,255,255,0.94)',
+                        backgroundColor: C.surface,
                         borderWidth: 1, borderColor: C.border,
                       }}>
-                        <AppText variant="label">Cambiar</AppText>
+                        <AppText variant="label" color={C.onSurface}>Cambiar</AppText>
                       </View>
                     )}
                     {verifUploading && (
@@ -761,9 +761,9 @@ export default function OwnerProfileScreen() {
                 </View>
               )}
               {restaurant.cover_url && uploading !== 'cover' && (
-                <View style={{ position: 'absolute', bottom: 8, right: 8, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.94)', borderWidth: 1, borderColor: C.border }}>
+                <View style={{ position: 'absolute', bottom: 8, right: 8, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border }}>
                   <Icon name="camera-plus-outline" size={12} color={C.onSurface} />
-                  <AppText variant="caption" style={{ fontSize: 11 }}>Cambiar</AppText>
+                  <AppText variant="caption" color={C.onSurface} style={{ fontSize: 11 }}>Cambiar</AppText>
                 </View>
               )}
               {uploading === 'cover' && (

@@ -166,8 +166,8 @@ function ReviewCard({
               ...shadow.sm,
             }}
           >
-            <Icon name="tag" size={13} color={C.onSurface} />
-            <AppText variant="caption">PROMO</AppText>
+            <Icon name="tag" size={13} color={C.onPrimary} />
+            <AppText variant="caption" color={C.onPrimary}>PROMO</AppText>
           </View>
         )}
       </View>

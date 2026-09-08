@@ -15,6 +15,7 @@ const FOOD_ICONS = [
   "food-steak",
   "egg-fried",
   "fish",
+  "shrimp",
   "food-apple",
   "cherries",
   "carrot",
