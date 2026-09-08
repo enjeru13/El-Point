@@ -27,6 +27,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 /** Where a notification takes you when tapped (null = just mark read). */
 function notifTarget(notif: AppNotification) {
+  const kind = notif.data?.kind;
+  if (kind === "review_report") {
+    return { pathname: "/admin/reviews" as const };
+  }
+  if (kind === "restaurant_report") {
+    return { pathname: "/admin/restaurant-reports" as const };
+  }
   const rid = notif.data?.restaurant_id;
   if (typeof rid === "string" && rid) {
     return { pathname: "/restaurant/[id]" as const, params: { id: rid } };
