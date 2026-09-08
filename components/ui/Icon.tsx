@@ -167,6 +167,8 @@ const MAP: Record<string, LucideIcon> = {
   // Business
   "store-outline": Store,
   "storefront-outline": Store,
+  storefront: Store,
+  "chart-line": TrendingUp,
   analytics: BarChart2,
   cog: Settings,
   "cog-outline": Settings,
@@ -189,6 +191,7 @@ const MAP: Record<string, LucideIcon> = {
   tag: Tag,
   // Food
   "silverware-fork-knife": Utensils,
+  "food-fork-drink": Utensils,
   food: Utensils,
   "food-variant": Utensils,
   "food-off-outline": UtensilsCrossed,

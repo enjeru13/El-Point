@@ -226,7 +226,7 @@ export default function AdminRestaurantsScreen() {
           gap: 12,
           borderBottomWidth: 1,
           borderBottomColor: C.border,
-          backgroundColor: C.surface,
+          backgroundColor: C.background,
         }}
       >
         <Pressable

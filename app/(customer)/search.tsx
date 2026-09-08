@@ -393,7 +393,7 @@ export default function SearchScreen() {
       <View style={{
         paddingTop: insets.top + 10,
         paddingBottom: 12,
-        backgroundColor: C.surface,
+        backgroundColor: C.background,
         borderBottomWidth: 1, borderBottomColor: C.outlineVariant,
       }}>
         <View style={{
@@ -451,7 +451,7 @@ export default function SearchScreen() {
       {/* ── Panel de filtros ── */}
       {filterOpen && (
         <View style={{
-          backgroundColor: C.surface,
+          backgroundColor: C.background,
           borderBottomWidth: 1, borderBottomColor: C.outlineVariant,
           paddingHorizontal: 16, paddingVertical: 14, gap: 14,
         }}>

@@ -70,7 +70,7 @@ export default function SettingsScreen() {
       <View style={{
         paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 14,
         flexDirection: 'row', alignItems: 'center', gap: 12,
-        borderBottomWidth: 1, borderBottomColor: C.border, backgroundColor: C.surface,
+        borderBottomWidth: 1, borderBottomColor: C.border, backgroundColor: C.background,
       }}>
         <Pressable
           onPress={() => router.back()}
