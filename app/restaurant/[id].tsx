@@ -305,8 +305,8 @@ const ReviewSheet = forwardRef<
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingTop: 4,
-          paddingBottom: 132,
-          gap: 22,
+          paddingBottom: 112,
+          gap: 16,
         }}
         keyboardShouldPersistTaps="handled"
       >
@@ -324,8 +324,8 @@ const ReviewSheet = forwardRef<
         <View
           style={{
             alignItems: "center",
-            gap: 14,
-            paddingVertical: 20,
+            gap: 10,
+            paddingVertical: 14,
             borderRadius: 20,
             backgroundColor: C.surfaceContainerLow,
             borderWidth: 1,
@@ -342,8 +342,41 @@ const ReviewSheet = forwardRef<
           </AppText>
         </View>
 
+        {/* Fotos (antes del comentario para que se vean sin scrollear) */}
+        {!editing && (
+          <View style={{ gap: 8 }}>
+            <AppText variant="overline" color={C.onSurfaceVariant} style={{ marginLeft: 4 }}>
+              FOTOS (OPCIONAL)
+            </AppText>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+              {photos.map((uri, i) => (
+                <View key={uri + i} style={{ width: 64, height: 64, borderRadius: 14, overflow: "hidden", borderWidth: 1, borderColor: C.border }}>
+                  <Image source={{ uri }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+                  <Pressable
+                    onPress={() => setPhotos((p) => p.filter((_, idx) => idx !== i))}
+                    style={{ position: "absolute", top: 3, right: 3, width: 20, height: 20, borderRadius: 10, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center" }}
+                  >
+                    <Icon name="close" size={13} color="#fff" />
+                  </Pressable>
+                </View>
+              ))}
+              {photos.length < 4 && (
+                <Pressable
+                  onPress={addPhotos}
+                  style={{ width: 64, height: 64, borderRadius: 14, borderWidth: 1, borderStyle: "dashed", borderColor: C.outlineVariant, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceContainerLow, gap: 2 }}
+                >
+                  <Icon name="camera-plus-outline" size={20} color={C.primary} />
+                  <AppText variant="caption" color={C.outline} style={{ fontSize: 10 }}>
+                    Agregar
+                  </AppText>
+                </Pressable>
+              )}
+            </View>
+          </View>
+        )}
+
         {/* Comentario */}
-        <View style={{ gap: 8 }}>
+        <View style={{ gap: 6 }}>
           <AppText variant="overline" color={C.onSurfaceVariant} style={{ marginLeft: 4 }}>
             TU EXPERIENCIA
           </AppText>
@@ -354,7 +387,7 @@ const ReviewSheet = forwardRef<
             placeholderTextColor={C.outline}
             multiline
             style={{
-              minHeight: 110,
+              minHeight: 88,
               borderRadius: 16,
               borderWidth: 1,
               borderColor: C.outlineVariant,
@@ -378,39 +411,6 @@ const ReviewSheet = forwardRef<
               : `${comment.length}/500`}
           </AppText>
         </View>
-
-        {/* Fotos */}
-        {!editing && (
-          <View style={{ gap: 8 }}>
-            <AppText variant="overline" color={C.onSurfaceVariant}>
-              FOTOS (OPCIONAL)
-            </AppText>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-              {photos.map((uri, i) => (
-                <View key={uri + i} style={{ width: 72, height: 72, borderRadius: 14, overflow: "hidden", borderWidth: 1, borderColor: C.border }}>
-                  <Image source={{ uri }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
-                  <Pressable
-                    onPress={() => setPhotos((p) => p.filter((_, idx) => idx !== i))}
-                    style={{ position: "absolute", top: 3, right: 3, width: 20, height: 20, borderRadius: 10, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center" }}
-                  >
-                    <Icon name="close" size={13} color="#fff" />
-                  </Pressable>
-                </View>
-              ))}
-              {photos.length < 4 && (
-                <Pressable
-                  onPress={addPhotos}
-                  style={{ width: 72, height: 72, borderRadius: 14, borderWidth: 1, borderStyle: "dashed", borderColor: C.outlineVariant, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceContainerLow, gap: 3 }}
-                >
-                  <Icon name="camera-plus-outline" size={22} color={C.primary} />
-                  <AppText variant="caption" color={C.outline} style={{ fontSize: 10 }}>
-                    Agregar
-                  </AppText>
-                </Pressable>
-              )}
-            </View>
-          </View>
-        )}
 
         {errorMessage && (
           <AppText variant="label" color={C.error}>
