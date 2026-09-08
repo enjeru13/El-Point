@@ -17,29 +17,22 @@ export default function PrivacyScreen() {
 
       <LegalSection n={2} title="Qué datos recogemos">
         <LegalBullet>
-          <>Cuenta: nombre de usuario, nombre (opcional), correo, contraseña
-          cifrada. Si entras con Google: tu nombre, correo y foto de perfil.</>
+          Cuenta: nombre de usuario, nombre (opcional), correo, contraseña cifrada. Si entras con Google: tu nombre, correo y foto de perfil.
         </LegalBullet>
         <LegalBullet>
-          <>Ubicación aproximada: solo si la activas, para ordenar lugares por
-          cercanía y mostrar distancias. No guardamos un historial de
-          ubicaciones.</>
+          Ubicación aproximada: solo si la activas, para ordenar lugares por cercanía y mostrar distancias. No guardamos un historial de ubicaciones.
         </LegalBullet>
         <LegalBullet>
-          <>Contenido que creas: reseñas, calificaciones, fotos, favoritos,
-          preferencias de categorías.</>
+          Contenido que creas: reseñas, calificaciones, fotos, favoritos, preferencias de categorías.
         </LegalBullet>
         <LegalBullet>
-          <>Datos de negocio (dueños): nombre del local, dirección, teléfono,
-          redes, RIF y foto de fachada para la verificación. El RIF y la foto de
-          fachada no se muestran públicamente.</>
+          Datos de negocio (dueños): nombre del local, dirección, teléfono, redes, RIF y foto de fachada para la verificación. El RIF y la foto de fachada no se muestran públicamente.
         </LegalBullet>
         <LegalBullet>
-          <>Token de notificaciones push del dispositivo, para enviarte avisos.</>
+          Token de notificaciones push del dispositivo, para enviarte avisos.
         </LegalBullet>
         <LegalBullet>
-          <>Datos técnicos básicos de uso y errores para mantener la app
-          funcionando.</>
+          Datos técnicos básicos de uso y errores para mantener la app funcionando.
         </LegalBullet>
       </LegalSection>
 
