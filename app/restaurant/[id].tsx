@@ -166,7 +166,7 @@ const ReviewSheet = forwardRef<
     C.secondary,
   ];
   const sheetRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => ["90%"], []);
+  const snapPoints = useMemo(() => ["72%"], []);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
