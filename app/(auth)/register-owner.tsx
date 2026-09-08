@@ -16,7 +16,7 @@ import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Alert,
   Image,
@@ -26,6 +26,10 @@ import {
   ScrollView,
   View,
 } from "react-native";
+import MapView from "react-native-maps";
+
+// Centro por defecto: San Cristóbal, Táchira.
+const SAN_CRISTOBAL = { latitude: 7.7669, longitude: -72.2251 };
 import { AppText } from "@/components/ui/AppText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -37,6 +41,8 @@ export default function RegisterOwnerScreen() {
   const router = useRouter();
   const toast = useToast();
   const [step, setStep] = useState(0);
+  const mapRef = useRef<MapView>(null);
+  const [locating, setLocating] = useState(false);
 
   // Step 0 — cuenta
   const [email, setEmail] = useState("");
@@ -81,18 +87,34 @@ export default function RegisterOwnerScreen() {
   }
 
   async function detectLocation() {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      toast.error("Permiso de ubicación denegado");
-      return;
+    setLocating(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        toast.error("Permiso de ubicación denegado");
+        return;
+      }
+      const loc = await Location.getCurrentPositionAsync({});
+      const region = {
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+        latitudeDelta: 0.008,
+        longitudeDelta: 0.008,
+      };
+      setCoords({ lat: region.latitude, lng: region.longitude });
+      mapRef.current?.animateToRegion(region, 500);
+      if (!address.trim()) {
+        const [place] = await Location.reverseGeocodeAsync(loc.coords);
+        if (place)
+          setAddress(
+            `${place.street ?? ""} ${place.streetNumber ?? ""}, ${place.city ?? ""}`.trim(),
+          );
+      }
+    } catch {
+      toast.error("No pudimos obtener tu ubicación");
+    } finally {
+      setLocating(false);
     }
-    const loc = await Location.getCurrentPositionAsync({});
-    setCoords({ lat: loc.coords.latitude, lng: loc.coords.longitude });
-    const [place] = await Location.reverseGeocodeAsync(loc.coords);
-    if (place)
-      setAddress(
-        `${place.street ?? ""} ${place.streetNumber ?? ""}, ${place.city ?? ""}`.trim(),
-      );
   }
 
   async function pickImage(setter: (uri: string) => void) {
@@ -521,43 +543,108 @@ export default function RegisterOwnerScreen() {
               </View>
 
               <View style={{ gap: 20 }}>
-                {/* Dirección + GPS */}
+                {/* Dirección */}
+                <Field
+                  label="Dirección *"
+                  icon="map-marker-outline"
+                  placeholder="Calle, sector y ciudad"
+                  value={address}
+                  onChangeText={setAddress}
+                />
+
+                {/* Punto en el mapa */}
                 <View style={{ gap: 8 }}>
-                  <Field
-                    label="Dirección *"
-                    icon="map-marker-outline"
-                    placeholder="Calle y ciudad"
-                    value={address}
-                    onChangeText={setAddress}
-                  />
-                  <Pressable
-                    onPress={detectLocation}
+                  <AppText variant="overline" color={C.outline} style={{ marginLeft: 4 }}>
+                    UBICACIÓN EN EL MAPA *
+                  </AppText>
+                  <AppText variant="bodySm" color={C.outline} style={{ marginLeft: 4 }}>
+                    Mueve el mapa para dejar el pin justo en la entrada de tu local.
+                  </AppText>
+                  <View
                     style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 8,
-                      paddingHorizontal: 16,
-                      paddingVertical: 12,
+                      height: 220,
                       borderRadius: 16,
+                      overflow: "hidden",
                       borderWidth: 1,
-                      borderStyle: "dashed",
                       borderColor: coords ? C.secondary : C.outlineVariant,
-                      backgroundColor: coords
-                        ? C.secondaryContainer + "20"
-                        : C.surface,
                     }}
                   >
-                    <Icon
-                      name={coords ? "check-circle" : "crosshairs-gps"}
-                      size={20}
-                      color={coords ? C.secondary : C.outline}
+                    <MapView
+                      ref={mapRef}
+                      style={{ flex: 1 }}
+                      initialRegion={{
+                        latitude: coords?.lat ?? SAN_CRISTOBAL.latitude,
+                        longitude: coords?.lng ?? SAN_CRISTOBAL.longitude,
+                        latitudeDelta: coords ? 0.008 : 0.05,
+                        longitudeDelta: coords ? 0.008 : 0.05,
+                      }}
+                      onMapReady={() =>
+                        setCoords((c) =>
+                          c ?? { lat: SAN_CRISTOBAL.latitude, lng: SAN_CRISTOBAL.longitude },
+                        )
+                      }
+                      onRegionChangeComplete={(r) =>
+                        setCoords({ lat: r.latitude, lng: r.longitude })
+                      }
                     />
-                    <AppText variant="bodyStrong" color={coords ? C.secondary : C.onSurfaceVariant}>
-                      {coords
-                        ? `GPS capturado (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`
-                        : "Detectar ubicación GPS automáticamente"}
-                    </AppText>
-                  </Pressable>
+                    {/* Pin fijo en el centro */}
+                    <View
+                      pointerEvents="none"
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        right: 0,
+                        top: 0,
+                        bottom: 0,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Icon
+                        name="map-marker"
+                        size={40}
+                        color={C.primary}
+                        style={{ marginBottom: 40 }}
+                      />
+                    </View>
+                    {/* Botón: mi ubicación */}
+                    <Pressable
+                      onPress={detectLocation}
+                      disabled={locating}
+                      style={{
+                        position: "absolute",
+                        right: 10,
+                        bottom: 10,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 6,
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        borderRadius: 99,
+                        backgroundColor: C.surface,
+                        borderWidth: 1,
+                        borderColor: C.border,
+                        ...shadow.sm,
+                      }}
+                    >
+                      <Icon
+                        name="crosshairs-gps"
+                        size={15}
+                        color={C.primary}
+                      />
+                      <AppText variant="label" color={C.onSurface} style={{ fontSize: 13 }}>
+                        {locating ? "Ubicando…" : "Mi ubicación"}
+                      </AppText>
+                    </Pressable>
+                  </View>
+                  {coords && (
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginLeft: 4 }}>
+                      <Icon name="check-circle" size={14} color={C.secondary} />
+                      <AppText variant="caption" color={C.secondary}>
+                        Punto fijado ({coords.lat.toFixed(5)}, {coords.lng.toFixed(5)})
+                      </AppText>
+                    </View>
+                  )}
                 </View>
 
                 <Field
