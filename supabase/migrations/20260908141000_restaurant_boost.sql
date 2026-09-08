@@ -69,6 +69,12 @@ $$;
 grant execute on function public.admin_set_restaurant_boost(uuid, integer) to authenticated;
 
 -- ─── nearby_restaurants: return boost_until + sort boosted first ─────────
+-- La firma de retorno cambia (nueva columna), así que hay que soltarla antes:
+-- CREATE OR REPLACE no puede alterar el row type de una función existente.
+drop function if exists public.nearby_restaurants(
+  double precision, double precision, double precision, text
+);
+
 create or replace function public.nearby_restaurants(
   user_lat double precision,
   user_lng double precision,
@@ -129,3 +135,7 @@ as $$
     (r.boost_until is not null and r.boost_until > now()) desc,
     distance_m
 $$;
+
+grant execute on function public.nearby_restaurants(
+  double precision, double precision, double precision, text
+) to anon, authenticated;
