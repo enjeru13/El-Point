@@ -17,7 +17,6 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
-import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -27,7 +26,7 @@ import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/query';
 import { useNotificationsRealtime } from '@/lib/queries/notifications';
 import { ToastProvider } from '@/lib/toast';
-import { AppThemeProvider } from '@/lib/ThemeContext';
+import { AppThemeProvider, useTheme } from '@/lib/ThemeContext';
 import { SettingsBridge } from '@/components/SettingsBridge';
 import { SplashScreenView } from '@/components/ui/SplashScreenView';
 
@@ -36,7 +35,6 @@ SplashScreen.preventAutoHideAsync();
 type UserRole = 'customer' | 'restaurant_owner' | null;
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const router = useRouter();
   const segments = useSegments();
 
@@ -147,16 +145,30 @@ export default function RootLayout() {
       <AppThemeProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <BottomSheetModalProvider>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-              <ToastProvider>
-                <SettingsBridge />
-                <Stack screenOptions={{ headerShown: false }} />
-              </ToastProvider>
-              <StatusBar style="auto" />
-            </ThemeProvider>
+            <NavShell />
           </BottomSheetModalProvider>
         </GestureHandlerRootView>
       </AppThemeProvider>
     </QueryClientProvider>
+  );
+}
+
+/** Inside AppThemeProvider so react-navigation's container follows the
+ *  app's light/dark choice, not just the OS — avoids a white flash on
+ *  screen transitions in dark mode. */
+function NavShell() {
+  const { scheme, C } = useTheme();
+  const navTheme =
+    scheme === 'dark'
+      ? { ...DarkTheme, colors: { ...DarkTheme.colors, background: C.background } }
+      : { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: C.background } };
+  return (
+    <ThemeProvider value={navTheme}>
+      <ToastProvider>
+        <SettingsBridge />
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: C.background } }} />
+      </ToastProvider>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+    </ThemeProvider>
   );
 }
