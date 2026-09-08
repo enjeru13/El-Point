@@ -34,6 +34,12 @@ function notifTarget(notif: AppNotification) {
   if (kind === "restaurant_report") {
     return { pathname: "/admin/restaurant-reports" as const };
   }
+  if (kind === "mission" || kind === "streak") {
+    return { pathname: "/(customer)/profile" as const };
+  }
+  if (kind === "owner_boost") {
+    return { pathname: "/(owner)" as const };
+  }
   const rid = notif.data?.restaurant_id;
   if (typeof rid === "string" && rid) {
     return { pathname: "/restaurant/[id]" as const, params: { id: rid } };

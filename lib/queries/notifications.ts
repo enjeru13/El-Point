@@ -96,6 +96,10 @@ export function useNotificationsRealtime(uid: string | null) {
         },
         () => {
           queryClient.invalidateQueries({ queryKey: KEY });
+          // Una noti puede significar misión/racha/nivel nuevos o boost ganado.
+          queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+          queryClient.invalidateQueries({ queryKey: ["my-missions"] });
+          queryClient.invalidateQueries({ queryKey: ["owner-restaurant"] });
         },
       )
       .subscribe();

@@ -176,6 +176,9 @@ export type Database = {
           role: string
           search_radius_km: number
           settings: Json
+          streak_best: number
+          streak_week_start: string | null
+          streak_weeks: number
           strikes: number
           updated_at: string
           username: string | null
@@ -195,6 +198,9 @@ export type Database = {
           role?: string
           search_radius_km?: number
           settings?: Json
+          streak_best?: number
+          streak_week_start?: string | null
+          streak_weeks?: number
           strikes?: number
           updated_at?: string
           username?: string | null
@@ -214,12 +220,41 @@ export type Database = {
           role?: string
           search_radius_km?: number
           settings?: Json
+          streak_best?: number
+          streak_week_start?: string | null
+          streak_weeks?: number
           strikes?: number
           updated_at?: string
           username?: string | null
           xp?: number
         }
         Relationships: []
+      }
+      user_missions: {
+        Row: {
+          earned_at: string
+          mission: string
+          user_id: string
+        }
+        Insert: {
+          earned_at?: string
+          mission: string
+          user_id: string
+        }
+        Update: {
+          earned_at?: string
+          mission?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_missions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       restaurant_amenities: {
         Row: {
@@ -326,10 +361,12 @@ export type Database = {
       restaurants: {
         Row: {
           address: string | null
+          boost_profile_awarded: boolean
           boost_until: string | null
           cover_url: string | null
           created_at: string
           description: string | null
+          host_streak_weeks: number
           hours: Json | null
           id: string
           instagram: string | null
@@ -357,10 +394,12 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          boost_profile_awarded?: boolean
           boost_until?: string | null
           cover_url?: string | null
           created_at?: string
           description?: string | null
+          host_streak_weeks?: number
           hours?: Json | null
           id?: string
           instagram?: string | null
@@ -388,10 +427,12 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          boost_profile_awarded?: boolean
           boost_until?: string | null
           cover_url?: string | null
           created_at?: string
           description?: string | null
+          host_streak_weeks?: number
           hours?: Json | null
           id?: string
           instagram?: string | null

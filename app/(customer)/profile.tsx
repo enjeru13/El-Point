@@ -24,6 +24,7 @@ import { StarRow } from '@/components/ui/StarRow';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { useMyProfile, useMyReviews, useUpdateMyProfile, levelProgress } from '@/lib/queries/me';
+import { useMyMissions, MISSIONS } from '@/lib/queries/missions';
 import { RankBadge } from '@/components/ui/RankBadge';
 import { Button } from '@/components/ui/Button';
 import { Chip, Tag } from '@/components/ui/Chip';
@@ -64,6 +65,7 @@ export default function ProfileScreen() {
   const reviewsQ = useMyReviews();
   const favoritesQ = useFavorites();
   const categoriesQ = useCategories();
+  const missionsQ = useMyMissions();
 
   const updateMut = useUpdateMyProfile();
   const toast = useToast();
@@ -272,6 +274,25 @@ export default function ProfileScreen() {
               <AppText variant="label" color={C.onSurfaceVariant}>
                 {next - xp > 0 ? `${next - xp} XP para el nivel ${level + 1}` : `¡Listo para subir de nivel!`}
               </AppText>
+
+              <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Icon
+                  name="fire"
+                  size={18}
+                  color={(profile?.streak_weeks ?? 0) > 0 ? C.primary : C.outline}
+                />
+                <AppText variant="label" color={C.onSurfaceVariant} style={{ flex: 1 }}>
+                  {(profile?.streak_weeks ?? 0) > 0
+                    ? `Racha: ${profile!.streak_weeks} ${profile!.streak_weeks === 1 ? 'semana' : 'semanas'} rankeando`
+                    : 'Sin racha. Rankea esta semana para empezar una.'}
+                </AppText>
+                {(profile?.streak_best ?? 0) > 1 && (
+                  <AppText variant="caption" color={C.outline}>
+                    récord {profile!.streak_best}
+                  </AppText>
+                )}
+              </View>
             </View>
 
             {/* Stats */}
@@ -288,6 +309,43 @@ export default function ProfileScreen() {
                   <AppText variant="label" color={C.onSurfaceVariant}>{stat.label}</AppText>
                 </View>
               ))}
+            </View>
+
+            {/* Logros */}
+            <View style={{ gap: 12 }}>
+              <SectionTitle
+                icon="trophy-outline"
+                label={`Logros · ${missionsQ.data?.size ?? 0}/${MISSIONS.length}`}
+              />
+              <View style={{ backgroundColor: C.surface, borderRadius: 24, padding: 16, gap: 10, borderWidth: 1, borderColor: C.border, ...shadow.sm }}>
+                {MISSIONS.map((m) => {
+                  const done = missionsQ.data?.has(m.key) ?? false;
+                  return (
+                    <View
+                      key={m.key}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 12, opacity: done ? 1 : 0.5 }}
+                    >
+                      <View style={{
+                        width: 38, height: 38, borderRadius: 12,
+                        alignItems: 'center', justifyContent: 'center',
+                        backgroundColor: done ? C.primary + '22' : C.surfaceContainerHighest,
+                        borderWidth: 1, borderColor: done ? C.primary + '55' : C.outlineVariant,
+                      }}>
+                        <Icon name={done ? m.icon : 'lock-outline'} size={18} color={done ? C.primary : C.outline} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <AppText variant="bodyStrong" style={{ fontSize: 14 }}>{m.title}</AppText>
+                        <AppText variant="caption" color={C.outline} style={{ fontSize: 12 }}>
+                          {m.description}
+                        </AppText>
+                      </View>
+                      <AppText variant="label" color={done ? C.primary : C.outline}>
+                        +{m.xp}
+                      </AppText>
+                    </View>
+                  );
+                })}
+              </View>
             </View>
 
             {/* Perfil de sabor */}

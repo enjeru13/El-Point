@@ -10,6 +10,8 @@ export type MyProfile = {
   bio: string | null;
   level: number;
   xp: number;
+  streak_weeks: number;
+  streak_best: number;
   search_radius_km: number;
   settings: Record<string, boolean>;
   favorite_categories: number[];
@@ -27,7 +29,7 @@ async function fetchMyProfile(): Promise<MyProfile | null> {
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "id, role, username, full_name, avatar_url, bio, level, xp, search_radius_km, settings, favorite_categories, is_admin, strikes, banned_at, created_at",
+      "id, role, username, full_name, avatar_url, bio, level, xp, streak_weeks, streak_best, search_radius_km, settings, favorite_categories, is_admin, strikes, banned_at, created_at",
     )
     .eq("id", uid)
     .maybeSingle();
@@ -41,6 +43,8 @@ async function fetchMyProfile(): Promise<MyProfile | null> {
     is_admin: !!(data as any).is_admin,
     strikes: ((data as any).strikes ?? 0) as number,
     banned_at: ((data as any).banned_at ?? null) as string | null,
+    streak_weeks: ((data as any).streak_weeks ?? 0) as number,
+    streak_best: ((data as any).streak_best ?? 0) as number,
   };
 }
 

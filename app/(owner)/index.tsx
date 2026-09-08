@@ -274,6 +274,18 @@ export default function OwnerHomeScreen() {
               </AppText>
             </View>
           )}
+          {restaurant.host_streak_weeks > 0 && (
+            <View style={{
+              flexDirection: 'row', alignItems: 'center', gap: 8,
+              paddingHorizontal: 16, paddingVertical: 10,
+              borderTopWidth: 1, borderTopColor: C.border,
+            }}>
+              <Icon name="reply" size={15} color={C.secondary} />
+              <AppText variant="caption" color={C.onSurfaceVariant} style={{ flex: 1 }}>
+                Racha de buen anfitrión: {restaurant.host_streak_weeks} {restaurant.host_streak_weeks === 1 ? 'semana' : 'semanas'}. Responde todas las reseñas para sumar días de Destacado.
+              </AppText>
+            </View>
+          )}
           <Pressable
             onPress={() => router.push('/(owner)/profile')}
             android_ripple={{ color: C.outlineVariant }}
