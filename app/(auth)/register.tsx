@@ -516,10 +516,10 @@ export default function RegisterScreen() {
             <>
               <View className="mb-6">
                 <AppText variant="title" style={{ marginBottom: 8 }}>
-                  Tu estilo visual
+                  Claro u oscuro
                 </AppText>
                 <AppText variant="body" color={C.onSurfaceVariant}>
-                  Elige el tema que más va contigo. Puedes cambiarlo cuando quieras en tu perfil.
+                  Elige cómo se ve la app. Puedes cambiarlo cuando quieras en ajustes.
                 </AppText>
               </View>
               <ThemePicker />

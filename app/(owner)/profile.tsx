@@ -52,7 +52,7 @@ function Field({
   const { C } = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12, paddingHorizontal: 18 }}>
-      <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+      <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
         <Icon name={icon} size={18} color={C.primary} />
       </View>
       <View style={{ flex: 1 }}>
@@ -266,7 +266,7 @@ export default function OwnerProfileScreen() {
 
   if (restaurantQ.isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: C.surface, paddingTop: insets.top + 20, paddingHorizontal: 20, gap: 20 }}>
+      <View style={{ flex: 1, backgroundColor: C.background, paddingTop: insets.top + 20, paddingHorizontal: 20, gap: 20 }}>
         <Skeleton width={120} height={24} />
         <Skeleton height={220} radius={24} />
         <Skeleton height={260} radius={22} />
@@ -277,7 +277,7 @@ export default function OwnerProfileScreen() {
 
   if (!restaurant) {
     return (
-      <View style={{ flex: 1, backgroundColor: C.surface, justifyContent: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: C.background, justifyContent: 'center' }}>
         <EmptyState
           icon="storefront-outline"
           title="Sin local registrado"
@@ -292,7 +292,7 @@ export default function OwnerProfileScreen() {
   const busy = updateMut.isPending;
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
 
       {/* Header */}
       <View style={{ paddingTop: insets.top + 10, paddingBottom: 14, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -302,7 +302,7 @@ export default function OwnerProfileScreen() {
             <Pressable
               onPress={cancel}
               disabled={busy}
-              style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 2, borderColor: C.outlineVariant }}
+              style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: C.outlineVariant }}
             >
               <AppText variant="label" color={C.onSurfaceVariant}>Cancelar</AppText>
             </Pressable>
@@ -312,7 +312,7 @@ export default function OwnerProfileScreen() {
               style={{
                 flexDirection: 'row', alignItems: 'center', gap: 6,
                 paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
-                backgroundColor: C.primary, borderWidth: 2, borderColor: C.border, ...shadow.sm,
+                backgroundColor: C.primary, borderWidth: 1, borderColor: C.border, ...shadow.sm,
               }}
             >
               {busy ? <ActivityIndicator size="small" color="#fff" /> : <Icon name="check" size={15} color="#fff" />}
@@ -326,7 +326,7 @@ export default function OwnerProfileScreen() {
               style={{
                 flexDirection: 'row', alignItems: 'center', gap: 6,
                 paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
-                backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border, ...shadow.sm,
+                backgroundColor: C.primaryFixed, borderWidth: 1, borderColor: C.border, ...shadow.sm,
               }}
             >
               <Icon name="pencil-outline" size={15} color={C.primary} />
@@ -334,7 +334,7 @@ export default function OwnerProfileScreen() {
             </Pressable>
             <Pressable
               onPress={() => router.push('/settings')}
-              style={{ width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border, backgroundColor: C.surface, ...shadow.sm }}
+              style={{ width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border, backgroundColor: C.surface, ...shadow.sm }}
             >
               <Icon name="settings" size={18} color={C.onSurface} />
             </Pressable>
@@ -349,7 +349,7 @@ export default function OwnerProfileScreen() {
           <View style={{
             borderRadius: 18, padding: 16, gap: 10,
             backgroundColor: restaurant.status === 'pending' ? C.tertiaryContainer : C.error + '22',
-            borderWidth: 2, borderColor: C.border,
+            borderWidth: 1, borderColor: C.border,
           }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Icon
@@ -389,7 +389,7 @@ export default function OwnerProfileScreen() {
                       height: 130,
                       borderRadius: 12,
                       overflow: 'hidden',
-                      borderWidth: 2,
+                      borderWidth: 1,
                       borderColor: verifUrl ? C.border : C.outlineVariant,
                       borderStyle: verifUrl ? 'solid' : 'dashed',
                       backgroundColor: C.surface,
@@ -417,7 +417,7 @@ export default function OwnerProfileScreen() {
                         position: 'absolute', bottom: 8, right: 8,
                         paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99,
                         backgroundColor: 'rgba(255,255,255,0.94)',
-                        borderWidth: 2, borderColor: C.border,
+                        borderWidth: 1, borderColor: C.border,
                       }}>
                         <AppText variant="label">Cambiar</AppText>
                       </View>
@@ -481,7 +481,7 @@ export default function OwnerProfileScreen() {
         )}
 
         {/* Hero card */}
-        <View style={{ borderRadius: 24, overflow: 'hidden', borderWidth: 2, borderColor: C.border, ...shadow.md }}>
+        <View style={{ borderRadius: 24, overflow: 'hidden', borderWidth: 1, borderColor: C.border, ...shadow.md }}>
           <View style={{ height: 110, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center' }}>
             {restaurant.cover_url ? (
               <Image source={{ uri: restaurant.cover_url }} style={{ position: 'absolute', width: '100%', height: '100%' }} contentFit="cover" transition={150} />
@@ -524,7 +524,7 @@ export default function OwnerProfileScreen() {
             {restaurant.categories.length > 0 && (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
                 {restaurant.categories.map(c => (
-                  <View key={c.slug} style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99, backgroundColor: C.secondaryContainer, borderWidth: 2, borderColor: C.border }}>
+                  <View key={c.slug} style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99, backgroundColor: C.secondaryContainer, borderWidth: 1, borderColor: C.border }}>
                     <AppText variant="caption" style={{ fontSize: 12 }}>{c.label}</AppText>
                   </View>
                 ))}
@@ -548,8 +548,8 @@ export default function OwnerProfileScreen() {
         </View>
 
         {/* Info editable */}
-        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
-          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
+        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
             <AppText variant="bodyStrong">Información del negocio</AppText>
           </View>
 
@@ -564,7 +564,7 @@ export default function OwnerProfileScreen() {
 
           {/* Precio */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12, paddingHorizontal: 18 }}>
-            <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+            <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
               <Icon name="tag-outline" size={18} color={C.primary} />
             </View>
             <View style={{ flex: 1 }}>
@@ -577,7 +577,7 @@ export default function OwnerProfileScreen() {
                       <Pressable
                         key={p}
                         onPress={() => setPriceLevel(active ? null : p)}
-                        style={{ paddingHorizontal: 14, paddingVertical: 6, borderRadius: 99, borderWidth: 2, borderColor: active ? C.border : C.outlineVariant, backgroundColor: active ? C.primary : C.surface }}
+                        style={{ paddingHorizontal: 14, paddingVertical: 6, borderRadius: 99, borderWidth: 1, borderColor: active ? C.border : C.outlineVariant, backgroundColor: active ? C.primary : C.surface }}
                       >
                         <AppText variant="label" color={active ? '#fff' : C.onSurfaceVariant}>{'$'.repeat(p)}</AppText>
                       </Pressable>
@@ -594,8 +594,8 @@ export default function OwnerProfileScreen() {
         </View>
 
         {/* Comodidades */}
-        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
-          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
+        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
             <AppText variant="bodyStrong">Comodidades</AppText>
           </View>
           <View style={{ padding: 18 }}>
@@ -615,7 +615,7 @@ export default function OwnerProfileScreen() {
             ) : restaurant.amenities.length > 0 ? (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                 {restaurant.amenities.map((a) => (
-                  <View key={a.slug} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 99, backgroundColor: C.secondaryContainer, borderWidth: 2, borderColor: C.border }}>
+                  <View key={a.slug} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 99, backgroundColor: C.secondaryContainer, borderWidth: 1, borderColor: C.border }}>
                     <Icon name={a.icon} size={14} color={C.onSurface} />
                     <AppText variant="caption" style={{ fontSize: 12 }}>{a.label}</AppText>
                   </View>
@@ -630,8 +630,8 @@ export default function OwnerProfileScreen() {
         </View>
 
         {/* Horario */}
-        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
-          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
+        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
             <AppText variant="bodyStrong">Horario</AppText>
           </View>
           <View style={{ padding: 14, gap: 8 }}>
@@ -656,14 +656,14 @@ export default function OwnerProfileScreen() {
                         <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                           <Pressable
                             onPress={() => openTimePicker(dow, 'open')}
-                            style={{ flex: 1, backgroundColor: C.surfaceContainerLow, borderRadius: 10, borderWidth: 2, borderColor: C.outlineVariant, paddingVertical: 8, alignItems: 'center' }}
+                            style={{ flex: 1, backgroundColor: C.surfaceContainerLow, borderRadius: 10, borderWidth: 1, borderColor: C.outlineVariant, paddingVertical: 8, alignItems: 'center' }}
                           >
                             <AppText variant="label" style={{ fontSize: 13 }}>{to12h(d.open)}</AppText>
                           </Pressable>
                           <AppText variant="bodySm" color={C.outline}>–</AppText>
                           <Pressable
                             onPress={() => openTimePicker(dow, 'close')}
-                            style={{ flex: 1, backgroundColor: C.surfaceContainerLow, borderRadius: 10, borderWidth: 2, borderColor: C.outlineVariant, paddingVertical: 8, alignItems: 'center' }}
+                            style={{ flex: 1, backgroundColor: C.surfaceContainerLow, borderRadius: 10, borderWidth: 1, borderColor: C.outlineVariant, paddingVertical: 8, alignItems: 'center' }}
                           >
                             <AppText variant="label" style={{ fontSize: 13 }}>{to12h(d.close)}</AppText>
                           </Pressable>
@@ -682,8 +682,8 @@ export default function OwnerProfileScreen() {
         </View>
 
         {/* Oferta */}
-        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
-          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
+        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
             <AppText variant="bodyStrong">Oferta / promoción</AppText>
           </View>
           <View style={{ padding: 18, gap: 6 }}>
@@ -712,8 +712,8 @@ export default function OwnerProfileScreen() {
         </View>
 
         {/* Visibilidad */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: 20, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
-          <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: 20, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, ...shadow.sm }}>
+          <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
             <Icon name="store-outline" size={20} color={C.primary} />
           </View>
           <View style={{ flex: 1 }}>
@@ -732,13 +732,13 @@ export default function OwnerProfileScreen() {
         </View>
 
         {/* Fotos y menú */}
-        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
-          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
+        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
             <AppText variant="bodyStrong">Fotos y menú</AppText>
           </View>
 
           {/* Portada */}
-          <View style={{ padding: 18, gap: 8, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
+          <View style={{ padding: 18, gap: 8, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
             <AppText variant="overline" color={C.outline}>FOTO DE PORTADA</AppText>
             <AppText variant="caption" color={C.onSurfaceVariant}>Se muestra grande arriba de tu perfil.</AppText>
             <Pressable
@@ -747,7 +747,7 @@ export default function OwnerProfileScreen() {
               style={{
                 marginTop: 4,
                 height: 150, borderRadius: 14, overflow: 'hidden',
-                borderWidth: 2, borderColor: C.border, borderStyle: restaurant.cover_url ? 'solid' : 'dashed',
+                borderWidth: 1, borderColor: C.border, borderStyle: restaurant.cover_url ? 'solid' : 'dashed',
                 alignItems: 'center', justifyContent: 'center',
                 backgroundColor: C.surfaceContainerLow,
               }}
@@ -761,7 +761,7 @@ export default function OwnerProfileScreen() {
                 </View>
               )}
               {restaurant.cover_url && uploading !== 'cover' && (
-                <View style={{ position: 'absolute', bottom: 8, right: 8, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.94)', borderWidth: 2, borderColor: C.border }}>
+                <View style={{ position: 'absolute', bottom: 8, right: 8, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.94)', borderWidth: 1, borderColor: C.border }}>
                   <Icon name="camera-plus-outline" size={12} color={C.onSurface} />
                   <AppText variant="caption" style={{ fontSize: 11 }}>Cambiar</AppText>
                 </View>
@@ -778,11 +778,11 @@ export default function OwnerProfileScreen() {
           <Pressable
             onPress={() => pickPhoto('logo')}
             disabled={uploading !== null}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}
           >
             <View style={{
               width: 56, height: 56, borderRadius: 16, overflow: 'hidden',
-              borderWidth: 2, borderColor: C.border, borderStyle: restaurant.logo_url ? 'solid' : 'dashed',
+              borderWidth: 1, borderColor: C.border, borderStyle: restaurant.logo_url ? 'solid' : 'dashed',
               alignItems: 'center', justifyContent: 'center', backgroundColor: C.primaryFixed,
             }}>
               {restaurant.logo_url ? (
@@ -811,7 +811,7 @@ export default function OwnerProfileScreen() {
             disabled={uploading !== null}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18 }}
           >
-            <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: restaurant.menu_pdf_url ? C.primary : C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+            <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: restaurant.menu_pdf_url ? C.primary : C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
               {uploading === 'menu'
                 ? <ActivityIndicator size="small" color={restaurant.menu_pdf_url ? '#fff' : C.primary} />
                 : <Icon name={restaurant.menu_pdf_url ? 'file-check' : 'file-pdf-box'} size={24} color={restaurant.menu_pdf_url ? '#fff' : C.primary} />}

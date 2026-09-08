@@ -61,7 +61,7 @@ export function ReviewCardSkeleton() {
       style={{
         backgroundColor: C.surface,
         borderRadius: 24,
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: C.border,
         overflow: "hidden",
         marginBottom: 16,
@@ -103,7 +103,7 @@ export function ListRowSkeleton() {
         padding: 12,
         borderRadius: 18,
         backgroundColor: C.surface,
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: C.border,
         marginBottom: 10,
         ...shadow.sm,

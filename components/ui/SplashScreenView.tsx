@@ -1,17 +1,13 @@
 import { useEffect, useRef } from "react";
-import { Animated, Easing, Text, View } from "react-native";
+import { Animated, Easing, Text, useColorScheme, View } from "react-native";
 
 /**
  * Branded loading screen shown while auth/role resolve, after the native
  * (static) splash hands off. Rendered before the theme providers mount, so
- * every colour here is hard-coded (and the background matches the native
- * splash's so the handoff is seamless).
+ * colours follow the OS scheme (the app's explicit light/dark override isn't
+ * known yet this early).
  */
-const BG = "#ffffff";
-const INK = "#1c1b1b";
-const MUTED = "#6f5b54";
-const BORDER = "#1c1b1b";
-const ACCENT = "#c8451f";
+const ACCENT = "#ff6a3d";
 
 function LoaderDot({ anim }: { anim: Animated.Value }) {
   return (
@@ -36,6 +32,12 @@ function LoaderDot({ anim }: { anim: Animated.Value }) {
 }
 
 export function SplashScreenView() {
+  const dark = useColorScheme() === "dark";
+  const BG = dark ? "#0b0b0d" : "#ffffff";
+  const INK = dark ? "#f4f4f5" : "#1c1b1b";
+  const MUTED = dark ? "#b4b4b8" : "#6f5b54";
+  const BORDER = dark ? "#35353c" : "#1c1b1b";
+
   const entrance = useRef(new Animated.Value(0)).current;
   const dots = useRef([0, 1, 2].map(() => new Animated.Value(0.3))).current;
 
@@ -108,7 +110,7 @@ export function SplashScreenView() {
             paddingHorizontal: 8,
             paddingVertical: 4,
             borderRadius: 8,
-            borderWidth: 2,
+            borderWidth: 1,
             borderColor: BORDER,
             marginBottom: 4,
           }}
@@ -142,7 +144,7 @@ export function SplashScreenView() {
               height: 9,
               borderRadius: 99,
               backgroundColor: ACCENT,
-              borderWidth: 2,
+              borderWidth: 1,
               borderColor: BORDER,
               marginBottom: 3,
               marginLeft: 2,

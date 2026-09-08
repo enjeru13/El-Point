@@ -35,7 +35,7 @@ export function Button({
   fullWidth = true,
   style,
 }: ButtonProps) {
-  const { C } = useTheme();
+  const { C, shadow } = useTheme();
   const [pressed, setPressed] = useState(false);
   const off = disabled || loading;
 
@@ -70,16 +70,12 @@ export function Button({
     gap: 8,
     paddingHorizontal: 20,
     backgroundColor: bg,
-    borderWidth: variant === "ghost" ? 0 : 2,
+    borderWidth: variant === "ghost" ? 0 : 1,
     borderColor: border,
     alignSelf: fullWidth ? "stretch" : "flex-start",
   };
   if (withShadow) {
-    base.shadowColor = variant === "primary" ? C.primary : "#1c1b1b";
-    base.shadowOffset = { width: 3, height: 3 };
-    base.shadowOpacity = variant === "primary" ? 0.5 : 1;
-    base.shadowRadius = 0;
-    base.elevation = 4;
+    Object.assign(base, variant === "primary" ? shadow.primary : shadow.sm);
   }
 
   return (

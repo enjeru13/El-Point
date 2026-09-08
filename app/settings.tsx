@@ -4,27 +4,12 @@ import { Pressable, ScrollView, Switch, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/ThemeContext';
-import { THEMES, THEME_META, ThemeName } from '@/lib/themes';
+import { THEME_MODE_META } from '@/lib/themes';
 import { useMyProfile, useUpdateSettings } from '@/lib/queries/me';
 import { SETTING_DEFAULTS } from '@/lib/settings';
 import { AppText } from '@/components/ui/AppText';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
-
-const THEME_NAMES = Object.keys(THEME_META) as ThemeName[];
-
-function ThemeDot({ name, size = 44 }: { name: ThemeName; size?: number }) {
-  const p = THEMES[name];
-  const r = size / 2;
-  return (
-    <View style={{ width: size, height: size, borderRadius: r, borderWidth: 2, borderColor: '#1c1b1b' }}>
-      <View style={{ flex: 1, borderRadius: r - 2, overflow: 'hidden', flexDirection: 'row' }}>
-        <View style={{ width: (size - 4) / 2, height: size - 4, backgroundColor: p.primary }} />
-        <View style={{ width: (size - 4) / 2, height: size - 4, backgroundColor: p.secondary }} />
-      </View>
-    </View>
-  );
-}
 
 function SectionLabel({ label }: { label: string }) {
   const { C } = useTheme();
@@ -38,7 +23,7 @@ function SectionLabel({ label }: { label: string }) {
 function SectionCard({ children }: { children: React.ReactNode }) {
   const { C, shadow } = useTheme();
   return (
-    <View style={{ backgroundColor: C.surface, borderRadius: 24, borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+    <View style={{ backgroundColor: C.surface, borderRadius: 24, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
       {children}
     </View>
   );
@@ -55,7 +40,7 @@ function ToggleRow({ icon, label, sublabel, value, onChange }: {
   const { C } = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}>
-      <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+      <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
         <Icon name={icon} size={20} color={C.primary} />
       </View>
       <View style={{ flex: 1 }}>
@@ -68,7 +53,7 @@ function ToggleRow({ icon, label, sublabel, value, onChange }: {
 }
 
 export default function SettingsScreen() {
-  const { C, shadow, themeName, setTheme } = useTheme();
+  const { C, shadow, mode, setMode } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -80,16 +65,16 @@ export default function SettingsScreen() {
   const set = (k: string) => (v: boolean) => updateSettings.mutate({ [k]: v });
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
       {/* Header */}
       <View style={{
         paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 14,
         flexDirection: 'row', alignItems: 'center', gap: 12,
-        borderBottomWidth: 2, borderBottomColor: C.border, backgroundColor: C.surface,
+        borderBottomWidth: 1, borderBottomColor: C.border, backgroundColor: C.surface,
       }}>
         <Pressable
           onPress={() => router.back()}
-          style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border, backgroundColor: C.surface, ...shadow.sm }}
+          style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border, backgroundColor: C.surface, ...shadow.sm }}
         >
           <Icon name="arrow-left" size={20} color={C.onSurface} />
         </Pressable>
@@ -110,16 +95,30 @@ export default function SettingsScreen() {
           <View style={{ gap: 10 }}>
             <SectionLabel label="Apariencia" />
             <SectionCard>
-              <View style={{ padding: 18, gap: 16 }}>
-                <AppText variant="bodyStrong">Tema de color</AppText>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}>
-                  {THEME_NAMES.map((name) => {
-                    const active = name === themeName;
+              <View style={{ padding: 18, gap: 12 }}>
+                <AppText variant="bodyStrong">Modo</AppText>
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  {THEME_MODE_META.map(({ mode: m, label, icon }) => {
+                    const active = mode === m;
                     return (
-                      <Pressable key={name} onPress={() => setTheme(name)} style={{ alignItems: 'center', gap: 6, width: 60 }}>
-                        <View style={{ padding: 3, borderRadius: 99, borderWidth: 2.5, borderColor: active ? C.primary : 'transparent' }}>
-                          <ThemeDot name={name} size={40} />
-                        </View>
+                      <Pressable
+                        key={m}
+                        onPress={() => setMode(m)}
+                        style={{
+                          flex: 1,
+                          alignItems: 'center',
+                          gap: 6,
+                          paddingVertical: 14,
+                          borderRadius: 16,
+                          borderWidth: active ? 2 : 1,
+                          borderColor: active ? C.primary : C.border,
+                          backgroundColor: active ? C.primaryFixed : C.surface,
+                        }}
+                      >
+                        <Icon name={icon} size={22} color={active ? C.primary : C.onSurfaceVariant} />
+                        <AppText variant="label" color={active ? C.primary : C.onSurfaceVariant}>
+                          {label}
+                        </AppText>
                       </Pressable>
                     );
                   })}
@@ -176,7 +175,7 @@ export default function SettingsScreen() {
                 onPress={() => router.push('/change-password')}
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
               >
-                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
                   <Icon name="lock-outline" size={20} color={C.primary} />
                 </View>
                 <AppText variant="bodyStrong" style={{ flex: 1 }}>Cambiar contraseña</AppText>
@@ -190,7 +189,7 @@ export default function SettingsScreen() {
                     onPress={() => router.push('/admin')}
                     style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
                   >
-                    <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.error + '22', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+                    <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.error + '22', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
                       <Icon name="shield-alert-outline" size={20} color={C.error} />
                     </View>
                     <AppText variant="bodyStrong" style={{ flex: 1 }}>Panel de moderación</AppText>

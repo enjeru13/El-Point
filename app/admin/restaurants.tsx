@@ -65,7 +65,7 @@ function QueueCard({
         borderRadius: 20,
         padding: 16,
         gap: 12,
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: C.border,
         ...shadow.sm,
       }}
@@ -87,7 +87,7 @@ function QueueCard({
               width: "100%",
               height: 170,
               borderRadius: 14,
-              borderWidth: 2,
+              borderWidth: 1,
               borderColor: C.border,
             }}
             contentFit="cover"
@@ -99,7 +99,7 @@ function QueueCard({
           style={{
             height: 90,
             borderRadius: 14,
-            borderWidth: 2,
+            borderWidth: 1,
             borderStyle: "dashed",
             borderColor: C.outlineVariant,
             alignItems: "center",
@@ -215,7 +215,7 @@ export default function AdminRestaurantsScreen() {
   const queue = queueQ.data ?? [];
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
       <View
         style={{
           paddingTop: insets.top + 8,
@@ -224,7 +224,7 @@ export default function AdminRestaurantsScreen() {
           flexDirection: "row",
           alignItems: "center",
           gap: 12,
-          borderBottomWidth: 2,
+          borderBottomWidth: 1,
           borderBottomColor: C.border,
           backgroundColor: C.surface,
         }}
@@ -237,7 +237,7 @@ export default function AdminRestaurantsScreen() {
             borderRadius: 20,
             alignItems: "center",
             justifyContent: "center",
-            borderWidth: 2,
+            borderWidth: 1,
             borderColor: C.border,
             backgroundColor: C.surface,
             ...shadow.sm,

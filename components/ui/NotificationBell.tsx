@@ -23,7 +23,7 @@ export function NotificationBell() {
           borderRadius: 20,
           alignItems: "center",
           justifyContent: "center",
-          borderWidth: 2,
+          borderWidth: 1,
           borderColor: C.border,
           backgroundColor: C.surface,
         }}

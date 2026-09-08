@@ -17,8 +17,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { FoodBackdrop } from "@/components/ui/FoodBackdrop";
-
+import { AuthBackground } from "@/components/ui/AuthBackground";
 
 export default function LoginScreen() {
   const { C, shadow } = useTheme();
@@ -43,15 +42,12 @@ export default function LoginScreen() {
   async function handleLogin() {
     if (!email.trim() || !password.trim()) return;
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       toast.error(
-        error.message.includes('Invalid login')
-          ? 'Correo o contraseña incorrectos.'
+        error.message.includes("Invalid login")
+          ? "Correo o contraseña incorrectos."
           : error.message,
       );
     }
@@ -62,10 +58,9 @@ export default function LoginScreen() {
     setGoogleLoading(true);
     try {
       await signInWithGoogle();
-      // _layout.tsx detecta la sesión nueva y redirige automáticamente
     } catch (e: any) {
-      if (e?.message !== 'CANCELLED') {
-        toast.error(e?.message ?? 'No se pudo iniciar sesión con Google');
+      if (e?.message !== "CANCELLED") {
+        toast.error(e?.message ?? "No se pudo iniciar sesión con Google");
       }
     } finally {
       setGoogleLoading(false);
@@ -73,21 +68,8 @@ export default function LoginScreen() {
   }
 
   return (
-    <View
-      style={{ flex: 1, backgroundColor: C.primary, paddingTop: insets.top }}
-    >
-      {/* Fondo animado de comidas */}
-      <FoodBackdrop seed={11} />
-      <View
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(94,20,0,0.28)",
-        }}
-      />
+    <View style={{ flex: 1, paddingTop: insets.top }}>
+      <AuthBackground seed={11} />
 
       <KeyboardAvoidingView
         style={{
@@ -110,7 +92,7 @@ export default function LoginScreen() {
           </AppText>
         </View>
 
-        {/* Card neo-brutalist */}
+        {/* Card */}
         <Animated.View
           style={{
             width: "100%",
@@ -127,11 +109,11 @@ export default function LoginScreen() {
         >
           <View
             style={{
-              borderRadius: 32,
+              borderRadius: 28,
               padding: 24,
               gap: 20,
-              backgroundColor: C.surface,
-              borderWidth: 2,
+              backgroundColor: C.surfaceContainerHigh,
+              borderWidth: 1,
               borderColor: C.border,
               ...shadow.md,
             }}
@@ -158,13 +140,13 @@ export default function LoginScreen() {
             <Pressable
               onPress={() => router.push("/(auth)/forgot-password")}
               style={{ alignSelf: "flex-end", marginTop: -8 }}
+              hitSlop={8}
             >
               <AppText variant="bodyStrong" color={C.primary}>
                 ¿Olvidaste tu contraseña?
               </AppText>
             </Pressable>
 
-            {/* Botón ingresar */}
             <Button
               label={loading ? "Ingresando…" : "Ingresar"}
               onPress={handleLogin}
@@ -172,20 +154,14 @@ export default function LoginScreen() {
               iconTrailing="arrow-right"
             />
 
-            {/* Divisor */}
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-              <View
-                style={{ flex: 1, height: 1, backgroundColor: C.outlineVariant }}
-              />
+              <View style={{ flex: 1, height: 1, backgroundColor: C.outlineVariant }} />
               <AppText variant="overline" color={C.outline}>
                 O CONTINÚA CON
               </AppText>
-              <View
-                style={{ flex: 1, height: 1, backgroundColor: C.outlineVariant }}
-              />
+              <View style={{ flex: 1, height: 1, backgroundColor: C.outlineVariant }} />
             </View>
 
-            {/* Google */}
             <Button
               label={googleLoading ? "Conectando…" : "Continuar con Google"}
               onPress={handleGoogleLogin}
@@ -194,14 +170,11 @@ export default function LoginScreen() {
               icon="google"
             />
 
-            {/* Registro */}
-            <View
-              style={{ flexDirection: "row", justifyContent: "center", gap: 4 }}
-            >
+            <View style={{ flexDirection: "row", justifyContent: "center", gap: 4 }}>
               <AppText variant="body" color={C.onSurfaceVariant}>
                 ¿No tienes cuenta?
               </AppText>
-              <Pressable onPress={() => router.push("/(auth)/register")}>
+              <Pressable onPress={() => router.push("/(auth)/register")} hitSlop={8}>
                 <AppText variant="bodyStrong" color={C.primary}>
                   Regístrate
                 </AppText>

@@ -45,7 +45,7 @@ function Card({
         borderRadius: 20,
         padding: 16,
         gap: 12,
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: C.border,
         ...shadow.sm,
       }}
@@ -152,7 +152,7 @@ export default function AdminRestaurantReportsScreen() {
   const list = listQ.data ?? [];
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
       <View
         style={{
           paddingTop: insets.top + 8,
@@ -161,7 +161,7 @@ export default function AdminRestaurantReportsScreen() {
           flexDirection: "row",
           alignItems: "center",
           gap: 12,
-          borderBottomWidth: 2,
+          borderBottomWidth: 1,
           borderBottomColor: C.border,
           backgroundColor: C.surface,
         }}
@@ -174,7 +174,7 @@ export default function AdminRestaurantReportsScreen() {
             borderRadius: 20,
             alignItems: "center",
             justifyContent: "center",
-            borderWidth: 2,
+            borderWidth: 1,
             borderColor: C.border,
             backgroundColor: C.surface,
             ...shadow.sm,

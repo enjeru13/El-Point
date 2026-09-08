@@ -165,14 +165,14 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
       <ScreenHeader
         left={<AppLogo />}
         right={
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Pressable
               onPress={() => router.push('/settings')}
-              style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border, backgroundColor: C.surface }}
+              style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border, backgroundColor: C.surface }}
             >
               <Icon name="settings" size={20} color={C.onSurface} />
             </Pressable>
@@ -183,7 +183,7 @@ export default function ProfileScreen() {
 
       {profileQ.isLoading ? (
         <View style={{ padding: 20, gap: 20 }}>
-          <View style={{ alignItems: 'center', gap: 12, backgroundColor: C.surface, borderRadius: 28, padding: 24, borderWidth: 2, borderColor: C.border, ...shadow.md }}>
+          <View style={{ alignItems: 'center', gap: 12, backgroundColor: C.surface, borderRadius: 28, padding: 24, borderWidth: 1, borderColor: C.border, ...shadow.md }}>
             <Skeleton width={88} height={88} radius={44} />
             <Skeleton width={140} height={22} />
             <Skeleton width={200} height={14} />
@@ -207,7 +207,7 @@ export default function ProfileScreen() {
           <View style={{ padding: 20, gap: 20 }}>
 
             {/* Card perfil */}
-            <View style={{ backgroundColor: C.surface, borderRadius: 28, padding: 24, alignItems: 'center', gap: 12, borderWidth: 2, borderColor: C.border, ...shadow.md }}>
+            <View style={{ backgroundColor: C.surface, borderRadius: 28, padding: 24, alignItems: 'center', gap: 12, borderWidth: 1, borderColor: C.border, ...shadow.md }}>
               <Pressable onPress={editing ? pickAvatar : undefined} style={{ position: 'relative' }}>
                 <View style={{ width: 88, height: 88, borderRadius: 44, overflow: 'hidden', backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: C.border }}>
                   {profile?.avatar_url ? (
@@ -222,11 +222,11 @@ export default function ProfileScreen() {
                   )}
                 </View>
                 {editing ? (
-                  <View style={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+                  <View style={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
                     <Icon name="camera-plus-outline" size={14} color="#fff" />
                   </View>
                 ) : (
-                  <View style={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: C.primaryContainer, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+                  <View style={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: C.primaryContainer, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
                     <AppText variant="caption" style={{ fontSize: 12 }}>{level}</AppText>
                   </View>
                 )}
@@ -258,13 +258,13 @@ export default function ProfileScreen() {
             </View>
 
             {/* Nivel / XP */}
-            <View style={{ backgroundColor: C.surface, borderRadius: 28, padding: 20, gap: 12, borderWidth: 2, borderColor: C.border, ...shadow.md }}>
+            <View style={{ backgroundColor: C.surface, borderRadius: 28, padding: 20, gap: 12, borderWidth: 1, borderColor: C.border, ...shadow.md }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <View style={{ gap: 6 }}>
                   <AppText variant="overline" color={C.onSurfaceVariant}>NIVEL {level}</AppText>
                   <RankBadge level={level} size="md" />
                 </View>
-                <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 99, backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border }}>
+                <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 99, backgroundColor: C.primaryFixed, borderWidth: 1, borderColor: C.border }}>
                   <AppText variant="subtitle" color={C.primary} style={{ fontFamily: 'Outfit_700Bold' }}>{xp} XP</AppText>
                 </View>
               </View>
@@ -280,8 +280,8 @@ export default function ProfileScreen() {
                 { icon: 'medal', value: reviews.length, label: 'Ranks' },
                 { icon: 'heart', value: favorites.length, label: 'Favoritos' },
               ].map(stat => (
-                <View key={stat.label} style={{ flex: 1, backgroundColor: C.surface, borderRadius: 24, padding: 20, alignItems: 'center', gap: 6, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
-                  <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+                <View key={stat.label} style={{ flex: 1, backgroundColor: C.surface, borderRadius: 24, padding: 20, alignItems: 'center', gap: 6, borderWidth: 1, borderColor: C.border, ...shadow.sm }}>
+                  <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
                     <Icon name={stat.icon} size={20} color={C.primary} />
                   </View>
                   <AppText variant="title">{stat.value}</AppText>
@@ -293,7 +293,7 @@ export default function ProfileScreen() {
             {/* Perfil de sabor */}
             <View style={{ gap: 12 }}>
               <SectionTitle icon="silverware-fork-knife" label="Tu perfil de sabor" />
-              <View style={{ backgroundColor: C.surface, borderRadius: 24, padding: 18, gap: 12, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
+              <View style={{ backgroundColor: C.surface, borderRadius: 24, padding: 18, gap: 12, borderWidth: 1, borderColor: C.border, ...shadow.sm }}>
                 {categoriesQ.isLoading ? (
                   <Skeleton height={32} radius={16} />
                 ) : editing ? (
@@ -349,9 +349,9 @@ export default function ProfileScreen() {
                     <Pressable
                       key={f.id}
                       onPress={() => router.push(`/restaurant/${f.id}`)}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 18, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, ...shadow.sm }}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 18, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, ...shadow.sm }}
                     >
-                      <View style={{ width: 48, height: 48, borderRadius: 12, overflow: 'hidden', backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border }}>
+                      <View style={{ width: 48, height: 48, borderRadius: 12, overflow: 'hidden', backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
                         {f.cover_url ? (
                           <Image source={{ uri: f.cover_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={150} />
                         ) : (
@@ -392,9 +392,9 @@ export default function ProfileScreen() {
                   <Pressable
                     key={r.id}
                     onPress={() => r.restaurant && router.push(`/restaurant/${r.restaurant.id}`)}
-                    style={{ backgroundColor: C.surface, borderRadius: 20, padding: 16, flexDirection: 'row', gap: 14, borderWidth: 2, borderColor: C.border, ...shadow.sm }}
+                    style={{ backgroundColor: C.surface, borderRadius: 20, padding: 16, flexDirection: 'row', gap: 14, borderWidth: 1, borderColor: C.border, ...shadow.sm }}
                   >
-                    <View style={{ width: 60, height: 60, borderRadius: 14, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.border, flexShrink: 0 }}>
+                    <View style={{ width: 60, height: 60, borderRadius: 14, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border, flexShrink: 0 }}>
                       <Icon name={r.restaurant?.icon ?? 'silverware-fork-knife'} size={28} color={C.primary} />
                     </View>
                     <View style={{ flex: 1, gap: 6 }}>

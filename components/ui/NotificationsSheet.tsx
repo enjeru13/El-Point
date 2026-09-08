@@ -130,7 +130,7 @@ function NotifCard({
           padding: 16,
           borderRadius: 18,
           backgroundColor: notif.read ? C.surfaceContainerLow : C.surface,
-          borderWidth: 2,
+          borderWidth: 1,
           borderColor: notif.read ? C.outlineVariant : C.border,
         },
         pressed ? { opacity: 0.7 } : null,
@@ -259,7 +259,7 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
       backgroundStyle={{
         backgroundColor: C.surface,
         borderRadius: 28,
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: C.border,
       }}
     >
@@ -271,7 +271,7 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
           justifyContent: "space-between",
           paddingHorizontal: 20,
           paddingBottom: 12,
-          borderBottomWidth: 2,
+          borderBottomWidth: 1,
           borderBottomColor: C.outlineVariant,
         }}
       >
@@ -284,7 +284,7 @@ export const NotificationsSheet = forwardRef<NotificationsHandle>((_, ref) => {
                 paddingVertical: 1,
                 borderRadius: 99,
                 backgroundColor: C.primaryContainer,
-                borderWidth: 2,
+                borderWidth: 1,
                 borderColor: C.border,
               }}
             >

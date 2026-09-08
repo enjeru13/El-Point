@@ -67,11 +67,11 @@ export const TimePickerSheet = forwardRef<TimePickerHandle>((_, ref) => {
       backgroundStyle={{
         backgroundColor: C.surface,
         borderRadius: 28,
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: C.border,
       }}
     >
-      <View style={{ paddingHorizontal: 20, paddingBottom: 12, borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
+      <View style={{ paddingHorizontal: 20, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
         <AppText variant="overline" color={C.onSurfaceVariant}>ELEGIR HORA</AppText>
         <AppText variant="title" style={{ fontSize: 20, lineHeight: 24 }}>{state?.title ?? ""}</AppText>
       </View>

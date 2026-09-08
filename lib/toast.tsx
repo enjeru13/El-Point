@@ -115,7 +115,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               paddingHorizontal: 16,
               paddingVertical: 14,
               borderRadius: 18,
-              borderWidth: 2,
+              borderWidth: 1,
               borderColor: C.border,
               backgroundColor: palette[toast.kind].bg,
               ...shadow.md,

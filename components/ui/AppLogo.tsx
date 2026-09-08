@@ -25,7 +25,7 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
           paddingHorizontal: Math.round(6 * scale),
           paddingVertical: Math.round(3 * scale),
           borderRadius: Math.round(6 * scale),
-          borderWidth: 2,
+          borderWidth: 1,
           borderColor,
           marginBottom: Math.round(3 * scale),
         }}
@@ -61,7 +61,7 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
             height: Math.round(7 * scale),
             borderRadius: 99,
             backgroundColor: dotColor,
-            borderWidth: 2,
+            borderWidth: 1,
             borderColor: dotBorder,
             marginBottom: Math.round(2 * scale),
             marginLeft: 1,

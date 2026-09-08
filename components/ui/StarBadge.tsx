@@ -26,7 +26,7 @@ export function StarBadge({ rating, size = "md" }: Props) {
         paddingVertical: lg ? 5 : 3,
         borderRadius: 99,
         backgroundColor: bg,
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: C.border,
       }}
     >

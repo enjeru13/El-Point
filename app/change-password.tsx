@@ -70,7 +70,7 @@ export default function ChangePasswordScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
       {/* Header */}
       <View
         style={{
@@ -80,7 +80,7 @@ export default function ChangePasswordScreen() {
           flexDirection: "row",
           alignItems: "center",
           gap: 12,
-          borderBottomWidth: 2,
+          borderBottomWidth: 1,
           borderBottomColor: C.border,
           backgroundColor: C.surface,
         }}
@@ -93,7 +93,7 @@ export default function ChangePasswordScreen() {
             borderRadius: 20,
             alignItems: "center",
             justifyContent: "center",
-            borderWidth: 2,
+            borderWidth: 1,
             borderColor: C.border,
             backgroundColor: C.surface,
             ...shadow.sm,
@@ -125,7 +125,7 @@ export default function ChangePasswordScreen() {
               borderRadius: 24,
               padding: 20,
               gap: 16,
-              borderWidth: 2,
+              borderWidth: 1,
               borderColor: C.border,
               ...shadow.sm,
             }}

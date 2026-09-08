@@ -35,7 +35,7 @@ export function EmptyState({
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: C.surfaceContainerLow,
-          borderWidth: 2,
+          borderWidth: 1,
           borderColor: C.outlineVariant,
         }}
       >

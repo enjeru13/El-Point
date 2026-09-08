@@ -44,7 +44,7 @@ function priceLabel(level: number | null): string {
 
 const PINNED = [{ slug: 'all', label: 'Todo', icon: 'silverware-fork-knife' }];
 
-const MAP_STYLE = [
+const MAP_STYLE_LIGHT = [
   { elementType: 'geometry',            stylers: [{ color: '#f5f5f0' }] },
   { elementType: 'labels.text.fill',    stylers: [{ color: '#8f7067' }] },
   { elementType: 'labels.text.stroke',  stylers: [{ color: '#ffffff' }] },
@@ -52,6 +52,19 @@ const MAP_STYLE = [
   { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#e4beb3' }] },
   { featureType: 'water', elementType: 'geometry',       stylers: [{ color: '#c9e8f0' }] },
   { featureType: 'poi',  elementType: 'geometry',        stylers: [{ color: '#e8f0e4' }] },
+  { featureType: 'poi',  elementType: 'labels',          stylers: [{ visibility: 'off' }] },
+  { featureType: 'transit',                              stylers: [{ visibility: 'off' }] },
+];
+
+const MAP_STYLE_DARK = [
+  { elementType: 'geometry',            stylers: [{ color: '#14141a' }] },
+  { elementType: 'labels.text.fill',    stylers: [{ color: '#8a8a90' }] },
+  { elementType: 'labels.text.stroke',  stylers: [{ color: '#0a0a0b' }] },
+  { featureType: 'road', elementType: 'geometry',        stylers: [{ color: '#26262d' }] },
+  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#1a1a1f' }] },
+  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#9a9aa2' }] },
+  { featureType: 'water', elementType: 'geometry',       stylers: [{ color: '#0e1a1f' }] },
+  { featureType: 'poi',  elementType: 'geometry',        stylers: [{ color: '#1a201c' }] },
   { featureType: 'poi',  elementType: 'labels',          stylers: [{ visibility: 'off' }] },
   { featureType: 'transit',                              stylers: [{ visibility: 'off' }] },
 ];
@@ -67,9 +80,9 @@ const MAP_STYLE = [
 const MARKER_W = 70;
 const MARKER_H = 92;
 
-function markerCacheKey(r: Restaurant): string {
+function markerCacheKey(r: Restaurant, scheme: string): string {
   const rating = r.rating_count > 0 ? r.rating_avg.toFixed(1) : '-';
-  return `${r.id}:${r.icon}:${rating}`;
+  return `${r.id}:${r.icon}:${rating}:${scheme}`;
 }
 
 function MarkerTemplate({ restaurant }: { restaurant: Restaurant }) {
@@ -114,6 +127,7 @@ function MarkerImageFactory({
   pending: Restaurant[];
   onReady: (key: string, uri: string) => void;
 }) {
+  const { scheme } = useTheme();
   const refs = useRef<Record<string, View | null>>({});
   const started = useRef<Set<string>>(new Set());
 
@@ -131,7 +145,7 @@ function MarkerImageFactory({
   return (
     <View pointerEvents="none" style={{ position: 'absolute', top: -1000, left: -1000, opacity: 0 }}>
       {pending.map(r => {
-        const key = markerCacheKey(r);
+        const key = markerCacheKey(r, scheme);
         return (
           <View
             key={key}
@@ -176,7 +190,7 @@ function RestaurantCard({
           width: 60, height: 60, borderRadius: 14, overflow: 'hidden',
           backgroundColor: C.primaryFixed,
           alignItems: 'center', justifyContent: 'center',
-          borderWidth: 2, borderColor: C.border,
+          borderWidth: 1, borderColor: C.border,
         }}>
           {restaurant.cover_url || restaurant.logo_url ? (
             <Image source={{ uri: (restaurant.cover_url ?? restaurant.logo_url)! }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={150} />
@@ -224,7 +238,7 @@ function RestaurantCard({
 // ─── Pantalla ─────────────────────────────────────────────────────────────────
 
 export default function MapScreen() {
-  const { C, shadow } = useTheme();
+  const { C, shadow, scheme } = useTheme();
   const router  = useRouter();
   const insets  = useSafeAreaInsets();
   const toast   = useToast();
@@ -264,8 +278,8 @@ export default function MapScreen() {
   // Pre-rendered marker bitmaps (see MarkerImageFactory above).
   const [markerImages, setMarkerImages] = useState<Record<string, string>>({});
   const pendingImages = useMemo(
-    () => filtered.filter(r => !markerImages[markerCacheKey(r)]),
-    [filtered, markerImages],
+    () => filtered.filter(r => !markerImages[markerCacheKey(r, scheme)]),
+    [filtered, markerImages, scheme],
   );
 
   // Ping animation for user dot
@@ -355,7 +369,7 @@ export default function MapScreen() {
         ref={mapRef}
         style={{ flex: 1 }}
         initialRegion={{ latitude: origin.latitude, longitude: origin.longitude, latitudeDelta: 0.04, longitudeDelta: 0.04 }}
-        customMapStyle={MAP_STYLE}
+        customMapStyle={scheme === 'dark' ? MAP_STYLE_DARK : MAP_STYLE_LIGHT}
         showsUserLocation={false}
         showsMyLocationButton={false}
         showsCompass={false}
@@ -391,7 +405,7 @@ export default function MapScreen() {
 
         {/* Restaurant markers */}
         {filtered.map(r => {
-          const uri = markerImages[markerCacheKey(r)];
+          const uri = markerImages[markerCacheKey(r, scheme)];
           if (!uri) return null; // aún capturando su bitmap
           const isSelected = selected?.id === r.id;
           return (
@@ -450,14 +464,14 @@ export default function MapScreen() {
 
         {/* Estado */}
         {nearbyQ.isLoading ? (
-          <View style={{ alignSelf: 'center', marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, ...shadow.sm }}>
+          <View style={{ alignSelf: 'center', marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, ...shadow.sm }}>
             <ActivityIndicator size="small" color={C.primary} />
             <AppText variant="caption" color={C.onSurfaceVariant}>Buscando lugares...</AppText>
           </View>
         ) : filtered.length === 0 ? (
           <Pressable
             onPress={userLocation ? undefined : requestLocation}
-            style={{ alignSelf: 'center', marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, ...shadow.sm }}
+            style={{ alignSelf: 'center', marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, ...shadow.sm }}
           >
             <Icon name={userLocation ? 'map-marker-outline' : 'crosshairs-gps'} size={13} color={C.outline} />
             <AppText variant="caption" color={C.onSurfaceVariant}>
@@ -483,7 +497,7 @@ export default function MapScreen() {
             width: 48, height: 48, borderRadius: 24,
             backgroundColor: locLoading ? C.primaryFixed : C.surface,
             alignItems: 'center', justifyContent: 'center',
-            borderWidth: 2, borderColor: C.border,
+            borderWidth: 1, borderColor: C.border,
             ...shadow.md,
           }}
         >
@@ -512,7 +526,7 @@ export default function MapScreen() {
         backgroundStyle={{
           backgroundColor: C.surface,
           borderRadius: 22,
-          borderWidth: 2,
+          borderWidth: 1,
           borderColor: C.border,
         }}
       >

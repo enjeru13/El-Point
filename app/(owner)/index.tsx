@@ -35,7 +35,7 @@ function StatCard({ icon, label, value, color }: { icon: string; label: string; 
     <View style={{
       flex: 1, padding: 16, borderRadius: 20,
       backgroundColor: C.surface,
-      borderWidth: 2, borderColor: C.border,
+      borderWidth: 1, borderColor: C.border,
       gap: 6, ...shadow.sm,
     }}>
       <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: color + '22', alignItems: 'center', justifyContent: 'center' }}>
@@ -53,7 +53,7 @@ function ReviewRow({ review }: { review: Review }) {
     <View style={{
       padding: 14, borderRadius: 18,
       backgroundColor: C.surface,
-      borderWidth: 2, borderColor: C.border,
+      borderWidth: 1, borderColor: C.border,
       gap: 8, ...shadow.sm,
     }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -100,7 +100,7 @@ export default function OwnerHomeScreen() {
 
   if (restaurantQ.isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: C.surface, paddingTop: insets.top + 20, paddingHorizontal: 20, gap: 20 }}>
+      <View style={{ flex: 1, backgroundColor: C.background, paddingTop: insets.top + 20, paddingHorizontal: 20, gap: 20 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <Skeleton width={44} height={44} radius={22} />
           <View style={{ gap: 6 }}>
@@ -121,7 +121,7 @@ export default function OwnerHomeScreen() {
 
   if (!restaurant) {
     return (
-      <View style={{ flex: 1, backgroundColor: C.surface, justifyContent: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: C.background, justifyContent: 'center' }}>
         <EmptyState
           icon="store-outline"
           title="No encontramos tu local"
@@ -134,7 +134,7 @@ export default function OwnerHomeScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
 
       {/* Header */}
       <View style={{
@@ -186,13 +186,13 @@ export default function OwnerHomeScreen() {
           return (
             <View style={{
               borderRadius: 22, backgroundColor: map.bg,
-              borderWidth: 2, borderColor: C.border, overflow: 'hidden', ...shadow.sm,
+              borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm,
             }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16 }}>
                 <View style={{
                   width: 48, height: 48, borderRadius: 14,
                   backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center',
-                  borderWidth: 2, borderColor: C.border,
+                  borderWidth: 1, borderColor: C.border,
                 }}>
                   <Icon name={map.icon} size={24} color={C.onSurface} />
                 </View>
@@ -221,7 +221,7 @@ export default function OwnerHomeScreen() {
         <View style={{
           borderRadius: 22,
           backgroundColor: restaurant.is_active ? C.primaryFixed : C.surfaceContainerHighest,
-          borderWidth: 2, borderColor: C.border,
+          borderWidth: 1, borderColor: C.border,
           overflow: 'hidden',
           ...shadow.sm,
         }}>
@@ -230,7 +230,7 @@ export default function OwnerHomeScreen() {
               width: 48, height: 48, borderRadius: 14,
               backgroundColor: restaurant.is_active ? C.primary : C.outline,
               alignItems: 'center', justifyContent: 'center',
-              borderWidth: 2, borderColor: C.border,
+              borderWidth: 1, borderColor: C.border,
             }}>
               <Icon name={restaurant.is_active ? 'store-outline' : 'eye-off-outline'} size={24} color="#fff" />
             </View>
@@ -249,7 +249,7 @@ export default function OwnerHomeScreen() {
             <View style={{
               paddingHorizontal: 9, paddingVertical: 3, borderRadius: 99,
               backgroundColor: restaurant.is_active ? C.secondaryContainer : C.surface,
-              borderWidth: 2, borderColor: C.border,
+              borderWidth: 1, borderColor: C.border,
             }}>
               <AppText variant="caption" color={restaurant.is_active ? C.onSurface : C.outline}>
                 {restaurant.is_active ? 'ACTIVO' : 'PAUSADO'}
@@ -281,12 +281,13 @@ export default function OwnerHomeScreen() {
         {restaurant.promo_text && (
           <View style={{
             padding: 14, borderRadius: 16, gap: 4,
-            backgroundColor: C.primaryContainer,
-            borderWidth: 2, borderColor: C.border, borderLeftWidth: 6,
+            backgroundColor: C.primary + '1f',
+            borderWidth: 1, borderColor: C.primary + '40',
+            borderLeftWidth: 6, borderLeftColor: C.primary,
           }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Icon name="tag" size={14} color={C.onSurface} />
-              <AppText variant="overline">PROMO ACTIVA</AppText>
+              <Icon name="tag" size={14} color={C.primary} />
+              <AppText variant="overline" color={C.primary}>PROMO ACTIVA</AppText>
             </View>
             <AppText variant="bodyStrong" style={{ fontSize: 15 }} numberOfLines={2}>
               {restaurant.promo_text}

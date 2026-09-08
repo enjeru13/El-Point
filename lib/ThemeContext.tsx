@@ -7,10 +7,16 @@ import {
   useMemo,
   useState,
 } from "react";
-import { THEMES, ThemeName, ThemePalette } from "./themes";
+import { useColorScheme } from "react-native";
+import {
+  SCHEMES,
+  ThemeMode,
+  ThemePalette,
+  ThemeScheme,
+} from "./themes";
 
-const STORAGE_KEY = "elpoint_theme";
-const DEFAULT_THEME: ThemeName = "brasa";
+const STORAGE_KEY = "elpoint_theme_mode";
+const DEFAULT_MODE: ThemeMode = "system";
 
 type Shadow = {
   shadowColor: string;
@@ -28,32 +34,35 @@ type ShadowMap = {
 };
 
 function buildShadow(C: ThemePalette): ShadowMap {
-  const base = { shadowOpacity: 1, shadowRadius: 0 };
+  // Soft elevation, not hard neo-brutalist offset.
   return {
     sm: {
-      ...base,
-      shadowColor: "#1c1b1b",
-      shadowOffset: { width: 3, height: 3 },
-      elevation: 4,
+      shadowColor: "#000000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.08,
+      shadowRadius: 3,
+      elevation: 2,
     },
     md: {
-      ...base,
-      shadowColor: "#1c1b1b",
-      shadowOffset: { width: 4, height: 4 },
-      elevation: 6,
+      shadowColor: "#000000",
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 4,
     },
     lg: {
-      ...base,
-      shadowColor: "#1c1b1b",
-      shadowOffset: { width: 6, height: 6 },
+      shadowColor: "#000000",
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.12,
+      shadowRadius: 16,
       elevation: 8,
     },
     primary: {
-      ...base,
       shadowColor: C.primary,
-      shadowOffset: { width: 4, height: 4 },
-      shadowOpacity: 0.5,
-      elevation: 6,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.28,
+      shadowRadius: 8,
+      elevation: 4,
     },
   };
 }
@@ -61,35 +70,44 @@ function buildShadow(C: ThemePalette): ShadowMap {
 type ThemeContextValue = {
   C: ThemePalette;
   shadow: ShadowMap;
-  themeName: ThemeName;
-  setTheme: (name: ThemeName) => void;
+  /** The user's stored preference. */
+  mode: ThemeMode;
+  /** The palette actually in use right now ("system" resolved). */
+  scheme: ThemeScheme;
+  setMode: (mode: ThemeMode) => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue>({
-  C: THEMES[DEFAULT_THEME],
-  shadow: buildShadow(THEMES[DEFAULT_THEME]),
-  themeName: DEFAULT_THEME,
-  setTheme: () => {},
+  C: SCHEMES.light,
+  shadow: buildShadow(SCHEMES.light),
+  mode: DEFAULT_MODE,
+  scheme: "light",
+  setMode: () => {},
 });
 
 export function AppThemeProvider({ children }: { children: React.ReactNode }) {
-  const [themeName, setThemeState] = useState<ThemeName>(DEFAULT_THEME);
+  const os = useColorScheme();
+  const [mode, setModeState] = useState<ThemeMode>(DEFAULT_MODE);
 
   useEffect(() => {
     SecureStore.getItemAsync(STORAGE_KEY).then((saved) => {
-      if (saved && saved in THEMES) setThemeState(saved as ThemeName);
+      if (saved === "light" || saved === "dark" || saved === "system") {
+        setModeState(saved);
+      }
     });
   }, []);
 
-  const setTheme = useCallback((name: ThemeName) => {
-    setThemeState(name);
-    SecureStore.setItemAsync(STORAGE_KEY, name);
+  const setMode = useCallback((next: ThemeMode) => {
+    setModeState(next);
+    SecureStore.setItemAsync(STORAGE_KEY, next);
   }, []);
 
   const value = useMemo(() => {
-    const C = THEMES[themeName];
-    return { C, shadow: buildShadow(C), themeName, setTheme };
-  }, [themeName, setTheme]);
+    const scheme: ThemeScheme =
+      mode === "system" ? (os === "dark" ? "dark" : "light") : mode;
+    const C = SCHEMES[scheme];
+    return { C, shadow: buildShadow(C), mode, scheme, setMode };
+  }, [mode, os, setMode]);
 
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

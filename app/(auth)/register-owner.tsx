@@ -232,7 +232,7 @@ export default function RegisterOwnerScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
       {/* Header */}
       <View
         style={{
@@ -318,7 +318,7 @@ export default function RegisterOwnerScreen() {
                       alignItems: "center",
                       justifyContent: "center",
                       backgroundColor: C.primaryFixed,
-                      borderWidth: 2,
+                      borderWidth: 1,
                       borderColor: C.border,
                       ...shadow.sm,
                     }}
@@ -388,7 +388,7 @@ export default function RegisterOwnerScreen() {
                       alignItems: "center",
                       justifyContent: "center",
                       backgroundColor: C.primaryFixed,
-                      borderWidth: 2,
+                      borderWidth: 1,
                       borderColor: C.border,
                       ...shadow.sm,
                     }}
@@ -476,7 +476,7 @@ export default function RegisterOwnerScreen() {
                   padding: 20,
                   borderRadius: 20,
                   backgroundColor: C.secondaryContainer,
-                  borderWidth: 2,
+                  borderWidth: 1,
                   borderColor: C.border,
                 }}
               >
@@ -552,7 +552,7 @@ export default function RegisterOwnerScreen() {
                       paddingHorizontal: 16,
                       paddingVertical: 12,
                       borderRadius: 16,
-                      borderWidth: 2,
+                      borderWidth: 1,
                       borderStyle: "dashed",
                       borderColor: coords ? C.secondary : C.outlineVariant,
                       backgroundColor: coords
@@ -656,7 +656,7 @@ export default function RegisterOwnerScreen() {
                       height: 180,
                       borderRadius: 16,
                       overflow: "hidden",
-                      borderWidth: 2,
+                      borderWidth: 1,
                       borderStyle: "dashed",
                       alignItems: "center",
                       justifyContent: "center",
@@ -679,7 +679,7 @@ export default function RegisterOwnerScreen() {
                             padding: 16,
                             borderRadius: 16,
                             backgroundColor: C.primaryFixed,
-                            borderWidth: 2,
+                            borderWidth: 1,
                             borderColor: C.border,
                             ...shadow.sm,
                           }}
@@ -712,7 +712,7 @@ export default function RegisterOwnerScreen() {
                       height: 120,
                       borderRadius: 16,
                       overflow: "hidden",
-                      borderWidth: 2,
+                      borderWidth: 1,
                       borderStyle: "dashed",
                       alignItems: "center",
                       justifyContent: "center",
@@ -735,7 +735,7 @@ export default function RegisterOwnerScreen() {
                             padding: 12,
                             borderRadius: 16,
                             backgroundColor: C.primaryFixed,
-                            borderWidth: 2,
+                            borderWidth: 1,
                             borderColor: C.border,
                             ...shadow.sm,
                           }}
@@ -787,7 +787,7 @@ export default function RegisterOwnerScreen() {
                       height: 180,
                       borderRadius: 16,
                       overflow: "hidden",
-                      borderWidth: 2,
+                      borderWidth: 1,
                       borderStyle: "dashed",
                       alignItems: "center",
                       justifyContent: "center",
@@ -810,7 +810,7 @@ export default function RegisterOwnerScreen() {
                             padding: 16,
                             borderRadius: 16,
                             backgroundColor: C.primaryFixed,
-                            borderWidth: 2,
+                            borderWidth: 1,
                             borderColor: C.border,
                             ...shadow.sm,
                           }}
@@ -845,7 +845,7 @@ export default function RegisterOwnerScreen() {
                       gap: 16,
                       padding: 20,
                       borderRadius: 16,
-                      borderWidth: 2,
+                      borderWidth: 1,
                       borderStyle: "dashed",
                       borderColor: menuPdfName ? C.primary : C.outlineVariant,
                       backgroundColor: menuPdfName
@@ -863,7 +863,7 @@ export default function RegisterOwnerScreen() {
                         backgroundColor: menuPdfName
                           ? C.primary
                           : C.primaryFixed,
-                        borderWidth: 2,
+                        borderWidth: 1,
                         borderColor: C.border,
                       }}
                     >

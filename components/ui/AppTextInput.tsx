@@ -67,7 +67,7 @@ export function InputWrapper({
           paddingHorizontal: 16,
           gap: 12,
           backgroundColor: C.surfaceContainerLow,
-          borderWidth: 2,
+          borderWidth: 1,
           borderColor: focused ? C.primary : C.outlineVariant,
         },
         style,

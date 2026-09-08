@@ -90,7 +90,7 @@ function ReviewCard({
         backgroundColor: C.surface,
         borderRadius: 24,
         overflow: "hidden",
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: C.border,
         ...shadow.md,
         marginBottom: compact ? 12 : 16,
@@ -135,7 +135,7 @@ function ReviewCard({
             paddingVertical: 4,
             borderRadius: 99,
             backgroundColor: C.secondaryContainer,
-            borderWidth: 2,
+            borderWidth: 1,
             borderColor: C.border,
           }}
         >
@@ -161,7 +161,7 @@ function ReviewCard({
               paddingVertical: 4,
               borderRadius: 99,
               backgroundColor: C.primaryContainer,
-              borderWidth: 2,
+              borderWidth: 1,
               borderColor: C.border,
               ...shadow.sm,
             }}
@@ -222,10 +222,11 @@ function ReviewCard({
               gap: 8,
               padding: 10,
               borderRadius: 12,
-              backgroundColor: C.primaryFixed,
-              borderWidth: 2,
-              borderColor: C.border,
+              backgroundColor: C.primary + "1f",
+              borderWidth: 1,
+              borderColor: C.primary + "40",
               borderLeftWidth: 5,
+              borderLeftColor: C.primary,
             }}
           >
             <Icon name="tag" size={16} color={C.primary} />
@@ -292,7 +293,7 @@ function ReviewCard({
               paddingVertical: 6,
               borderRadius: 99,
               backgroundColor: favorited ? C.primary : C.primaryFixed,
-              borderWidth: 2,
+              borderWidth: 1,
               borderColor: C.border,
             }}
           >
@@ -351,7 +352,7 @@ function FavoriteRow({
         borderRadius: 18,
         marginBottom: 10,
         backgroundColor: C.surface,
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: C.border,
         ...shadow.sm,
       }}
@@ -365,7 +366,7 @@ function FavoriteRow({
           backgroundColor: C.primaryFixed,
           alignItems: "center",
           justifyContent: "center",
-          borderWidth: 2,
+          borderWidth: 1,
           borderColor: C.border,
         }}
       >
@@ -420,6 +421,7 @@ export default function HomeScreen() {
 
   const { compactCards, showDistance } = useSettings();
   const [activeCategory, setActiveCategory] = useState("all");
+  const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"ranks" | "favorites">("ranks");
   const [refreshing, setRefreshing] = useState(false);
   const [userLoc, setUserLoc] = useState<LatLng | null>(null);
@@ -471,8 +473,16 @@ export default function HomeScreen() {
     (categoriesQ.data ?? []).filter((c) => prefIds.has(c.id)).map((c) => c.slug),
   );
 
+  const q = query.trim().toLowerCase();
+  const matchQuery = (r: FeedItem["restaurant"]) =>
+    !q ||
+    r.name.toLowerCase().includes(q) ||
+    r.categories.some((c) => c.label.toLowerCase().includes(q)) ||
+    (r.address ?? "").toLowerCase().includes(q);
+
   const filtered = feed
     .filter((item) => {
+      if (!matchQuery(item.restaurant)) return false;
       if (activeCategory === "promo") return !!item.restaurant.promo_text;
       if (activeCategory === "all") return true;
       return item.restaurant.categories.some((c) => c.slug === activeCategory);
@@ -486,7 +496,7 @@ export default function HomeScreen() {
     });
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
       {/* ── Header ── */}
       <ScreenHeader left={<AppLogo />} right={<NotificationBell />} />
 
@@ -516,20 +526,17 @@ export default function HomeScreen() {
             ¡Hola, {greetName}! 👋
           </AppText>
 
-          <Pressable onPress={() => router.push("/(customer)/search")}>
-            <View pointerEvents="none">
-              <SearchBar
-                value=""
-                onChangeText={() => {}}
-                placeholder="Encuentra tu próximo antojo..."
-                variant="floating"
-              />
-            </View>
-          </Pressable>
+          <SearchBar
+            value={query}
+            onChangeText={setQuery}
+            onClear={() => setQuery("")}
+            placeholder="Encuentra tu próximo antojo..."
+            variant="floating"
+          />
         </View>
 
         {/* ── 1: Filtros pegajosos (categorías + tabs) ── */}
-        <View style={{ backgroundColor: C.surface }}>
+        <View style={{ backgroundColor: C.background }}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -555,7 +562,7 @@ export default function HomeScreen() {
               flexDirection: "row",
               paddingHorizontal: 20,
               gap: 24,
-              borderBottomWidth: 2,
+              borderBottomWidth: 1,
               borderBottomColor: C.outlineVariant,
             }}
           >
@@ -593,16 +600,32 @@ export default function HomeScreen() {
           {activeTab === "favorites" ? (
             favoritesQ.isLoading ? (
               <SkeletonList count={4} kind="row" />
-            ) : (favoritesQ.data ?? []).length === 0 ? (
+            ) : (favoritesQ.data ?? []).filter((f) =>
+                !q ||
+                f.name.toLowerCase().includes(q) ||
+                f.categories.some((c) => c.label.toLowerCase().includes(q)) ||
+                (f.address ?? "").toLowerCase().includes(q),
+              ).length === 0 ? (
               <EmptyState
                 icon="heart-outline"
-                title="Sin favoritos aún"
-                body='Toca "Me gusta" en las reseñas que más te gusten para guardarlas aquí.'
-                actionLabel="Explorar lugares"
-                onAction={() => setActiveTab("ranks")}
+                title={q ? "Sin coincidencias" : "Sin favoritos aún"}
+                body={
+                  q
+                    ? "Ningún favorito coincide con tu búsqueda."
+                    : 'Toca "Me gusta" en las reseñas que más te gusten para guardarlas aquí.'
+                }
+                actionLabel={q ? undefined : "Explorar lugares"}
+                onAction={q ? undefined : () => setActiveTab("ranks")}
               />
             ) : (
-              (favoritesQ.data ?? []).map((f) => (
+              (favoritesQ.data ?? [])
+                .filter((f) =>
+                  !q ||
+                  f.name.toLowerCase().includes(q) ||
+                  f.categories.some((c) => c.label.toLowerCase().includes(q)) ||
+                  (f.address ?? "").toLowerCase().includes(q),
+                )
+                .map((f) => (
                 <FavoriteRow
                   key={f.id}
                   id={f.id}

@@ -95,7 +95,7 @@ export default function WelcomeScreen() {
   }, []);
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden' }}>
         {confetti.map(p => <ConfettiParticle key={p.id} {...p} />)}
       </View>
@@ -106,10 +106,10 @@ export default function WelcomeScreen() {
 
         <Animated.View style={{ alignItems: 'center', justifyContent: 'center', transform: [{ translateY: floatY }] }}>
           <View style={{ position: 'absolute', width: 240, height: 240, borderRadius: 120, backgroundColor: isOwner ? C.secondary : C.primary, opacity: 0.08, transform: [{ scaleX: 1.3 }] }} />
-          <View style={{ width: 224, height: 224, borderRadius: 40, alignItems: 'center', justifyContent: 'center', backgroundColor: isOwner ? C.secondaryContainer : C.primaryFixed, borderWidth: 2, borderColor: C.border, ...shadow.lg }}>
+          <View style={{ width: 224, height: 224, borderRadius: 40, alignItems: 'center', justifyContent: 'center', backgroundColor: isOwner ? C.secondaryContainer : C.primaryFixed, borderWidth: 1, borderColor: C.border, ...shadow.lg }}>
             <Icon name={isOwner ? 'storefront' : 'silverware-fork-knife'} size={80} color={isOwner ? C.secondary : C.primary} />
           </View>
-          <View style={{ position: 'absolute', bottom: -16, right: -16, width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', backgroundColor: isOwner ? C.primaryFixed : C.secondaryContainer, borderWidth: 2, borderColor: C.border, ...shadow.md }}>
+          <View style={{ position: 'absolute', bottom: -16, right: -16, width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', backgroundColor: isOwner ? C.primaryFixed : C.secondaryContainer, borderWidth: 1, borderColor: C.border, ...shadow.md }}>
             <Icon name={isOwner ? 'fire' : 'food-fork-drink'} size={30} color={isOwner ? C.primary : C.secondary} />
           </View>
         </Animated.View>
@@ -126,8 +126,8 @@ export default function WelcomeScreen() {
           </AppText>
         </Animated.View>
 
-        <Animated.View style={{ width: '100%', padding: 20, borderRadius: 28, flexDirection: 'row', alignItems: 'center', gap: 16, backgroundColor: C.surfaceContainerLow, borderWidth: 2, borderColor: C.border, ...shadow.md, opacity: fadeIn, transform: [{ translateY: slideUp }] }}>
-          <View style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: isOwner ? C.primaryFixed : C.secondaryContainer, borderWidth: 2, borderColor: C.border }}>
+        <Animated.View style={{ width: '100%', padding: 20, borderRadius: 28, flexDirection: 'row', alignItems: 'center', gap: 16, backgroundColor: C.surfaceContainerLow, borderWidth: 1, borderColor: C.border, ...shadow.md, opacity: fadeIn, transform: [{ translateY: slideUp }] }}>
+          <View style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: isOwner ? C.primaryFixed : C.secondaryContainer, borderWidth: 1, borderColor: C.border }}>
             <Icon name={isOwner ? 'chart-line' : 'star'} size={24} color={isOwner ? C.primary : C.secondary} />
           </View>
           <View style={{ flex: 1 }}>

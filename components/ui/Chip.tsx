@@ -28,7 +28,7 @@ export function Chip({
         paddingHorizontal: 14,
         paddingVertical: 8,
         borderRadius: 99,
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: active ? C.border : C.outlineVariant,
         backgroundColor: active ? activeBg : C.surface,
         ...(active ? (tone === "secondary" ? shadow.sm : shadow.primary) : {}),
@@ -74,7 +74,7 @@ export function Tag({
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 99,
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: C.border,
         backgroundColor: tone === "accent" ? C.secondaryContainer : C.surface,
       }}

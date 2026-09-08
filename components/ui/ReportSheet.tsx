@@ -76,7 +76,7 @@ export const ReportSheet = forwardRef<
       backgroundStyle={{
         backgroundColor: C.surface,
         borderRadius: 28,
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: C.border,
       }}
     >
@@ -108,7 +108,7 @@ export const ReportSheet = forwardRef<
                   gap: 10,
                   padding: 12,
                   borderRadius: 14,
-                  borderWidth: 2,
+                  borderWidth: 1,
                   borderColor: active ? C.border : C.outlineVariant,
                   backgroundColor: active ? C.primaryFixed : C.surface,
                 }}

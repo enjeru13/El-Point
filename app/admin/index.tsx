@@ -34,7 +34,7 @@ function Row({
         padding: 16,
         borderRadius: 20,
         backgroundColor: C.surface,
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: C.border,
         ...shadow.sm,
       }}
@@ -47,7 +47,7 @@ function Row({
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: hot ? C.error + "22" : C.primaryFixed,
-          borderWidth: 2,
+          borderWidth: 1,
           borderColor: C.border,
         }}
       >
@@ -67,7 +67,7 @@ function Row({
             paddingVertical: 2,
             borderRadius: 99,
             backgroundColor: C.error + "22",
-            borderWidth: 2,
+            borderWidth: 1,
             borderColor: C.border,
             alignItems: "center",
           }}
@@ -94,7 +94,7 @@ export default function AdminHubScreen() {
   const c = countsQ.data ?? { reviews: 0, restaurants: 0, reported: 0 };
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
       <View
         style={{
           paddingTop: insets.top + 8,
@@ -103,7 +103,7 @@ export default function AdminHubScreen() {
           flexDirection: "row",
           alignItems: "center",
           gap: 12,
-          borderBottomWidth: 2,
+          borderBottomWidth: 1,
           borderBottomColor: C.border,
           backgroundColor: C.surface,
         }}
@@ -116,7 +116,7 @@ export default function AdminHubScreen() {
             borderRadius: 20,
             alignItems: "center",
             justifyContent: "center",
-            borderWidth: 2,
+            borderWidth: 1,
             borderColor: C.border,
             backgroundColor: C.surface,
             ...shadow.sm,

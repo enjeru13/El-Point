@@ -1,6 +1,6 @@
 import { AppLogo } from "@/components/ui/AppLogo";
 import { AppText } from "@/components/ui/AppText";
-import { FoodBackdrop } from "@/components/ui/FoodBackdrop";
+import { AuthBackground } from "@/components/ui/AuthBackground";
 import { Field } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
@@ -86,17 +86,8 @@ export default function ForgotPasswordScreen() {
   }
 
   return (
-    <View
-      style={{ flex: 1, backgroundColor: C.primary, paddingTop: insets.top }}
-    >
-      <FoodBackdrop seed={4} />
-      <View
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundColor: "rgba(94,20,0,0.28)",
-        }}
-      />
+    <View style={{ flex: 1, paddingTop: insets.top }}>
+      <AuthBackground seed={4} />
 
       <Pressable
         onPress={() => (step === "code" ? setStep("email") : router.back())}
@@ -136,8 +127,8 @@ export default function ForgotPasswordScreen() {
             borderRadius: 32,
             padding: 24,
             gap: 18,
-            backgroundColor: C.surface,
-            borderWidth: 2,
+            backgroundColor: C.surfaceContainerHigh,
+            borderWidth: 1,
             borderColor: C.border,
             ...shadow.md,
           }}

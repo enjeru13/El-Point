@@ -22,7 +22,7 @@ export function Card({
         {
           backgroundColor: C.surface,
           borderRadius: radius,
-          borderWidth: 2,
+          borderWidth: 1,
           borderColor: C.border,
           ...(elevation === "md"
             ? shadow.md

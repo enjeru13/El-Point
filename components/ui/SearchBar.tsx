@@ -38,7 +38,7 @@ export const SearchBar = forwardRef<TextInput, Props>(
           borderRadius: 24,
           paddingHorizontal: 14,
           backgroundColor: C.surface,
-          borderWidth: 2,
+          borderWidth: 1,
           borderColor: hasValue ? C.border : C.outlineVariant,
           ...shadow.sm,
         }}

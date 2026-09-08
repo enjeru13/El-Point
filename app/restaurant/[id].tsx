@@ -233,7 +233,7 @@ const ReviewSheet = forwardRef<
       backgroundStyle={{
         backgroundColor: C.surface,
         borderRadius: 28,
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: C.border,
       }}
     >
@@ -242,7 +242,7 @@ const ReviewSheet = forwardRef<
         style={{
           paddingHorizontal: 20,
           paddingBottom: 14,
-          borderBottomWidth: 2,
+          borderBottomWidth: 1,
           borderBottomColor: C.outlineVariant,
         }}
       >
@@ -268,7 +268,7 @@ const ReviewSheet = forwardRef<
                 paddingVertical: 6,
                 borderRadius: 99,
                 backgroundColor: C.surfaceContainerLow,
-                borderWidth: 2,
+                borderWidth: 1,
                 borderColor: C.outlineVariant,
               }}
             >
@@ -313,7 +313,7 @@ const ReviewSheet = forwardRef<
           </AppText>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
             {photos.map((uri, i) => (
-              <View key={uri + i} style={{ width: 64, height: 64, borderRadius: 12, overflow: "hidden", borderWidth: 2, borderColor: C.border }}>
+              <View key={uri + i} style={{ width: 64, height: 64, borderRadius: 12, overflow: "hidden", borderWidth: 1, borderColor: C.border }}>
                 <Image source={{ uri }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
                 <Pressable
                   onPress={() => setPhotos((p) => p.filter((_, idx) => idx !== i))}
@@ -326,7 +326,7 @@ const ReviewSheet = forwardRef<
             {photos.length < 4 && (
               <Pressable
                 onPress={addPhotos}
-                style={{ width: 64, height: 64, borderRadius: 12, borderWidth: 2, borderStyle: "dashed", borderColor: C.outlineVariant, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceContainerLow }}
+                style={{ width: 64, height: 64, borderRadius: 12, borderWidth: 1, borderStyle: "dashed", borderColor: C.outlineVariant, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceContainerLow }}
               >
                 <Icon name="camera-plus-outline" size={22} color={C.primary} />
               </Pressable>
@@ -453,9 +453,16 @@ export default function RestaurantProfileScreen() {
   }
 
   const HERO_H = 320;
+  const hexA = (hex: string, a: number) => {
+    const h = hex.replace("#", "");
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    return `rgba(${r},${g},${b},${a})`;
+  };
   const headerBg = scrollY.interpolate({
     inputRange: [HERO_H - 80, HERO_H - 20],
-    outputRange: ["rgba(251,248,255,0)", "rgba(251,248,255,1)"],
+    outputRange: [hexA(C.surface, 0), hexA(C.surface, 1)],
     extrapolate: "clamp",
   });
   const headerBorder = scrollY.interpolate({
@@ -470,7 +477,7 @@ export default function RestaurantProfileScreen() {
   });
   const btnBg = scrollY.interpolate({
     inputRange: [HERO_H - 80, HERO_H - 20],
-    outputRange: ["rgba(252,249,248,0.92)", "rgba(252,249,248,0)"],
+    outputRange: [hexA(C.surface, 0.92), hexA(C.surface, 0)],
     extrapolate: "clamp",
   });
   const btnBorder = scrollY.interpolate({
@@ -482,7 +489,7 @@ export default function RestaurantProfileScreen() {
   // ── Loading / error ──────────────────────────────────────────────────────────
   if (restaurantQ.isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: C.surface }}>
+      <View style={{ flex: 1, backgroundColor: C.background }}>
         <Skeleton height={HERO_H} radius={0} />
         <View style={{ padding: 16, gap: 16 }}>
           <Skeleton height={48} radius={16} />
@@ -635,7 +642,7 @@ export default function RestaurantProfileScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
       <Animated.ScrollView
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
         showsVerticalScrollIndicator={false}
@@ -661,7 +668,7 @@ export default function RestaurantProfileScreen() {
             backgroundColor: C.primaryFixed,
             alignItems: "center",
             justifyContent: "center",
-            borderBottomWidth: 2,
+            borderBottomWidth: 1,
             borderBottomColor: C.border,
           }}
         >
@@ -710,7 +717,7 @@ export default function RestaurantProfileScreen() {
                       paddingVertical: 4,
                       borderRadius: 99,
                       backgroundColor: C.secondaryContainer,
-                      borderWidth: 2,
+                      borderWidth: 1,
                       borderColor: C.border,
                     }}
                   >
@@ -770,7 +777,7 @@ export default function RestaurantProfileScreen() {
                 padding: 12,
                 borderRadius: 16,
                 backgroundColor: C.primaryFixed,
-                borderWidth: 2,
+                borderWidth: 1,
                 borderColor: C.border,
               }}
             >
@@ -801,16 +808,16 @@ export default function RestaurantProfileScreen() {
                 gap: 10,
                 padding: 14,
                 borderRadius: 16,
-                backgroundColor: C.primaryContainer,
-                borderWidth: 2,
-                borderColor: C.border,
+                backgroundColor: C.primary + "1f",
+                borderWidth: 1,
+                borderColor: C.primary + "40",
                 borderLeftWidth: 6,
-                ...shadow.sm,
+                borderLeftColor: C.primary,
               }}
             >
-              <Icon name="tag" size={20} color={C.onSurface} />
+              <Icon name="tag" size={20} color={C.primary} />
               <View style={{ flex: 1 }}>
-                <AppText variant="overline">PROMOS</AppText>
+                <AppText variant="overline" color={C.primary}>PROMOS</AppText>
                 <AppText variant="bodyStrong">
                   {restaurant.promo_text}
                 </AppText>
@@ -853,7 +860,7 @@ export default function RestaurantProfileScreen() {
             style={{
               backgroundColor: C.surface,
               borderRadius: 20,
-              borderWidth: 2,
+              borderWidth: 1,
               borderColor: C.border,
               overflow: "hidden",
               ...shadow.sm,
@@ -864,7 +871,7 @@ export default function RestaurantProfileScreen() {
               const os = isOpenNow(restaurant.hours);
               const canExpand = !!restaurant.hours;
               return (
-                <View style={{ borderBottomWidth: 2, borderBottomColor: C.outlineVariant }}>
+                <View style={{ borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
                   <Pressable
                     onPress={() => canExpand && setHoursOpen((v) => !v)}
                     style={{ flexDirection: "row", alignItems: "center", gap: 14, padding: 16 }}
@@ -919,7 +926,7 @@ export default function RestaurantProfileScreen() {
                   alignItems: "center",
                   gap: 14,
                   padding: 16,
-                  borderBottomWidth: 2,
+                  borderBottomWidth: 1,
                   borderBottomColor: C.outlineVariant,
                 }}
               >
@@ -953,7 +960,7 @@ export default function RestaurantProfileScreen() {
                   alignItems: "center",
                   gap: 14,
                   padding: 16,
-                  borderBottomWidth: 2,
+                  borderBottomWidth: 1,
                   borderBottomColor: C.outlineVariant,
                 }}
               >
@@ -985,7 +992,7 @@ export default function RestaurantProfileScreen() {
                   alignItems: "center",
                   gap: 14,
                   padding: 16,
-                  borderBottomWidth: 2,
+                  borderBottomWidth: 1,
                   borderBottomColor: C.outlineVariant,
                 }}
               >
@@ -1050,7 +1057,7 @@ export default function RestaurantProfileScreen() {
                 padding: 18,
                 borderRadius: 20,
                 backgroundColor: C.primaryFixed,
-                borderWidth: 2,
+                borderWidth: 1,
                 borderColor: C.border,
                 ...shadow.md,
               }}
@@ -1063,7 +1070,7 @@ export default function RestaurantProfileScreen() {
                   backgroundColor: C.primaryContainer,
                   alignItems: "center",
                   justifyContent: "center",
-                  borderWidth: 2,
+                  borderWidth: 1,
                   borderColor: C.border,
                 }}
               >
@@ -1089,7 +1096,7 @@ export default function RestaurantProfileScreen() {
                 borderRadius: 20,
                 padding: 18,
                 gap: 8,
-                borderWidth: 2,
+                borderWidth: 1,
                 borderColor: C.border,
                 ...shadow.sm,
               }}
@@ -1127,7 +1134,7 @@ export default function RestaurantProfileScreen() {
                       paddingVertical: 10,
                       borderRadius: 16,
                       backgroundColor: C.surface,
-                      borderWidth: 2,
+                      borderWidth: 1,
                       borderColor: C.border,
                     }}
                   >
@@ -1176,7 +1183,7 @@ export default function RestaurantProfileScreen() {
               style={{
                 backgroundColor: C.surface,
                 borderRadius: 20,
-                borderWidth: 2,
+                borderWidth: 1,
                 borderColor: C.border,
                 padding: 16,
                 flexDirection: "row",
@@ -1247,7 +1254,7 @@ export default function RestaurantProfileScreen() {
                       borderRadius: 20,
                       padding: 16,
                       gap: 10,
-                      borderWidth: 2,
+                      borderWidth: 1,
                       borderColor: C.border,
                       ...shadow.sm,
                     }}
@@ -1295,7 +1302,7 @@ export default function RestaurantProfileScreen() {
                     borderRadius: 20,
                     padding: 16,
                     gap: 12,
-                    borderWidth: 2,
+                    borderWidth: 1,
                     borderColor: hiddenForMe ? C.error : C.border,
                     ...shadow.sm,
                   }}
@@ -1408,7 +1415,7 @@ export default function RestaurantProfileScreen() {
                         <Image
                           key={uri}
                           source={{ uri }}
-                          style={{ width: 96, height: 96, borderRadius: 12, borderWidth: 2, borderColor: C.border }}
+                          style={{ width: 96, height: 96, borderRadius: 12, borderWidth: 1, borderColor: C.border }}
                           contentFit="cover"
                           transition={150}
                         />
@@ -1563,7 +1570,7 @@ export default function RestaurantProfileScreen() {
                           paddingHorizontal: 14,
                           paddingVertical: 8,
                           borderRadius: 99,
-                          borderWidth: 2,
+                          borderWidth: 1,
                           borderColor: C.border,
                           backgroundColor: r.viewer_marked_helpful
                             ? C.secondaryContainer

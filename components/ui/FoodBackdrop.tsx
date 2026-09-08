@@ -171,11 +171,21 @@ function FloatingIcon({ item, color }: { item: Placed; color: string }) {
 export function FoodBackdrop({
   color = "#ffffff",
   seed = 7,
+  opacityScale = 1,
 }: {
   color?: string;
   seed?: number;
+  /** Multiply every icon's opacity (dark backgrounds need more). */
+  opacityScale?: number;
 }) {
-  const layout = useMemo(() => buildLayout(seed), [seed]);
+  const layout = useMemo(
+    () =>
+      buildLayout(seed).map((it) => ({
+        ...it,
+        opacity: Math.min(1, it.opacity * opacityScale),
+      })),
+    [seed, opacityScale],
+  );
   return (
     <View
       pointerEvents="none"

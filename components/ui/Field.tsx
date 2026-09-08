@@ -63,7 +63,7 @@ export function Field({
           alignItems: multiline ? "flex-start" : "center",
           gap: 10,
           borderRadius: 16,
-          borderWidth: 2,
+          borderWidth: 1,
           borderColor,
           backgroundColor: C.surfaceContainerLow,
           paddingHorizontal: 14,

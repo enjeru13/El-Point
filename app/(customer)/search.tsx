@@ -56,7 +56,7 @@ function StarBadgeInline({ rating, count }: { rating: number; count: number }) {
     return (
       <View style={{
         paddingHorizontal: 8, paddingVertical: 4, borderRadius: 99,
-        backgroundColor: C.surfaceContainerHighest, borderWidth: 2, borderColor: C.border,
+        backgroundColor: C.surfaceContainerHighest, borderWidth: 1, borderColor: C.border,
       }}>
         <AppText variant="label" color={C.onSurfaceVariant}>Nuevo</AppText>
       </View>
@@ -68,7 +68,7 @@ function StarBadgeInline({ rating, count }: { rating: number; count: number }) {
     <View style={{
       flexDirection: 'row', alignItems: 'center', gap: 4,
       paddingHorizontal: 8, paddingVertical: 4, borderRadius: 99,
-      backgroundColor: bg, borderWidth: 2, borderColor: C.border,
+      backgroundColor: bg, borderWidth: 1, borderColor: C.border,
     }}>
       <Icon name="star" size={13} color={text} />
       <AppText variant="label" color={text}>{rating.toFixed(1)}</AppText>
@@ -91,7 +91,7 @@ function OpenPill({ hours }: { hours: SearchResult['hours'] }) {
     <View style={{
       flexDirection: 'row', alignItems: 'center', gap: 5,
       paddingHorizontal: 9, paddingVertical: 4, borderRadius: 99,
-      backgroundColor: 'rgba(255,255,255,0.94)', borderWidth: 2, borderColor: C.border,
+      backgroundColor: 'rgba(255,255,255,0.94)', borderWidth: 1, borderColor: C.border,
     }}>
       <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: open ? C.secondary : C.error }} />
       <AppText variant="caption" style={{ fontSize: 11 }}>{open ? 'Abierto' : 'Cerrado'}</AppText>
@@ -129,7 +129,7 @@ function PlaceCard({
           backgroundColor: C.surface,
           borderRadius: 22,
           overflow: 'hidden',
-          borderWidth: 2,
+          borderWidth: 1,
           borderColor: C.border,
         },
         { transform: [{ translateY: pressed ? 2 : 0 }] },
@@ -224,7 +224,7 @@ function PlaceCard({
             marginTop: 6, alignSelf: 'flex-start',
             flexDirection: 'row', alignItems: 'center', gap: 6,
             paddingHorizontal: 16, paddingVertical: 9, borderRadius: 99,
-            backgroundColor: C.primaryContainer, borderWidth: 2, borderColor: C.border,
+            backgroundColor: C.primaryContainer, borderWidth: 1, borderColor: C.border,
           }}>
             <AppText variant="bodyStrong" style={{ fontSize: 14 }}>Ver restaurante</AppText>
             <Icon name="arrow-right" size={15} color={C.onSurface} />
@@ -240,7 +240,7 @@ function CardSkeleton({ featured = false }: { featured?: boolean }) {
   return (
     <View style={{
       backgroundColor: C.surface, borderRadius: 22, overflow: 'hidden',
-      borderWidth: 2, borderColor: C.border, ...shadow.sm,
+      borderWidth: 1, borderColor: C.border, ...shadow.sm,
     }}>
       <Skeleton height={featured ? 190 : 132} radius={0} />
       <View style={{ padding: 14, gap: 8 }}>
@@ -386,14 +386,14 @@ export default function SearchScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
 
       {/* ── Header ── */}
       <View style={{
         paddingTop: insets.top + 10,
         paddingBottom: 12,
         backgroundColor: C.surface,
-        borderBottomWidth: 2, borderBottomColor: C.outlineVariant,
+        borderBottomWidth: 1, borderBottomColor: C.outlineVariant,
       }}>
         <View style={{
           paddingHorizontal: 16,
@@ -416,7 +416,7 @@ export default function SearchScreen() {
               width: 48, height: 48, borderRadius: 24,
               alignItems: 'center', justifyContent: 'center',
               backgroundColor: (filterOpen || hasActiveFilters) ? C.primary : C.surface,
-              borderWidth: 2, borderColor: (filterOpen || hasActiveFilters) ? C.border : C.outlineVariant,
+              borderWidth: 1, borderColor: (filterOpen || hasActiveFilters) ? C.border : C.outlineVariant,
               ...((filterOpen || hasActiveFilters) ? shadow.primary : {}),
             }}
           >
@@ -451,7 +451,7 @@ export default function SearchScreen() {
       {filterOpen && (
         <View style={{
           backgroundColor: C.surface,
-          borderBottomWidth: 2, borderBottomColor: C.outlineVariant,
+          borderBottomWidth: 1, borderBottomColor: C.outlineVariant,
           paddingHorizontal: 16, paddingVertical: 14, gap: 14,
         }}>
           <View style={{ gap: 8 }}>
@@ -502,7 +502,7 @@ export default function SearchScreen() {
               flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start',
               paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99,
               backgroundColor: onlyOpen ? C.secondaryContainer : C.surface,
-              borderWidth: 2, borderColor: onlyOpen ? C.border : C.outlineVariant,
+              borderWidth: 1, borderColor: onlyOpen ? C.border : C.outlineVariant,
             }}
           >
             <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: onlyOpen ? C.secondary : C.outline }} />

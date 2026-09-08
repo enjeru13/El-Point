@@ -48,7 +48,7 @@ function QueueCard({
         borderRadius: 20,
         padding: 16,
         gap: 12,
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: C.border,
         ...shadow.sm,
       }}
@@ -175,7 +175,7 @@ export default function AdminReviewsScreen() {
   const queue = queueQ.data ?? [];
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
       <View
         style={{
           paddingTop: insets.top + 8,
@@ -184,7 +184,7 @@ export default function AdminReviewsScreen() {
           flexDirection: "row",
           alignItems: "center",
           gap: 12,
-          borderBottomWidth: 2,
+          borderBottomWidth: 1,
           borderBottomColor: C.border,
           backgroundColor: C.surface,
         }}
@@ -197,7 +197,7 @@ export default function AdminReviewsScreen() {
             borderRadius: 20,
             alignItems: "center",
             justifyContent: "center",
-            borderWidth: 2,
+            borderWidth: 1,
             borderColor: C.border,
             backgroundColor: C.surface,
             ...shadow.sm,
@@ -215,7 +215,7 @@ export default function AdminReviewsScreen() {
               paddingVertical: 2,
               borderRadius: 99,
               backgroundColor: C.error + "22",
-              borderWidth: 2,
+              borderWidth: 1,
               borderColor: C.border,
             }}
           >

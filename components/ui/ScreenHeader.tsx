@@ -21,8 +21,8 @@ export function ScreenHeader({ left, right, border = true }: Props) {
         paddingTop: insets.top + 10,
         paddingBottom: 12,
         paddingHorizontal: 20,
-        backgroundColor: C.surface,
-        borderBottomWidth: border ? 2 : 0,
+        backgroundColor: C.background,
+        borderBottomWidth: border ? 1 : 0,
         borderBottomColor: C.outlineVariant,
       }}
     >

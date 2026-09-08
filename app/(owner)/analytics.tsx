@@ -63,12 +63,12 @@ function MetricCard({ icon, label, value }: { icon: string; label: string; value
   return (
     <View style={{
       flex: 1, padding: 14, borderRadius: 18,
-      backgroundColor: C.surface, borderWidth: 2, borderColor: C.border,
+      backgroundColor: C.surface, borderWidth: 1, borderColor: C.border,
       gap: 8, ...shadow.sm,
     }}>
       <View style={{
         width: 34, height: 34, borderRadius: 10,
-        backgroundColor: C.primaryFixed, borderWidth: 2, borderColor: C.border,
+        backgroundColor: C.primaryFixed, borderWidth: 1, borderColor: C.border,
         alignItems: 'center', justifyContent: 'center',
       }}>
         <Icon name={icon} size={16} color={C.primary} />
@@ -120,7 +120,7 @@ export default function AnalyticsScreen() {
 
   if (restaurantQ.isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: C.surface, paddingTop: insets.top + 20, paddingHorizontal: 20, gap: 20 }}>
+      <View style={{ flex: 1, backgroundColor: C.background, paddingTop: insets.top + 20, paddingHorizontal: 20, gap: 20 }}>
         <Skeleton width={140} height={24} />
         <Skeleton height={48} radius={20} />
         <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -135,7 +135,7 @@ export default function AnalyticsScreen() {
 
   if (!restaurant) {
     return (
-      <View style={{ flex: 1, backgroundColor: C.surface, justifyContent: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: C.background, justifyContent: 'center' }}>
         <EmptyState
           icon="analytics"
           title="Sin métricas todavía"
@@ -148,7 +148,7 @@ export default function AnalyticsScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
+    <View style={{ flex: 1, backgroundColor: C.background }}>
 
       {/* Header */}
       <View style={{ paddingTop: insets.top + 10, paddingBottom: 14, paddingHorizontal: 20 }}>
@@ -165,7 +165,7 @@ export default function AnalyticsScreen() {
       >
 
         {/* Period selector */}
-        <View style={{ flexDirection: 'row', gap: 6, padding: 4, borderRadius: 20, backgroundColor: C.surfaceContainerLow, borderWidth: 2, borderColor: C.border }}>
+        <View style={{ flexDirection: 'row', gap: 6, padding: 4, borderRadius: 20, backgroundColor: C.surfaceContainerLow, borderWidth: 1, borderColor: C.border }}>
           {PERIODS.map(p => (
             <Pressable
               key={p}
@@ -173,7 +173,7 @@ export default function AnalyticsScreen() {
               style={{
                 flex: 1, paddingVertical: 8, borderRadius: 15, alignItems: 'center',
                 backgroundColor: period === p ? C.primary : 'transparent',
-                borderWidth: 2,
+                borderWidth: 1,
                 borderColor: period === p ? C.border : 'transparent',
               }}
             >
@@ -193,7 +193,7 @@ export default function AnalyticsScreen() {
         </View>
 
         {/* Bar chart - reseñas */}
-        <View style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, gap: 4, ...shadow.sm }}>
+        <View style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, gap: 4, ...shadow.sm }}>
           <AppText variant="heading" style={{ fontSize: 17 }}>Reseñas por período</AppText>
           <AppText variant="caption" color={C.outline}>{periodWord}</AppText>
           {total === 0 ? (
@@ -229,7 +229,7 @@ export default function AnalyticsScreen() {
         </View>
 
         {/* Distribución de estrellas */}
-        <View style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 2, borderColor: C.border, gap: 4, ...shadow.sm }}>
+        <View style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, gap: 4, ...shadow.sm }}>
           <AppText variant="heading" style={{ fontSize: 17 }}>Distribución de estrellas</AppText>
           <AppText variant="caption" color={C.outline}>{periodWord} · {total} {total === 1 ? 'reseña' : 'reseñas'}</AppText>
           {total === 0 ? (
