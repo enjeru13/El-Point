@@ -27,6 +27,34 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const STEPS = 5;
 
+function StepHeader({ icon, title, subtitle }: { icon: string; title: string; subtitle: string }) {
+  const { C } = useTheme();
+  return (
+    <View style={{ alignItems: 'center', marginBottom: 28, gap: 10 }}>
+      <View
+        style={{
+          width: 60,
+          height: 60,
+          borderRadius: 20,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: C.primaryFixed,
+          borderWidth: 1,
+          borderColor: C.border,
+        }}
+      >
+        <Icon name={icon} size={28} color={C.primary} />
+      </View>
+      <AppText variant="title" align="center" style={{ fontSize: 23, lineHeight: 28 }}>
+        {title}
+      </AppText>
+      <AppText variant="body" color={C.onSurfaceVariant} align="center" style={{ lineHeight: 21, maxWidth: 300 }}>
+        {subtitle}
+      </AppText>
+    </View>
+  );
+}
+
 // ─── Pantalla principal ───────────────────────────────────────────────────────
 
 export default function RegisterScreen() {
@@ -196,20 +224,11 @@ export default function RegisterScreen() {
           {/* ════ STEP 0 — Datos básicos ════ */}
           {step === 0 && (
             <>
-              <View className="items-center mb-8">
-                <View
-                  className="p-4 rounded-3xl mb-4"
-                  style={{ backgroundColor: C.secondaryContainer + '4d' }}
-                >
-                  <Icon name="party-popper" size={40} color={C.secondary} />
-                </View>
-                <AppText variant="title" align="center" style={{ marginBottom: 8 }}>
-                  ¡Cuéntanos quién eres!
-                </AppText>
-                <AppText variant="body" color={C.onSurfaceVariant} align="center">
-                  Únete a la comunidad gastronómica más vibrante del barrio.
-                </AppText>
-              </View>
+              <StepHeader
+                icon="account"
+                title="Crea tu cuenta"
+                subtitle="Elige tu nombre de usuario y el correo con el que vas a entrar."
+              />
 
               <View style={{ gap: 16 }}>
                 <Field
@@ -292,14 +311,11 @@ export default function RegisterScreen() {
           {/* ════ STEP 1 — Perfil de sabor ════ */}
           {step === 1 && (
             <>
-              <View className="mb-6">
-                <AppText variant="title" style={{ marginBottom: 8 }}>
-                  Tu perfil de sabor
-                </AppText>
-                <AppText variant="body" color={C.onSurfaceVariant}>
-                  Elige tus estilos favoritos para personalizar tu experiencia.
-                </AppText>
-              </View>
+              <StepHeader
+                icon="silverware-fork-knife"
+                title="Tu perfil de sabor"
+                subtitle="Elige tus estilos favoritos y te mostramos primero lo que te gusta."
+              />
 
               {/* Grid 2 columnas */}
               <View
@@ -367,20 +383,11 @@ export default function RegisterScreen() {
           {/* ════ STEP 2 — Contraseña ════ */}
           {step === 2 && (
             <>
-              <View className="items-center mb-8">
-                <View
-                  className="p-4 rounded-3xl mb-4"
-                  style={{ backgroundColor: C.primaryFixed + '66' }}
-                >
-                  <Icon name="shield-lock-outline" size={40} color={C.primary} />
-                </View>
-                <AppText variant="title" align="center" style={{ marginBottom: 8 }}>
-                  Crea tu contraseña
-                </AppText>
-                <AppText variant="body" color={C.onSurfaceVariant} align="center">
-                  Mínimo 8 caracteres. Hazla memorable pero segura.
-                </AppText>
-              </View>
+              <StepHeader
+                icon="lock-outline"
+                title="Crea tu contraseña"
+                subtitle="Mínimo 8 caracteres. Que sea memorable pero segura."
+              />
               <View style={{ gap: 16 }}>
                 <Field
                   label="Contraseña"
@@ -407,44 +414,40 @@ export default function RegisterScreen() {
           {/* ════ STEP 3 — Ubicación ════ */}
           {step === 3 && (
             <>
-              <View className="mb-6">
-                <AppText variant="title" style={{ marginBottom: 8 }}>
-                  Encuentra tu barrio
-                </AppText>
-                <AppText variant="body" color={C.onSurfaceVariant}>
-                  Define tu radio de búsqueda para descubrir sabores cerca tuyo.
-                </AppText>
-              </View>
+              <StepHeader
+                icon="map-marker"
+                title="Tu zona"
+                subtitle="Define hasta dónde estás dispuesto a ir por un buen plato."
+              />
 
-              {/* Mapa placeholder con círculo animado */}
+              {/* Radio visualizado */}
               <View
                 className="w-full rounded-[32px] overflow-hidden mb-8 items-center justify-center border"
                 style={{
-                  height: 280,
-                  backgroundColor: C.surfaceContainerHighest,
+                  height: 230,
+                  backgroundColor: C.surfaceContainerHigh,
                   borderColor: C.border,
-                  ...shadow.md,
+                  ...shadow.sm,
                 }}
               >
-                {/* Círculo de radio animado */}
                 <View
                   className="rounded-full items-center justify-center"
                   style={{
-                    width: 80 + radius * 12,
-                    height: 80 + radius * 12,
-                    backgroundColor: C.primary + '14',
+                    width: 80 + radius * 11,
+                    height: 80 + radius * 11,
+                    backgroundColor: C.primary + '1f',
                     borderWidth: 1,
-                    borderColor: C.primary + '33',
+                    borderColor: C.primary + '44',
                   }}
                 >
                   <View
                     className="rounded-full items-center justify-center"
                     style={{
-                      width: 60 + radius * 6,
-                      height: 60 + radius * 6,
-                      backgroundColor: C.primary + '0f',
+                      width: 58 + radius * 5,
+                      height: 58 + radius * 5,
+                      backgroundColor: C.primary + '1a',
                       borderWidth: 1,
-                      borderColor: C.primary + '4d',
+                      borderColor: C.primary + '55',
                     }}
                   >
                     {/* Pin central */}
@@ -535,14 +538,11 @@ export default function RegisterScreen() {
           {/* ════ STEP 4 — Tema ════ */}
           {step === 4 && (
             <>
-              <View className="mb-6">
-                <AppText variant="title" style={{ marginBottom: 8 }}>
-                  Claro u oscuro
-                </AppText>
-                <AppText variant="body" color={C.onSurfaceVariant}>
-                  Elige cómo se ve la app. Puedes cambiarlo cuando quieras en ajustes.
-                </AppText>
-              </View>
+              <StepHeader
+                icon="sun"
+                title="Claro u oscuro"
+                subtitle="Elige cómo se ve la app. Lo puedes cambiar cuando quieras en Ajustes."
+              />
               <ThemePicker />
             </>
           )}
