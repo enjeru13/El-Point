@@ -476,7 +476,7 @@ export default function RegisterOwnerScreen() {
                 </View>
               </View>
 
-              {/* Badge gamificación */}
+              {/* Beneficio al aprobar */}
               <View
                 style={{
                   marginTop: 32,
@@ -495,34 +495,14 @@ export default function RegisterOwnerScreen() {
                     marginBottom: 8,
                   }}
                 >
-                  <Icon name="trending-up" size={22} color={C.secondary} />
+                  <Icon name="fire" size={22} color={C.secondary} />
                   <AppText variant="bodyStrong" style={{ flex: 1 }}>
-                    Obtén el badge "Local Heat" 🔥
+                    Arranca como "Destacado"
                   </AppText>
                 </View>
-                <AppText variant="body" color={C.onSecondaryContainer} style={{ marginBottom: 12 }}>
-                  Completa tu perfil hoy y recibe 2 semanas de boost en
-                  búsquedas locales.
-                </AppText>
-                <View
-                  style={{
-                    height: 8,
-                    borderRadius: 99,
-                    overflow: "hidden",
-                    backgroundColor: "rgba(0,0,0,0.12)",
-                  }}
-                >
-                  <View
-                    style={{
-                      height: "100%",
-                      borderRadius: 99,
-                      width: "35%",
-                      backgroundColor: C.secondary,
-                    }}
-                  />
-                </View>
-                <AppText variant="overline" color={C.secondary} style={{ marginTop: 6 }}>
-                  35% COMPLETADO
+                <AppText variant="body" color={C.onSecondaryContainer}>
+                  Apenas aprobemos tu local, sale con la etiqueta Destacado y de
+                  primero en las búsquedas y el mapa durante 14 días. Sin costo.
                 </AppText>
               </View>
             </>

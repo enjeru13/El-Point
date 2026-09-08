@@ -12,6 +12,7 @@ export type FeedRestaurant = {
   cover_url: string | null;
   lat: number | null;
   lng: number | null;
+  boost_until: string | null;
   categories: RestaurantCategory[];
   amenities: RestaurantAmenity[];
 };
@@ -43,7 +44,7 @@ function num(v: any): number | null {
 }
 
 const RESTAURANT_EMBED = `restaurant:restaurants (
-  id, name, address, rating_avg, rating_count, promo_text, cover_url, latitude, longitude,
+  id, name, address, rating_avg, rating_count, promo_text, cover_url, latitude, longitude, boost_until,
   restaurant_categories ( categories ( slug, label, icon ) ),
   restaurant_amenities ( amenities ( id, slug, label, icon ) )
 )`;
@@ -80,6 +81,7 @@ async function fetchFeed(): Promise<FeedItem[]> {
         cover_url: r.restaurant.cover_url ?? null,
         lat: num(r.restaurant.latitude),
         lng: num(r.restaurant.longitude),
+        boost_until: r.restaurant.boost_until ?? null,
         categories: mapCategories(r.restaurant.restaurant_categories),
         amenities: mapAmenities(r.restaurant.restaurant_amenities),
       },
@@ -122,6 +124,7 @@ async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
       cover_url: f.restaurant.cover_url ?? null,
       lat: num(f.restaurant.latitude),
       lng: num(f.restaurant.longitude),
+      boost_until: f.restaurant.boost_until ?? null,
       categories: mapCategories(f.restaurant.restaurant_categories),
       amenities: mapAmenities(f.restaurant.restaurant_amenities),
       favorited_at: f.created_at,

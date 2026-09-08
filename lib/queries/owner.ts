@@ -25,6 +25,7 @@ export type OwnerRestaurant = {
   rif: string | null;
   rating_avg: number;
   rating_count: number;
+  boost_until: string | null;
   created_at: string;
   categories: RestaurantCategory[];
   amenities: RestaurantAmenity[];
@@ -43,7 +44,7 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
       `id, name, description, address, phone, whatsapp, instagram, price_level,
        logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
        status, status_reason, submitted_at, verification_photo_path, rif,
-       rating_avg, rating_count, created_at,
+       rating_avg, rating_count, boost_until, created_at,
        restaurant_categories ( categories ( slug, label, icon ) ),
        restaurant_amenities ( amenities ( id, slug, label, icon ) )`,
     )

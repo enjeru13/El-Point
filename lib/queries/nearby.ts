@@ -12,6 +12,7 @@ export type NearbyRestaurant = {
   rating_count: number;
   cover_url: string | null;
   logo_url: string | null;
+  boost_until: string | null;
   distance_m: number;
 };
 

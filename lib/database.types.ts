@@ -326,6 +326,7 @@ export type Database = {
       restaurants: {
         Row: {
           address: string | null
+          boost_until: string | null
           cover_url: string | null
           created_at: string
           description: string | null
@@ -356,6 +357,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          boost_until?: string | null
           cover_url?: string | null
           created_at?: string
           description?: string | null
@@ -386,6 +388,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          boost_until?: string | null
           cover_url?: string | null
           created_at?: string
           description?: string | null
@@ -1048,6 +1051,7 @@ export type Database = {
         }
         Returns: {
           address: string
+          boost_until: string | null
           cover_url: string
           distance_m: number
           id: string
@@ -1059,6 +1063,10 @@ export type Database = {
           rating_avg: number
           rating_count: number
         }[]
+      }
+      admin_set_restaurant_boost: {
+        Args: { p_restaurant_id: string; p_days: number }
+        Returns: string | null
       }
       owns_restaurant_path: { Args: { object_name: string }; Returns: boolean }
       owns_review_path: { Args: { object_name: string }; Returns: boolean }

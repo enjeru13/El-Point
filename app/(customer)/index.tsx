@@ -16,6 +16,7 @@ import {
   type FeedItem,
 } from "@/lib/queries/feed";
 import { useCategories } from "@/lib/queries/categories";
+import { isBoosted } from "@/lib/queries/restaurants";
 import { useMyProfile } from "@/lib/queries/me";
 import { useSettings } from "@/lib/settings";
 import { distanceKm, fmtKm, type LatLng } from "@/lib/geo";
@@ -182,8 +183,18 @@ function ReviewCard({
           {item.restaurant.name}
         </AppText>
 
-        {(dist || cat) && (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        {(dist || cat || isBoosted(item.restaurant)) && (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            {isBoosted(item.restaurant) && (
+              <View style={{
+                flexDirection: "row", alignItems: "center", gap: 3,
+                paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99,
+                backgroundColor: C.primary + "22", borderWidth: 1, borderColor: C.primary + "55",
+              }}>
+                <Icon name="fire" size={11} color={C.primary} />
+                <AppText variant="caption" color={C.primary} style={{ fontSize: 10 }}>Destacado</AppText>
+              </View>
+            )}
             {cat && (
               <AppText variant="caption" color={C.outline}>{cat.label}</AppText>
             )}

@@ -14,6 +14,7 @@ export type SearchResult = {
   hours: Hours | null;
   lat: number | null;
   lng: number | null;
+  boost_until: string | null;
   categories: RestaurantCategory[];
   amenities: RestaurantAmenity[];
 };
@@ -23,7 +24,7 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
     .from("restaurants")
     .select(
       `id, name, address, price_level, rating_avg, rating_count, cover_url, hours,
-       latitude, longitude,
+       latitude, longitude, boost_until,
        restaurant_categories ( categories ( slug, label, icon ) ),
        restaurant_amenities ( amenities ( id, slug, label, icon ) )`,
     )
@@ -43,6 +44,7 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
     hours: parseHours(r.hours),
     lat: typeof r.latitude === "number" ? r.latitude : null,
     lng: typeof r.longitude === "number" ? r.longitude : null,
+    boost_until: r.boost_until ?? null,
     categories: (r.restaurant_categories ?? [])
       .map((rc: any) => rc.categories)
       .filter(Boolean),

@@ -25,6 +25,7 @@ import {
 } from "@/lib/queries/reviews";
 import {
   useReportRestaurant,
+  isBoosted,
   RESTAURANT_REPORT_REASONS,
   type RestaurantReportReason,
 } from "@/lib/queries/restaurants";
@@ -710,8 +711,28 @@ export default function RestaurantProfileScreen() {
             }}
           >
             {/* Chips */}
-            {restaurant.categories.length > 0 && (
+            {(restaurant.categories.length > 0 || isBoosted(restaurant)) && (
               <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+                {isBoosted(restaurant) && (
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 4,
+                      paddingHorizontal: 10,
+                      paddingVertical: 4,
+                      borderRadius: 99,
+                      backgroundColor: "rgba(255,255,255,0.18)",
+                      borderWidth: 1,
+                      borderColor: "rgba(255,255,255,0.35)",
+                    }}
+                  >
+                    <Icon name="fire" size={12} color="#fff" />
+                    <AppText variant="caption" color="#fff" style={{ fontSize: 12 }}>
+                      DESTACADO
+                    </AppText>
+                  </View>
+                )}
                 {restaurant.categories.map((c) => (
                   <View
                     key={c.slug}

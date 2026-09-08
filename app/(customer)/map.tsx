@@ -24,6 +24,7 @@ import { Chip } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/lib/toast';
 import { useNearby, useRestaurantIcons, useRestaurantAmenitiesMap, type NearbyRestaurant, type NearbyAmenity } from '@/lib/queries/nearby';
+import { isBoosted } from '@/lib/queries/restaurants';
 import { useCategories } from '@/lib/queries/categories';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -200,9 +201,21 @@ function RestaurantCard({
         </View>
 
         <View style={{ flex: 1, justifyContent: 'center', gap: 3 }}>
-          <AppText variant="heading" style={{ fontSize: 17, lineHeight: 21 }} numberOfLines={1}>
-            {restaurant.name}
-          </AppText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <AppText variant="heading" style={{ fontSize: 17, lineHeight: 21, flexShrink: 1 }} numberOfLines={1}>
+              {restaurant.name}
+            </AppText>
+            {isBoosted(restaurant) && (
+              <View style={{
+                flexDirection: 'row', alignItems: 'center', gap: 3,
+                paddingHorizontal: 7, paddingVertical: 2, borderRadius: 99,
+                backgroundColor: C.primary + '22', borderWidth: 1, borderColor: C.primary + '55',
+              }}>
+                <Icon name="fire" size={11} color={C.primary} />
+                <AppText variant="caption" color={C.primary} style={{ fontSize: 10 }}>Destacado</AppText>
+              </View>
+            )}
+          </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <StarRow rating={Math.round(restaurant.rating_avg)} size={13} />
             <AppText variant="caption" color={C.onSurfaceVariant}>

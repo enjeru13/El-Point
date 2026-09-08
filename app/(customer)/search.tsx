@@ -17,6 +17,7 @@ import { AppText } from '@/components/ui/AppText';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { useRestaurantSearch, type SearchResult } from '@/lib/queries/search';
+import { isBoosted } from '@/lib/queries/restaurants';
 import { useCategories } from '@/lib/queries/categories';
 import { isOpenNow } from '@/lib/hours';
 import { distanceKm, fmtKm, type LatLng } from '@/lib/geo';
@@ -162,6 +163,16 @@ function PlaceCard({
       {/* Body */}
       <View style={{ padding: featured ? 16 : 14, gap: 6 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          {isBoosted(item) && (
+            <View style={{
+              flexDirection: 'row', alignItems: 'center', gap: 4,
+              paddingHorizontal: 9, paddingVertical: 3, borderRadius: 99,
+              backgroundColor: C.primary + '22', borderWidth: 1, borderColor: C.primary + '55',
+            }}>
+              <Icon name="fire" size={12} color={C.primary} />
+              <AppText variant="caption" color={C.primary} style={{ fontSize: 11 }}>Destacado</AppText>
+            </View>
+          )}
           <View style={{
             paddingHorizontal: 9, paddingVertical: 3, borderRadius: 99,
             backgroundColor: C.secondaryContainer, borderWidth: 1.5, borderColor: C.border,
@@ -354,10 +365,19 @@ export default function SearchScreen() {
         if (r.categories.some(c => c.label.toLowerCase().includes(q))) return 3;
         return 4;
       };
-      list = [...list].sort((a, b) => score(a) - score(b) || b.rating_count - a.rating_count);
+      list = [...list].sort(
+        (a, b) =>
+          score(a) - score(b) ||
+          (isBoosted(b) ? 1 : 0) - (isBoosted(a) ? 1 : 0) ||
+          b.rating_count - a.rating_count,
+      );
     } else {
-      // category browse → alphabetical
-      list = [...list].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+      // category browse → destacados primero, luego alfabético
+      list = [...list].sort(
+        (a, b) =>
+          (isBoosted(b) ? 1 : 0) - (isBoosted(a) ? 1 : 0) ||
+          a.name.localeCompare(b.name, 'es'),
+      );
     }
     return list;
   }, [all, query, activeCat, price, sort, onlyOpen, userLoc]);

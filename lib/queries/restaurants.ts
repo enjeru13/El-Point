@@ -15,6 +15,11 @@ export type RestaurantAmenity = {
   icon: string;
 };
 
+/** Un local está "destacado" mientras boost_until esté en el futuro. */
+export function isBoosted(r: { boost_until?: string | null } | null | undefined): boolean {
+  return !!r?.boost_until && new Date(r.boost_until).getTime() > Date.now();
+}
+
 export type RestaurantDetail = {
   id: string;
   owner_id: string | null;
@@ -35,6 +40,7 @@ export type RestaurantDetail = {
   status_reason: string | null;
   rating_avg: number;
   rating_count: number;
+  boost_until: string | null;
   categories: RestaurantCategory[];
   amenities: RestaurantAmenity[];
 };
@@ -49,7 +55,7 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
     .select(
       `id, owner_id, name, description, address, whatsapp, instagram, phone,
        price_level, logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
-       status, status_reason, rating_avg, rating_count,
+       status, status_reason, rating_avg, rating_count, boost_until,
        restaurant_categories ( categories ( slug, label, icon ) ),
        restaurant_amenities ( amenities ( id, slug, label, icon ) )`,
     )

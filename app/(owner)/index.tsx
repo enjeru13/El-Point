@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews, type Review } from '@/lib/queries/reviews';
+import { isBoosted } from '@/lib/queries/restaurants';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { Avatar } from '@/components/ui/Avatar';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -260,6 +261,19 @@ export default function OwnerHomeScreen() {
               </AppText>
             </View>
           </View>
+          {isBoosted(restaurant) && (
+            <View style={{
+              flexDirection: 'row', alignItems: 'center', gap: 8,
+              paddingHorizontal: 16, paddingVertical: 10,
+              borderTopWidth: 1, borderTopColor: C.border,
+              backgroundColor: C.primary + '14',
+            }}>
+              <Icon name="fire" size={15} color={C.primary} />
+              <AppText variant="caption" color={C.primary} style={{ flex: 1 }}>
+                Local destacado hasta el {new Date(restaurant.boost_until!).toLocaleDateString('es-VE', { day: 'numeric', month: 'long' })}
+              </AppText>
+            </View>
+          )}
           <Pressable
             onPress={() => router.push('/(owner)/profile')}
             android_ripple={{ color: C.outlineVariant }}
