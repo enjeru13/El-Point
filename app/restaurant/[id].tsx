@@ -531,6 +531,9 @@ export default function RestaurantProfileScreen() {
   // Distribución sólo con reseñas visibles (una oculta propia no debe sesgarla).
   const ratedReviews = reviews.filter((r) => r.moderation === "visible");
   const isOwnerHere = !!myProfileQ.data?.id && myProfileQ.data.id === restaurant.owner_id;
+  const myReview = myProfileQ.data?.id
+    ? reviews.find((r) => r.author?.id === myProfileQ.data!.id)
+    : undefined;
   const heroIcon = restaurant.categories[0]?.icon ?? "silverware-fork-knife";
   const priceStr = priceLabel(restaurant.price_level);
   const dist = [5, 4, 3, 2, 1].map(
@@ -829,9 +832,9 @@ export default function RestaurantProfileScreen() {
           {!isOwnerHere && (
             <View style={{ flexDirection: "row", gap: 10 }}>
               <Button
-                label="Rankear"
-                onPress={startCreateReview}
-                icon="fire"
+                label={myReview ? "Editar rank" : "Rankear"}
+                onPress={() => (myReview ? startEditReview(myReview) : startCreateReview())}
+                icon={myReview ? "pencil-outline" : "fire"}
                 size="sm"
                 fullWidth={false}
                 style={{ flex: 2 }}
@@ -1169,9 +1172,9 @@ export default function RestaurantProfileScreen() {
               </View>
               {!isOwnerHere && (
                 <Button
-                  label="Deja tu rank"
-                  onPress={startCreateReview}
-                  icon="fire"
+                  label={myReview ? "Editar mi rank" : "Deja tu rank"}
+                  onPress={() => (myReview ? startEditReview(myReview) : startCreateReview())}
+                  icon={myReview ? "pencil-outline" : "fire"}
                   size="sm"
                   fullWidth={false}
                 />

@@ -131,7 +131,11 @@ export function useSubmitReview(restaurantId: string) {
         })
         .select("id")
         .single();
-      if (error) throw error;
+      if (error) {
+        if (error.code === "23505")
+          throw new Error("Ya dejaste tu rank en este local. Edítalo desde tu reseña.");
+        throw error;
+      }
 
       if (photoUris.length > 0 && review) {
         const rows = await Promise.all(
