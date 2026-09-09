@@ -1,0 +1,32 @@
+# Netlify config for the El Point landing site (static, no build step).
+# The Expo app is NOT built or deployed here.
+
+[build]
+  publish = "landing"
+  command = ""
+
+# Clean URLs — so the Play/App Store consoles can use links without ".html".
+[[redirects]]
+  from = "/terminos"
+  to = "/terminos.html"
+  status = 200
+[[redirects]]
+  from = "/privacidad"
+  to = "/privacidad.html"
+  status = 200
+[[redirects]]
+  from = "/soporte"
+  to = "/soporte.html"
+  status = 200
+[[redirects]]
+  from = "/eliminar-cuenta"
+  to = "/eliminar-cuenta.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
