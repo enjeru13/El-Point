@@ -8,6 +8,7 @@ import { Chip } from "@/components/ui/Chip";
 import { NotificationBell } from "@/components/ui/NotificationBell";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { SearchBar } from "@/components/ui/SearchBar";
+import { StarBadge } from "@/components/ui/StarBadge";
 import {
   useFavoriteIds,
   useFavorites,
@@ -124,28 +125,11 @@ function ReviewCard({
         )}
 
         {/* Rating */}
-        <View
-          style={{
-            position: "absolute",
-            top: 12,
-            right: 12,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 4,
-            paddingHorizontal: 10,
-            paddingVertical: 4,
-            borderRadius: 99,
-            backgroundColor: C.secondaryContainer,
-            borderWidth: 1,
-            borderColor: C.border,
-          }}
-        >
-          <Icon name="star" size={14} color={C.secondary} />
-          <AppText variant="bodyStrong" color={C.secondary}>
-            {item.restaurant.rating_count > 0
-              ? item.restaurant.rating_avg.toFixed(1)
-              : "Nuevo"}
-          </AppText>
+        <View style={{ position: "absolute", top: 12, right: 12 }}>
+          <StarBadge
+            rating={item.restaurant.rating_avg}
+            count={item.restaurant.rating_count}
+          />
         </View>
 
         {/* PROMO badge */}
@@ -335,6 +319,7 @@ function FavoriteRow({
   name,
   address,
   rating,
+  ratingCount,
   icon,
   cover,
   lat,
@@ -345,6 +330,7 @@ function FavoriteRow({
   name: string;
   address: string | null;
   rating: number;
+  ratingCount: number;
   icon: string;
   cover: string | null;
   lat: number | null;
@@ -413,10 +399,7 @@ function FavoriteRow({
           )}
         </View>
       </View>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
-        <Icon name="star" size={13} color={C.secondary} />
-        <AppText variant="label">{rating > 0 ? rating.toFixed(1) : "–"}</AppText>
-      </View>
+      <StarBadge rating={rating} count={ratingCount} size="sm" />
     </Pressable>
   );
 }
@@ -648,6 +631,7 @@ export default function HomeScreen() {
                   name={f.name}
                   address={f.address}
                   rating={f.rating_avg}
+                  ratingCount={f.rating_count}
                   icon={f.categories[0]?.icon ?? "silverware-fork-knife"}
                   cover={f.cover_url}
                   lat={f.lat}

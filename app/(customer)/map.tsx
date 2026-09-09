@@ -19,7 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FLOATING_NAV_H } from '@/lib/theme';
 import { useTheme } from '@/lib/ThemeContext';
 import { SearchBar } from '@/components/ui/SearchBar';
-import { StarRow } from '@/components/ui/StarRow';
+import { StarBadge } from '@/components/ui/StarBadge';
 import { Chip } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/lib/toast';
@@ -217,12 +217,12 @@ function RestaurantCard({
             )}
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <StarRow rating={Math.round(restaurant.rating_avg)} size={13} />
-            <AppText variant="caption" color={C.onSurfaceVariant}>
-              {restaurant.rating_count > 0
-                ? `${restaurant.rating_avg.toFixed(1)} (${restaurant.rating_count})`
-                : 'Sin ranks'}
-            </AppText>
+            <StarBadge rating={restaurant.rating_avg} count={restaurant.rating_count} size="sm" />
+            {restaurant.rating_count > 0 && (
+              <AppText variant="caption" color={C.outline}>
+                {restaurant.rating_count} {restaurant.rating_count === 1 ? 'rank' : 'ranks'}
+              </AppText>
+            )}
           </View>
           {!!meta && (
             <AppText variant="caption" color={C.outline}>{meta}</AppText>

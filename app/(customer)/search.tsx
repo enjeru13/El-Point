@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { useRestaurantSearch, type SearchResult } from '@/lib/queries/search';
 import { isBoosted } from '@/lib/queries/restaurants';
+import { StarBadge } from '@/components/ui/StarBadge';
 import { useCategories } from '@/lib/queries/categories';
 import { useAmenities } from '@/lib/queries/amenities';
 import { isOpenNow } from '@/lib/hours';
@@ -51,33 +52,6 @@ function priceLabel(level: number | null): string {
 }
 
 // ─── Components ───────────────────────────────────────────────────────────────
-
-function StarBadgeInline({ rating, count }: { rating: number; count: number }) {
-  const { C } = useTheme();
-  if (count === 0) {
-    return (
-      <View style={{
-        paddingHorizontal: 8, paddingVertical: 4, borderRadius: 99,
-        backgroundColor: C.surfaceContainerHighest, borderWidth: 1, borderColor: C.border,
-      }}>
-        <AppText variant="label" color={C.onSurfaceVariant}>Nuevo</AppText>
-      </View>
-    );
-  }
-  const strong = rating >= 4.5;
-  const bg = rating >= 5.0 ? C.secondary : strong ? C.primaryContainer : C.secondaryContainer;
-  const text = strong ? '#fff' : C.onSurface;
-  return (
-    <View style={{
-      flexDirection: 'row', alignItems: 'center', gap: 4,
-      paddingHorizontal: 8, paddingVertical: 4, borderRadius: 99,
-      backgroundColor: bg, borderWidth: 1, borderColor: C.border,
-    }}>
-      <Icon name="star" size={13} color={text} />
-      <AppText variant="label" color={text}>{rating.toFixed(1)}</AppText>
-    </View>
-  );
-}
 
 function catLabel(item: SearchResult): string {
   return item.categories[0]?.label ?? 'Restaurante';
@@ -157,7 +131,7 @@ function PlaceCard({
           <OpenPill hours={item.hours} />
         </View>
         <View style={{ position: 'absolute', top: 12, right: 12 }}>
-          <StarBadgeInline rating={item.rating_avg} count={item.rating_count} />
+          <StarBadge rating={item.rating_avg} count={item.rating_count} size={featured ? 'md' : 'sm'} />
         </View>
       </View>
 
