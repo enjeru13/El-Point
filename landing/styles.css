@@ -61,6 +61,13 @@ strong { font-weight: 700; }
 
 .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 20px; }
 
+/* lucide icon helper — every SVG in the page uses .i */
+.i {
+  width: 1em; height: 1em; display: inline-block; vertical-align: middle;
+  stroke: currentColor; fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+
 /* ── Nav ── */
 .nav {
   position: sticky; top: 0; z-index: 30;
@@ -69,7 +76,7 @@ strong { font-weight: 700; }
   border-bottom: 1px solid var(--border);
 }
 .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 66px; }
-.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; color: var(--text); }
+.brand { display: flex; align-items: center; gap: 9px; font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; color: var(--text); }
 .brand:hover { text-decoration: none; }
 .brand .dot {
   width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center;
@@ -90,35 +97,35 @@ strong { font-weight: 700; }
   border: 1px solid transparent; cursor: pointer;
   transition: transform 0.12s ease, filter 0.12s ease, border-color 0.12s ease, background 0.12s ease;
 }
+.btn .i { font-size: 1.05rem; }
 .btn:active { transform: translateY(1px); }
 .btn-primary { background: linear-gradient(150deg, var(--brand), var(--brand-2)); color: var(--brand-ink); box-shadow: var(--shadow-sm); }
 .btn-primary:hover { text-decoration: none; filter: brightness(1.06); transform: translateY(-1px); }
 .btn-ghost { background: var(--surface); color: var(--text); border-color: var(--border); }
 .btn-ghost:hover { text-decoration: none; border-color: var(--brand); transform: translateY(-1px); }
 
-/* ── Store buttons ── */
-.stores { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 22px; }
+/* ── Store row ── */
+.stores { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 24px; }
 .badge-link { display: inline-block; line-height: 0; }
-.badge-link img { height: 56px; width: auto; display: block; }
+.badge-link img { height: 54px; width: auto; display: block; }
 .badge-link:hover { text-decoration: none; opacity: 0.9; }
+/* App Store "pronto" — pastilla negra tipo badge oficial (fija en ambos temas) */
 .store {
   display: flex; align-items: center; gap: 11px;
-  padding: 10px 18px; border-radius: 14px;
-  background: var(--text); color: var(--bg);
-  border: 1px solid var(--text);
-  min-width: 190px;
+  height: 54px; padding: 0 18px; border-radius: 13px;
+  background: #0c0c0e; color: #fff; border: 1px solid #26262b;
 }
 .store:hover { text-decoration: none; opacity: 0.92; }
-.store svg { width: 24px; height: 24px; flex: none; }
-.store .s1 { font-size: 0.68rem; opacity: 0.8; display: block; letter-spacing: 0.04em; text-transform: uppercase; }
-.store .s2 { font-family: var(--font-display); font-weight: 700; font-size: 1.02rem; line-height: 1.1; }
+.store .i, .store svg { width: 22px; height: 22px; flex: none; color: #fff; }
+.store .s1 { font-size: 0.66rem; color: rgba(255,255,255,0.7); display: block; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1.2; }
+.store .s2 { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; line-height: 1.15; color: #fff; }
 
 /* ── Hero ── */
-.hero { position: relative; padding: 84px 0 64px; overflow: hidden; }
-.hero::before {
-  content: ""; position: absolute; inset: -30% -10% auto -10%; height: 640px; z-index: 0;
-  background: radial-gradient(60% 60% at 30% 20%, color-mix(in srgb, var(--brand) 22%, transparent), transparent 70%);
-  pointer-events: none;
+.hero {
+  position: relative; padding: 84px 0 64px; overflow: hidden;
+  background:
+    radial-gradient(70% 60% at 25% 0%, color-mix(in srgb, var(--brand) 20%, transparent), transparent 70%),
+    linear-gradient(180deg, color-mix(in srgb, var(--brand) 8%, var(--bg)), var(--bg) 70%);
 }
 .hero .wrap { position: relative; z-index: 2; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 52px; align-items: center; }
 @media (max-width: 900px) { .hero .wrap { grid-template-columns: 1fr; gap: 40px; } }
@@ -130,16 +137,22 @@ strong { font-weight: 700; }
   color: var(--brand); background: color-mix(in srgb, var(--brand) 13%, transparent);
   padding: 7px 13px; border-radius: 999px; margin-bottom: 20px;
 }
-.cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.eyebrow .i { font-size: 0.95rem; }
+.cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
 
-/* food emoji backdrop — echo of the app's FoodBackdrop */
-.food-bg { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
-.food-bg span { position: absolute; font-size: 60px; opacity: 0.05; filter: grayscale(0.2); }
-.food-bg span:nth-child(1) { top: 8%; left: 6%; transform: rotate(-12deg); }
-.food-bg span:nth-child(2) { top: 62%; left: 2%; font-size: 44px; transform: rotate(9deg); }
-.food-bg span:nth-child(3) { top: 22%; right: 40%; font-size: 38px; transform: rotate(18deg); }
-.food-bg span:nth-child(4) { bottom: 10%; right: 8%; transform: rotate(-8deg); }
-.food-bg span:nth-child(5) { top: 4%; right: 14%; font-size: 40px; transform: rotate(6deg); }
+/* food-icon field — eco del FoodBackdrop del login de la app */
+.food-bg { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; color: var(--brand); }
+.food-bg .i { position: absolute; opacity: 0.07; }
+.food-bg .i:nth-child(1)  { top: 6%;   left: 4%;   font-size: 66px; transform: rotate(-14deg); }
+.food-bg .i:nth-child(2)  { top: 54%;  left: 1%;   font-size: 48px; transform: rotate(10deg); }
+.food-bg .i:nth-child(3)  { top: 84%;  left: 12%;  font-size: 40px; transform: rotate(-6deg); }
+.food-bg .i:nth-child(4)  { top: 20%;  left: 30%;  font-size: 34px; transform: rotate(16deg); opacity: 0.05; }
+.food-bg .i:nth-child(5)  { top: 70%;  left: 40%;  font-size: 30px; transform: rotate(-10deg); opacity: 0.05; }
+.food-bg .i:nth-child(6)  { top: 4%;   right: 30%; font-size: 42px; transform: rotate(8deg); }
+.food-bg .i:nth-child(7)  { top: 44%;  right: 4%;  font-size: 56px; transform: rotate(-12deg); }
+.food-bg .i:nth-child(8)  { top: 8%;   right: 6%;  font-size: 38px; transform: rotate(6deg); }
+.food-bg .i:nth-child(9)  { bottom: 6%; right: 14%; font-size: 50px; transform: rotate(-8deg); }
+.food-bg .i:nth-child(10) { bottom: 22%; right: 34%; font-size: 32px; transform: rotate(14deg); opacity: 0.05; }
 
 /* ── App mock ── */
 .mock { position: relative; justify-self: center; width: min(300px, 78vw); }
@@ -180,14 +193,14 @@ strong { font-weight: 700; }
   font-family: var(--font-display); font-weight: 700; font-size: 0.8rem;
   padding: 5px 10px; border-radius: 999px; border: 1px solid var(--border);
 }
-.frame .cover .rate::before { content: "★"; color: var(--gold); }
+.frame .cover .rate .i { font-size: 0.85rem; color: var(--gold); fill: var(--gold); }
 .frame .body { padding: 14px 16px 20px; }
 .frame .body h4 { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; margin: 0 0 4px; }
 .frame .body .meta { color: var(--text-soft); font-size: 0.78rem; margin-bottom: 12px; }
 .frame .amn { display: flex; gap: 6px; }
 .frame .amn i {
   width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center;
-  background: var(--surface-2); font-style: normal; font-size: 14px;
+  background: var(--surface-2); color: var(--text-soft); font-size: 15px;
 }
 .frame .featured {
   position: absolute; z-index: 2; right: -14px; top: 84px;
@@ -197,6 +210,7 @@ strong { font-weight: 700; }
   font-family: var(--font-display); font-weight: 700; font-size: 0.75rem; color: var(--brand);
   padding: 8px 12px; border-radius: 999px;
 }
+.frame .featured .i { font-size: 0.9rem; }
 .frame .level {
   position: absolute; z-index: 2; left: -20px; bottom: -16px;
   display: flex; align-items: center; gap: 8px;
@@ -222,8 +236,8 @@ section { padding: 62px 0; position: relative; }
 .feature:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--brand) 45%, var(--border)); }
 .feature .ico {
   width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center;
-  background: color-mix(in srgb, var(--brand) 15%, transparent);
-  font-size: 23px; margin-bottom: 15px;
+  background: color-mix(in srgb, var(--brand) 15%, transparent); color: var(--brand);
+  font-size: 22px; margin-bottom: 15px;
 }
 .feature h3 { margin-bottom: 6px; }
 .feature p { color: var(--text-soft); margin: 0; font-size: 0.96rem; }
@@ -233,10 +247,11 @@ section { padding: 62px 0; position: relative; }
 @media (max-width: 820px) { .band .wrap { grid-template-columns: 1fr; } }
 .checklist { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 12px; }
 .checklist li { display: flex; gap: 10px; align-items: flex-start; color: var(--text-soft); }
-.checklist li::before {
-  content: "✓"; color: var(--brand); font-weight: 800; flex: none;
-  width: 20px; height: 20px; display: grid; place-items: center;
-  background: color-mix(in srgb, var(--brand) 14%, transparent); border-radius: 6px; font-size: 0.8rem;
+.checklist li .i {
+  color: var(--brand); flex: none; font-size: 0.8rem;
+  width: 20px; height: 20px; padding: 4px;
+  background: color-mix(in srgb, var(--brand) 14%, transparent); border-radius: 6px;
+  stroke-width: 3;
 }
 
 /* ── Logros / rachas ── */
@@ -249,18 +264,19 @@ section { padding: 62px 0; position: relative; }
 }
 .badge .b-ico {
   width: 40px; height: 40px; margin: 0 auto 8px; border-radius: 12px; display: grid; place-items: center;
-  background: color-mix(in srgb, var(--brand) 15%, transparent); font-size: 19px;
+  background: color-mix(in srgb, var(--brand) 15%, transparent); color: var(--brand); font-size: 19px;
 }
 .badge span { display: block; font-family: var(--font-display); font-weight: 700; font-size: 0.82rem; }
 .badge small { color: var(--text-soft); font-size: 0.72rem; }
 .badge.locked { opacity: 0.45; }
-.badge.locked .b-ico { background: var(--surface-2); }
+.badge.locked .b-ico { background: var(--surface-2); color: var(--text-soft); }
 .streak-pill {
   display: inline-flex; align-items: center; gap: 8px; margin-top: 16px;
   background: color-mix(in srgb, var(--brand) 12%, transparent);
   color: var(--brand); font-family: var(--font-display); font-weight: 700;
   padding: 9px 15px; border-radius: 999px; font-size: 0.9rem;
 }
+.streak-pill .i { font-size: 1rem; }
 
 /* ── Screenshots ── */
 .shots { display: flex; gap: 18px; overflow-x: auto; padding: 6px 4px 18px; scroll-snap-type: x mandatory; }
@@ -299,6 +315,7 @@ section { padding: 62px 0; position: relative; }
 }
 .final h2 { margin-bottom: 10px; }
 .final p { color: var(--text-soft); margin-bottom: 22px; }
+.final .stores { justify-content: center; }
 
 /* ── Footer ── */
 .footer { border-top: 1px solid var(--border); padding: 44px 0; color: var(--text-soft); font-size: 0.92rem; }

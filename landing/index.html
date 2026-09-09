@@ -17,9 +17,39 @@
 </head>
 <body>
 
+  <!-- ── lucide icon sprite ── -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="ic-pin" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol>
+      <symbol id="ic-utensils" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></symbol>
+      <symbol id="ic-utensils-crossed" viewBox="0 0 24 24"><path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8"/><path d="M15 15 3.3 3.3a4.2 4.2 0 0 0 0 6l7.3 7.3c.7.7 2 .7 2.8 0L15 15Zm0 0 7 7"/><path d="m2.1 21.8 6.4-6.3"/><path d="m19 5-7 7"/></symbol>
+      <symbol id="ic-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+      <symbol id="ic-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+      <symbol id="ic-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+      <symbol id="ic-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+      <symbol id="ic-store" viewBox="0 0 24 24"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M18 12a2.83 2.83 0 0 1-2-.85A2.83 2.83 0 0 1 14 12a2.83 2.83 0 0 1-2-.85A2.83 2.83 0 0 1 10 12a2.83 2.83 0 0 1-2-.85A2.83 2.83 0 0 1 6 12a2.83 2.83 0 0 1-2-.85A2.83 2.83 0 0 1 2 7"/></symbol>
+      <symbol id="ic-thumbs-up" viewBox="0 0 24 24"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></symbol>
+      <symbol id="ic-map" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" x2="8" y1="2" y2="18"/><line x1="16" x2="16" y1="6" y2="22"/></symbol>
+      <symbol id="ic-pizza" viewBox="0 0 24 24"><path d="M15 11h.01"/><path d="M11 15h.01"/><path d="M16 16h.01"/><path d="m2 16 20 6-6-20A20 20 0 0 0 2 16"/><path d="M5.71 17.11a17.04 17.04 0 0 1 11.4-11.4"/></symbol>
+      <symbol id="ic-coffee" viewBox="0 0 24 24"><path d="M10 2v2"/><path d="M14 2v2"/><path d="M6 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/></symbol>
+      <symbol id="ic-wine" viewBox="0 0 24 24"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/></symbol>
+      <symbol id="ic-soup" viewBox="0 0 24 24"><path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z"/><path d="M7 21h10"/><path d="M19.5 12 22 6"/><path d="M16.25 3c.27.1.8.53.75 1.36-.06.83-.93 1.2-1 2.02-.05.78.34 1.24.73 1.62"/><path d="M11.25 3c.27.1.8.53.74 1.36-.05.83-.93 1.2-.98 2.02-.06.78.33 1.24.72 1.62"/><path d="M6.25 3c.27.1.8.53.75 1.36-.06.83-.93 1.2-1 2.02-.05.78.34 1.24.74 1.62"/></symbol>
+      <symbol id="ic-ice-cream" viewBox="0 0 24 24"><path d="m7 11 4.08 10.35a1 1 0 0 0 1.84 0L17 11"/><path d="M17 7A5 5 0 0 0 7 7"/><path d="M17 7a2 2 0 0 1 0 4H7a2 2 0 0 1 0-4"/></symbol>
+      <symbol id="ic-cookie" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/></symbol>
+      <symbol id="ic-beef" viewBox="0 0 24 24"><circle cx="12.5" cy="8.5" r="2.5"/><path d="M12.5 2a6.5 6.5 0 0 0-6.22 4.6c-1.1 3.13-.78 3.9-3.18 6.08A3 3 0 0 0 5 18c4 0 8.4-1.8 11.4-4.3a6.5 6.5 0 0 0-3.9-11.7Z"/><path d="m18.5 6 2.19 4.5a6.48 6.48 0 0 1 .31 2 6.49 6.49 0 0 1-2.6 5.2C15.4 22.2 11 24 7 24a3 3 0 0 1-2.68-1.66L2.4 18.5"/></symbol>
+      <symbol id="ic-snowflake" viewBox="0 0 24 24"><line x1="2" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="22"/><path d="m20 16-4-4 4-4"/><path d="m4 8 4 4-4 4"/><path d="m16 4-4 4-4-4"/><path d="m8 20 4-4 4 4"/></symbol>
+      <symbol id="ic-baby" viewBox="0 0 24 24"><path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/></symbol>
+      <symbol id="ic-parking" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></symbol>
+      <symbol id="ic-wifi" viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/></symbol>
+      <symbol id="ic-tree" viewBox="0 0 24 24"><path d="m17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14h-.3a1 1 0 0 1-.7-1.7L9 9h-.2A1 1 0 0 1 8 7.3L12 3l4 4.3a1 1 0 0 1-.8 1.7H15l3 3.3a1 1 0 0 1-.7 1.7H17Z"/><path d="M12 22v-3"/></symbol>
+      <symbol id="ic-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+      <symbol id="ic-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    </defs>
+  </svg>
+
   <header class="nav">
     <div class="wrap">
-      <a class="brand" href="/"><span class="dot">◈</span> El Point</a>
+      <a class="brand" href="/"><span class="dot"><svg class="i" style="color:var(--brand-ink)"><use href="#ic-pin"/></svg></span> El Point</a>
       <nav class="nav-links">
         <a href="#como-funciona">Cómo funciona</a>
         <a href="#logros">Logros</a>
@@ -34,11 +64,20 @@
     <!-- Hero -->
     <section class="hero">
       <div class="food-bg" aria-hidden="true">
-        <span>🍔</span><span>🌮</span><span>🍕</span><span>🍜</span><span>🍤</span>
+        <svg class="i"><use href="#ic-utensils"/></svg>
+        <svg class="i"><use href="#ic-pizza"/></svg>
+        <svg class="i"><use href="#ic-coffee"/></svg>
+        <svg class="i"><use href="#ic-wine"/></svg>
+        <svg class="i"><use href="#ic-soup"/></svg>
+        <svg class="i"><use href="#ic-ice-cream"/></svg>
+        <svg class="i"><use href="#ic-cookie"/></svg>
+        <svg class="i"><use href="#ic-beef"/></svg>
+        <svg class="i"><use href="#ic-utensils-crossed"/></svg>
+        <svg class="i"><use href="#ic-coffee"/></svg>
       </div>
       <div class="wrap">
         <div>
-          <span class="eyebrow">◈ San Cristóbal · Táchira</span>
+          <span class="eyebrow"><svg class="i"><use href="#ic-pin"/></svg> San Cristóbal · Táchira</span>
           <h1>Dónde comer, decidido por la ciudad.</h1>
           <p class="lead">
             Descubre locales, deja tu rank y sigue a tus favoritos para no perderte
@@ -54,25 +93,29 @@
             </a>
           </div>
           <div class="cta-row">
-            <a class="btn btn-ghost" href="#duenos">Tengo un local →</a>
+            <a class="btn btn-ghost" href="#duenos">Tengo un local <svg class="i"><use href="#ic-arrow-right"/></svg></a>
           </div>
         </div>
 
         <div class="mock" aria-hidden="true">
           <div class="glow"></div>
           <div class="frame">
-            <span class="featured">🔥 Destacado</span>
+            <span class="featured"><svg class="i"><use href="#ic-flame"/></svg> Destacado</span>
             <span class="level">Nivel <b>7</b> · 1.240 XP</span>
             <div class="view">
               <div class="cover">
                 <span class="ribbon">PROMO · 2x1 hoy</span>
-                <span class="rate">4.7</span>
+                <span class="rate"><svg class="i"><use href="#ic-star"/></svg> 4.7</span>
               </div>
               <div class="body">
                 <h4>La Esquina del Sabor</h4>
                 <div class="meta">Comida criolla · $$ · Abierto · 600 m</div>
                 <div class="amn">
-                  <i>❄️</i><i>👶</i><i>🅿️</i><i>📶</i><i>🎠</i>
+                  <i><svg class="i"><use href="#ic-snowflake"/></svg></i>
+                  <i><svg class="i"><use href="#ic-baby"/></svg></i>
+                  <i><svg class="i"><use href="#ic-parking"/></svg></i>
+                  <i><svg class="i"><use href="#ic-wifi"/></svg></i>
+                  <i><svg class="i"><use href="#ic-tree"/></svg></i>
                 </div>
               </div>
             </div>
@@ -90,17 +133,17 @@
         </div>
         <div class="grid-3">
           <div class="feature">
-            <div class="ico">🍽️</div>
+            <div class="ico"><svg class="i"><use href="#ic-utensils-crossed"/></svg></div>
             <h3>Descubre</h3>
             <p>Mapa y buscador con filtros por categoría, precio, si está abierto y comodidades: A/C, sillas de bebé, cambiador, parque infantil, solo efectivo y más.</p>
           </div>
           <div class="feature">
-            <div class="ico">⭐</div>
+            <div class="ico"><svg class="i"><use href="#ic-star"/></svg></div>
             <h3>Rankea y gana</h3>
             <p>Deja tu rank con foto. Suma XP, sube de nivel y desbloquea logros. Mantén tu racha semanal para ganar puntos extra.</p>
           </div>
           <div class="feature">
-            <div class="ico">🔔</div>
+            <div class="ico"><svg class="i"><use href="#ic-bell"/></svg></div>
             <h3>Promos de tus favoritos</h3>
             <p>Marca un local como favorito y te avisamos cuando publica una promo. Nada de spam: solo lo que sigues.</p>
           </div>
@@ -115,15 +158,15 @@
           <span class="eyebrow">Gamificación</span>
           <h2>Rankear tiene premio.</h2>
           <p>Cada reseña suma XP y te acerca al siguiente rango: de Novato a Leyenda. Completa misiones y mantén tu racha semanal para ganar puntos extra.</p>
-          <div class="streak-pill">🔥 Racha: 4 semanas rankeando</div>
+          <div class="streak-pill"><svg class="i"><use href="#ic-flame"/></svg> Racha: 4 semanas rankeando</div>
         </div>
         <div class="badges">
-          <div class="badge"><div class="b-ico">⭐</div><span>Primera reseña</span><small>+20 XP</small></div>
-          <div class="badge"><div class="b-ico">📷</div><span>Reseña con foto</span><small>+25 XP</small></div>
-          <div class="badge"><div class="b-ico">🏙️</div><span>5 locales</span><small>+60 XP</small></div>
-          <div class="badge locked"><div class="b-ico">👍</div><span>10 "me sirve"</span><small>+60 XP</small></div>
-          <div class="badge locked"><div class="b-ico">🔥</div><span>Un mes en racha</span><small>+100 XP</small></div>
-          <div class="badge locked"><div class="b-ico">🗺️</div><span>Explorador</span><small>+150 XP</small></div>
+          <div class="badge"><div class="b-ico"><svg class="i"><use href="#ic-star"/></svg></div><span>Primera reseña</span><small>+20 XP</small></div>
+          <div class="badge"><div class="b-ico"><svg class="i"><use href="#ic-camera"/></svg></div><span>Reseña con foto</span><small>+25 XP</small></div>
+          <div class="badge"><div class="b-ico"><svg class="i"><use href="#ic-store"/></svg></div><span>5 locales</span><small>+60 XP</small></div>
+          <div class="badge locked"><div class="b-ico"><svg class="i"><use href="#ic-thumbs-up"/></svg></div><span>10 "me sirve"</span><small>+60 XP</small></div>
+          <div class="badge locked"><div class="b-ico"><svg class="i"><use href="#ic-flame"/></svg></div><span>Un mes en racha</span><small>+100 XP</small></div>
+          <div class="badge locked"><div class="b-ico"><svg class="i"><use href="#ic-map"/></svg></div><span>Explorador</span><small>+150 XP</small></div>
         </div>
       </div>
     </section>
@@ -156,15 +199,15 @@
           <h2>Tu local, en el mapa de la ciudad.</h2>
           <p>Registra tu restaurante gratis. El equipo verifica cada local antes de publicarlo.</p>
           <ul class="checklist">
-            <li>Perfil con fotos, menú en PDF, horario y datos de contacto.</li>
-            <li>Publica promos que llegan como notificación a quien te sigue.</li>
-            <li>Responde las reseñas de tus clientes desde la app.</li>
-            <li>Al aprobarse, tu local sale <strong>Destacado</strong> 14 días: primero en búsquedas y mapa. Sin costo.</li>
+            <li><svg class="i"><use href="#ic-check"/></svg> Perfil con fotos, menú en PDF, horario y datos de contacto.</li>
+            <li><svg class="i"><use href="#ic-check"/></svg> Publica promos que llegan como notificación a quien te sigue.</li>
+            <li><svg class="i"><use href="#ic-check"/></svg> Responde las reseñas de tus clientes desde la app.</li>
+            <li><svg class="i"><use href="#ic-check"/></svg> Al aprobarse, tu local sale <strong>Destacado</strong> 14 días: primero en búsquedas y mapa. Sin costo.</li>
           </ul>
         </div>
         <div>
           <div class="feature">
-            <div class="ico">🔥</div>
+            <div class="ico"><svg class="i"><use href="#ic-flame"/></svg></div>
             <h3>Cómo ganar más días Destacado</h3>
             <p>Además del arranque de 14 días: responde todas tus reseñas cada semana y completa el perfil del local. Cada logro suma días extra, sin pagar.</p>
           </div>
@@ -203,7 +246,7 @@
         <div class="box">
           <h2>Descubre tu próximo lugar.</h2>
           <p>El Point ya está en Google Play. App Store, pronto.</p>
-          <div class="stores" style="justify-content:center">
+          <div class="stores">
             <a class="badge-link" href="https://play.google.com/store/apps/details?id=com.elpoint.app" target="_blank" rel="noopener" aria-label="Consíguelo en Google Play">
               <img src="assets/googleplay-es.svg" alt="Consíguelo en Google Play" />
             </a>
