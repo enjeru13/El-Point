@@ -76,6 +76,99 @@ function OpenPill({ hours }: { hours: SearchResult['hours'] }) {
   );
 }
 
+function BoostChip() {
+  const { C } = useTheme();
+  return (
+    <View style={{
+      flexDirection: 'row', alignItems: 'center', gap: 4,
+      paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99,
+      backgroundColor: C.primary + '22', borderWidth: 1, borderColor: C.primary + '55',
+    }}>
+      <Icon name="fire" size={11} color={C.primary} />
+      <AppText variant="caption" color={C.primary} style={{ fontSize: 10 }}>Destacado</AppText>
+    </View>
+  );
+}
+
+/** Fila compacta para la lista de resultados (todo lo que no es el destacado). */
+function ResultRow({
+  item,
+  userLoc,
+  onPress,
+}: {
+  item: SearchResult;
+  userLoc?: LatLng | null;
+  onPress: () => void;
+}) {
+  const { C, shadow } = useTheme();
+  const [pressed, setPressed] = useState(false);
+  const price = priceLabel(item.price_level);
+  const open = item.hours ? isOpenNow(item.hours).open : null;
+  const dist =
+    userLoc && item.lat != null && item.lng != null
+      ? fmtKm(distanceKm(userLoc, item.lat, item.lng))
+      : null;
+  const meta = [catLabel(item), price, dist].filter(Boolean).join('  ·  ');
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      style={[
+        {
+          flexDirection: 'row', alignItems: 'center', gap: 12,
+          backgroundColor: C.surface, borderRadius: 16, padding: 10,
+          borderWidth: 1, borderColor: C.border,
+        },
+        { transform: [{ translateY: pressed ? 1 : 0 }] },
+        shadow.sm,
+      ]}
+    >
+      <View style={{
+        width: 60, height: 60, borderRadius: 13, overflow: 'hidden',
+        backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center',
+        borderWidth: 1, borderColor: C.border,
+      }}>
+        {item.cover_url ? (
+          <Image source={{ uri: item.cover_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={150} />
+        ) : (
+          <Icon name={catIcon(item)} size={26} color={C.onSurface} style={{ opacity: 0.5 }} />
+        )}
+      </View>
+
+      <View style={{ flex: 1, gap: 3 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <AppText variant="heading" style={{ fontSize: 16, lineHeight: 20, flexShrink: 1 }} numberOfLines={1}>
+            {item.name}
+          </AppText>
+          {isBoosted(item) && <BoostChip />}
+        </View>
+        <AppText variant="caption" color={C.outline} numberOfLines={1}>
+          {meta}
+        </AppText>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          {open !== null && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: open ? C.secondary : C.error }} />
+              <AppText variant="caption" color={open ? C.secondary : C.error} style={{ fontSize: 11 }}>
+                {open ? 'Abierto' : 'Cerrado'}
+              </AppText>
+            </View>
+          )}
+          {item.address && (
+            <AppText variant="caption" color={C.outline} numberOfLines={1} style={{ flex: 1, fontSize: 11 }}>
+              {open !== null ? '· ' : ''}{item.address}
+            </AppText>
+          )}
+        </View>
+      </View>
+
+      <StarBadge rating={item.rating_avg} count={item.rating_count} size="sm" />
+    </Pressable>
+  );
+}
+
 function PlaceCard({
   item,
   featured = false,
@@ -89,7 +182,12 @@ function PlaceCard({
 }) {
   const { C, shadow } = useTheme();
   const [pressed, setPressed] = useState(false);
-  const imgH = featured ? 190 : 132;
+
+  if (!featured) {
+    return <ResultRow item={item} userLoc={userLoc} onPress={onPress} />;
+  }
+
+  const imgH = 190;
   const price = priceLabel(item.price_level);
   const dist =
     userLoc && item.lat != null && item.lng != null
@@ -224,15 +322,31 @@ function PlaceCard({
 
 function CardSkeleton({ featured = false }: { featured?: boolean }) {
   const { C, shadow } = useTheme();
+  if (!featured) {
+    return (
+      <View style={{
+        flexDirection: 'row', alignItems: 'center', gap: 12,
+        backgroundColor: C.surface, borderRadius: 16, padding: 10,
+        borderWidth: 1, borderColor: C.border, ...shadow.sm,
+      }}>
+        <Skeleton width={60} height={60} radius={13} />
+        <View style={{ flex: 1, gap: 6 }}>
+          <Skeleton width="70%" height={16} />
+          <Skeleton width="45%" height={12} />
+          <Skeleton width="55%" height={12} />
+        </View>
+      </View>
+    );
+  }
   return (
     <View style={{
       backgroundColor: C.surface, borderRadius: 22, overflow: 'hidden',
       borderWidth: 1, borderColor: C.border, ...shadow.sm,
     }}>
-      <Skeleton height={featured ? 190 : 132} radius={0} />
+      <Skeleton height={190} radius={0} />
       <View style={{ padding: 14, gap: 8 }}>
         <Skeleton width={90} height={16} radius={99} />
-        <Skeleton width="75%" height={featured ? 24 : 18} />
+        <Skeleton width="75%" height={24} />
         <Skeleton width="55%" height={13} />
       </View>
     </View>
