@@ -32,11 +32,11 @@ Páginas:
 - Pegar estas URLs en Google Play Console:
   - Política de privacidad: `https://<sitio>/privacidad`
   - Eliminación de cuenta: `https://<sitio>/eliminar-cuenta`
-- Soporte en la ficha: `https://<sitio>/soporte` o `soporte@elpoint.app`.
+- Soporte en la ficha: `https://<sitio>/soporte` o `atencion.elpoint@gmail.com`.
 
 ## Pendiente
 
-- Confirmar los correos `soporte@elpoint.app` / `privacidad@elpoint.app` (deben
+- Confirmar los correos `atencion.elpoint@gmail.com` / `atencion.elpoint@gmail.com` (deben
   existir y recibir). Están tanto aquí como en las pantallas legales de la app.
 - Reemplazar el mock del teléfono por capturas reales cuando estén.
 - Badges reales de las tiendas cuando la app esté publicada.

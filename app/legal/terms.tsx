@@ -120,7 +120,7 @@ export default function TermsScreen() {
 
       <LegalSection n={10} title="Contacto">
         <LegalP>
-          Escríbenos a soporte@elpoint.app. El Point opera desde San Cristóbal,
+          Escríbenos a atencion.elpoint@gmail.com. El Point opera desde San Cristóbal,
           Táchira, Venezuela.
         </LegalP>
       </LegalSection>

@@ -11,7 +11,7 @@ export default function PrivacyScreen() {
       <LegalSection n={1} title="Responsable">
         <LegalP>
           El Point (San Cristóbal, Táchira, Venezuela) es responsable del
-          tratamiento de tus datos. Contacto: privacidad@elpoint.app.
+          tratamiento de tus datos. Contacto: atencion.elpoint@gmail.com.
         </LegalP>
       </LegalSection>
 
@@ -79,7 +79,7 @@ export default function PrivacyScreen() {
           página web de eliminación de cuenta.
         </LegalBullet>
         <LegalBullet>
-          Solicitar una copia de tus datos escribiendo a privacidad@elpoint.app.
+          Solicitar una copia de tus datos escribiendo a atencion.elpoint@gmail.com.
         </LegalBullet>
         <LegalBullet>Desactivar la ubicación o las notificaciones cuando quieras.</LegalBullet>
       </LegalSection>
@@ -108,7 +108,7 @@ export default function PrivacyScreen() {
 
       <LegalSection n={10} title="Contacto">
         <LegalP>
-          Dudas sobre privacidad: privacidad@elpoint.app.
+          Dudas sobre privacidad: atencion.elpoint@gmail.com.
         </LegalP>
       </LegalSection>
     </LegalDoc>
