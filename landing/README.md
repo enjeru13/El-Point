@@ -34,9 +34,35 @@ Páginas:
   - Eliminación de cuenta: `https://<sitio>/eliminar-cuenta`
 - Soporte en la ficha: `https://<sitio>/soporte` o `atencion.elpoint@gmail.com`.
 
+## Badges oficiales de las tiendas
+
+Los SVG oficiales ya están en `landing/assets/` (variante español LATAM):
+
+| Archivo | Badge |
+|---|---|
+| `assets/googleplay-es.svg` | "Consíguelo en Google Play" (color) |
+| `assets/appstore-es.svg` | "Descárgalo en el App Store" (negro) |
+| `assets/appstore-es-white.svg` | idem, blanco (para fondo oscuro) |
+
+**NO se muestran todavía.** Apple y Google solo permiten estos badges enlazando
+a una ficha PUBLICADA de la app. Hasta entonces quedan los botones "Pronto en…".
+
+Cuando la app esté publicada (o haya pre-registro en Google Play), reemplazar
+en `index.html` cada bloque `<a class="store">…</a>` por:
+
+```html
+<a href="URL_REAL_DE_LA_FICHA" target="_blank" rel="noopener">
+  <img src="assets/googleplay-es.svg" alt="Consíguelo en Google Play" height="52" />
+</a>
+```
+
+(Apple pide alto mínimo 40px y respetar el área de protección; Google, alto
+mínimo 48px. Ambos: no recolorear ni deformar.)
+
 ## Pendiente
 
-- Confirmar los correos `atencion.elpoint@gmail.com` / `atencion.elpoint@gmail.com` (deben
-  existir y recibir). Están tanto aquí como en las pantallas legales de la app.
-- Reemplazar el mock del teléfono por capturas reales cuando estén.
-- Badges reales de las tiendas cuando la app esté publicada.
+- Confirmar que `atencion.elpoint@gmail.com` existe y recibe (está aquí y en las
+  pantallas legales de la app).
+- Reemplazar el mock del teléfono / los placeholders de `.shots` por capturas
+  reales (`landing/shots/1.png` … `5.png`).
+- Mostrar los badges oficiales cuando la app esté publicada (ver arriba).
