@@ -96,8 +96,11 @@ strong { font-weight: 700; }
 .btn-ghost { background: var(--surface); color: var(--text); border-color: var(--border); }
 .btn-ghost:hover { text-decoration: none; border-color: var(--brand); transform: translateY(-1px); }
 
-/* ── Store buttons (coming soon) ── */
-.stores { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+/* ── Store buttons ── */
+.stores { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 22px; }
+.badge-link { display: inline-block; line-height: 0; }
+.badge-link img { height: 56px; width: auto; display: block; }
+.badge-link:hover { text-decoration: none; opacity: 0.9; }
 .store {
   display: flex; align-items: center; gap: 11px;
   padding: 10px 18px; border-radius: 14px;
