@@ -182,7 +182,7 @@ strong { font-weight: 700; }
 /* ── App mock ── */
 .mock { position: relative; justify-self: center; width: min(300px, 78vw); }
 .mock .glow {
-  position: absolute; inset: 12% -18% -8% -18%;
+  position: absolute; inset: 12% -8% -8% -8%;
   background: radial-gradient(50% 50% at 50% 50%, color-mix(in srgb, var(--brand) 30%, transparent), transparent 72%);
   filter: blur(10px); z-index: 0;
 }
