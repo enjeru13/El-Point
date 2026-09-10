@@ -4,7 +4,7 @@ import type { ExpoConfig } from "expo/config";
 // the Google Maps key actually resolves instead of being the literal string
 // "EXPO_PUBLIC_GOOGLE_MAPS_KEY" baked into the native build.
 const config: ExpoConfig = {
-  name: "El-Point",
+  name: "El Point",
   slug: "El-Point",
   version: "1.0.0",
   orientation: "portrait",
@@ -29,7 +29,7 @@ const config: ExpoConfig = {
     googleServicesFile:
       process.env.GOOGLE_SERVICES_JSON ?? "./google-services.json",
     adaptiveIcon: {
-      backgroundColor: "#E6F4FE",
+      backgroundColor: "#c8451f",
       foregroundImage: "./assets/images/android-icon-foreground.png",
       backgroundImage: "./assets/images/android-icon-background.png",
       monochromeImage: "./assets/images/android-icon-monochrome.png",
