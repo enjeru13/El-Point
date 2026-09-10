@@ -1,3 +1,4 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   BRAND_GLYPHS,
   BrandGlyph,
@@ -312,8 +313,31 @@ export function Icon({
       </View>
     );
   }
+  // Prefijo "mdi:" -> forzar MaterialCommunityIcons (iconos de categoría:
+  // comida, donde MDI tiene mucha más cobertura y un estilo consistente).
+  if (name.startsWith("mdi:")) {
+    return (
+      <MaterialCommunityIcons
+        name={name.slice(4) as any}
+        size={size}
+        color={color}
+        style={style}
+      />
+    );
+  }
+
   const Component = MAP[name];
-  if (!Component) return null;
+  if (!Component) {
+    // Nombre no mapeado a lucide -> intento con MDI igual.
+    return (
+      <MaterialCommunityIcons
+        name={name as any}
+        size={size}
+        color={color}
+        style={style}
+      />
+    );
+  }
   return (
     <Component
       size={size}
