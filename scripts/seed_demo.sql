@@ -5,7 +5,7 @@
 -- Idempotente: usa IDs fijos + ON CONFLICT DO NOTHING, se puede re-correr.
 --
 -- Para borrarlo después:
---   delete from public.restaurants where id like 'a0de0000-%';
+--   delete from public.restaurants where id::text like 'a0de0000-%';
 --   (borra en cascada reseñas, réplicas, favoritos, comodidades de esos locales)
 --   update public.profiles set streak_weeks = 0, streak_best = 0, streak_week_start = null
 --     where id in ( ...los 6 comensales... );
@@ -231,7 +231,7 @@ on conflict (restaurant_id, author_id) do nothing;
 
 -- Que no aparezcan como "editado" (updated_at por defecto = now()).
 update public.reviews set updated_at = created_at
-where restaurant_id like 'a0de0000-%' and updated_at <> created_at;
+where restaurant_id::text like 'a0de0000-%' and updated_at <> created_at;
 
 -- ─── 6. respuestas de los dueños ────────────────────────────────────────
 insert into public.review_replies (review_id, author_id, body)
@@ -258,7 +258,7 @@ from (values
 ) u(uid)
 cross join lateral (
   select id from public.restaurants
-  where id like 'a0de0000-%'
+  where id::text like 'a0de0000-%'
   order by md5(u.uid::text || id::text)
   limit 4
 ) x
@@ -311,5 +311,5 @@ from (values
 commit;
 
 -- Chequeo rápido:
---   select name, rating_avg, rating_count, promo_text, boost_until from public.restaurants where id like 'a0de0000-%' order by name;
+--   select name, rating_avg, rating_count, promo_text, boost_until from public.restaurants where id::text like 'a0de0000-%' order by name;
 --   select username, xp, level, streak_weeks from public.profiles where id = 'f80dcb1e-e9ed-42f6-a6ce-fad94260e751';
