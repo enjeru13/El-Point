@@ -105,7 +105,7 @@ strong { font-weight: 700; }
 }
 .btn .i { font-size: 1.05rem; }
 .btn:active { transform: translateY(1px); }
-.btn-primary { background: linear-gradient(150deg, var(--brand), var(--brand-2)); color: var(--brand-ink); box-shadow: var(--shadow-sm); }
+.btn-primary { background: linear-gradient(150deg, var(--brand), var(--brand-2)); color: #fff; box-shadow: var(--shadow-sm); }
 .btn-primary:hover { text-decoration: none; filter: brightness(1.06); transform: translateY(-1px); }
 .btn-ghost { background: var(--surface); color: var(--text); border-color: var(--border); }
 .btn-ghost:hover { text-decoration: none; border-color: var(--brand); transform: translateY(-1px); }
