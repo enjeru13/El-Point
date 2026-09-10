@@ -140,19 +140,30 @@ strong { font-weight: 700; }
 .eyebrow .i { font-size: 0.95rem; }
 .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
 
-/* food-icon field — eco del FoodBackdrop del login de la app */
+/* food-icon field — eco del FoodBackdrop del login de la app.
+   Abre (hero) y cierra (final) la página. */
 .food-bg { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; color: var(--brand); }
 .food-bg .i { position: absolute; opacity: 0.07; }
-.food-bg .i:nth-child(1)  { top: 6%;   left: 4%;   font-size: 66px; transform: rotate(-14deg); }
-.food-bg .i:nth-child(2)  { top: 54%;  left: 1%;   font-size: 48px; transform: rotate(10deg); }
-.food-bg .i:nth-child(3)  { top: 84%;  left: 12%;  font-size: 40px; transform: rotate(-6deg); }
-.food-bg .i:nth-child(4)  { top: 20%;  left: 30%;  font-size: 34px; transform: rotate(16deg); opacity: 0.05; }
-.food-bg .i:nth-child(5)  { top: 70%;  left: 40%;  font-size: 30px; transform: rotate(-10deg); opacity: 0.05; }
-.food-bg .i:nth-child(6)  { top: 4%;   right: 30%; font-size: 42px; transform: rotate(8deg); }
-.food-bg .i:nth-child(7)  { top: 44%;  right: 4%;  font-size: 56px; transform: rotate(-12deg); }
-.food-bg .i:nth-child(8)  { top: 8%;   right: 6%;  font-size: 38px; transform: rotate(6deg); }
-.food-bg .i:nth-child(9)  { bottom: 6%; right: 14%; font-size: 50px; transform: rotate(-8deg); }
-.food-bg .i:nth-child(10) { bottom: 22%; right: 34%; font-size: 32px; transform: rotate(14deg); opacity: 0.05; }
+
+.hero .food-bg .i:nth-child(1)  { top: 6%;   left: 4%;   font-size: 66px; transform: rotate(-14deg); }
+.hero .food-bg .i:nth-child(2)  { top: 54%;  left: 1%;   font-size: 48px; transform: rotate(10deg); }
+.hero .food-bg .i:nth-child(3)  { top: 84%;  left: 12%;  font-size: 40px; transform: rotate(-6deg); }
+.hero .food-bg .i:nth-child(4)  { top: 20%;  left: 30%;  font-size: 34px; transform: rotate(16deg); opacity: 0.05; }
+.hero .food-bg .i:nth-child(5)  { top: 70%;  left: 40%;  font-size: 30px; transform: rotate(-10deg); opacity: 0.05; }
+.hero .food-bg .i:nth-child(6)  { top: 4%;   right: 30%; font-size: 42px; transform: rotate(8deg); }
+.hero .food-bg .i:nth-child(7)  { top: 44%;  right: 4%;  font-size: 56px; transform: rotate(-12deg); }
+.hero .food-bg .i:nth-child(8)  { top: 8%;   right: 6%;  font-size: 38px; transform: rotate(6deg); }
+.hero .food-bg .i:nth-child(9)  { bottom: 6%; right: 14%; font-size: 50px; transform: rotate(-8deg); }
+.hero .food-bg .i:nth-child(10) { bottom: 22%; right: 34%; font-size: 32px; transform: rotate(14deg); opacity: 0.05; }
+
+.final .food-bg .i:nth-child(1)  { top: 14%;  left: 5%;   font-size: 52px; transform: rotate(-10deg); }
+.final .food-bg .i:nth-child(2)  { bottom: 12%; left: 12%; font-size: 40px; transform: rotate(12deg); }
+.final .food-bg .i:nth-child(3)  { top: 40%;  left: 24%;  font-size: 30px; transform: rotate(-6deg); opacity: 0.05; }
+.final .food-bg .i:nth-child(4)  { bottom: 8%; left: 34%;  font-size: 34px; transform: rotate(8deg); opacity: 0.05; }
+.final .food-bg .i:nth-child(5)  { top: 10%;  right: 8%;  font-size: 56px; transform: rotate(10deg); }
+.final .food-bg .i:nth-child(6)  { bottom: 16%; right: 6%; font-size: 44px; transform: rotate(-12deg); }
+.final .food-bg .i:nth-child(7)  { top: 46%;  right: 22%; font-size: 30px; transform: rotate(14deg); opacity: 0.05; }
+.final .food-bg .i:nth-child(8)  { bottom: 6%; right: 30%; font-size: 36px; transform: rotate(-8deg); opacity: 0.05; }
 
 /* ── App mock ── */
 .mock { position: relative; justify-self: center; width: min(300px, 78vw); }
@@ -307,7 +318,13 @@ section { padding: 62px 0; position: relative; }
 .faq details p { color: var(--text-soft); padding: 12px 0 6px; margin: 0; }
 
 /* ── CTA final ── */
-.final { text-align: center; }
+.final {
+  text-align: center; position: relative; overflow: hidden;
+  background:
+    radial-gradient(70% 70% at 75% 100%, color-mix(in srgb, var(--brand) 20%, transparent), transparent 70%),
+    linear-gradient(0deg, color-mix(in srgb, var(--brand) 9%, var(--bg)), var(--bg) 72%);
+}
+.final .wrap { position: relative; z-index: 2; }
 .final .box {
   max-width: 640px; margin: 0 auto; padding: 44px 28px;
   background: var(--surface); border: 1px solid var(--border);
