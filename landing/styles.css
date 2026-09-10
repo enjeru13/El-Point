@@ -76,12 +76,18 @@ strong { font-weight: 700; }
   border-bottom: 1px solid var(--border);
 }
 .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 66px; }
-.brand { display: flex; align-items: center; gap: 9px; font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; color: var(--text); }
+/* marca — réplica del AppLogo de la app: «el Point•» */
+.brand { display: inline-flex; align-items: flex-end; gap: 3px; font-family: var(--font-display); color: var(--text); }
 .brand:hover { text-decoration: none; }
-.brand .dot {
-  width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center;
-  background: linear-gradient(150deg, var(--brand), var(--brand-2));
-  color: var(--brand-ink); font-size: 15px;
+.brand .lg-el {
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 2px 6px; margin-bottom: 3px;
+  font-weight: 700; font-size: 12px; line-height: 1; color: var(--text-soft);
+}
+.brand .lg-point { font-weight: 800; font-size: 22px; line-height: 1; letter-spacing: -0.5px; }
+.brand .lg-dot {
+  width: 7px; height: 7px; border-radius: 99px; margin: 0 0 3px 2px;
+  background: var(--brand); border: 1px solid var(--border);
 }
 .nav-links { display: flex; gap: 24px; align-items: center; }
 .nav-links a { color: var(--text-soft); font-size: 0.95rem; font-weight: 600; }
@@ -109,16 +115,22 @@ strong { font-weight: 700; }
 .badge-link { display: inline-block; line-height: 0; }
 .badge-link img { height: 54px; width: auto; display: block; }
 .badge-link:hover { text-decoration: none; opacity: 0.9; }
-/* App Store "pronto" — pastilla negra tipo badge oficial (fija en ambos temas) */
+/* App Store — todavía no disponible. Pastilla negra, texto blanco nítido. */
 .store {
-  display: flex; align-items: center; gap: 11px;
+  display: flex; align-items: center; gap: 10px;
   height: 54px; padding: 0 18px; border-radius: 13px;
-  background: #0c0c0e; color: #fff; border: 1px solid #26262b;
+  background: #0c0c0e; border: 1px solid #2b2b31;
+  font-family: var(--font-display); font-weight: 700; font-size: 1.02rem;
+  color: #fff;
 }
 .store:hover { text-decoration: none; opacity: 0.92; }
-.store .i, .store svg { width: 22px; height: 22px; flex: none; color: #fff; }
-.store .s1 { font-size: 0.66rem; color: rgba(255,255,255,0.7); display: block; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1.2; }
-.store .s2 { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; line-height: 1.15; color: #fff; }
+.store svg:not(.i), .store .i { width: 22px; height: 22px; flex: none; color: #fff; }
+.store .tag {
+  font-family: var(--font-body); font-weight: 700; font-size: 0.68rem;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: #0c0c0e; background: #fff;
+  padding: 3px 8px; border-radius: 999px; margin-left: 2px;
+}
 
 /* ── Hero ── */
 .hero {
