@@ -272,9 +272,11 @@ section { padding: 62px 0; position: relative; }
 @media (max-width: 820px) { .band .wrap { grid-template-columns: 1fr; } }
 .checklist { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 12px; }
 .checklist li { display: flex; gap: 10px; align-items: flex-start; color: var(--text-soft); }
+.checklist li span { flex: 1; min-width: 0; }
 .checklist li .i {
-  color: var(--brand); flex: none; font-size: 0.8rem;
-  width: 20px; height: 20px; padding: 4px;
+  color: var(--brand); flex: none; align-self: flex-start;
+  box-sizing: border-box;
+  width: 22px; height: 22px; padding: 4px; margin-top: 1px;
   background: color-mix(in srgb, var(--brand) 14%, transparent); border-radius: 6px;
   stroke-width: 3;
 }
@@ -293,26 +295,28 @@ section { padding: 62px 0; position: relative; }
 
 /* ── Logros / rachas ── */
 .rewards .wrap { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 44px 44px; align-items: center; }
+.rewards .wrap > * { min-width: 0; }
 @media (max-width: 820px) { .rewards .wrap { grid-template-columns: 1fr; } }
 
 /* Escalera de rangos */
-.ranks { grid-column: 1 / -1; margin-top: 10px; }
+.ranks { grid-column: 1 / -1; min-width: 0; margin-top: 10px; }
 .ranks-title {
   display: block; font-family: var(--font-display); font-weight: 700;
   font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--text-soft); margin-bottom: 18px;
 }
 .rank-track {
-  list-style: none; margin: 0; padding: 0;
-  display: flex; justify-content: space-between; gap: 8px;
-  position: relative; overflow-x: auto;
+  list-style: none; margin: 0; padding: 0 0 8px;
+  display: flex; gap: 8px;
+  position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
 .rank-track::before {
   content: ""; position: absolute; left: 6px; right: 6px; top: 6px; height: 2px;
   background: linear-gradient(90deg, var(--brand), color-mix(in srgb, var(--brand) 25%, var(--border)));
 }
 .rank-track li {
-  position: relative; z-index: 1; flex: 1; min-width: 92px;
+  position: relative; z-index: 1; flex: 1 0 96px;
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
 }
 .rank-track .dot {
@@ -322,7 +326,8 @@ section { padding: 62px 0; position: relative; }
 .rank-track .dot.last { background: var(--brand); box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 22%, transparent); }
 .rank-track b { font-family: var(--font-display); font-size: 0.82rem; line-height: 1.15; margin-top: 4px; }
 .rank-track small { color: var(--text-soft); font-size: 0.7rem; }
-.badges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.badges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; min-width: 0; }
+@media (max-width: 520px) { .badges { grid-template-columns: repeat(2, 1fr); } }
 .badge {
   background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
   padding: 16px 12px; text-align: center; box-shadow: var(--shadow-sm);
