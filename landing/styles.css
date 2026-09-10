@@ -92,7 +92,9 @@ strong { font-weight: 700; }
 .nav-links { display: flex; gap: 24px; align-items: center; }
 .nav-links a { color: var(--text-soft); font-size: 0.95rem; font-weight: 600; }
 .nav-links a:hover { color: var(--text); text-decoration: none; }
-.nav-links .btn { padding: 9px 16px; }
+.nav-links a.btn { padding: 9px 18px; font-size: 0.95rem; font-weight: 700; }
+.nav-links a.btn-primary,
+.nav-links a.btn-primary:hover { color: #fff; }
 @media (max-width: 680px) { .nav-links a:not(.btn) { display: none; } }
 
 /* ── Buttons ── */
