@@ -355,12 +355,11 @@ section { padding: 62px 0; position: relative; }
 .shot {
   flex: none; width: 210px; aspect-ratio: 9 / 19; scroll-snap-align: start;
   border-radius: 26px; border: 1px solid var(--border);
-  background: linear-gradient(160deg, var(--surface-2), var(--surface));
+  background: var(--surface-2);
   box-shadow: var(--shadow-sm);
-  display: grid; place-items: center; color: var(--text-soft);
-  font-size: 0.82rem; text-align: center; padding: 16px; overflow: hidden;
+  overflow: hidden;
 }
-.shot img { width: 100%; height: 100%; object-fit: cover; border-radius: 24px; }
+.shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* ── FAQ ── */
 .faq-sec .section-head { margin-left: auto; margin-right: auto; text-align: center; }

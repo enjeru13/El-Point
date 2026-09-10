@@ -45,3 +45,6 @@ app-example
 
 # Firebase Android config (subido a EAS como file secret)
 google-services.json
+
+# capturas full-res (solo para Play Store, no van al repo)
+landing/shots/_orig/
