@@ -9,6 +9,7 @@ function targetFor(data: Record<string, any> | undefined) {
   const kind = data?.kind;
   if (kind === "review_report") return "/admin/reviews" as const;
   if (kind === "restaurant_report") return "/admin/restaurant-reports" as const;
+  if (kind === "new_restaurant") return "/admin/restaurants" as const;
   if (kind === "mission" || kind === "streak") return "/(customer)/profile" as const;
   if (kind === "owner_boost") return "/(owner)" as const;
   const rid = data?.restaurant_id;
