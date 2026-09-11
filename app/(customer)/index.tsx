@@ -443,10 +443,11 @@ export default function HomeScreen() {
   const [userLoc, setUserLoc] = useState<LatLng | null>(null);
 
   // "¿Qué comer hoy?" — random pick out of every active restaurant, open-now
-  // ones first if there are any.
+  // ones first if there are any. The modal owns the reveal animation; here
+  // we just decide the real pick right away.
   const searchQ = useRestaurantSearch();
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [picking, setPicking] = useState(false);
+  const [pickPool, setPickPool] = useState<SearchResult[]>([]);
   const [picked, setPicked] = useState<SearchResult | null>(null);
 
   function rollQuickPick() {
@@ -454,13 +455,11 @@ export default function HomeScreen() {
     if (all.length === 0) return;
     const open = all.filter((r) => isOpenNow(r.hours).open);
     const pool = open.length > 0 ? open : all;
-    const next = pool[Math.floor(Math.random() * pool.length)];
-    setPicking(true);
+    setPickPool(pool);
     setPicked(null);
-    setTimeout(() => {
-      setPicked(next);
-      setPicking(false);
-    }, 900);
+    // A tick later so the modal sees the null->result transition and rolls
+    // the animation, even on a re-roll from the same pool.
+    setTimeout(() => setPicked(pool[Math.floor(Math.random() * pool.length)]), 20);
   }
 
   function openQuickPick() {
@@ -796,8 +795,8 @@ export default function HomeScreen() {
 
       <QuickPickModal
         visible={pickerOpen}
-        spinning={picking}
-        item={picked}
+        pool={pickPool}
+        result={picked}
         onReroll={rollQuickPick}
         onGo={() => {
           if (!picked) return;
