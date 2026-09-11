@@ -164,6 +164,28 @@ export default function SettingsScreen() {
             </SectionCard>
           </View>
 
+          {/* Tu local (solo dueños) */}
+          {isOwner && (
+            <View style={{ gap: 10 }}>
+              <SectionLabel label="Tu local" />
+              <SectionCard>
+                <Pressable
+                  onPress={() => router.push('/boost-info')}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
+                >
+                  <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
+                    <Icon name="fire" size={20} color={C.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <AppText variant="bodyStrong">Cómo funciona Destacado</AppText>
+                    <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 1 }}>3 formas de ganarlo, sin pagar</AppText>
+                  </View>
+                  <Icon name="chevron-right" size={20} color={C.outline} />
+                </Pressable>
+              </SectionCard>
+            </View>
+          )}
+
           {/* Táctil */}
           <View style={{ gap: 10 }}>
             <SectionLabel label="Táctil" />

@@ -310,6 +310,21 @@ export default function OwnerHomeScreen() {
             </View>
           )}
           <Pressable
+            onPress={() => router.push('/boost-info')}
+            android_ripple={{ color: C.outlineVariant }}
+            style={{
+              flexDirection: 'row', alignItems: 'center', gap: 8,
+              paddingHorizontal: 16, paddingVertical: 10,
+              borderTopWidth: 1, borderTopColor: C.border,
+            }}
+          >
+            <Icon name="information-outline" size={15} color={C.primary} />
+            <AppText variant="caption" color={C.primary} style={{ flex: 1 }}>
+              ¿Cómo consigo más días de Destacado?
+            </AppText>
+            <Icon name="chevron-right" size={14} color={C.primary} />
+          </Pressable>
+          <Pressable
             onPress={() => router.push('/(owner)/profile')}
             android_ripple={{ color: C.outlineVariant }}
             style={{
