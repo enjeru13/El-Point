@@ -90,6 +90,8 @@ export default function AnalyticsScreen() {
   const tourPeriodRef  = useRef<View>(null);
   const tourMetricsRef = useRef<View>(null);
   const tourChartRef   = useRef<View>(null);
+  const scrollRef      = useRef<ScrollView>(null);
+  const scrollY        = useRef(0);
   const tourSteps: TourStep[] = [
     { ref: tourPeriodRef, icon: 'calendar-range', title: 'Cambia el período', text: 'Mira tus métricas por semana, mes o año.' },
     { ref: tourMetricsRef, icon: 'chart-box-outline', title: 'Tus números clave', text: 'Calificación promedio y el total histórico de reseñas.' },
@@ -168,6 +170,9 @@ export default function AnalyticsScreen() {
       </View>
 
       <ScrollView
+        ref={scrollRef}
+        onScroll={(e) => { scrollY.current = e.nativeEvent.contentOffset.y; }}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20 }}
         refreshControl={
@@ -275,7 +280,7 @@ export default function AnalyticsScreen() {
 
       </ScrollView>
 
-      <TourGuide tourKey="owner_analytics" ready={!reviewsQ.isLoading} steps={tourSteps} />
+      <TourGuide tourKey="owner_analytics" ready={!reviewsQ.isLoading} steps={tourSteps} scrollRef={scrollRef} scrollOffset={scrollY} />
     </View>
   );
 }

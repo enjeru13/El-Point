@@ -97,6 +97,8 @@ export default function OwnerHomeScreen() {
   const tourStatsRef   = useRef<View>(null);
   const tourReviewsRef = useRef<View>(null);
   const tourBellRef    = useRef<View>(null);
+  const scrollRef      = useRef<ScrollView>(null);
+  const scrollY        = useRef(0);
   const tourSteps: TourStep[] = [
     { ref: tourStatusRef, icon: 'store-outline', title: 'Estado de tu local', text: 'Aquí ves si está en revisión, visible o pausado, y tu racha de Destacado.' },
     { ref: tourStatsRef, icon: 'chart-box-outline', title: 'Tu resumen', text: 'Calificación, reseñas de hoy y el total acumulado, de un vistazo.' },
@@ -171,6 +173,9 @@ export default function OwnerHomeScreen() {
       </View>
 
       <ScrollView
+        ref={scrollRef}
+        onScroll={(e) => { scrollY.current = e.nativeEvent.contentOffset.y; }}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20 }}
         refreshControl={
@@ -383,7 +388,7 @@ export default function OwnerHomeScreen() {
 
       </ScrollView>
 
-      <TourGuide tourKey="owner_home" ready={!reviewsQ.isLoading} steps={tourSteps} />
+      <TourGuide tourKey="owner_home" ready={!reviewsQ.isLoading} steps={tourSteps} scrollRef={scrollRef} scrollOffset={scrollY} />
     </View>
   );
 }

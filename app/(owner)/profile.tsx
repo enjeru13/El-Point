@@ -115,6 +115,8 @@ export default function OwnerProfileScreen() {
   const tourInfoRef   = useRef<View>(null);
   const tourHoursRef  = useRef<View>(null);
   const tourPhotosRef = useRef<View>(null);
+  const scrollRef     = useRef<ScrollView>(null);
+  const scrollY       = useRef(0);
   const tourSteps: TourStep[] = [
     { ref: tourEditRef, icon: 'pencil-outline', title: 'Edita tu local', text: 'Toca aquí para actualizar dirección, contacto, comodidades y más.' },
     { ref: tourInfoRef, icon: 'store-outline', title: 'Información del negocio', text: 'Dirección, teléfono, WhatsApp, Instagram y tu rango de precio.' },
@@ -357,7 +359,14 @@ export default function OwnerProfileScreen() {
         )}
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20 }}>
+      <ScrollView
+        ref={scrollRef}
+        onScroll={(e) => { scrollY.current = e.nativeEvent.contentOffset.y; }}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20 }}
+      >
 
         {/* Verificación */}
         {restaurant.status !== 'approved' && (
@@ -860,7 +869,7 @@ export default function OwnerProfileScreen() {
       </ScrollView>
 
       <TimePickerSheet ref={timePickerRef} />
-      <TourGuide tourKey="owner_profile" steps={tourSteps} />
+      <TourGuide tourKey="owner_profile" steps={tourSteps} scrollRef={scrollRef} scrollOffset={scrollY} />
     </View>
   );
 }

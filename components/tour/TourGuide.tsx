@@ -12,6 +12,7 @@ import {
   Easing,
   Modal,
   Pressable,
+  ScrollView,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -39,10 +40,19 @@ export function TourGuide({
   tourKey,
   steps,
   ready = true,
+  scrollRef,
+  scrollOffset,
 }: {
   tourKey: string;
   steps: TourStep[];
   ready?: boolean;
+  /** Screen's ScrollView, if the target can sit below the fold — the tour
+   *  scrolls it into view before highlighting. */
+  scrollRef?: RefObject<ScrollView | null>;
+  /** Ref tracking that ScrollView's current contentOffset.y (update it from
+   *  the screen's own onScroll). Required alongside scrollRef to compute
+   *  where to scroll to. */
+  scrollOffset?: RefObject<number>;
 }) {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
@@ -57,10 +67,34 @@ export function TourGuide({
       const target = steps[i]?.ref.current;
       if (!target) return;
       target.measureInWindow((x, y, width, height) => {
-        if (width > 0 && height > 0) setRect({ x, y, width, height });
+        if (width <= 0 || height <= 0) return;
+
+        const scroller = scrollRef?.current;
+        if (!scroller) { setRect({ x, y, width, height }); return; }
+
+        // Below/above the visible area (leaving room for the card) — scroll
+        // the target toward the middle of the screen, then re-measure.
+        const win = Dimensions.get("window");
+        const centerY = y + height / 2;
+        const safeTop = insets.top + 90;
+        const safeBottom = win.height - insets.bottom - 220;
+
+        if (centerY >= safeTop && centerY <= safeBottom) {
+          setRect({ x, y, width, height });
+          return;
+        }
+
+        const delta = centerY - (safeTop + safeBottom) / 2;
+        const current = scrollOffset?.current ?? 0;
+        scroller.scrollTo({ y: Math.max(0, current + delta), animated: true });
+        setTimeout(() => {
+          target.measureInWindow((x2, y2, w2, h2) => {
+            if (w2 > 0 && h2 > 0) setRect({ x: x2, y: y2, width: w2, height: h2 });
+          });
+        }, 360);
       });
     },
-    [steps],
+    [steps, scrollRef, scrollOffset, insets],
   );
 
   const start = useCallback(() => {
