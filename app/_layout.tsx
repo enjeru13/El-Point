@@ -65,13 +65,21 @@ export default function RootLayout() {
   }, []);
 
   // Orientation: unlocked at the native level (app.config.ts) — phones lock
-  // to portrait here, tablets stay free to rotate. Dynamic import + try/catch
-  // because this native module isn't in an existing dev-client build until
-  // it's rebuilt (`eas build --profile development` / `expo run:ios|android`)
-  // — a static import would crash the whole app on load until then.
+  // to portrait here, tablets stay free to rotate. This native module isn't
+  // in an existing dev-client build until it's rebuilt (`eas build --profile
+  // development` / `expo run:ios|android`) — requireNativeModule() throws
+  // synchronously in that case, even from inside a dynamic import()'s own
+  // module evaluation, which a plain try/catch around the import doesn't
+  // reliably catch under Metro. requireOptionalNativeModule() returns null
+  // instead of throwing, so check with that FIRST and only import the real
+  // module (and its own throwing requireNativeModule call) once we know
+  // it's actually linked.
   useEffect(() => {
     (async () => {
       try {
+        const { requireOptionalNativeModule } = await import('expo-modules-core');
+        if (!requireOptionalNativeModule('ExpoScreenOrientation')) return;
+
         const ScreenOrientation = await import('expo-screen-orientation');
         const { width, height } = Dimensions.get('window');
         const isTablet = Math.min(width, height) >= 600;
@@ -79,7 +87,7 @@ export default function RootLayout() {
           ? ScreenOrientation.unlockAsync()
           : ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP));
       } catch {
-        // Native module not linked yet (old dev client) — skip silently.
+        // Belt and suspenders — skip silently on any other surprise here.
       }
     })();
   }, []);
