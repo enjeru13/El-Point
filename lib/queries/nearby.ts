@@ -13,6 +13,7 @@ export type NearbyRestaurant = {
   cover_url: string | null;
   logo_url: string | null;
   boost_until: string | null;
+  founder_rank: number | null;
   distance_m: number;
 };
 

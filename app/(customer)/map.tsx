@@ -24,7 +24,7 @@ import { Chip } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/lib/toast';
 import { useNearby, useRestaurantIcons, useRestaurantAmenitiesMap, type NearbyRestaurant, type NearbyAmenity } from '@/lib/queries/nearby';
-import { isBoosted } from '@/lib/queries/restaurants';
+import { isBoosted, isFounder } from '@/lib/queries/restaurants';
 import { useCategories } from '@/lib/queries/categories';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 import { capWidth, useIsTablet } from '@/lib/responsive';
@@ -207,6 +207,18 @@ function RestaurantCard({
             <AppText variant="heading" style={{ fontSize: 17, lineHeight: 21, flexShrink: 1 }} numberOfLines={1}>
               {restaurant.name}
             </AppText>
+            {isFounder(restaurant) && (
+              <View style={{
+                flexDirection: 'row', alignItems: 'center', gap: 3,
+                paddingHorizontal: 7, paddingVertical: 2, borderRadius: 99,
+                backgroundColor: '#f0c26022', borderWidth: 1, borderColor: '#f0c26066',
+              }}>
+                <Icon name="crown" size={11} color="#b8860b" />
+                <AppText variant="caption" color="#b8860b" style={{ fontSize: 10 }}>
+                  Fundador #{restaurant.founder_rank}
+                </AppText>
+              </View>
+            )}
             {isBoosted(restaurant) && (
               <View style={{
                 flexDirection: 'row', alignItems: 'center', gap: 3,

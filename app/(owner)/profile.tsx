@@ -34,6 +34,8 @@ import { DEFAULT_HOURS, DAY_LABELS, DAY_LABELS_LONG, formatRange, to12h, type Ho
 import { instagramHandle } from '@/lib/contact';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 import { capWidth, useIsTablet } from '@/lib/responsive';
+import { isFounder } from '@/lib/queries/restaurants';
+import { FounderBadge } from '@/components/ui/FounderBadge';
 
 function Divider() {
   const { C } = useTheme();
@@ -545,6 +547,12 @@ export default function OwnerProfileScreen() {
                 {restaurant.rating_count > 0 ? `${restaurant.rating_avg.toFixed(1)} · ${restaurant.rating_count} reseñas` : 'Sin reseñas aún'}
               </AppText>
             </View>
+
+            {isFounder(restaurant) && (
+              <View style={{ marginTop: 8 }}>
+                <FounderBadge rank={restaurant.founder_rank!} size="md" />
+              </View>
+            )}
 
             {/* Categorías (solo lectura por ahora) */}
             {restaurant.categories.length > 0 && (

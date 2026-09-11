@@ -20,6 +20,11 @@ export function isBoosted(r: { boost_until?: string | null } | null | undefined)
   return !!r?.boost_until && new Date(r.boost_until).getTime() > Date.now();
 }
 
+/** Los primeros 100 locales aprobados — insignia permanente, gratis siempre. */
+export function isFounder(r: { founder_rank?: number | null } | null | undefined): boolean {
+  return typeof r?.founder_rank === "number";
+}
+
 export type RestaurantDetail = {
   id: string;
   owner_id: string | null;
@@ -41,6 +46,7 @@ export type RestaurantDetail = {
   rating_avg: number;
   rating_count: number;
   boost_until: string | null;
+  founder_rank: number | null;
   categories: RestaurantCategory[];
   amenities: RestaurantAmenity[];
 };
@@ -55,7 +61,7 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
     .select(
       `id, owner_id, name, description, address, whatsapp, instagram, phone,
        price_level, logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
-       status, status_reason, rating_avg, rating_count, boost_until,
+       status, status_reason, rating_avg, rating_count, boost_until, founder_rank,
        restaurant_categories ( categories ( slug, label, icon ) ),
        restaurant_amenities ( amenities ( id, slug, label, icon ) )`,
     )
@@ -64,14 +70,19 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
 
   if (error) throw error;
 
-  const categories: RestaurantCategory[] = (data.restaurant_categories ?? [])
+  // Cast right away — the generated Supabase types don't know about a
+  // brand-new column (founder_rank) until `supabase gen types` is re-run
+  // against the pushed migration, and choke on the embedded relations too.
+  const row = data as any;
+
+  const categories: RestaurantCategory[] = (row.restaurant_categories ?? [])
     .map((rc: any) => rc.categories)
     .filter(Boolean);
-  const amenities: RestaurantAmenity[] = (data.restaurant_amenities ?? [])
+  const amenities: RestaurantAmenity[] = (row.restaurant_amenities ?? [])
     .map((ra: any) => ra.amenities)
     .filter(Boolean);
 
-  const { restaurant_categories, restaurant_amenities, hours, ...rest } = data as any;
+  const { restaurant_categories, restaurant_amenities, hours, ...rest } = row;
   return {
     ...(rest as Omit<RestaurantDetail, "categories" | "amenities" | "hours">),
     hours: parseHours(hours),

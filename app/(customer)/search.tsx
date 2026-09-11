@@ -17,7 +17,7 @@ import { AppText } from '@/components/ui/AppText';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { useRestaurantSearch, type SearchResult } from '@/lib/queries/search';
-import { isBoosted } from '@/lib/queries/restaurants';
+import { isBoosted, isFounder } from '@/lib/queries/restaurants';
 import { StarBadge } from '@/components/ui/StarBadge';
 import { useCategories } from '@/lib/queries/categories';
 import { useAmenities } from '@/lib/queries/amenities';
@@ -92,6 +92,19 @@ function BoostChip() {
   );
 }
 
+function FounderChip({ rank }: { rank: number }) {
+  return (
+    <View style={{
+      flexDirection: 'row', alignItems: 'center', gap: 4,
+      paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99,
+      backgroundColor: '#f0c26022', borderWidth: 1, borderColor: '#f0c26066',
+    }}>
+      <Icon name="crown" size={11} color="#b8860b" />
+      <AppText variant="caption" color="#b8860b" style={{ fontSize: 10 }}>Fundador #{rank}</AppText>
+    </View>
+  );
+}
+
 /** Fila compacta para la lista de resultados (todo lo que no es el destacado). */
 function ResultRow({
   item,
@@ -144,6 +157,7 @@ function ResultRow({
           <AppText variant="heading" style={{ fontSize: 16, lineHeight: 20, flexShrink: 1 }} numberOfLines={1}>
             {item.name}
           </AppText>
+          {isFounder(item) && <FounderChip rank={item.founder_rank!} />}
           {isBoosted(item) && <BoostChip />}
         </View>
         <AppText variant="caption" color={C.outline} numberOfLines={1}>
@@ -238,6 +252,7 @@ function PlaceCard({
       {/* Body */}
       <View style={{ padding: featured ? 16 : 14, gap: 6 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          {isFounder(item) && <FounderChip rank={item.founder_rank!} />}
           {isBoosted(item) && (
             <View style={{
               flexDirection: 'row', alignItems: 'center', gap: 4,

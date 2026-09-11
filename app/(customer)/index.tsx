@@ -17,7 +17,7 @@ import {
   type FeedItem,
 } from "@/lib/queries/feed";
 import { useCategories } from "@/lib/queries/categories";
-import { isBoosted } from "@/lib/queries/restaurants";
+import { isBoosted, isFounder } from "@/lib/queries/restaurants";
 import { useMyProfile } from "@/lib/queries/me";
 import { useSettings } from "@/lib/settings";
 import { distanceKm, fmtKm, type LatLng } from "@/lib/geo";
@@ -169,8 +169,20 @@ function ReviewCard({
           {item.restaurant.name}
         </AppText>
 
-        {(dist || cat || isBoosted(item.restaurant)) && (
+        {(dist || cat || isBoosted(item.restaurant) || isFounder(item.restaurant)) && (
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            {isFounder(item.restaurant) && (
+              <View style={{
+                flexDirection: "row", alignItems: "center", gap: 3,
+                paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99,
+                backgroundColor: "#f0c26022", borderWidth: 1, borderColor: "#f0c26066",
+              }}>
+                <Icon name="crown" size={11} color="#b8860b" />
+                <AppText variant="caption" color="#b8860b" style={{ fontSize: 10 }}>
+                  Fundador #{item.restaurant.founder_rank}
+                </AppText>
+              </View>
+            )}
             {isBoosted(item.restaurant) && (
               <View style={{
                 flexDirection: "row", alignItems: "center", gap: 3,

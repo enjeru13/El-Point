@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews, type Review } from '@/lib/queries/reviews';
-import { isBoosted } from '@/lib/queries/restaurants';
+import { isBoosted, isFounder } from '@/lib/queries/restaurants';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { Avatar } from '@/components/ui/Avatar';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -184,6 +184,30 @@ export default function OwnerHomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />
         }
       >
+
+        {isFounder(restaurant) && (
+          <View
+            style={{
+              flexDirection: 'row', alignItems: 'center', gap: 14,
+              padding: 16, borderRadius: 20,
+              backgroundColor: '#f0c26022',
+              borderWidth: 1, borderColor: '#f0c26066',
+            }}
+          >
+            <View style={{
+              width: 44, height: 44, borderRadius: 14,
+              backgroundColor: '#f0c260', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Icon name="crown" size={22} color="#3a2a05" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <AppText variant="bodyStrong">Eres Fundador #{restaurant.founder_rank}</AppText>
+              <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                Uno de los primeros 100 locales de El Point. Nunca vas a pagar por estar en la app.
+              </AppText>
+            </View>
+          </View>
+        )}
 
         <View ref={tourStatusRef} collapsable={false} style={{ gap: 20 }}>
         {/* Banner de verificación (mientras no esté aprobado) */}

@@ -230,32 +230,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_missions: {
-        Row: {
-          earned_at: string
-          mission: string
-          user_id: string
-        }
-        Insert: {
-          earned_at?: string
-          mission: string
-          user_id: string
-        }
-        Update: {
-          earned_at?: string
-          mission?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_missions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       restaurant_amenities: {
         Row: {
           amenity_id: number
@@ -684,6 +658,30 @@ export type Database = {
           },
         ]
       }
+      spatial_ref_sys: {
+        Row: {
+          auth_name: string | null
+          auth_srid: number | null
+          proj4text: string | null
+          srid: number
+          srtext: string | null
+        }
+        Insert: {
+          auth_name?: string | null
+          auth_srid?: number | null
+          proj4text?: string | null
+          srid: number
+          srtext?: string | null
+        }
+        Update: {
+          auth_name?: string | null
+          auth_srid?: number | null
+          proj4text?: string | null
+          srid?: number
+          srtext?: string | null
+        }
+        Relationships: []
+      }
       support_messages: {
         Row: {
           body: string
@@ -722,29 +720,31 @@ export type Database = {
           },
         ]
       }
-      spatial_ref_sys: {
+      user_missions: {
         Row: {
-          auth_name: string | null
-          auth_srid: number | null
-          proj4text: string | null
-          srid: number
-          srtext: string | null
+          earned_at: string
+          mission: string
+          user_id: string
         }
         Insert: {
-          auth_name?: string | null
-          auth_srid?: number | null
-          proj4text?: string | null
-          srid: number
-          srtext?: string | null
+          earned_at?: string
+          mission: string
+          user_id: string
         }
         Update: {
-          auth_name?: string | null
-          auth_srid?: number | null
-          proj4text?: string | null
-          srid?: number
-          srtext?: string | null
+          earned_at?: string
+          mission?: string
+          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_missions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -919,6 +919,19 @@ export type Database = {
             }
             Returns: string
           }
+      admin_growth_stats: {
+        Args: { p_weeks?: number }
+        Returns: {
+          new_restaurants: number
+          new_reviews: number
+          new_users: number
+          week_start: string
+        }[]
+      }
+      admin_set_restaurant_boost: {
+        Args: { p_days: number; p_restaurant_id: string }
+        Returns: string
+      }
       award_xp: {
         Args: { p_amount: number; p_user: string }
         Returns: undefined
@@ -972,12 +985,19 @@ export type Database = {
         | { Args: { table_name: string }; Returns: string }
       enablelongtransactions: { Args: never; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      evaluate_host_streaks: { Args: never; Returns: undefined }
       evaluate_restaurant_reports: {
         Args: { target: string }
         Returns: undefined
       }
       evaluate_review_moderation: {
         Args: { target: string }
+        Returns: undefined
+      }
+      evaluate_review_streaks: { Args: never; Returns: undefined }
+      evaluate_user_missions: { Args: { p_user: string }; Returns: undefined }
+      extend_boost: {
+        Args: { p_days: number; p_restaurant_id: string }
         Returns: undefined
       }
       geometry: { Args: { "": string }; Returns: unknown }
@@ -1079,10 +1099,17 @@ export type Database = {
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
       gettransactionid: { Args: never; Returns: unknown }
+      grant_mission: {
+        Args: { p_mission: string; p_user: string }
+        Returns: undefined
+      }
       is_admin: { Args: { uid: string }; Returns: boolean }
+      is_not_banned: { Args: never; Returns: boolean }
       is_trusted_writer: { Args: never; Returns: boolean }
       level_for_xp: { Args: { p_xp: number }; Returns: number }
       longtransactionsenabled: { Args: never; Returns: boolean }
+      mission_title: { Args: { p_mission: string }; Returns: string }
+      mission_xp: { Args: { p_mission: string }; Returns: number }
       nearby_restaurants: {
         Args: {
           filter_category?: string
@@ -1092,7 +1119,7 @@ export type Database = {
         }
         Returns: {
           address: string
-          boost_until: string | null
+          boost_until: string
           cover_url: string
           distance_m: number
           id: string
@@ -1104,10 +1131,6 @@ export type Database = {
           rating_avg: number
           rating_count: number
         }[]
-      }
-      admin_set_restaurant_boost: {
-        Args: { p_restaurant_id: string; p_days: number }
-        Returns: string | null
       }
       owns_restaurant_path: { Args: { object_name: string }; Returns: boolean }
       owns_review_path: { Args: { object_name: string }; Returns: boolean }
@@ -1151,7 +1174,9 @@ export type Database = {
       }
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
+      push_setting_key: { Args: { p_type: string }; Returns: string }
       rank_for_level: { Args: { p_level: number }; Returns: string }
+      restaurant_profile_complete: { Args: { p_id: string }; Returns: boolean }
       resubmit_restaurant: {
         Args: { p_restaurant_id: string }
         Returns: undefined

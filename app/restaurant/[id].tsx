@@ -26,6 +26,7 @@ import {
 import {
   useReportRestaurant,
   isBoosted,
+  isFounder,
   RESTAURANT_REPORT_REASONS,
   type RestaurantReportReason,
 } from "@/lib/queries/restaurants";
@@ -776,8 +777,28 @@ export default function RestaurantProfileScreen() {
             }}
           >
             {/* Chips */}
-            {(restaurant.categories.length > 0 || isBoosted(restaurant)) && (
+            {(restaurant.categories.length > 0 || isBoosted(restaurant) || isFounder(restaurant)) && (
               <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+                {isFounder(restaurant) && (
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 4,
+                      paddingHorizontal: 10,
+                      paddingVertical: 4,
+                      borderRadius: 99,
+                      backgroundColor: "rgba(240,194,96,0.25)",
+                      borderWidth: 1,
+                      borderColor: "rgba(240,194,96,0.6)",
+                    }}
+                  >
+                    <Icon name="crown" size={12} color="#f0c260" />
+                    <AppText variant="caption" color="#fff" style={{ fontSize: 12 }}>
+                      FUNDADOR #{restaurant.founder_rank}
+                    </AppText>
+                  </View>
+                )}
                 {isBoosted(restaurant) && (
                   <View
                     style={{
