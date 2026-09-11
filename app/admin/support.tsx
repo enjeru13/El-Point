@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Icon } from "@/components/ui/Icon";
 import { SkeletonList } from "@/components/ui/Skeleton";
+import { capWidth, useIsTablet } from "@/lib/responsive";
 
 function timeAgo(iso: string): string {
   const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400_000);
@@ -103,6 +104,7 @@ export default function AdminSupportScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const toast = useToast();
+  const isTablet = useIsTablet();
 
   const isAdmin = !!useMyProfile().data?.is_admin;
   const [tab, setTab] = useState<"open" | "closed">("open");
@@ -171,7 +173,7 @@ export default function AdminSupportScreen() {
           </View>
 
           <ScrollView
-            contentContainerStyle={{ padding: 20, gap: 14, paddingBottom: insets.bottom + 40 }}
+            contentContainerStyle={{ padding: 20, gap: 14, paddingBottom: insets.bottom + 40, ...capWidth(isTablet) }}
             showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl refreshing={q.isRefetching} onRefresh={() => q.refetch()} tintColor={C.primary} colors={[C.primary]} />

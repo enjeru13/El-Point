@@ -5,11 +5,13 @@ import { useTheme } from "@/lib/ThemeContext";
 import { AppText } from "@/components/ui/AppText";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
+import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
 
 export default function DonateScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const isTablet = useIsTablet();
 
   return (
     <View style={{ flex: 1, backgroundColor: C.background }}>
@@ -47,7 +49,7 @@ export default function DonateScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: insets.bottom + 40 }}
+        contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: insets.bottom + 40, ...capWidth(isTablet, FORM_MAX_W) }}
         showsVerticalScrollIndicator={false}
       >
         <View style={{ alignItems: "center", gap: 14, paddingTop: 12 }}>

@@ -23,6 +23,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { capWidth, useIsTablet } from "@/lib/responsive";
 
 function timeAgo(iso: string): string {
   const h = Math.floor((Date.now() - new Date(iso).getTime()) / 3600_000);
@@ -186,6 +187,7 @@ export default function AdminRestaurantsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const toast = useToast();
+  const isTablet = useIsTablet();
 
   const profileQ = useMyProfile();
   const isAdmin = !!profileQ.data?.is_admin;
@@ -262,6 +264,7 @@ export default function AdminRestaurantsScreen() {
             padding: 20,
             gap: 14,
             paddingBottom: insets.bottom + 40,
+            ...capWidth(isTablet),
           }}
           showsVerticalScrollIndicator={false}
           refreshControl={

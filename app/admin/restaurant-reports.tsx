@@ -21,6 +21,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { capWidth, useIsTablet } from "@/lib/responsive";
 
 const REASON_LABEL: Record<string, string> = Object.fromEntries(
   RESTAURANT_REPORT_REASONS.map((r) => [r.key, r.label]),
@@ -111,6 +112,7 @@ export default function AdminRestaurantReportsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const toast = useToast();
+  const isTablet = useIsTablet();
 
   const profileQ = useMyProfile();
   const isAdmin = !!profileQ.data?.is_admin;
@@ -199,6 +201,7 @@ export default function AdminRestaurantReportsScreen() {
             padding: 20,
             gap: 14,
             paddingBottom: insets.bottom + 40,
+            ...capWidth(isTablet),
           }}
           showsVerticalScrollIndicator={false}
           refreshControl={

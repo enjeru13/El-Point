@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/lib/ThemeContext";
 import { AppText } from "@/components/ui/AppText";
 import { Icon } from "@/components/ui/Icon";
+import { capWidth, useIsTablet } from "@/lib/responsive";
 
 /** Shared shell for the Terms / Privacy screens. */
 export function LegalDoc({
@@ -19,6 +20,7 @@ export function LegalDoc({
   const { C } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const isTablet = useIsTablet();
 
   return (
     <View style={{ flex: 1, backgroundColor: C.background }}>
@@ -60,6 +62,7 @@ export function LegalDoc({
           padding: 20,
           paddingBottom: insets.bottom + 48,
           gap: 6,
+          ...capWidth(isTablet, 640),
         }}
         showsVerticalScrollIndicator={false}
       >

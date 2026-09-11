@@ -8,6 +8,7 @@ import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
 import { Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { capWidth, useIsTablet } from "@/lib/responsive";
 
 function Row({
   icon,
@@ -87,6 +88,7 @@ export default function AdminHubScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const isTablet = useIsTablet();
 
   const profileQ = useMyProfile();
   const isAdmin = !!profileQ.data?.is_admin;
@@ -141,6 +143,7 @@ export default function AdminHubScreen() {
             padding: 20,
             gap: 12,
             paddingBottom: insets.bottom + 40,
+            ...capWidth(isTablet),
           }}
           showsVerticalScrollIndicator={false}
           refreshControl={

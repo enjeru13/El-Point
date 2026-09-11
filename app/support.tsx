@@ -11,12 +11,14 @@ import { AppTextInput } from "@/components/ui/AppTextInput";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
+import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
 
 export default function SupportScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const toast = useToast();
+  const isTablet = useIsTablet();
   const send = useSendSupportMessage();
   const profileQ = useMyProfile();
 
@@ -77,7 +79,7 @@ export default function SupportScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 20, gap: 18, paddingBottom: insets.bottom + 40 }}
+        contentContainerStyle={{ padding: 20, gap: 18, paddingBottom: insets.bottom + 40, ...capWidth(isTablet, FORM_MAX_W) }}
         keyboardShouldPersistTaps="handled"
       >
         <View

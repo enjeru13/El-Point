@@ -15,12 +15,14 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
 
 export default function ChangePasswordScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const toast = useToast();
+  const isTablet = useIsTablet();
 
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
@@ -111,7 +113,7 @@ export default function ChangePasswordScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
-          contentContainerStyle={{ padding: 20, gap: 18 }}
+          contentContainerStyle={{ padding: 20, gap: 18, ...capWidth(isTablet, FORM_MAX_W) }}
           keyboardShouldPersistTaps="handled"
         >
           <AppText variant="body" color={C.onSurfaceVariant}>

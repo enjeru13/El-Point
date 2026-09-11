@@ -9,6 +9,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
 
 const CONFIRM_WORD = "ELIMINAR";
 
@@ -17,6 +18,7 @@ export default function DeleteAccountScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const toast = useToast();
+  const isTablet = useIsTablet();
 
   const [confirmText, setConfirmText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -76,7 +78,7 @@ export default function DeleteAccountScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 20, gap: 18, paddingBottom: insets.bottom + 40 }}
+        contentContainerStyle={{ padding: 20, gap: 18, paddingBottom: insets.bottom + 40, ...capWidth(isTablet, FORM_MAX_W) }}
         keyboardShouldPersistTaps="handled"
       >
         <View

@@ -5,11 +5,13 @@ import { useTheme } from "@/lib/ThemeContext";
 import { CHANGELOG } from "@/lib/changelog";
 import { AppText } from "@/components/ui/AppText";
 import { Icon } from "@/components/ui/Icon";
+import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
 
 export default function ChangelogScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const isTablet = useIsTablet();
 
   return (
     <View style={{ flex: 1, backgroundColor: C.background }}>
@@ -47,7 +49,7 @@ export default function ChangelogScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: insets.bottom + 40 }}
+        contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: insets.bottom + 40, ...capWidth(isTablet, FORM_MAX_W) }}
         showsVerticalScrollIndicator={false}
       >
         {CHANGELOG.map((r, i) => (
