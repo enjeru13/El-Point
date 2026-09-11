@@ -9,6 +9,7 @@ import { useTheme } from '@/lib/ThemeContext';
 import { THEME_MODE_META } from '@/lib/themes';
 import { useMyProfile, useUpdateSettings } from '@/lib/queries/me';
 import { SETTING_DEFAULTS } from '@/lib/settings';
+import { resetAllTours } from '@/lib/tour';
 import { AppText } from '@/components/ui/AppText';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
@@ -216,6 +217,23 @@ export default function SettingsScreen() {
                 <AppText variant="bodyStrong" style={{ flex: 1 }}>Contacto y soporte</AppText>
                 <Icon name="chevron-right" size={20} color={C.outline} />
               </Pressable>
+
+              {!isOwner && (
+                <>
+                  <Divider />
+                  <Pressable
+                    onPress={async () => { await resetAllTours(); router.back(); }}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
+                  >
+                    <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
+                      <Icon name="gesture-tap" size={20} color={C.primary} />
+                    </View>
+                    <AppText variant="bodyStrong" style={{ flex: 1 }}>Ver tutorial otra vez</AppText>
+                    <Icon name="chevron-right" size={20} color={C.outline} />
+                  </Pressable>
+                </>
+              )}
+
               <Divider />
               <Pressable
                 onPress={() => router.push('/changelog')}

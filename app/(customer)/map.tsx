@@ -26,6 +26,7 @@ import { useToast } from '@/lib/toast';
 import { useNearby, useRestaurantIcons, useRestaurantAmenitiesMap, type NearbyRestaurant, type NearbyAmenity } from '@/lib/queries/nearby';
 import { isBoosted } from '@/lib/queries/restaurants';
 import { useCategories } from '@/lib/queries/categories';
+import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -293,6 +294,16 @@ export default function MapScreen() {
   const mapRef   = useRef<MapView>(null);
   const sheetSnap = useMemo(() => [CARD_H], []);
 
+  // Coach-mark targets for the first-use tour.
+  const tourSearchRef = useRef<View>(null);
+  const tourChipsRef  = useRef<View>(null);
+  const tourGpsRef    = useRef<View>(null);
+  const tourSteps: TourStep[] = [
+    { ref: tourSearchRef, icon: 'magnify', title: 'Busca directo en el mapa', text: 'Escribe un nombre y los pines se filtran al momento.' },
+    { ref: tourChipsRef, icon: 'silverware-fork-knife', title: 'Filtra los pines', text: 'Toca una categoría para ver solo esos locales cerca de ti.' },
+    { ref: tourGpsRef, icon: 'crosshairs-gps', title: 'Céntrate en tu ubicación', text: 'Un toque y el mapa se mueve a donde estás.' },
+  ];
+
   const origin = userLocation ?? DEFAULT_ORIGIN;
   const nearbyQ = useNearby(origin, RADIUS_KM, activeCategory === 'all' ? null : activeCategory);
   const iconsQ = useRestaurantIcons();
@@ -483,24 +494,26 @@ export default function MapScreen() {
 
       {/* ── Search + chips ── */}
       <View style={{ position: 'absolute', top: insets.top + 8, left: 0, right: 0, gap: 8 }}>
-        <View style={{ marginHorizontal: 12 }}>
+        <View ref={tourSearchRef} collapsable={false} style={{ marginHorizontal: 12 }}>
           <SearchBar value={search} onChangeText={t => { setSearch(t); if (selected) closeSheet(); }} variant="floating" />
         </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 6, paddingHorizontal: 12, paddingBottom: 4, paddingTop: 2 }}
-        >
-          {[...PINNED, ...(categoriesQ.data ?? [])].map(cat => (
-            <Chip
-              key={cat.slug}
-              label={cat.label}
-              icon={cat.icon}
-              active={activeCategory === cat.slug}
-              onPress={() => { setActiveCategory(cat.slug); if (selected) closeSheet(); }}
-            />
-          ))}
-        </ScrollView>
+        <View ref={tourChipsRef} collapsable={false}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 6, paddingHorizontal: 12, paddingBottom: 4, paddingTop: 2 }}
+          >
+            {[...PINNED, ...(categoriesQ.data ?? [])].map(cat => (
+              <Chip
+                key={cat.slug}
+                label={cat.label}
+                icon={cat.icon}
+                active={activeCategory === cat.slug}
+                onPress={() => { setActiveCategory(cat.slug); if (selected) closeSheet(); }}
+              />
+            ))}
+          </ScrollView>
+        </View>
 
         {/* Estado */}
         {nearbyQ.isLoading ? (
@@ -526,11 +539,15 @@ export default function MapScreen() {
       </View>
 
       {/* ── GPS button ── */}
-      <Animated.View style={{
-        position: 'absolute', right: 14,
-        bottom: Math.max(insets.bottom, 12) + 84,
-        transform: [{ translateY: gpsY }],
-      }}>
+      <Animated.View
+        ref={tourGpsRef}
+        collapsable={false}
+        style={{
+          position: 'absolute', right: 14,
+          bottom: Math.max(insets.bottom, 12) + 84,
+          transform: [{ translateY: gpsY }],
+        }}
+      >
         <Pressable
           onPress={requestLocation}
           style={{
@@ -579,6 +596,8 @@ export default function MapScreen() {
           )}
         </BottomSheetView>
       </BottomSheet>
+
+      <TourGuide tourKey="map" ready={!nearbyQ.isLoading} steps={tourSteps} />
     </View>
   );
 }

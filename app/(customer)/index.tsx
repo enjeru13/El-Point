@@ -23,7 +23,8 @@ import { useSettings } from "@/lib/settings";
 import { distanceKm, fmtKm, type LatLng } from "@/lib/geo";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { TourGuide, type TourStep } from "@/components/tour/TourGuide";
 import * as Location from "expo-location";
 import {
   Pressable,
@@ -425,6 +426,18 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [userLoc, setUserLoc] = useState<LatLng | null>(null);
 
+  // Coach-mark targets for the first-use tour.
+  const tourSearchRef = useRef<View>(null);
+  const tourChipsRef = useRef<View>(null);
+  const tourTabsRef = useRef<View>(null);
+  const tourBellRef = useRef<View>(null);
+  const tourSteps: TourStep[] = [
+    { ref: tourSearchRef, icon: "magnify", title: "Busca lo que se te antoje", text: "Escribe un plato, un tipo de comida o el nombre del local y aparece al toque." },
+    { ref: tourChipsRef, icon: "silverware-fork-knife", title: "Filtra por categoría", text: "Toca cualquier chip para ver solo esa categoría, o \"Promos\" para las ofertas activas." },
+    { ref: tourTabsRef, icon: "star-outline", title: "Últimos ranks o tus favoritos", text: "Cambia entre lo que la gente está calificando ahora y los locales que ya guardaste." },
+    { ref: tourBellRef, icon: "bell-outline", title: "Tus notificaciones", text: "Aquí llegan tus subidas de nivel, respuestas a tus reseñas y promos cerca de ti." },
+  ];
+
   const firstName = profileQ.data?.full_name?.trim().split(/\s+/)[0];
   const greetName = profileQ.data?.username
     ? `@${profileQ.data.username}`
@@ -497,7 +510,14 @@ export default function HomeScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: C.background }}>
       {/* ── Header ── */}
-      <ScreenHeader left={<AppLogo />} right={<NotificationBell />} />
+      <ScreenHeader
+        left={<AppLogo />}
+        right={
+          <View ref={tourBellRef} collapsable={false}>
+            <NotificationBell />
+          </View>
+        }
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -525,38 +545,44 @@ export default function HomeScreen() {
             ¡Hola, {greetName}! 👋
           </AppText>
 
-          <SearchBar
-            value={query}
-            onChangeText={setQuery}
-            onClear={() => setQuery("")}
-            placeholder="Encuentra tu próximo antojo..."
-            variant="floating"
-          />
+          <View ref={tourSearchRef} collapsable={false}>
+            <SearchBar
+              value={query}
+              onChangeText={setQuery}
+              onClear={() => setQuery("")}
+              placeholder="Encuentra tu próximo antojo..."
+              variant="floating"
+            />
+          </View>
         </View>
 
         {/* ── 1: Filtros pegajosos (categorías + tabs) ── */}
         <View style={{ backgroundColor: C.background }}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingHorizontal: 20,
-              paddingVertical: 12,
-              gap: 8,
-            }}
-          >
-            {[...PINNED, ...(categoriesQ.data ?? [])].map((cat) => (
-              <Chip
-                key={cat.slug}
-                label={cat.label}
-                icon={cat.icon}
-                active={activeCategory === cat.slug}
-                onPress={() => setActiveCategory(cat.slug)}
-              />
-            ))}
-          </ScrollView>
+          <View ref={tourChipsRef} collapsable={false}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
+                paddingHorizontal: 20,
+                paddingVertical: 12,
+                gap: 8,
+              }}
+            >
+              {[...PINNED, ...(categoriesQ.data ?? [])].map((cat) => (
+                <Chip
+                  key={cat.slug}
+                  label={cat.label}
+                  icon={cat.icon}
+                  active={activeCategory === cat.slug}
+                  onPress={() => setActiveCategory(cat.slug)}
+                />
+              ))}
+            </ScrollView>
+          </View>
 
           <View
+            ref={tourTabsRef}
+            collapsable={false}
             style={{
               flexDirection: "row",
               paddingHorizontal: 20,
@@ -684,6 +710,8 @@ export default function HomeScreen() {
           )}
         </View>
       </ScrollView>
+
+      <TourGuide tourKey="home" ready={!feedQ.isLoading} steps={tourSteps} />
     </View>
   );
 }

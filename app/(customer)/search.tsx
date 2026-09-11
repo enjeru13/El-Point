@@ -25,6 +25,7 @@ import { isOpenNow } from '@/lib/hours';
 import { distanceKm, fmtKm, type LatLng } from '@/lib/geo';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Chip } from '@/components/ui/Chip';
+import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 
 type SortKey = 'rank' | 'reviews' | 'near' | null;
 type PriceKey = 1 | 2 | 3 | null;
@@ -377,6 +378,16 @@ export default function SearchScreen() {
   const [userLoc, setUserLoc]   = useState<LatLng | null>(null);
   const [locBusy, setLocBusy]   = useState(false);
 
+  // Coach-mark targets for the first-use tour.
+  const tourSearchRef = useRef<View>(null);
+  const tourFilterRef = useRef<View>(null);
+  const tourChipsRef  = useRef<View>(null);
+  const tourSteps: TourStep[] = [
+    { ref: tourSearchRef, icon: 'magnify', title: 'Busca por nombre o plato', text: 'Escribe y filtra en tiempo real entre todos los locales registrados.' },
+    { ref: tourFilterRef, icon: 'tune-variant', title: 'Filtros a fondo', text: 'Precio, comodidades, si está abierto ahora o el más cercano a ti.' },
+    { ref: tourChipsRef, icon: 'silverware-fork-knife', title: 'O navega por categoría', text: 'Toca un chip para saltar directo a esa comida.' },
+  ];
+
   useEffect(() => { loadRecents().then(setRecents); }, []);
 
   async function enableNear() {
@@ -522,7 +533,7 @@ export default function SearchScreen() {
           paddingHorizontal: 16,
           flexDirection: 'row', alignItems: 'center', gap: 10,
         }}>
-          <View style={{ flex: 1 }}>
+          <View ref={tourSearchRef} collapsable={false} style={{ flex: 1 }}>
             <SearchBar
               ref={inputRef}
               value={query}
@@ -533,41 +544,45 @@ export default function SearchScreen() {
             />
           </View>
 
-          <Pressable
-            onPress={() => setFilter(f => !f)}
-            style={{
-              width: 48, height: 48, borderRadius: 24,
-              alignItems: 'center', justifyContent: 'center',
-              backgroundColor: (filterOpen || hasActiveFilters) ? C.primary : C.surface,
-              borderWidth: 1, borderColor: (filterOpen || hasActiveFilters) ? C.border : C.outlineVariant,
-              ...((filterOpen || hasActiveFilters) ? shadow.primary : {}),
-            }}
-          >
-            <Icon name="tune-variant" size={20} color={(filterOpen || hasActiveFilters) ? '#fff' : C.onSurfaceVariant} />
-            {hasActiveFilters && !filterOpen && (
-              <View style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: 4, backgroundColor: C.primaryContainer, borderWidth: 1.5, borderColor: C.surface }} />
-            )}
-          </Pressable>
+          <View ref={tourFilterRef} collapsable={false}>
+            <Pressable
+              onPress={() => setFilter(f => !f)}
+              style={{
+                width: 48, height: 48, borderRadius: 24,
+                alignItems: 'center', justifyContent: 'center',
+                backgroundColor: (filterOpen || hasActiveFilters) ? C.primary : C.surface,
+                borderWidth: 1, borderColor: (filterOpen || hasActiveFilters) ? C.border : C.outlineVariant,
+                ...((filterOpen || hasActiveFilters) ? shadow.primary : {}),
+              }}
+            >
+              <Icon name="tune-variant" size={20} color={(filterOpen || hasActiveFilters) ? '#fff' : C.onSurfaceVariant} />
+              {hasActiveFilters && !filterOpen && (
+                <View style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: 4, backgroundColor: C.primaryContainer, borderWidth: 1.5, borderColor: C.surface }} />
+              )}
+            </Pressable>
+          </View>
         </View>
 
         {/* ── Chips de categoría ── */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 16, gap: 8, alignItems: 'center' }}
-          style={{ marginTop: 12, height: 44 }}
-        >
-          <Chip label="Todo" active={!activeCat} onPress={() => setActiveCat(null)} />
-          {(categoriesQ.data ?? []).map(cat => (
-            <Chip
-              key={cat.slug}
-              label={cat.label}
-              icon={cat.icon}
-              active={activeCat === cat.slug}
-              onPress={() => setActiveCat(activeCat === cat.slug ? null : cat.slug)}
-            />
-          ))}
-        </ScrollView>
+        <View ref={tourChipsRef} collapsable={false}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 16, gap: 8, alignItems: 'center' }}
+            style={{ marginTop: 12, height: 44 }}
+          >
+            <Chip label="Todo" active={!activeCat} onPress={() => setActiveCat(null)} />
+            {(categoriesQ.data ?? []).map(cat => (
+              <Chip
+                key={cat.slug}
+                label={cat.label}
+                icon={cat.icon}
+                active={activeCat === cat.slug}
+                onPress={() => setActiveCat(activeCat === cat.slug ? null : cat.slug)}
+              />
+            ))}
+          </ScrollView>
+        </View>
       </View>
 
       {/* ── Panel de filtros ── */}
@@ -765,6 +780,8 @@ export default function SearchScreen() {
           )}
         </ScrollView>
       )}
+
+      <TourGuide tourKey="search" ready={!searchQ.isLoading} steps={tourSteps} />
     </View>
   );
 }
