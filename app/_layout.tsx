@@ -19,7 +19,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { Dimensions } from 'react-native';
-import * as ScreenOrientation from 'expo-screen-orientation';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -66,11 +65,23 @@ export default function RootLayout() {
   }, []);
 
   // Orientation: unlocked at the native level (app.config.ts) — phones lock
-  // to portrait here, tablets stay free to rotate.
+  // to portrait here, tablets stay free to rotate. Dynamic import + try/catch
+  // because this native module isn't in an existing dev-client build until
+  // it's rebuilt (`eas build --profile development` / `expo run:ios|android`)
+  // — a static import would crash the whole app on load until then.
   useEffect(() => {
-    const { width, height } = Dimensions.get('window');
-    const isTablet = Math.min(width, height) >= 600;
-    (isTablet ? ScreenOrientation.unlockAsync() : ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)).catch(() => {});
+    (async () => {
+      try {
+        const ScreenOrientation = await import('expo-screen-orientation');
+        const { width, height } = Dimensions.get('window');
+        const isTablet = Math.min(width, height) >= 600;
+        await (isTablet
+          ? ScreenOrientation.unlockAsync()
+          : ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP));
+      } catch {
+        // Native module not linked yet (old dev client) — skip silently.
+      }
+    })();
   }, []);
 
   useNotificationsRealtime(session?.user.id ?? null);
