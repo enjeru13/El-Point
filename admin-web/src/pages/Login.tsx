@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { useAuth } from "../lib/auth";
 import { Button, Card } from "../components/ui";
+import { Brand } from "../components/Brand";
+import { FoodPattern } from "../components/FoodPattern";
 
 function GoogleIcon() {
   return (
@@ -43,14 +45,13 @@ export function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4">
-      <Card className="w-full max-w-sm p-8">
-        <div className="mb-6 flex flex-col items-center gap-2 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-xl font-black text-white">
-            P
-          </div>
-          <h1 className="font-display text-xl font-bold text-text">El Point · Admin</h1>
-          <p className="text-sm text-text-soft">Entra con tu cuenta de administrador.</p>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-bg px-4">
+      <FoodPattern />
+
+      <Card className="relative w-full max-w-sm p-8">
+        <div className="mb-7 flex flex-col items-center gap-3 text-center">
+          <Brand size="lg" />
+          <p className="text-sm text-text-soft">Panel de moderación · entra con tu cuenta de admin.</p>
         </div>
 
         <Button

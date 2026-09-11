@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { AtSign, Clock, MessageCircle, Store } from "lucide-react";
 import { useRestaurantQueue, useReviewRestaurant, type PendingRestaurant } from "../lib/queries/admin";
-import { Badge, Button, Card, EmptyState, PageLoading, timeAgo } from "../components/ui";
+import { Badge, Button, EmptyState, PageHeader, PageLoading, StripeCard, timeAgo } from "../components/ui";
 
 function Row({ r }: { r: PendingRestaurant }) {
   const review = useReviewRestaurant();
@@ -8,18 +9,18 @@ function Row({ r }: { r: PendingRestaurant }) {
   const [reason, setReason] = useState("");
 
   return (
-    <Card className="flex flex-col gap-4 p-5">
+    <StripeCard tone="brand" className="flex flex-col gap-4 py-5 pr-5">
       <div className="flex items-start gap-4">
-        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-border bg-surface-2">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-surface-2">
           {r.photo_url ? (
             <img src={r.photo_url} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-2xl">🏪</div>
+            <Store className="h-6 w-6 text-text-soft" strokeWidth={1.5} />
           )}
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <p className="font-display text-base font-bold text-text">{r.name}</p>
             <Badge>{r.owner_name}</Badge>
           </div>
@@ -27,13 +28,25 @@ function Row({ r }: { r: PendingRestaurant }) {
           {r.categories.length > 0 && (
             <p className="mt-1 text-xs text-text-soft">{r.categories.join(" · ")}</p>
           )}
-          <p className="mt-1 text-xs text-text-soft">
-            Enviado {timeAgo(r.submitted_at)}
-            {r.rif && ` · RIF ${r.rif}`}
-            {(r.whatsapp || r.instagram) && " · "}
-            {r.whatsapp && `WhatsApp ${r.whatsapp}`}
-            {r.instagram && ` @${r.instagram}`}
-          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-soft">
+            <span className="inline-flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" strokeWidth={2} />
+              {timeAgo(r.submitted_at)}
+            </span>
+            {r.rif && <span>RIF {r.rif}</span>}
+            {r.whatsapp && (
+              <span className="inline-flex items-center gap-1">
+                <MessageCircle className="h-3.5 w-3.5" strokeWidth={2} />
+                {r.whatsapp}
+              </span>
+            )}
+            {r.instagram && (
+              <span className="inline-flex items-center gap-1">
+                <AtSign className="h-3.5 w-3.5" strokeWidth={2} />
+                {r.instagram}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -75,7 +88,7 @@ function Row({ r }: { r: PendingRestaurant }) {
           </Button>
         </div>
       )}
-    </Card>
+    </StripeCard>
   );
 }
 
@@ -84,15 +97,16 @@ export function PendingRestaurants() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-text">Locales pendientes</h1>
-        <p className="mt-1 text-text-soft">Revisa y aprueba antes de que aparezcan en la app.</p>
-      </div>
+      <PageHeader
+        eyebrow="Verificación"
+        title="Locales pendientes"
+        body="Revisa y aprueba antes de que aparezcan en la app."
+      />
 
       {queueQ.isLoading ? (
         <PageLoading />
       ) : (queueQ.data ?? []).length === 0 ? (
-        <EmptyState title="Nada pendiente" body="Todos los locales enviados ya fueron revisados." />
+        <EmptyState icon={Store} title="Nada pendiente" body="Todos los locales enviados ya fueron revisados." />
       ) : (
         <div className="flex flex-col gap-4">
           {queueQ.data!.map((r) => (

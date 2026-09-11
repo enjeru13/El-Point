@@ -1,14 +1,15 @@
+import { Flag } from "lucide-react";
 import { useReportedRestaurants, useResolveRestaurantReport, type ReportedRestaurant } from "../lib/queries/admin";
 import { reasonLabel, RESTAURANT_REPORT_REASONS } from "../lib/reasons";
-import { Badge, Button, Card, EmptyState, PageLoading, timeAgo } from "../components/ui";
+import { Badge, Button, EmptyState, PageHeader, PageLoading, StripeCard, timeAgo } from "../components/ui";
 
 function Row({ r }: { r: ReportedRestaurant }) {
   const resolve = useResolveRestaurantReport();
 
   return (
-    <Card className="flex flex-col gap-4 p-5">
+    <StripeCard tone="danger" className="flex flex-col gap-4 py-5 pr-5">
       <div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <p className="font-display text-base font-bold text-text">{r.name}</p>
           <Badge>{r.owner_name}</Badge>
           <Badge tone="danger">{r.reports.length} {r.reports.length === 1 ? "reporte" : "reportes"}</Badge>
@@ -41,7 +42,7 @@ function Row({ r }: { r: ReportedRestaurant }) {
           Restaurar local
         </Button>
       </div>
-    </Card>
+    </StripeCard>
   );
 }
 
@@ -50,15 +51,16 @@ export function ReportedRestaurants() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-text">Locales reportados</h1>
-        <p className="mt-1 text-text-soft">Suspendidos automáticamente por reportes de comensales.</p>
-      </div>
+      <PageHeader
+        eyebrow="Moderación"
+        title="Locales reportados"
+        body="Suspendidos automáticamente por reportes de comensales."
+      />
 
       {q.isLoading ? (
         <PageLoading />
       ) : (q.data ?? []).length === 0 ? (
-        <EmptyState title="Sin reportes pendientes" body="Ningún local suspendido esperando revisión." />
+        <EmptyState icon={Flag} title="Sin reportes pendientes" body="Ningún local suspendido esperando revisión." />
       ) : (
         <div className="flex flex-col gap-4">
           {q.data!.map((r) => (

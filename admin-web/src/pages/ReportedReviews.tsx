@@ -1,16 +1,29 @@
+import { MessageSquareWarning, Star } from "lucide-react";
 import { useModerationQueue, useResolveReview, type ModerationItem } from "../lib/queries/moderation";
 import { reasonLabel, REVIEW_REPORT_REASONS } from "../lib/reasons";
-import { Badge, Button, Card, EmptyState, PageLoading, timeAgo } from "../components/ui";
+import { Badge, Button, EmptyState, PageHeader, PageLoading, StripeCard, timeAgo } from "../components/ui";
 
 function Stars({ n }: { n: number }) {
-  return <span className="text-sm text-brand">{"★".repeat(n)}{"☆".repeat(5 - n)}</span>;
+  return (
+    <span className="inline-flex gap-0.5">
+      {Array.from({ length: 5 }, (_, i) => (
+        <Star
+          key={i}
+          className="h-3.5 w-3.5"
+          strokeWidth={1.5}
+          fill={i < n ? "var(--brand)" : "none"}
+          color="var(--brand)"
+        />
+      ))}
+    </span>
+  );
 }
 
 function Row({ item }: { item: ModerationItem }) {
   const resolve = useResolveReview();
 
   return (
-    <Card className="flex flex-col gap-4 p-5">
+    <StripeCard tone={item.moderation === "hidden" ? "danger" : "neutral"} className="flex flex-col gap-4 py-5 pr-5">
       <div>
         <div className="flex flex-wrap items-center gap-2">
           <p className="font-display text-base font-bold text-text">{item.restaurant_name}</p>
@@ -44,7 +57,7 @@ function Row({ item }: { item: ModerationItem }) {
           Mantener visible
         </Button>
       </div>
-    </Card>
+    </StripeCard>
   );
 }
 
@@ -53,15 +66,12 @@ export function ReportedReviews() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-text">Reseñas reportadas</h1>
-        <p className="mt-1 text-text-soft">Ordenadas por cantidad de reportes.</p>
-      </div>
+      <PageHeader eyebrow="Moderación" title="Reseñas reportadas" body="Ordenadas por cantidad de reportes." />
 
       {q.isLoading ? (
         <PageLoading />
       ) : (q.data ?? []).length === 0 ? (
-        <EmptyState title="Sin reseñas reportadas" body="No hay nada que moderar por ahora." />
+        <EmptyState icon={MessageSquareWarning} title="Sin reseñas reportadas" body="No hay nada que moderar por ahora." />
       ) : (
         <div className="flex flex-col gap-4">
           {q.data!.map((item) => (
