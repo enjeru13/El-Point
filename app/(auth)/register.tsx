@@ -22,6 +22,7 @@ import { ThemePicker } from '@/components/ui/ThemePicker';
 import { useCategories } from '@/lib/queries/categories';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { capWidth, FORM_MAX_W, useIsTablet } from '@/lib/responsive';
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
 
@@ -62,6 +63,7 @@ export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const toast = useToast();
+  const isTablet = useIsTablet();
   const categoriesQ = useCategories();
   const [step, setStep] = useState(0);
 
@@ -216,6 +218,7 @@ export default function RegisterScreen() {
             paddingTop: insets.top + 70,
             paddingBottom: insets.bottom + (step === 0 ? 172 : 120),
             paddingHorizontal: 20,
+            ...capWidth(isTablet, FORM_MAX_W),
           }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"

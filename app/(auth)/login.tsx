@@ -18,11 +18,13 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthBackground } from "@/components/ui/AuthBackground";
+import { FORM_MAX_W, useIsTablet } from "@/lib/responsive";
 
 export default function LoginScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const isTablet = useIsTablet();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -96,6 +98,7 @@ export default function LoginScreen() {
         <Animated.View
           style={{
             width: "100%",
+            maxWidth: isTablet ? FORM_MAX_W : undefined,
             opacity: cardAnim,
             transform: [
               {

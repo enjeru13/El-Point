@@ -17,6 +17,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { FORM_MAX_W, useIsTablet } from "@/lib/responsive";
 
 const emailValid = (e: string) =>
   /^[\x00-\x7F]+@[\x00-\x7F]+\.[\x00-\x7F]{2,}$/.test(e.trim());
@@ -26,6 +27,7 @@ export default function ForgotPasswordScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const toast = useToast();
+  const isTablet = useIsTablet();
 
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
@@ -124,6 +126,7 @@ export default function ForgotPasswordScreen() {
         <View
           style={{
             width: "100%",
+            maxWidth: isTablet ? FORM_MAX_W : undefined,
             borderRadius: 32,
             padding: 24,
             gap: 18,

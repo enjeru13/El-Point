@@ -32,6 +32,7 @@ import MapView from "react-native-maps";
 const SAN_CRISTOBAL = { latitude: 7.7669, longitude: -72.2251 };
 import { AppText } from "@/components/ui/AppText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
 
 const STEPS = 4;
 
@@ -40,6 +41,7 @@ export default function RegisterOwnerScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const toast = useToast();
+  const isTablet = useIsTablet();
   const [step, setStep] = useState(0);
   const mapRef = useRef<MapView>(null);
   const [locating, setLocating] = useState(false);
@@ -323,6 +325,7 @@ export default function RegisterOwnerScreen() {
             paddingTop: insets.top + 70,
             paddingBottom: insets.bottom + 120,
             paddingHorizontal: 20,
+            ...capWidth(isTablet, FORM_MAX_W),
           }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
