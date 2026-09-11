@@ -81,7 +81,7 @@ export default function ReferralsScreen() {
             <AppText variant="overline" color={C.onSurfaceVariant}>TU CÓDIGO</AppText>
             <AppText
               variant="display"
-              style={{ fontSize: 40, letterSpacing: 6 }}
+              style={{ fontSize: 40, lineHeight: 56, letterSpacing: 6, paddingVertical: 6 }}
             >
               {code ?? "······"}
             </AppText>
