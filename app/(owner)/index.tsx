@@ -201,7 +201,7 @@ export default function OwnerHomeScreen() {
               <Icon name="crown" size={22} color="#3a2a05" />
             </View>
             <View style={{ flex: 1 }}>
-              <AppText variant="bodyStrong">Eres Fundador #{restaurant.founder_rank}</AppText>
+              <AppText variant="bodyStrong">Eres Fundador</AppText>
               <AppText variant="bodySm" color={C.onSurfaceVariant}>
                 Uno de los primeros 100 locales de El Point. Nunca vas a pagar por estar en la app.
               </AppText>

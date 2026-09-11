@@ -173,14 +173,11 @@ function ReviewCard({
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             {isFounder(item.restaurant) && (
               <View style={{
-                flexDirection: "row", alignItems: "center", gap: 3,
-                paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99,
+                width: 20, height: 20, borderRadius: 10,
+                alignItems: "center", justifyContent: "center",
                 backgroundColor: "#f0c26022", borderWidth: 1, borderColor: "#f0c26066",
               }}>
                 <Icon name="crown" size={11} color="#b8860b" />
-                <AppText variant="caption" color="#b8860b" style={{ fontSize: 10 }}>
-                  Fundador #{item.restaurant.founder_rank}
-                </AppText>
               </View>
             )}
             {isBoosted(item.restaurant) && (

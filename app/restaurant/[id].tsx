@@ -782,21 +782,17 @@ export default function RestaurantProfileScreen() {
                 {isFounder(restaurant) && (
                   <View
                     style={{
-                      flexDirection: "row",
+                      width: 26,
+                      height: 26,
+                      borderRadius: 13,
                       alignItems: "center",
-                      gap: 4,
-                      paddingHorizontal: 10,
-                      paddingVertical: 4,
-                      borderRadius: 99,
+                      justifyContent: "center",
                       backgroundColor: "rgba(240,194,96,0.25)",
                       borderWidth: 1,
                       borderColor: "rgba(240,194,96,0.6)",
                     }}
                   >
-                    <Icon name="crown" size={12} color="#f0c260" />
-                    <AppText variant="caption" color="#fff" style={{ fontSize: 12 }}>
-                      FUNDADOR #{restaurant.founder_rank}
-                    </AppText>
+                    <Icon name="crown" size={13} color="#f0c260" />
                   </View>
                 )}
                 {isBoosted(restaurant) && (
