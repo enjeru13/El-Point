@@ -518,11 +518,18 @@ export default function OwnerProfileScreen() {
             )}
           </View>
           <View style={{ paddingHorizontal: 20, paddingBottom: 20, backgroundColor: C.surface }}>
-            <View style={{ marginTop: -28, marginBottom: 12, width: 64, height: 64, borderRadius: 20, overflow: 'hidden', backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: C.surface }}>
-              {restaurant.logo_url ? (
-                <Image source={{ uri: restaurant.logo_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={150} />
-              ) : (
-                <Icon name={restaurant.categories[0]?.icon ?? 'store-outline'} size={30} color="#fff" />
+            <View style={{ marginTop: -28, marginBottom: 12, width: 64, height: 64 }}>
+              <View style={{ width: 64, height: 64, borderRadius: 20, overflow: 'hidden', backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: C.surface }}>
+                {restaurant.logo_url ? (
+                  <Image source={{ uri: restaurant.logo_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={150} />
+                ) : (
+                  <Icon name={restaurant.categories[0]?.icon ?? 'store-outline'} size={30} color="#fff" />
+                )}
+              </View>
+              {isFounder(restaurant) && (
+                <View style={{ position: 'absolute', top: -4, right: -4 }}>
+                  <FounderBadge rank={restaurant.founder_rank!} size="md" />
+                </View>
               )}
             </View>
 

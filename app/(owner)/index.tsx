@@ -1,6 +1,6 @@
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { Skeleton, SkeletonList } from '@/components/ui/Skeleton';
@@ -12,6 +12,8 @@ import { isBoosted, isFounder } from '@/lib/queries/restaurants';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { Avatar } from '@/components/ui/Avatar';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { FounderWelcomeModal } from '@/components/ui/FounderWelcomeModal';
+import { hasSeenFounderWelcome, markFounderWelcomeSeen } from '@/lib/founderWelcome';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 import { capWidth, useIsTablet } from '@/lib/responsive';
 
@@ -93,6 +95,21 @@ export default function OwnerHomeScreen() {
   const reviewsQ = useReviews(restaurant?.id ?? '');
   const reviews = reviewsQ.data ?? [];
   const [refreshing, setRefreshing] = useState(false);
+  const [showFounderWelcome, setShowFounderWelcome] = useState(false);
+
+  useEffect(() => {
+    if (!restaurant || !isFounder(restaurant)) return;
+    let alive = true;
+    hasSeenFounderWelcome(restaurant.id).then((seen) => {
+      if (alive && !seen) setShowFounderWelcome(true);
+    });
+    return () => { alive = false; };
+  }, [restaurant?.id, restaurant?.founder_rank]);
+
+  function closeFounderWelcome() {
+    setShowFounderWelcome(false);
+    if (restaurant) markFounderWelcomeSeen(restaurant.id);
+  }
 
   // Coach-mark targets for the first-use tour.
   const tourStatusRef  = useRef<View>(null);
@@ -164,7 +181,22 @@ export default function OwnerHomeScreen() {
         paddingHorizontal: 20,
         flexDirection: 'row', alignItems: 'center', gap: 12,
       }}>
-        <Avatar uri={restaurant.logo_url ?? restaurant.cover_url} size={44} icon={restaurant.categories[0]?.icon ?? 'store-outline'} />
+        <View>
+          <Avatar uri={restaurant.logo_url ?? restaurant.cover_url} size={44} icon={restaurant.categories[0]?.icon ?? 'store-outline'} />
+          {isFounder(restaurant) && (
+            <View
+              style={{
+                position: 'absolute', top: -4, right: -4,
+                width: 20, height: 20, borderRadius: 10,
+                alignItems: 'center', justifyContent: 'center',
+                backgroundColor: '#f0c260',
+                borderWidth: 2, borderColor: C.background,
+              }}
+            >
+              <Icon name="crown" size={11} color="#3a2a05" />
+            </View>
+          )}
+        </View>
         <View style={{ flex: 1 }}>
           <AppText variant="label" color={C.onSurfaceVariant}>Bienvenido</AppText>
           <AppText variant="title" style={{ fontSize: 22, lineHeight: 27 }} numberOfLines={1}>{restaurant.name}</AppText>
@@ -184,30 +216,6 @@ export default function OwnerHomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />
         }
       >
-
-        {isFounder(restaurant) && (
-          <View
-            style={{
-              flexDirection: 'row', alignItems: 'center', gap: 14,
-              padding: 16, borderRadius: 20,
-              backgroundColor: '#f0c26022',
-              borderWidth: 1, borderColor: '#f0c26066',
-            }}
-          >
-            <View style={{
-              width: 44, height: 44, borderRadius: 14,
-              backgroundColor: '#f0c260', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Icon name="crown" size={22} color="#3a2a05" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <AppText variant="bodyStrong">Eres Fundador</AppText>
-              <AppText variant="bodySm" color={C.onSurfaceVariant}>
-                Uno de los primeros 100 locales de El Point. Nunca vas a pagar por estar en la app.
-              </AppText>
-            </View>
-          </View>
-        )}
 
         <View ref={tourStatusRef} collapsable={false} style={{ gap: 20 }}>
         {/* Banner de verificación (mientras no esté aprobado) */}
@@ -430,6 +438,7 @@ export default function OwnerHomeScreen() {
       </ScrollView>
 
       <TourGuide tourKey="owner_home" ready={!reviewsQ.isLoading} steps={tourSteps} scrollRef={scrollRef} scrollOffset={scrollY} />
+      <FounderWelcomeModal visible={showFounderWelcome} onClose={closeFounderWelcome} />
     </View>
   );
 }

@@ -133,9 +133,9 @@ export default function SubscriptionScreen() {
                 <Icon name="crown" size={22} color="#3a2a05" />
               </View>
               <View style={{ flex: 1 }}>
-                <AppText variant="bodyStrong">Sos Fundador</AppText>
+                <AppText variant="bodyStrong">Eres Fundador de El Point</AppText>
                 <AppText variant="bodySm" color={C.onSurfaceVariant}>
-                  Uno de los primeros 100 locales. Nunca vas a tener que pagar.
+                  Tu local entró entre los primeros 100 de la app.
                 </AppText>
               </View>
             </View>

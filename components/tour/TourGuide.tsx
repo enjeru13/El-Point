@@ -10,7 +10,6 @@ import {
   DeviceEventEmitter,
   Dimensions,
   Easing,
-  Modal,
   Pressable,
   ScrollView,
   View,
@@ -188,7 +187,19 @@ export function TourGuide({
     : Math.max(insets.top + 12, cy - cardH - 14);
 
   return (
-    <Modal visible transparent animationType="none" statusBarTranslucent onRequestClose={finish}>
+    // No <Modal> on purpose: Modal opens a second native window on Android,
+    // and measureInWindow()'s coordinates for that window don't reliably
+    // line up with the Modal's own on some Android versions/OEMs (ring
+    // renders off-target — reported on a Poco M3, fine on iOS where Modal
+    // doesn't have this quirk). Rendered in-tree instead, as the last child
+    // of the screen, so it's guaranteed to share the exact same coordinate
+    // space as whatever we just measured. Trade-off: it won't dim/cover the
+    // floating tab bar (that's a sibling from the Tabs navigator, outside
+    // this screen's own tree) — a cosmetic gap, not a functional one.
+    <View
+      pointerEvents="box-none"
+      style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, elevation: 999, zIndex: 999 }}
+    >
       <Pressable style={{ flex: 1 }} onPress={goNext} accessible={false}>
         {/* Dim everywhere except a cutout around the target (4 bars) */}
         <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, height: cy, backgroundColor: DIM }} />
@@ -315,6 +326,6 @@ export function TourGuide({
           </Pressable>
         </Animated.View>
       </Pressable>
-    </Modal>
+    </View>
   );
 }
