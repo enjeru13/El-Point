@@ -63,6 +63,15 @@ export function TourGuide({
   // was shorter/longer than average. Reset per step so a short step
   // doesn't inherit a tall one's measurement for one frame.
   const [measuredCardH, setMeasuredCardH] = useState<number | null>(null);
+  // Where our own full-screen overlay actually renders in window-absolute
+  // coordinates. In theory it's (0,0) since it's position:absolute with
+  // top/left/right/bottom:0 — in practice, on some Android devices/OS
+  // versions (reported on a Poco M3; iOS is fine) it isn't exactly, so we
+  // measure it for real and use it to convert the target's window-absolute
+  // rect into this overlay's own coordinate space. Self-correcting for
+  // whatever the true offset is, instead of guessing why it's non-zero.
+  const overlayRef = useRef<View>(null);
+  const [origin, setOrigin] = useState({ x: 0, y: 0 });
   const fade = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(1)).current;
   const retriesRef = useRef(0);
@@ -181,8 +190,8 @@ export function TourGuide({
 
   const win = Dimensions.get("window");
   const s = steps[step];
-  const cx = Math.max(rect.x - HALO, 0);
-  const cy = Math.max(rect.y - HALO, 0);
+  const cx = Math.max(rect.x - origin.x - HALO, 0);
+  const cy = Math.max(rect.y - origin.y - HALO, 0);
   const cw = Math.min(rect.width + HALO * 2, win.width - cx);
   const ch = rect.height + HALO * 2;
 
@@ -207,6 +216,12 @@ export function TourGuide({
     // floating tab bar (that's a sibling from the Tabs navigator, outside
     // this screen's own tree) — a cosmetic gap, not a functional one.
     <View
+      ref={overlayRef}
+      onLayout={() => {
+        overlayRef.current?.measureInWindow((ox, oy) => {
+          if (ox !== origin.x || oy !== origin.y) setOrigin({ x: ox, y: oy });
+        });
+      }}
       pointerEvents="box-none"
       style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, elevation: 999, zIndex: 999 }}
     >
