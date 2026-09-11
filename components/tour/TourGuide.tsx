@@ -58,6 +58,11 @@ export function TourGuide({
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
+  // Real measured height of the card once it renders — a hardcoded guess
+  // was placing it too high/low above the target whenever a step's text
+  // was shorter/longer than average. Reset per step so a short step
+  // doesn't inherit a tall one's measurement for one frame.
+  const [measuredCardH, setMeasuredCardH] = useState<number | null>(null);
   const fade = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(1)).current;
   const retriesRef = useRef(0);
@@ -115,6 +120,7 @@ export function TourGuide({
 
   const start = useCallback(() => {
     setRect(null);
+    setMeasuredCardH(null);
     setStep(0);
     setVisible(true);
     requestAnimationFrame(() => measure(0));
@@ -162,6 +168,7 @@ export function TourGuide({
     const n = step + 1;
     setStep(n);
     setRect(null);
+    setMeasuredCardH(null);
     requestAnimationFrame(() => measure(n));
   }
 
@@ -179,12 +186,15 @@ export function TourGuide({
   const cw = Math.min(rect.width + HALO * 2, win.width - cx);
   const ch = rect.height + HALO * 2;
 
-  const cardH = 196;
+  // Estimate until the card actually renders and reports its real height
+  // (onLayout below) — a fixed guess was placing it too high/low above the
+  // target whenever a step's text ran shorter/longer than average.
+  const cardHEstimate = measuredCardH ?? 196;
   const spaceBelow = win.height - (rect.y - HALO + ch);
-  const placeBelow = spaceBelow > cardH + insets.bottom + 20;
+  const placeBelow = spaceBelow > cardHEstimate + insets.bottom + 20;
   const cardTop = placeBelow
     ? cy + ch + 14
-    : Math.max(insets.top + 12, cy - cardH - 14);
+    : Math.max(insets.top + 12, cy - cardHEstimate - 14);
 
   return (
     // No <Modal> on purpose: Modal opens a second native window on Android,
@@ -223,6 +233,10 @@ export function TourGuide({
         />
 
         <Animated.View
+          onLayout={(e) => {
+            const h = e.nativeEvent.layout.height;
+            if (h > 0 && h !== measuredCardH) setMeasuredCardH(h);
+          }}
           style={{
             position: "absolute",
             left: SIDE_MARGIN,
