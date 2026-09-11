@@ -295,6 +295,17 @@ export default function ProfileScreen() {
                   </AppText>
                 )}
               </View>
+
+              <Pressable
+                onPress={() => router.push('/rank-info')}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' }}
+                hitSlop={8}
+              >
+                <Icon name="information-outline" size={14} color={C.primary} />
+                <AppText variant="caption" color={C.primary}>
+                  ¿Cómo funcionan los rangos y el XP?
+                </AppText>
+              </Pressable>
             </View>
 
             {/* Stats */}
