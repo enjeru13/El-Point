@@ -10,6 +10,7 @@ import { THEME_MODE_META } from '@/lib/themes';
 import { useMyProfile, useUpdateSettings } from '@/lib/queries/me';
 import { SETTING_DEFAULTS } from '@/lib/settings';
 import { resetAllTours } from '@/lib/tour';
+import { capWidth, useIsTablet, FORM_MAX_W } from '@/lib/responsive';
 import { AppText } from '@/components/ui/AppText';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
@@ -59,6 +60,7 @@ export default function SettingsScreen() {
   const { C, shadow, mode, setMode } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const isTablet = useIsTablet();
 
   const profileQ = useMyProfile();
   const updateSettings = useUpdateSettings();
@@ -92,7 +94,7 @@ export default function SettingsScreen() {
           <Skeleton height={140} radius={24} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 20, gap: 24, paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={{ padding: 20, gap: 24, paddingBottom: insets.bottom + 40, ...capWidth(isTablet, FORM_MAX_W) }} showsVerticalScrollIndicator={false}>
 
           {/* Apariencia */}
           <View style={{ gap: 10 }}>

@@ -37,6 +37,7 @@ import { useToast } from "@/lib/toast";
 import { impact } from "@/lib/haptics";
 import { isOpenNow, formatRange, DAY_LABELS_LONG } from "@/lib/hours";
 import { useTheme } from "@/lib/ThemeContext";
+import { capWidth, useIsTablet } from "@/lib/responsive";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   forwardRef,
@@ -157,6 +158,7 @@ const ReviewSheet = forwardRef<
 >(({ restaurantName, submitting, errorMessage, editing, onSubmit }, ref) => {
   const { C } = useTheme();
   const insets = useSafeAreaInsets();
+  const isTablet = useIsTablet();
   const RATING_COLORS = [
     "",
     C.error,
@@ -307,6 +309,7 @@ const ReviewSheet = forwardRef<
           paddingTop: 4,
           paddingBottom: 112,
           gap: 16,
+          ...capWidth(isTablet),
         }}
         keyboardShouldPersistTaps="handled"
       >
@@ -431,6 +434,7 @@ export default function RestaurantProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const isTablet = useIsTablet();
 
   const restaurantQ = useRestaurant(id);
   const reviewsQ = useReviews(id);
@@ -709,7 +713,7 @@ export default function RestaurantProfileScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: C.background }}>
       <Animated.ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 100, ...capWidth(isTablet) }}
         showsVerticalScrollIndicator={false}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],

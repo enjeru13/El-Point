@@ -33,6 +33,7 @@ import { supabase } from '@/lib/supabase';
 import { DEFAULT_HOURS, DAY_LABELS, DAY_LABELS_LONG, formatRange, to12h, type Hours } from '@/lib/hours';
 import { instagramHandle } from '@/lib/contact';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
+import { capWidth, useIsTablet } from '@/lib/responsive';
 
 function Divider() {
   const { C } = useTheme();
@@ -81,6 +82,7 @@ export default function OwnerProfileScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const isTablet = useIsTablet();
 
   const toast = useToast();
   const restaurantQ = useMyRestaurant();
@@ -365,7 +367,7 @@ export default function OwnerProfileScreen() {
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20, ...capWidth(isTablet) }}
       >
 
         {/* Verificación */}

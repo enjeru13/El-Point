@@ -13,6 +13,7 @@ import { NotificationBell } from '@/components/ui/NotificationBell';
 import { Avatar } from '@/components/ui/Avatar';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
+import { capWidth, useIsTablet } from '@/lib/responsive';
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -85,6 +86,7 @@ export default function OwnerHomeScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const isTablet = useIsTablet();
 
   const restaurantQ = useMyRestaurant();
   const restaurant = restaurantQ.data ?? null;
@@ -177,7 +179,7 @@ export default function OwnerHomeScreen() {
         onScroll={(e) => { scrollY.current = e.nativeEvent.contentOffset.y; }}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20, ...capWidth(isTablet) }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />
         }

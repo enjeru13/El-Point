@@ -27,6 +27,7 @@ import { useNearby, useRestaurantIcons, useRestaurantAmenitiesMap, type NearbyRe
 import { isBoosted } from '@/lib/queries/restaurants';
 import { useCategories } from '@/lib/queries/categories';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
+import { capWidth, useIsTablet } from '@/lib/responsive';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -280,6 +281,7 @@ export default function MapScreen() {
   const router  = useRouter();
   const insets  = useSafeAreaInsets();
   const toast   = useToast();
+  const isTablet = useIsTablet();
 
   const [userLocation, setUserLocation]     = useState<{ latitude: number; longitude: number } | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
@@ -493,7 +495,7 @@ export default function MapScreen() {
       )}
 
       {/* ── Search + chips ── */}
-      <View style={{ position: 'absolute', top: insets.top + 8, left: 0, right: 0, gap: 8 }}>
+      <View style={{ position: 'absolute', top: insets.top + 8, left: 0, right: 0, gap: 8, ...capWidth(isTablet) }}>
         <View ref={tourSearchRef} collapsable={false} style={{ marginHorizontal: 12 }}>
           <SearchBar value={search} onChangeText={t => { setSearch(t); if (selected) closeSheet(); }} variant="floating" />
         </View>

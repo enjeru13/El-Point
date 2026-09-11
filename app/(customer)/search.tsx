@@ -26,6 +26,7 @@ import { distanceKm, fmtKm, type LatLng } from '@/lib/geo';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Chip } from '@/components/ui/Chip';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
+import { capWidth, useIsTablet } from '@/lib/responsive';
 
 type SortKey = 'rank' | 'reviews' | 'near' | null;
 type PriceKey = 1 | 2 | 3 | null;
@@ -362,6 +363,7 @@ export default function SearchScreen() {
   const router   = useRouter();
   const toast    = useToast();
   const inputRef = useRef<TextInput>(null);
+  const isTablet = useIsTablet();
 
   const searchQ = useRestaurantSearch();
   const categoriesQ = useCategories();
@@ -529,6 +531,7 @@ export default function SearchScreen() {
         backgroundColor: C.background,
         borderBottomWidth: 1, borderBottomColor: C.outlineVariant,
       }}>
+        <View style={capWidth(isTablet)}>
         <View style={{
           paddingHorizontal: 16,
           flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -583,6 +586,7 @@ export default function SearchScreen() {
             ))}
           </ScrollView>
         </View>
+        </View>
       </View>
 
       {/* ── Panel de filtros ── */}
@@ -594,7 +598,7 @@ export default function SearchScreen() {
             borderBottomWidth: 1,
             borderBottomColor: C.outlineVariant,
           }}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 14, gap: 14 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 14, gap: 14, ...capWidth(isTablet) }}
           showsVerticalScrollIndicator
           nestedScrollEnabled
           keyboardShouldPersistTaps="handled"
@@ -695,7 +699,7 @@ export default function SearchScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
-          contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: insets.bottom + 96 }}
+          contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: insets.bottom + 96, ...capWidth(isTablet) }}
         >
           {results.length === 0 ? (
             <EmptyState
@@ -735,7 +739,7 @@ export default function SearchScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
-          contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 96, gap: 14 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 96, gap: 14, ...capWidth(isTablet) }}
         >
           {recents.length > 0 && (
             <View style={{ gap: 10 }}>

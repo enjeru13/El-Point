@@ -32,6 +32,7 @@ import { uploadAvatar } from '@/lib/storage';
 import { useFavorites } from '@/lib/queries/feed';
 import { useCategories } from '@/lib/queries/categories';
 import { useToast } from '@/lib/toast';
+import { capWidth, useIsTablet } from '@/lib/responsive';
 
 function timeAgo(iso: string): string {
   const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400_000);
@@ -60,6 +61,7 @@ export default function ProfileScreen() {
   const { C, shadow } = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const isTablet = useIsTablet();
 
   const profileQ = useMyProfile();
   const reviewsQ = useMyReviews();
@@ -200,7 +202,7 @@ export default function ProfileScreen() {
         </View>
       ) : (
         <ScrollView
-          contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 96, ...capWidth(isTablet) }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />

@@ -7,7 +7,10 @@ const config: ExpoConfig = {
   name: "El Point",
   slug: "El-Point",
   version: "1.0.0",
-  orientation: "portrait",
+  // Unlocked at the native level — RootLayout locks phones to portrait at
+  // runtime and leaves tablets free to rotate (see expo-screen-orientation
+  // call in app/_layout.tsx).
+  orientation: "default",
   icon: "./assets/images/icon.png",
   scheme: "elpoint",
   userInterfaceStyle: "automatic",

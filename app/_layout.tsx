@@ -18,6 +18,8 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
+import { Dimensions } from 'react-native';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -61,6 +63,14 @@ export default function RootLayout() {
 
   useEffect(() => {
     hasSeenOnboarding().then(setOnboardingSeen);
+  }, []);
+
+  // Orientation: unlocked at the native level (app.config.ts) — phones lock
+  // to portrait here, tablets stay free to rotate.
+  useEffect(() => {
+    const { width, height } = Dimensions.get('window');
+    const isTablet = Math.min(width, height) >= 600;
+    (isTablet ? ScreenOrientation.unlockAsync() : ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)).catch(() => {});
   }, []);
 
   useNotificationsRealtime(session?.user.id ?? null);

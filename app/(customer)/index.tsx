@@ -25,6 +25,7 @@ import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { TourGuide, type TourStep } from "@/components/tour/TourGuide";
+import { capWidth, useIsTablet } from "@/lib/responsive";
 import * as Location from "expo-location";
 import {
   Pressable,
@@ -411,6 +412,7 @@ export default function HomeScreen() {
   const { C, shadow } = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const isTablet = useIsTablet();
 
   const feedQ = useHomeFeed();
   const favIdsQ = useFavoriteIds();
@@ -521,7 +523,7 @@ export default function HomeScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 96, ...capWidth(isTablet) }}
         stickyHeaderIndices={[1]}
         refreshControl={
           <RefreshControl

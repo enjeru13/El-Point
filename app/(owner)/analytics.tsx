@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews } from '@/lib/queries/reviews';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
+import { capWidth, useIsTablet } from '@/lib/responsive';
 
 const PERIODS = ['Semana', 'Mes', 'Año'] as const;
 type Period = typeof PERIODS[number];
@@ -83,6 +84,7 @@ function MetricCard({ icon, label, value }: { icon: string; label: string; value
 export default function AnalyticsScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
+  const isTablet = useIsTablet();
   const [period, setPeriod] = useState<Period>('Semana');
   const [refreshing, setRefreshing] = useState(false);
 
@@ -174,7 +176,7 @@ export default function AnalyticsScreen() {
         onScroll={(e) => { scrollY.current = e.nativeEvent.contentOffset.y; }}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20, ...capWidth(isTablet) }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />
         }
