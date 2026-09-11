@@ -18,8 +18,12 @@ import {
 } from "@/lib/queries/feed";
 import { useCategories } from "@/lib/queries/categories";
 import { isBoosted, isFounder } from "@/lib/queries/restaurants";
+import { useRestaurantSearch, type SearchResult } from "@/lib/queries/search";
+import { QuickPickModal } from "@/components/ui/QuickPickModal";
+import { isOpenNow } from "@/lib/hours";
 import { useMyProfile } from "@/lib/queries/me";
 import { useSettings } from "@/lib/settings";
+import { useToast } from "@/lib/toast";
 import { distanceKm, fmtKm, type LatLng } from "@/lib/geo";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
@@ -422,6 +426,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const isTablet = useIsTablet();
+  const toast = useToast();
 
   const feedQ = useHomeFeed();
   const favIdsQ = useFavoriteIds();
@@ -436,6 +441,39 @@ export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState<"ranks" | "favorites">("ranks");
   const [refreshing, setRefreshing] = useState(false);
   const [userLoc, setUserLoc] = useState<LatLng | null>(null);
+
+  // "¿Qué comer hoy?" — random pick out of every active restaurant, open-now
+  // ones first if there are any.
+  const searchQ = useRestaurantSearch();
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [picking, setPicking] = useState(false);
+  const [picked, setPicked] = useState<SearchResult | null>(null);
+
+  function rollQuickPick() {
+    const all = searchQ.data ?? [];
+    if (all.length === 0) return;
+    const open = all.filter((r) => isOpenNow(r.hours).open);
+    const pool = open.length > 0 ? open : all;
+    const next = pool[Math.floor(Math.random() * pool.length)];
+    setPicking(true);
+    setPicked(null);
+    setTimeout(() => {
+      setPicked(next);
+      setPicking(false);
+    }, 900);
+  }
+
+  function openQuickPick() {
+    if ((searchQ.data ?? []).length === 0) {
+      toast.error(
+        searchQ.isLoading ? "Un momento, cargando locales…" : "No encontramos locales todavía",
+      );
+      return;
+    }
+    impact("light");
+    setPickerOpen(true);
+    rollQuickPick();
+  }
 
   // Coach-mark targets for the first-use tour.
   const tourSearchRef = useRef<View>(null);
@@ -569,6 +607,34 @@ export default function HomeScreen() {
               variant="floating"
             />
           </View>
+
+          <Pressable
+            onPress={openQuickPick}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              borderRadius: 16,
+              backgroundColor: C.primary,
+              ...shadow.primary,
+            }}
+          >
+            <View
+              style={{
+                width: 32, height: 32, borderRadius: 10,
+                backgroundColor: "rgba(255,255,255,0.2)",
+                alignItems: "center", justifyContent: "center",
+              }}
+            >
+              <Icon name="dice-5-outline" size={18} color="#fff" />
+            </View>
+            <AppText variant="bodyStrong" color="#fff" style={{ flex: 1 }}>
+              ¿Qué comer hoy?
+            </AppText>
+            <Icon name="arrow-right" size={18} color="#fff" />
+          </Pressable>
         </View>
 
         {/* ── 1: Filtros pegajosos (categorías + tabs) ── */}
@@ -727,6 +793,19 @@ export default function HomeScreen() {
       </ScrollView>
 
       <TourGuide tourKey="home" ready={!feedQ.isLoading} steps={tourSteps} />
+
+      <QuickPickModal
+        visible={pickerOpen}
+        spinning={picking}
+        item={picked}
+        onReroll={rollQuickPick}
+        onGo={() => {
+          if (!picked) return;
+          setPickerOpen(false);
+          router.push(`/restaurant/${picked.id}`);
+        }}
+        onClose={() => setPickerOpen(false)}
+      />
     </View>
   );
 }
