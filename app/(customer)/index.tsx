@@ -514,7 +514,11 @@ export default function HomeScreen() {
       return item.restaurant.categories.some((c) => c.slug === activeCategory);
     })
     .sort((a, b) => {
-      // Solo re-ordena en "Todo"; respeta recencia dentro de cada grupo.
+      // Destacados primero siempre, en cualquier categoría.
+      const boostDiff = (isBoosted(b.restaurant) ? 1 : 0) - (isBoosted(a.restaurant) ? 1 : 0);
+      if (boostDiff !== 0) return boostDiff;
+      // El resto del orden (preferencias) solo aplica en "Todo"; respeta
+      // recencia dentro de cada grupo.
       if (activeCategory !== "all" || prefSlugs.size === 0) return 0;
       const am = a.restaurant.categories.some((c) => prefSlugs.has(c.slug)) ? 0 : 1;
       const bm = b.restaurant.categories.some((c) => prefSlugs.has(c.slug)) ? 0 : 1;

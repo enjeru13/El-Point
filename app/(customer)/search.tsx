@@ -513,7 +513,14 @@ export default function SearchScreen() {
   }, [all, query, activeCat, price, sort, onlyOpen, amenitySlugs, userLoc]);
 
   const popular = useMemo(
-    () => [...all].sort((a, b) => b.rating_count - a.rating_count).slice(0, 8),
+    () =>
+      [...all]
+        .sort(
+          (a, b) =>
+            (isBoosted(b) ? 1 : 0) - (isBoosted(a) ? 1 : 0) ||
+            b.rating_count - a.rating_count,
+        )
+        .slice(0, 8),
     [all],
   );
 
