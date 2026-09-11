@@ -97,6 +97,12 @@ export default function OwnerHomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showFounderWelcome, setShowFounderWelcome] = useState(false);
 
+  // Hidden from discovery (map/búsqueda/home) once the trial or the paid
+  // year lapses — Originales never hit this, RLS enforces it server-side too.
+  const subscriptionExpired =
+    !!restaurant && !isFounder(restaurant) &&
+    !!restaurant.paid_until && new Date(restaurant.paid_until) <= new Date();
+
   useEffect(() => {
     if (!restaurant || !isFounder(restaurant)) return;
     let alive = true;
@@ -280,42 +286,58 @@ export default function OwnerHomeScreen() {
         {restaurant.status === 'approved' && (
         <View style={{
           borderRadius: 22,
-          backgroundColor: restaurant.is_active ? C.primaryFixed : C.surfaceContainerHighest,
-          borderWidth: 1, borderColor: C.border,
+          backgroundColor: subscriptionExpired ? C.error + '1a' : restaurant.is_active ? C.primaryFixed : C.surfaceContainerHighest,
+          borderWidth: 1, borderColor: subscriptionExpired ? C.error + '55' : C.border,
           overflow: 'hidden',
           ...shadow.sm,
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16 }}>
             <View style={{
               width: 48, height: 48, borderRadius: 14,
-              backgroundColor: restaurant.is_active ? C.primary : C.outline,
+              backgroundColor: subscriptionExpired ? C.error : restaurant.is_active ? C.primary : C.outline,
               alignItems: 'center', justifyContent: 'center',
               borderWidth: 1, borderColor: C.border,
             }}>
-              <Icon name={restaurant.is_active ? 'store-outline' : 'eye-off-outline'} size={24} color="#fff" />
+              <Icon name={subscriptionExpired ? 'calendar-remove-outline' : restaurant.is_active ? 'store-outline' : 'eye-off-outline'} size={24} color="#fff" />
             </View>
 
             <View style={{ flex: 1, gap: 2 }}>
               <AppText variant="bodyStrong">
-                {restaurant.is_active ? 'Local visible' : 'Local oculto'}
+                {subscriptionExpired ? 'Oculto del mapa y búsquedas' : restaurant.is_active ? 'Local visible' : 'Local oculto'}
               </AppText>
               <AppText variant="bodySm" color={C.onSurfaceVariant}>
-                {restaurant.is_active
-                  ? 'Visible en mapa y búsquedas'
-                  : 'No aparece para los comensales'}
+                {subscriptionExpired
+                  ? 'Tu suscripción venció. Puedes seguir usando la app y respondiendo reseñas, pero los comensales no te encuentran.'
+                  : restaurant.is_active
+                    ? 'Visible en mapa y búsquedas'
+                    : 'No aparece para los comensales'}
               </AppText>
             </View>
 
             <View style={{
               paddingHorizontal: 9, paddingVertical: 3, borderRadius: 99,
-              backgroundColor: restaurant.is_active ? C.secondaryContainer : C.surface,
+              backgroundColor: subscriptionExpired ? C.error : restaurant.is_active ? C.secondaryContainer : C.surface,
               borderWidth: 1, borderColor: C.border,
             }}>
-              <AppText variant="caption" color={restaurant.is_active ? C.onSurface : C.outline}>
-                {restaurant.is_active ? 'ACTIVO' : 'PAUSADO'}
+              <AppText variant="caption" color={subscriptionExpired ? '#fff' : restaurant.is_active ? C.onSurface : C.outline}>
+                {subscriptionExpired ? 'VENCIDO' : restaurant.is_active ? 'ACTIVO' : 'PAUSADO'}
               </AppText>
             </View>
           </View>
+
+          {subscriptionExpired && (
+            <Pressable
+              onPress={() => router.push('/subscription' as any)}
+              android_ripple={{ color: C.outlineVariant }}
+              style={{
+                flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                gap: 6, paddingVertical: 12, borderTopWidth: 2, borderTopColor: C.border,
+              }}
+            >
+              <Icon name="credit-card-outline" size={16} color={C.error} />
+              <AppText variant="label" color={C.error}>Actualizar mi suscripción</AppText>
+            </Pressable>
+          )}
           {isBoosted(restaurant) && (
             <View style={{
               flexDirection: 'row', alignItems: 'center', gap: 8,
