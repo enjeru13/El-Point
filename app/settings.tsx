@@ -182,6 +182,23 @@ export default function SettingsScreen() {
                   </View>
                   <Icon name="chevron-right" size={20} color={C.outline} />
                 </Pressable>
+                <Divider />
+                <Pressable
+                  // "as any": el route del archivo nuevo (app/subscription.tsx) recién se
+                  // suma al tipado de expo-router la próxima vez que corra `expo start`
+                  // (.expo/types/router.d.ts es local, no versionado). Sin riesgo real.
+                  onPress={() => router.push('/subscription' as any)}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
+                >
+                  <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
+                    <Icon name="calendar-check-outline" size={20} color={C.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <AppText variant="bodyStrong">Suscripción</AppText>
+                    <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 1 }}>Tu plan y cómo pagar</AppText>
+                  </View>
+                  <Icon name="chevron-right" size={20} color={C.outline} />
+                </Pressable>
               </SectionCard>
             </View>
           )}

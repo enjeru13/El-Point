@@ -94,6 +94,34 @@ export async function verificationPhotoUrl(
   return data?.signedUrl ?? null;
 }
 
+// ─── Payment proofs ─────────────────────────────────────────────────────────
+
+const PAYMENTS_BUCKET = "restaurant-payments";
+
+/**
+ * Screenshot/foto del comprobante de pago (Bs BCV, Binance, Bancolombia).
+ * Path: "<ownerId>/<restaurantId>/<timestamp>" — mismo esquema de RLS que
+ * la foto de verificación. Timestamp en vez de un id de fila porque el
+ * archivo se sube antes de crear la fila (el path va en el insert).
+ * Retorna el storage path (no la URL — es privado).
+ */
+export async function uploadPaymentProof(
+  ownerId: string,
+  restaurantId: string,
+  uri: string,
+): Promise<string> {
+  const path = `${ownerId}/${restaurantId}/${Date.now()}`;
+  return putImage(PAYMENTS_BUCKET, path, uri);
+}
+
+/** Short-lived URL so the owner or an admin can view a private proof photo. */
+export async function paymentProofUrl(storagePath: string): Promise<string | null> {
+  const { data } = await supabase.storage
+    .from(PAYMENTS_BUCKET)
+    .createSignedUrl(storagePath, 3600);
+  return data?.signedUrl ?? null;
+}
+
 // ─── Avatars ────────────────────────────────────────────────────────────────
 
 export async function uploadAvatar(userId: string, uri: string) {

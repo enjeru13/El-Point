@@ -11,6 +11,7 @@ import { ReportedRestaurants } from "./pages/ReportedRestaurants";
 import { ReportedReviews } from "./pages/ReportedReviews";
 import { Support } from "./pages/Support";
 import { Stats } from "./pages/Stats";
+import { Payments } from "./pages/Payments";
 
 function Gate({ children }: { children: ReactNode }) {
   const { session, profile, loading, signOut } = useAuth();
@@ -57,6 +58,7 @@ function AppRoutes() {
         <Route path="restaurantes" element={<PendingRestaurants />} />
         <Route path="reportados" element={<ReportedRestaurants />} />
         <Route path="resenas" element={<ReportedReviews />} />
+        <Route path="pagos" element={<Payments />} />
         <Route path="soporte" element={<Support />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, BarChart3, Flag, LifeBuoy, MessageSquareWarning, Store, type LucideIcon } from "lucide-react";
+import { ArrowRight, Banknote, BarChart3, Flag, LifeBuoy, MessageSquareWarning, Store, type LucideIcon } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { useAdminCounts } from "../lib/queries/admin";
 import { PageHeader, PageLoading } from "../components/ui";
 
 const TILES: {
   to: string;
-  key: "restaurants" | "reported" | "reviews" | "support";
+  key: "restaurants" | "reported" | "reviews" | "support" | "payments";
   icon: LucideIcon;
   title: string;
   body: string;
@@ -31,6 +31,13 @@ const TILES: {
     icon: MessageSquareWarning,
     title: "Reseñas reportadas",
     body: "Reseñas que alguien marcó como problemáticas.",
+  },
+  {
+    to: "/pagos",
+    key: "payments",
+    icon: Banknote,
+    title: "Pagos pendientes",
+    body: "Comprobantes de suscripción esperando verificación.",
   },
   {
     to: "/soporte",
