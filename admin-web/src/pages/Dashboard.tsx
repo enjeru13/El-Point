@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Flag, LifeBuoy, MessageSquareWarning, Store, type LucideIcon } from "lucide-react";
+import { ArrowRight, BarChart3, Flag, LifeBuoy, MessageSquareWarning, Store, type LucideIcon } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { useAdminCounts } from "../lib/queries/admin";
 import { PageHeader, PageLoading } from "../components/ui";
@@ -61,6 +61,20 @@ export function Dashboard() {
               : `${totalPending} ${totalPending === 1 ? "cosa necesita" : "cosas necesitan"} tu atención.`
         }
       />
+
+      <Link
+        to="/estadisticas"
+        className="group flex items-center gap-4 rounded-2xl border border-border bg-surface-2 p-4 transition hover:border-brand/40"
+      >
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/12 text-brand">
+          <BarChart3 className="h-5 w-5" strokeWidth={2} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-sm font-bold text-text">Ver estadísticas de crecimiento</p>
+          <p className="text-xs text-text-soft">Usuarios, locales y reseñas nuevas por semana.</p>
+        </div>
+        <ArrowRight className="h-4 w-4 shrink-0 text-text-soft transition group-hover:translate-x-0.5 group-hover:text-brand" strokeWidth={2} />
+      </Link>
 
       {countsQ.isLoading ? (
         <PageLoading />

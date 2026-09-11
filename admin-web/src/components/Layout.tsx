@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import {
+  BarChart3,
   Flag,
   LayoutDashboard,
   LifeBuoy,
@@ -20,6 +21,7 @@ const NAV: {
   key?: "restaurants" | "reported" | "reviews" | "support";
 }[] = [
   { to: "/", label: "Resumen", icon: LayoutDashboard, end: true },
+  { to: "/estadisticas", label: "Estadísticas", icon: BarChart3 },
   { to: "/restaurantes", label: "Locales pendientes", icon: Store, key: "restaurants" },
   { to: "/reportados", label: "Locales reportados", icon: Flag, key: "reported" },
   { to: "/resenas", label: "Reseñas reportadas", icon: MessageSquareWarning, key: "reviews" },

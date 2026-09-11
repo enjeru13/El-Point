@@ -10,6 +10,7 @@ import { PendingRestaurants } from "./pages/PendingRestaurants";
 import { ReportedRestaurants } from "./pages/ReportedRestaurants";
 import { ReportedReviews } from "./pages/ReportedReviews";
 import { Support } from "./pages/Support";
+import { Stats } from "./pages/Stats";
 
 function Gate({ children }: { children: ReactNode }) {
   const { session, profile, loading, signOut } = useAuth();
@@ -52,6 +53,7 @@ function AppRoutes() {
         }
       >
         <Route index element={<Dashboard />} />
+        <Route path="estadisticas" element={<Stats />} />
         <Route path="restaurantes" element={<PendingRestaurants />} />
         <Route path="reportados" element={<ReportedRestaurants />} />
         <Route path="resenas" element={<ReportedReviews />} />

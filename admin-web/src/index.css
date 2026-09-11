@@ -13,6 +13,7 @@
   --color-border: var(--border);
   --color-danger: var(--danger);
   --color-good: var(--good);
+  --color-gold: var(--gold);
 }
 
 :root {
@@ -26,6 +27,7 @@
   --border: #e6d8d0;
   --danger: #c53030;
   --good: #2f855a;
+  --gold: #e0a53f;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -40,6 +42,7 @@
     --border: #34343b;
     --danger: #f56565;
     --good: #68d391;
+    --gold: #f0c260;
   }
 }
 
