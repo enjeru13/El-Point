@@ -61,13 +61,30 @@ export function TourGuide({
   const [rect, setRect] = useState<Rect | null>(null);
   const fade = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(1)).current;
+  const retriesRef = useRef(0);
 
   const measure = useCallback(
     (i: number) => {
+      // Target not mounted yet (loading skeleton, a conditional section
+      // that isn't showing right now, or just not laid out this frame) —
+      // retry for a few seconds instead of leaving the tour stuck forever
+      // with the dim overlay up and nothing to show.
+      function notReady() {
+        if (retriesRef.current < 12) {
+          retriesRef.current += 1;
+          setTimeout(() => measure(i), 250);
+        } else {
+          retriesRef.current = 0;
+          setVisible(false); // not marked as seen — tries again next mount
+        }
+      }
+
       const target = steps[i]?.ref.current;
-      if (!target) return;
+      if (!target) return notReady();
+
       target.measureInWindow((x, y, width, height) => {
-        if (width <= 0 || height <= 0) return;
+        if (width <= 0 || height <= 0) return notReady();
+        retriesRef.current = 0;
 
         const scroller = scrollRef?.current;
         if (!scroller) { setRect({ x, y, width, height }); return; }

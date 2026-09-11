@@ -2,6 +2,7 @@ import { Icon } from "@/components/ui/Icon";
 import { AppText } from "@/components/ui/AppText";
 import { AppTextInput } from "@/components/ui/AppTextInput";
 import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -103,6 +104,16 @@ export default function SubscriptionScreen() {
       {restaurantQ.isLoading ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
           <ActivityIndicator color={C.primary} />
+        </View>
+      ) : !r ? (
+        <View style={{ flex: 1, justifyContent: "center" }}>
+          <EmptyState
+            icon="store-outline"
+            title="No encontramos tu local"
+            body="Puede ser un problema de conexión. Vuelve a intentarlo."
+            actionLabel="Reintentar"
+            onAction={() => restaurantQ.refetch()}
+          />
         </View>
       ) : (
         <ScrollView
