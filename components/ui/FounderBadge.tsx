@@ -21,7 +21,7 @@ export function FounderBadge({
 
   return (
     <View
-      accessibilityLabel={`Fundador #${rank}`}
+      accessibilityLabel={`Original #${rank}`}
       style={{
         width: box,
         height: box,

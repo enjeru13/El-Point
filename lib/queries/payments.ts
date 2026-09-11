@@ -120,7 +120,7 @@ export function useSubmitPayment(restaurantId: string | undefined) {
   });
 }
 
-/** Días restantes de vigencia; null si el local es Fundador (nunca vence). */
+/** Días restantes de vigencia; null si el local es Original (nunca vence). */
 export function daysUntil(iso: string | null): number | null {
   if (!iso) return null;
   return Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000);

@@ -50,7 +50,7 @@ export function FounderWelcomeModal({
           >
             <Icon name="crown" size={36} color="#3a2a05" />
           </View>
-          <AppText variant="title" align="center">¡Eres Fundador de El Point!</AppText>
+          <AppText variant="title" align="center">¡Eres uno de los Originales!</AppText>
           <AppText variant="body" color={C.onSurfaceVariant} align="center" style={{ lineHeight: 21 }}>
             Tu local entró entre los primeros 100 de la app. Gracias por sumarte desde el día uno — la corona es tuya para siempre.
           </AppText>

@@ -133,7 +133,7 @@ export default function SubscriptionScreen() {
                 <Icon name="crown" size={22} color="#3a2a05" />
               </View>
               <View style={{ flex: 1 }}>
-                <AppText variant="bodyStrong">Eres Fundador de El Point</AppText>
+                <AppText variant="bodyStrong">Eres uno de los Originales</AppText>
                 <AppText variant="bodySm" color={C.onSurfaceVariant}>
                   Tu local entró entre los primeros 100 de la app.
                 </AppText>
