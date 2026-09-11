@@ -1,5 +1,5 @@
 import { Icon } from '@/components/ui/Icon';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews } from '@/lib/queries/reviews';
+import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 
 const PERIODS = ['Semana', 'Mes', 'Año'] as const;
 type Period = typeof PERIODS[number];
@@ -84,6 +85,16 @@ export default function AnalyticsScreen() {
   const insets = useSafeAreaInsets();
   const [period, setPeriod] = useState<Period>('Semana');
   const [refreshing, setRefreshing] = useState(false);
+
+  // Coach-mark targets for the first-use tour.
+  const tourPeriodRef  = useRef<View>(null);
+  const tourMetricsRef = useRef<View>(null);
+  const tourChartRef   = useRef<View>(null);
+  const tourSteps: TourStep[] = [
+    { ref: tourPeriodRef, icon: 'calendar-range', title: 'Cambia el período', text: 'Mira tus métricas por semana, mes o año.' },
+    { ref: tourMetricsRef, icon: 'chart-box-outline', title: 'Tus números clave', text: 'Calificación promedio y el total histórico de reseñas.' },
+    { ref: tourChartRef, icon: 'chart-bar', title: 'Reseñas en el tiempo', text: 'Ve cuándo recibes más calificaciones para planificar promos.' },
+  ];
 
   const restaurantQ = useMyRestaurant();
   const restaurant = restaurantQ.data ?? null;
@@ -165,7 +176,7 @@ export default function AnalyticsScreen() {
       >
 
         {/* Period selector */}
-        <View style={{ flexDirection: 'row', gap: 6, padding: 4, borderRadius: 20, backgroundColor: C.surfaceContainerLow, borderWidth: 1, borderColor: C.border }}>
+        <View ref={tourPeriodRef} collapsable={false} style={{ flexDirection: 'row', gap: 6, padding: 4, borderRadius: 20, backgroundColor: C.surfaceContainerLow, borderWidth: 1, borderColor: C.border }}>
           {PERIODS.map(p => (
             <Pressable
               key={p}
@@ -183,17 +194,19 @@ export default function AnalyticsScreen() {
         </View>
 
         {/* Metric cards — nivel local (histórico) */}
-        <View style={{ flexDirection: 'row', gap: 10 }}>
-          <MetricCard icon="star"         label="Calificación"  value={restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : '–'} />
-          <MetricCard icon="comment-text" label="Reseñas totales" value={String(restaurant.rating_count)} />
-        </View>
-        <View style={{ flexDirection: 'row', gap: 10 }}>
-          <MetricCard icon="trending-up"   label={`Reseñas ${periodWord}`} value={String(inPeriod)} />
-          <MetricCard icon="clock-outline" label="Última reseña" value={lastReview ? timeAgo(lastReview) : '—'} />
+        <View ref={tourMetricsRef} collapsable={false} style={{ gap: 10 }}>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <MetricCard icon="star"         label="Calificación"  value={restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : '–'} />
+            <MetricCard icon="comment-text" label="Reseñas totales" value={String(restaurant.rating_count)} />
+          </View>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <MetricCard icon="trending-up"   label={`Reseñas ${periodWord}`} value={String(inPeriod)} />
+            <MetricCard icon="clock-outline" label="Última reseña" value={lastReview ? timeAgo(lastReview) : '—'} />
+          </View>
         </View>
 
         {/* Bar chart - reseñas */}
-        <View style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, gap: 4, ...shadow.sm }}>
+        <View ref={tourChartRef} collapsable={false} style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, gap: 4, ...shadow.sm }}>
           <AppText variant="heading" style={{ fontSize: 17 }}>Reseñas por período</AppText>
           <AppText variant="caption" color={C.outline}>{periodWord}</AppText>
           {total === 0 ? (
@@ -261,6 +274,8 @@ export default function AnalyticsScreen() {
         </View>
 
       </ScrollView>
+
+      <TourGuide tourKey="owner_analytics" ready={!reviewsQ.isLoading} steps={tourSteps} />
     </View>
   );
 }

@@ -1,6 +1,6 @@
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { Skeleton, SkeletonList } from '@/components/ui/Skeleton';
@@ -12,6 +12,7 @@ import { isBoosted } from '@/lib/queries/restaurants';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { Avatar } from '@/components/ui/Avatar';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -91,6 +92,18 @@ export default function OwnerHomeScreen() {
   const reviews = reviewsQ.data ?? [];
   const [refreshing, setRefreshing] = useState(false);
 
+  // Coach-mark targets for the first-use tour.
+  const tourStatusRef  = useRef<View>(null);
+  const tourStatsRef   = useRef<View>(null);
+  const tourReviewsRef = useRef<View>(null);
+  const tourBellRef    = useRef<View>(null);
+  const tourSteps: TourStep[] = [
+    { ref: tourStatusRef, icon: 'store-outline', title: 'Estado de tu local', text: 'Aquí ves si está en revisión, visible o pausado, y tu racha de Destacado.' },
+    { ref: tourStatsRef, icon: 'chart-box-outline', title: 'Tu resumen', text: 'Calificación, reseñas de hoy y el total acumulado, de un vistazo.' },
+    { ref: tourReviewsRef, icon: 'comment-text-outline', title: 'Reseñas recientes', text: 'Tócalas para responder. Responder todas suma días de Destacado gratis.' },
+    { ref: tourBellRef, icon: 'bell-outline', title: 'Notificaciones', text: 'Aquí llegan las nuevas reseñas y avisos de tu local.' },
+  ];
+
   async function onRefresh() {
     setRefreshing(true);
     try {
@@ -152,7 +165,9 @@ export default function OwnerHomeScreen() {
           <AppText variant="label" color={C.onSurfaceVariant}>Bienvenido</AppText>
           <AppText variant="title" style={{ fontSize: 22, lineHeight: 27 }} numberOfLines={1}>{restaurant.name}</AppText>
         </View>
-        <NotificationBell />
+        <View ref={tourBellRef} collapsable={false}>
+          <NotificationBell />
+        </View>
       </View>
 
       <ScrollView
@@ -163,6 +178,7 @@ export default function OwnerHomeScreen() {
         }
       >
 
+        <View ref={tourStatusRef} collapsable={false} style={{ gap: 20 }}>
         {/* Banner de verificación (mientras no esté aprobado) */}
         {restaurant.status !== 'approved' && (() => {
           const map = {
@@ -306,6 +322,7 @@ export default function OwnerHomeScreen() {
           </Pressable>
         </View>
         )}
+        </View>
 
         {/* Promo activa */}
         {restaurant.promo_text && (
@@ -326,7 +343,7 @@ export default function OwnerHomeScreen() {
         )}
 
         {/* Stats */}
-        <View style={{ gap: 8 }}>
+        <View ref={tourStatsRef} collapsable={false} style={{ gap: 8 }}>
           <AppText variant="heading" style={{ fontSize: 17 }}>Resumen</AppText>
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <StatCard icon="star"         label="Calificación"   value={restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : '–'} color={C.primary} />
@@ -336,7 +353,7 @@ export default function OwnerHomeScreen() {
         </View>
 
         {/* Reseñas recientes */}
-        <View style={{ gap: 12 }}>
+        <View ref={tourReviewsRef} collapsable={false} style={{ gap: 12 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <AppText variant="heading" style={{ fontSize: 17 }}>Reseñas recientes</AppText>
             {reviews.length > 5 && (
@@ -365,6 +382,8 @@ export default function OwnerHomeScreen() {
         </View>
 
       </ScrollView>
+
+      <TourGuide tourKey="owner_home" ready={!reviewsQ.isLoading} steps={tourSteps} />
     </View>
   );
 }

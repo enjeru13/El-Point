@@ -32,6 +32,7 @@ import {
 import { supabase } from '@/lib/supabase';
 import { DEFAULT_HOURS, DAY_LABELS, DAY_LABELS_LONG, formatRange, to12h, type Hours } from '@/lib/hours';
 import { instagramHandle } from '@/lib/contact';
+import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 
 function Divider() {
   const { C } = useTheme();
@@ -108,6 +109,18 @@ export default function OwnerProfileScreen() {
   const [rifDraft, setRifDraft] = useState('');
 
   const timePickerRef = useRef<TimePickerHandle>(null);
+
+  // Coach-mark targets for the first-use tour.
+  const tourEditRef   = useRef<View>(null);
+  const tourInfoRef   = useRef<View>(null);
+  const tourHoursRef  = useRef<View>(null);
+  const tourPhotosRef = useRef<View>(null);
+  const tourSteps: TourStep[] = [
+    { ref: tourEditRef, icon: 'pencil-outline', title: 'Edita tu local', text: 'Toca aquí para actualizar dirección, contacto, comodidades y más.' },
+    { ref: tourInfoRef, icon: 'store-outline', title: 'Información del negocio', text: 'Dirección, teléfono, WhatsApp, Instagram y tu rango de precio.' },
+    { ref: tourHoursRef, icon: 'clock-outline', title: 'Tu horario', text: 'Marca los días abiertos y las horas de cada uno.' },
+    { ref: tourPhotosRef, icon: 'camera-plus-outline', title: 'Fotos y menú', text: 'Portada, logo y tu carta en PDF: lo primero que ve el comensal.' },
+  ];
 
   useEffect(() => {
     let alive = true;
@@ -321,17 +334,19 @@ export default function OwnerProfileScreen() {
           </View>
         ) : (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Pressable
-              onPress={() => setEditing(true)}
-              style={{
-                flexDirection: 'row', alignItems: 'center', gap: 6,
-                paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
-                backgroundColor: C.primaryFixed, borderWidth: 1, borderColor: C.border, ...shadow.sm,
-              }}
-            >
-              <Icon name="pencil-outline" size={15} color={C.primary} />
-              <AppText variant="label" color={C.primary}>Editar</AppText>
-            </Pressable>
+            <View ref={tourEditRef} collapsable={false}>
+              <Pressable
+                onPress={() => setEditing(true)}
+                style={{
+                  flexDirection: 'row', alignItems: 'center', gap: 6,
+                  paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+                  backgroundColor: C.primaryFixed, borderWidth: 1, borderColor: C.border, ...shadow.sm,
+                }}
+              >
+                <Icon name="pencil-outline" size={15} color={C.primary} />
+                <AppText variant="label" color={C.primary}>Editar</AppText>
+              </Pressable>
+            </View>
             <Pressable
               onPress={() => router.push('/settings')}
               style={{ width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border, backgroundColor: C.surface, ...shadow.sm }}
@@ -564,7 +579,7 @@ export default function OwnerProfileScreen() {
         </View>
 
         {/* Info editable */}
-        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+        <View ref={tourInfoRef} collapsable={false} style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
           <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
             <AppText variant="bodyStrong">Información del negocio</AppText>
           </View>
@@ -646,7 +661,7 @@ export default function OwnerProfileScreen() {
         </View>
 
         {/* Horario */}
-        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+        <View ref={tourHoursRef} collapsable={false} style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
           <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
             <AppText variant="bodyStrong">Horario</AppText>
           </View>
@@ -748,7 +763,7 @@ export default function OwnerProfileScreen() {
         </View>
 
         {/* Fotos y menú */}
-        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+        <View ref={tourPhotosRef} collapsable={false} style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
           <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
             <AppText variant="bodyStrong">Fotos y menú</AppText>
           </View>
@@ -845,6 +860,7 @@ export default function OwnerProfileScreen() {
       </ScrollView>
 
       <TimePickerSheet ref={timePickerRef} />
+      <TourGuide tourKey="owner_profile" steps={tourSteps} />
     </View>
   );
 }
