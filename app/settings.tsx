@@ -249,6 +249,18 @@ export default function SettingsScreen() {
             <SectionLabel label="Más" />
             <SectionCard>
               <Pressable
+                onPress={() => router.push('/referrals' as any)}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
+              >
+                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
+                  <Icon name="account-multiple-plus-outline" size={20} color={C.primary} />
+                </View>
+                <AppText variant="bodyStrong" style={{ flex: 1 }}>Invita amigos</AppText>
+                <Icon name="chevron-right" size={20} color={C.outline} />
+              </Pressable>
+
+              <Divider />
+              <Pressable
                 onPress={() => router.push('/support')}
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
               >

@@ -82,6 +82,9 @@ export default function RegisterScreen() {
   const [radius, setRadius]       = useState(5);
   const [locGranted, setLocGranted] = useState(false);
 
+  // Step 4 — tema + código de invitación (opcional)
+  const [referralCode, setReferralCode] = useState('');
+
   const [loading, setLoading]     = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
@@ -114,7 +117,13 @@ export default function RegisterScreen() {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
-      options: { data: { role: 'customer', username: username.trim() } },
+      options: {
+        data: {
+          role: 'customer',
+          username: username.trim(),
+          ...(referralCode.trim() ? { invited_by_code: referralCode.trim() } : {}),
+        },
+      },
     });
 
     if (error) {
@@ -547,6 +556,21 @@ export default function RegisterScreen() {
                 subtitle="Elige cómo se ve la app. Lo puedes cambiar cuando quieras en Ajustes."
               />
               <ThemePicker />
+
+              <View className="mt-8 gap-1">
+                <AppText variant="subtitle">¿Alguien te invitó?</AppText>
+                <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                  Opcional — si tienes el código de un amigo, los dos ganan XP con tu primer rank.
+                </AppText>
+              </View>
+              <Field
+                label="Código de invitación"
+                icon="ticket-confirmation-outline"
+                placeholder="ABC123"
+                autoCapitalize="characters"
+                value={referralCode}
+                onChangeText={(t) => setReferralCode(t.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
+              />
             </>
           )}
 
