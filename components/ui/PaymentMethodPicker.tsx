@@ -4,6 +4,7 @@ import { useTheme } from "@/lib/ThemeContext";
 import { useToast } from "@/lib/toast";
 import { copyToClipboard } from "@/lib/clipboard";
 import { PAYMENT_METHODS, type PaymentMethod } from "@/lib/queries/payments";
+import { formatBs, useBcvRate } from "@/lib/queries/exchangeRate";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 
@@ -51,6 +52,11 @@ export function PaymentMethodPicker({
 }) {
   const { C } = useTheme();
   const active = PAYMENT_METHODS.find((m) => m.key === method) ?? PAYMENT_METHODS[0];
+  const bcv = useBcvRate();
+  const amountNote =
+    method === "bs_bcv" && bcv.data
+      ? `Monto: 10 USD ≈ Bs ${formatBs(10, bcv.data)} al cambio BCV de hoy.`
+      : active.amountNote;
 
   return (
     <View style={{ gap: 10 }}>
@@ -90,7 +96,7 @@ export function PaymentMethodPicker({
       ))}
 
       {showAmountNote && (
-        <AppText variant="caption" color={C.outline}>{active.amountNote}</AppText>
+        <AppText variant="caption" color={C.outline}>{amountNote}</AppText>
       )}
     </View>
   );

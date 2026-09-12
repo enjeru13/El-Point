@@ -13,7 +13,9 @@ export type AppNotification = {
     | "promo"
     | "review"
     | "weekly"
-    | "moderation";
+    | "moderation"
+    | "sub_expiring"
+    | "sub_expired";
   title: string;
   body: string | null;
   data: Record<string, any> | null;

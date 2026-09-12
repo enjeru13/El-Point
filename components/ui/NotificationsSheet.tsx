@@ -43,6 +43,9 @@ function notifTarget(notif: AppNotification) {
   if (kind === "owner_boost") {
     return { pathname: "/(owner)" as const };
   }
+  if (kind === "subscription") {
+    return { pathname: "/subscription" as const };
+  }
   const rid = notif.data?.restaurant_id;
   if (typeof rid === "string" && rid) {
     return { pathname: "/restaurant/[id]" as const, params: { id: rid } };
@@ -127,6 +130,16 @@ function NotifCard({
     weekly: { icon: "analytics", bg: C.primaryFixed, color: C.primary },
     moderation: {
       icon: "shield-alert-outline",
+      bg: C.error + "22",
+      color: C.error,
+    },
+    sub_expiring: {
+      icon: "calendar-clock-outline",
+      bg: "#f0c26022",
+      color: "#a97a12",
+    },
+    sub_expired: {
+      icon: "map-marker-off-outline",
       bg: C.error + "22",
       color: C.error,
     },
