@@ -4,14 +4,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type PaymentMethod = "bs_bcv" | "binance" | "bancolombia";
 
+export type PaymentField = { label: string; value: string };
+export type PaymentAccount = { name: string; fields: PaymentField[] };
+
 export type PaymentMethodMeta = {
   key: PaymentMethod;
   label: string;
   icon: string;
-  /** Placeholder instructions — reemplazar con los datos reales de cobro
-   *  (cuenta, cédula/RIF, usuario Binance, cuenta Bancolombia, etc.)
-   *  antes de anunciar el cobro a los dueños. */
-  instructions: string[];
+  amountNote: string;
+  accounts: PaymentAccount[];
 };
 
 export const PAYMENT_METHODS: PaymentMethodMeta[] = [
@@ -19,21 +20,39 @@ export const PAYMENT_METHODS: PaymentMethodMeta[] = [
     key: "bs_bcv",
     label: "Bs a tasa BCV",
     icon: "cash",
-    instructions: [
-      "[Pendiente] Banco: —",
-      "[Pendiente] Titular / Cédula: —",
-      "[Pendiente] Número de cuenta o pago móvil: —",
-      "Monto: 10 USD al cambio BCV del día.",
+    amountNote: "Monto: 10 USD al cambio BCV del día.",
+    accounts: [
+      {
+        name: "Banco de Venezuela",
+        fields: [
+          { label: "Número de cuenta", value: "01020219150001796274" },
+          { label: "Titular", value: "Angel Eduardo Cegarra Taborda" },
+          { label: "Cédula", value: "V-26686507" },
+        ],
+      },
+      {
+        name: "Banco Mercantil",
+        fields: [
+          { label: "Número de cuenta", value: "01050762631762107228" },
+          { label: "Titular", value: "Angel Eduardo Cegarra Taborda" },
+          { label: "Cédula", value: "V-26686507" },
+        ],
+      },
     ],
   },
   {
     key: "binance",
     label: "Binance",
     icon: "bitcoin",
-    instructions: [
-      "[Pendiente] Usuario / ID de Binance Pay: —",
-      "[Pendiente] Red y moneda aceptada: —",
-      "Monto: 10 USD (o equivalente en USDT).",
+    amountNote: "Monto: 10 USD (o equivalente en USDT).",
+    accounts: [
+      {
+        name: "Binance Pay",
+        fields: [
+          { label: "Correo", value: "angeleduardocegarrataborda@gmail.com" },
+          { label: "Binance ID (UID)", value: "1025615911" },
+        ],
+      },
     ],
   },
   // Bancolombia queda para más adelante — solo Bs BCV y Binance en el
