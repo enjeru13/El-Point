@@ -449,6 +449,10 @@ export default function HomeScreen() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickPool, setPickPool] = useState<SearchResult[]>([]);
   const [picked, setPicked] = useState<SearchResult | null>(null);
+  // Don't repeat a pick until you've seen the rest of the pool — plain
+  // Math.random() felt like "always the same ones" with a ~20-restaurant
+  // pool (it wasn't biased, just how randomness looks in a small sample).
+  const recentPicksRef = useRef<string[]>([]);
 
   function rollQuickPick() {
     const all = searchQ.data ?? [];
@@ -457,9 +461,20 @@ export default function HomeScreen() {
     const pool = open.length > 0 ? open : all;
     setPickPool(pool);
     setPicked(null);
+
+    const fresh = pool.filter((r) => !recentPicksRef.current.includes(r.id));
+    const choices = fresh.length > 0 ? fresh : pool;
+    const next = choices[Math.floor(Math.random() * choices.length)];
+
+    recentPicksRef.current.push(next.id);
+    const cap = Math.max(0, pool.length - 1); // always leave at least one to reuse
+    if (recentPicksRef.current.length > cap) {
+      recentPicksRef.current = recentPicksRef.current.slice(-cap);
+    }
+
     // A tick later so the modal sees the null->result transition and rolls
     // the animation, even on a re-roll from the same pool.
-    setTimeout(() => setPicked(pool[Math.floor(Math.random() * pool.length)]), 20);
+    setTimeout(() => setPicked(next), 20);
   }
 
   function openQuickPick() {
