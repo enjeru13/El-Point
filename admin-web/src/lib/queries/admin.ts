@@ -180,18 +180,25 @@ export type AdminCounts = {
   reported: number;
   support: number;
   payments: number;
+  expiredSubs: number;
 };
 
 export function useAdminCounts() {
   return useQuery({
     queryKey: ["admin-counts"],
     queryFn: async (): Promise<AdminCounts> => {
-      const [reportedReviewIds, restaurants, reported, support, payments] = await Promise.all([
+      const [reportedReviewIds, restaurants, reported, support, payments, expiredSubs] = await Promise.all([
         supabase.from("review_reports").select("review_id"),
         supabase.from("restaurants").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("restaurants").select("id", { count: "exact", head: true }).eq("status", "suspended"),
         supabase.from("support_messages").select("id", { count: "exact", head: true }).eq("status", "open"),
         supabase.from("restaurant_payments").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase
+          .from("restaurants")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "approved")
+          .is("founder_rank", null)
+          .lt("paid_until", new Date().toISOString()),
       ]);
       const distinctReviews = new Set((reportedReviewIds.data ?? []).map((r: any) => r.review_id));
       return {
@@ -200,6 +207,7 @@ export function useAdminCounts() {
         reported: reported.count ?? 0,
         support: support.count ?? 0,
         payments: payments.count ?? 0,
+        expiredSubs: expiredSubs.count ?? 0,
       };
     },
     refetchInterval: 60_000,
