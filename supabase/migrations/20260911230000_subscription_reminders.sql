@@ -9,7 +9,7 @@ alter table public.notifications
   add constraint notifications_type_check
   check (type in (
     'like', 'reply', 'levelup', 'levelup_soon', 'promo', 'review', 'weekly',
-    'sub_expiring', 'sub_expired'
+    'moderation', 'mission', 'streak', 'sub_expiring', 'sub_expired'
   ));
 
 create or replace function public.push_setting_key(p_type text)
@@ -22,6 +22,8 @@ as $$
     when 'reply'   then 'notifReplies'
     when 'review'  then 'notifReviews'
     when 'levelup' then 'notifLevelup'
+    when 'mission' then 'notifLevelup'
+    when 'streak'  then 'notifLevelup'
     when 'promo'   then 'notifPromos'
     when 'weekly'  then 'notifWeekly'
     else null            -- 'moderation', 'sub_expiring', 'sub_expired' y cualquier otro: siempre push
