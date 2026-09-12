@@ -14,6 +14,7 @@ import {
 import { AppText } from '@/components/ui/AppText';
 import { Field } from '@/components/ui/Field';
 import { supabase } from '@/lib/supabase';
+import { authErrorEs } from '@/lib/authErrors';
 import { signInWithGoogle } from '@/lib/oauth';
 import { useToast } from '@/lib/toast';
 import { useTheme } from '@/lib/ThemeContext';
@@ -128,7 +129,7 @@ export default function RegisterScreen() {
 
     if (error) {
       setLoading(false);
-      toast.error(error.message);
+      toast.error(authErrorEs(error.message));
       return;
     }
 

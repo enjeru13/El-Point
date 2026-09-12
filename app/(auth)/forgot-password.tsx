@@ -5,6 +5,7 @@ import { Field } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { supabase } from "@/lib/supabase";
+import { authErrorEs } from "@/lib/authErrors";
 import { useToast } from "@/lib/toast";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
@@ -42,7 +43,7 @@ export default function ForgotPasswordScreen() {
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
     setLoading(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(authErrorEs(error.message));
       return;
     }
     setStep("code");
@@ -70,7 +71,7 @@ export default function ForgotPasswordScreen() {
     });
     if (otpError) {
       setLoading(false);
-      toast.error(`Código inválido: ${otpError.message}`);
+      toast.error(authErrorEs(otpError.message));
       return;
     }
 
@@ -78,7 +79,7 @@ export default function ForgotPasswordScreen() {
     setLoading(false);
 
     if (updError) {
-      toast.error(updError.message);
+      toast.error(authErrorEs(updError.message));
       return;
     }
     // Ya se verificó el código y quedó una sesión válida con la contraseña

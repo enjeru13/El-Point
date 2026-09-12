@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { useToast } from "@/lib/toast";
 import { Field } from "@/components/ui/Field";
 import { supabase } from "@/lib/supabase";
+import { authErrorEs } from "@/lib/authErrors";
 import { signInWithGoogle } from "@/lib/oauth";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
@@ -47,11 +48,7 @@ export default function LoginScreen() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast.error(
-        error.message.includes("Invalid login")
-          ? "Correo o contraseña incorrectos."
-          : error.message,
-      );
+      toast.error(authErrorEs(error.message));
     }
     // _layout.tsx detecta session y redirige automáticamente
   }

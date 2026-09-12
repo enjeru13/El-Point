@@ -6,6 +6,7 @@ import {
   uploadRestaurantVerification,
 } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
+import { authErrorEs } from "@/lib/authErrors";
 import { useToast } from "@/lib/toast";
 import { useTheme } from "@/lib/ThemeContext";
 import { Button } from "@/components/ui/Button";
@@ -174,7 +175,7 @@ export default function RegisterOwnerScreen() {
 
     if (error) {
       setLoading(false);
-      toast.error(error.message);
+      toast.error(authErrorEs(error.message));
       return;
     }
 
