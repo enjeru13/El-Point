@@ -13,6 +13,7 @@ import { useMyProfile } from "@/lib/queries/me";
 import { AppText } from "@/components/ui/AppText";
 import { Button } from "@/components/ui/Button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
 
 const { width: W, height: H } = Dimensions.get("window");
 const CONFETTI_COUNT = 44;
@@ -114,6 +115,7 @@ export default function WelcomeScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const isTablet = useIsTablet();
   const { role } = useLocalSearchParams<{ role?: string }>();
   const isOwner = role === "owner";
   const profileQ = useMyProfile();
@@ -182,6 +184,7 @@ export default function WelcomeScreen() {
           paddingTop: insets.top + 24,
           paddingBottom: insets.bottom + 24,
           gap: 22,
+          ...capWidth(isTablet, FORM_MAX_W),
         }}
         showsVerticalScrollIndicator={false}
       >

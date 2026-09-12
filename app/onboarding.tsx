@@ -16,6 +16,7 @@ import { AppLogo } from "@/components/ui/AppLogo";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { FoodBackdrop } from "@/components/ui/FoodBackdrop";
+import { useIsTablet } from "@/lib/responsive";
 
 const { width: W } = Dimensions.get("window");
 
@@ -291,6 +292,7 @@ export default function OnboardingScreen() {
   const { C, scheme } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const isTablet = useIsTablet();
   const scrollRef = useRef<any>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
   const [page, setPage] = useState(0);
@@ -394,42 +396,43 @@ export default function OnboardingScreen() {
                 alignItems: "center",
                 justifyContent: "center",
                 paddingHorizontal: 32,
-                gap: 30,
               }}
             >
-              <Animated.View
-                style={{ transform: [{ translateX: heroTx }, { scale: heroScale }] }}
-              >
-                <s.Hero />
-              </Animated.View>
+              <View style={{ alignItems: "center", gap: 30, width: "100%", ...(isTablet ? { maxWidth: 420 } : {}) }}>
+                <Animated.View
+                  style={{ transform: [{ translateX: heroTx }, { scale: heroScale }] }}
+                >
+                  <s.Hero />
+                </Animated.View>
 
-              <Animated.View
-                style={{
-                  gap: 12,
-                  alignItems: "center",
-                  opacity: textOpacity,
-                  transform: [{ translateY: textTy }],
-                }}
-              >
-                <AppText variant="overline" color={C.primary}>
-                  {s.kicker.toUpperCase()}
-                </AppText>
-                <AppText
-                  variant="title"
-                  align="center"
-                  style={{ fontSize: 27, lineHeight: 33 }}
+                <Animated.View
+                  style={{
+                    gap: 12,
+                    alignItems: "center",
+                    opacity: textOpacity,
+                    transform: [{ translateY: textTy }],
+                  }}
                 >
-                  {s.title}
-                </AppText>
-                <AppText
-                  variant="body"
-                  color={C.onSurfaceVariant}
-                  align="center"
-                  style={{ lineHeight: 22, maxWidth: 320 }}
-                >
-                  {s.body}
-                </AppText>
-              </Animated.View>
+                  <AppText variant="overline" color={C.primary}>
+                    {s.kicker.toUpperCase()}
+                  </AppText>
+                  <AppText
+                    variant="title"
+                    align="center"
+                    style={{ fontSize: 27, lineHeight: 33 }}
+                  >
+                    {s.title}
+                  </AppText>
+                  <AppText
+                    variant="body"
+                    color={C.onSurfaceVariant}
+                    align="center"
+                    style={{ lineHeight: 22, maxWidth: 320 }}
+                  >
+                    {s.body}
+                  </AppText>
+                </Animated.View>
+              </View>
             </View>
           );
         })}
@@ -441,6 +444,8 @@ export default function OnboardingScreen() {
           paddingBottom: insets.bottom + 20,
           gap: 20,
           zIndex: 2,
+          width: "100%",
+          ...(isTablet ? { maxWidth: 420, alignSelf: "center" } : {}),
         }}
       >
         <View style={{ flexDirection: "row", justifyContent: "center", gap: 8 }}>
