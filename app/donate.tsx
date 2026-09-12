@@ -1,10 +1,13 @@
 import { Pressable, ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/lib/ThemeContext";
 import { AppText } from "@/components/ui/AppText";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
+import { PaymentMethodPicker } from "@/components/ui/PaymentMethodPicker";
+import type { PaymentMethod } from "@/lib/queries/payments";
 import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
 
 export default function DonateScreen() {
@@ -12,6 +15,7 @@ export default function DonateScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const isTablet = useIsTablet();
+  const [method, setMethod] = useState<PaymentMethod>("bs_bcv");
 
   return (
     <View style={{ flex: 1, backgroundColor: C.background }}>
@@ -90,9 +94,21 @@ export default function DonateScreen() {
             nuestro bolsillo.
           </AppText>
           <AppText variant="body" color={C.onSurfaceVariant} style={{ lineHeight: 22 }}>
-            Si El Point te sirve y quieres ayudar a que siga creciendo, muy
-            pronto habilitaremos formas de aportar. Mientras tanto, lo que más
-            nos ayuda es que uses la app, dejes tus ranks y la recomiendes.
+            Si El Point te sirve y quieres ayudar a que siga creciendo, puedes
+            aportar lo que quieras con las cuentas de abajo. No es
+            obligatorio, ni cambia nada de tu cuenta — es solo una forma de
+            decir gracias.
+          </AppText>
+        </View>
+
+        <View style={{ gap: 10 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Icon name="hand-coin-outline" size={18} color={C.primary} />
+            <AppText variant="bodyStrong">Hacer un aporte</AppText>
+          </View>
+          <PaymentMethodPicker method={method} onMethodChange={setMethod} showAmountNote={false} />
+          <AppText variant="caption" color={C.outline}>
+            Cualquier monto ayuda. No hace falta avisarnos ni enviar comprobante.
           </AppText>
         </View>
 

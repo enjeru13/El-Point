@@ -20,42 +20,13 @@ import {
   type PaymentMethod,
 } from "@/lib/queries/payments";
 import { capWidth, useIsTablet } from "@/lib/responsive";
-import { copyToClipboard } from "@/lib/clipboard";
+import { PaymentMethodPicker } from "@/components/ui/PaymentMethodPicker";
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "En revisión",
   approved: "Aprobado",
   rejected: "Rechazado",
 };
-
-function CopyRow({ label, value }: { label: string; value: string }) {
-  const { C } = useTheme();
-  const toast = useToast();
-  const [copied, setCopied] = useState(false);
-
-  async function onCopy() {
-    const ok = await copyToClipboard(value);
-    if (ok) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } else {
-      toast.error("No se pudo copiar — selecciona el texto manualmente");
-    }
-  }
-
-  return (
-    <Pressable
-      onPress={onCopy}
-      style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
-    >
-      <View style={{ flex: 1 }}>
-        <AppText variant="overline" color={C.outline}>{label.toUpperCase()}</AppText>
-        <AppText variant="bodyStrong" style={{ fontSize: 14 }}>{value}</AppText>
-      </View>
-      <Icon name={copied ? "check" : "content-copy"} size={18} color={copied ? C.primary : C.onSurfaceVariant} />
-    </Pressable>
-  );
-}
 
 export default function SubscriptionScreen() {
   const { C, shadow } = useTheme();
@@ -208,43 +179,7 @@ export default function SubscriptionScreen() {
               {/* Cómo pagar */}
               <View style={{ gap: 10 }}>
                 <AppText variant="heading" style={{ fontSize: 17 }}>Cómo pagar</AppText>
-                <View style={{ flexDirection: "row", gap: 8 }}>
-                  {PAYMENT_METHODS.map((m) => {
-                    const active = method === m.key;
-                    return (
-                      <Pressable
-                        key={m.key}
-                        onPress={() => setMethod(m.key)}
-                        style={{
-                          flex: 1, alignItems: "center", gap: 6, paddingVertical: 12,
-                          borderRadius: 14, borderWidth: active ? 2 : 1,
-                          borderColor: active ? C.primary : C.border,
-                          backgroundColor: active ? C.primaryFixed : C.surface,
-                        }}
-                      >
-                        <Icon name={m.icon} size={20} color={active ? C.primary : C.onSurfaceVariant} />
-                        <AppText variant="label" color={active ? C.primary : C.onSurfaceVariant} style={{ fontSize: 12, textAlign: "center" }}>
-                          {m.label}
-                        </AppText>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-
-                {PAYMENT_METHODS.find((m) => m.key === method)!.accounts.map((acc) => (
-                  <View
-                    key={acc.name}
-                    style={{ borderRadius: 18, backgroundColor: C.surfaceContainerLow, padding: 14, gap: 10 }}
-                  >
-                    <AppText variant="bodyStrong" style={{ fontSize: 14 }}>{acc.name}</AppText>
-                    {acc.fields.map((f) => (
-                      <CopyRow key={f.label} label={f.label} value={f.value} />
-                    ))}
-                  </View>
-                ))}
-                <AppText variant="caption" color={C.outline}>
-                  {PAYMENT_METHODS.find((m) => m.key === method)!.amountNote}
-                </AppText>
+                <PaymentMethodPicker method={method} onMethodChange={setMethod} />
               </View>
 
               {/* Enviar comprobante */}
