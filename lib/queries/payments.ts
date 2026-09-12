@@ -36,17 +36,9 @@ export const PAYMENT_METHODS: PaymentMethodMeta[] = [
       "Monto: 10 USD (o equivalente en USDT).",
     ],
   },
-  {
-    key: "bancolombia",
-    label: "Bancolombia",
-    icon: "bank",
-    instructions: [
-      "[Pendiente] Tipo de cuenta: —",
-      "[Pendiente] Número de cuenta: —",
-      "[Pendiente] Titular / Cédula: —",
-      "Monto: 10 USD al cambio del día.",
-    ],
-  },
+  // Bancolombia queda para más adelante — solo Bs BCV y Binance en el
+  // lanzamiento. El método sigue existiendo en la DB (restaurant_payments.method
+  // lo permite) por si se reactiva sin otra migración.
 ];
 
 export type RestaurantPayment = {
