@@ -4,7 +4,13 @@ import * as Location from 'expo-location';
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
 import { useToast } from '@/lib/toast';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetScrollView,
+  type BottomSheetBackdropProps,
+} from '@gorhom/bottom-sheet';
 import {
   Pressable,
   ScrollView,
@@ -386,6 +392,14 @@ export default function SearchScreen() {
   const [query, setQuery]       = useState('');
   const [activeCat, setActiveCat] = useState<string | null>(null);
   const [filterOpen, setFilter] = useState(false);
+  const filterSheetRef = useRef<BottomSheetModal>(null);
+  const filterSnapPoints = useMemo(() => ['75%'], []);
+  const renderFilterBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior="close" opacity={0.4} />
+    ),
+    [],
+  );
   const [sort, setSort]         = useState<SortKey>(null);
   const [price, setPrice]       = useState<PriceKey>(null);
   const [onlyOpen, setOnlyOpen] = useState(false);
@@ -570,7 +584,7 @@ export default function SearchScreen() {
 
           <View ref={tourFilterRef} collapsable={false}>
             <Pressable
-              onPress={() => setFilter(f => !f)}
+              onPress={() => { setFilter(true); filterSheetRef.current?.present(); }}
               style={{
                 width: 48, height: 48, borderRadius: 24,
                 alignItems: 'center', justifyContent: 'center',
@@ -609,106 +623,6 @@ export default function SearchScreen() {
         </View>
         </View>
       </View>
-
-      {/* ── Panel de filtros ── */}
-      {filterOpen && (
-        <ScrollView
-          style={{
-            maxHeight: 340,
-            backgroundColor: C.background,
-            borderBottomWidth: 1,
-            borderBottomColor: C.outlineVariant,
-          }}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 14, gap: 14, ...capWidth(isTablet) }}
-          showsVerticalScrollIndicator
-          nestedScrollEnabled
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={{ gap: 8 }}>
-            <AppText variant="overline" color={C.onSurfaceVariant}>ORDENAR</AppText>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              <Chip
-                label={locBusy ? 'Ubicando…' : 'Cerca de mí'}
-                icon="crosshairs-gps"
-                active={sort === 'near'}
-                onPress={enableNear}
-              />
-              <Chip
-                label="Mejor rank"
-                icon="star-outline"
-                active={sort === 'rank'}
-                onPress={() => setSort(sort === 'rank' ? null : 'rank')}
-              />
-              <Chip
-                label="Más reseñas"
-                icon="comment-text"
-                active={sort === 'reviews'}
-                onPress={() => setSort(sort === 'reviews' ? null : 'reviews')}
-              />
-            </View>
-          </View>
-
-          <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
-
-          <View style={{ gap: 8 }}>
-            <AppText variant="overline" color={C.onSurfaceVariant}>PRECIO</AppText>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              {([1, 2, 3] as PriceKey[]).map(p => (
-                <Chip
-                  key={p!}
-                  label={'$'.repeat(p!)}
-                  active={price === p}
-                  onPress={() => setPrice(price === p ? null : p)}
-                />
-              ))}
-            </View>
-          </View>
-
-          <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
-
-          <Pressable
-            onPress={() => setOnlyOpen(v => !v)}
-            style={{
-              flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start',
-              paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99,
-              backgroundColor: onlyOpen ? C.secondaryContainer : C.surface,
-              borderWidth: 1, borderColor: onlyOpen ? C.border : C.outlineVariant,
-            }}
-          >
-            <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: onlyOpen ? C.secondary : C.outline }} />
-            <AppText variant="label" color={onlyOpen ? C.onSurface : C.onSurfaceVariant}>
-              Abiertos ahora
-            </AppText>
-          </Pressable>
-
-          {(amenitiesQ.data ?? []).length > 0 && (
-            <>
-              <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
-              <View style={{ gap: 8 }}>
-                <AppText variant="overline" color={C.onSurfaceVariant}>COMODIDADES</AppText>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                  {(amenitiesQ.data ?? []).map(am => (
-                    <Chip
-                      key={am.slug}
-                      label={am.label}
-                      icon={am.icon}
-                      active={amenitySlugs.has(am.slug)}
-                      onPress={() => toggleAmenity(am.slug)}
-                    />
-                  ))}
-                </View>
-              </View>
-            </>
-          )}
-
-          {hasActiveFilters && (
-            <Pressable onPress={resetFilters} style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <Icon name="close-circle-outline" size={14} color={C.outline} />
-              <AppText variant="label" color={C.outline}>Limpiar filtros</AppText>
-            </Pressable>
-          )}
-        </ScrollView>
-      )}
 
       {searchQ.isLoading ? (
         <View style={{ padding: 16, gap: 14 }}>
@@ -807,6 +721,120 @@ export default function SearchScreen() {
       )}
 
       <TourGuide tourKey="search" ready={!searchQ.isLoading} steps={tourSteps} />
+
+      {/* ── Panel de filtros ── */}
+      <BottomSheetModal
+        ref={filterSheetRef}
+        snapPoints={filterSnapPoints}
+        enableDynamicSizing={false}
+        backdropComponent={renderFilterBackdrop}
+        onDismiss={() => setFilter(false)}
+        handleIndicatorStyle={{ backgroundColor: C.outlineVariant, width: 44 }}
+        backgroundStyle={{
+          backgroundColor: C.surface,
+          borderRadius: 28,
+          borderWidth: 1,
+          borderColor: C.border,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+            paddingHorizontal: 20, paddingBottom: 14,
+            borderBottomWidth: 1, borderBottomColor: C.outlineVariant,
+          }}
+        >
+          <AppText variant="heading">Filtros</AppText>
+          {hasActiveFilters && (
+            <Pressable onPress={resetFilters} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }} hitSlop={8}>
+              <Icon name="close-circle-outline" size={14} color={C.outline} />
+              <AppText variant="label" color={C.outline}>Limpiar filtros</AppText>
+            </Pressable>
+          )}
+        </View>
+
+        <BottomSheetScrollView
+          contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 40, gap: 16, ...capWidth(isTablet) }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={{ gap: 8 }}>
+            <AppText variant="overline" color={C.onSurfaceVariant}>ORDENAR</AppText>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              <Chip
+                label={locBusy ? 'Ubicando…' : 'Cerca de mí'}
+                icon="crosshairs-gps"
+                active={sort === 'near'}
+                onPress={enableNear}
+              />
+              <Chip
+                label="Mejor rank"
+                icon="star-outline"
+                active={sort === 'rank'}
+                onPress={() => setSort(sort === 'rank' ? null : 'rank')}
+              />
+              <Chip
+                label="Más reseñas"
+                icon="comment-text"
+                active={sort === 'reviews'}
+                onPress={() => setSort(sort === 'reviews' ? null : 'reviews')}
+              />
+            </View>
+          </View>
+
+          <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
+
+          <View style={{ gap: 8 }}>
+            <AppText variant="overline" color={C.onSurfaceVariant}>PRECIO</AppText>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {([1, 2, 3] as PriceKey[]).map(p => (
+                <Chip
+                  key={p!}
+                  label={'$'.repeat(p!)}
+                  active={price === p}
+                  onPress={() => setPrice(price === p ? null : p)}
+                />
+              ))}
+            </View>
+          </View>
+
+          <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
+
+          <Pressable
+            onPress={() => setOnlyOpen(v => !v)}
+            style={{
+              flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start',
+              paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99,
+              backgroundColor: onlyOpen ? C.secondaryContainer : C.surface,
+              borderWidth: 1, borderColor: onlyOpen ? C.border : C.outlineVariant,
+            }}
+          >
+            <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: onlyOpen ? C.secondary : C.outline }} />
+            <AppText variant="label" color={onlyOpen ? C.onSurface : C.onSurfaceVariant}>
+              Abiertos ahora
+            </AppText>
+          </Pressable>
+
+          {(amenitiesQ.data ?? []).length > 0 && (
+            <>
+              <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
+              <View style={{ gap: 8 }}>
+                <AppText variant="overline" color={C.onSurfaceVariant}>COMODIDADES</AppText>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {(amenitiesQ.data ?? []).map(am => (
+                    <Chip
+                      key={am.slug}
+                      label={am.label}
+                      icon={am.icon}
+                      active={amenitySlugs.has(am.slug)}
+                      onPress={() => toggleAmenity(am.slug)}
+                    />
+                  ))}
+                </View>
+              </View>
+            </>
+          )}
+        </BottomSheetScrollView>
+      </BottomSheetModal>
     </View>
   );
 }
