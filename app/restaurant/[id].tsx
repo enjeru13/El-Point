@@ -466,8 +466,10 @@ export default function RestaurantProfileScreen() {
     const r = restaurantQ.data;
     if (!r) return;
 
+    // Solo la dirección (sin repetir el nombre, que ya va en la primera
+    // línea del mensaje) — el link queda mucho más corto y limpio.
     const mapsQuery = encodeURIComponent(
-      r.address ? `${r.name}, ${r.address}` : `${r.name}, San Cristóbal`,
+      r.address ? `${r.address}, San Cristóbal` : `${r.name}, San Cristóbal`,
     );
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
     const appUrl = `elpoint://restaurant/${r.id}`;

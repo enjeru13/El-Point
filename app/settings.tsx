@@ -294,17 +294,6 @@ export default function SettingsScreen() {
                 <AppText variant="bodyStrong" style={{ flex: 1 }}>Novedades</AppText>
                 <Icon name="chevron-right" size={20} color={C.outline} />
               </Pressable>
-              <Divider />
-              <Pressable
-                onPress={() => router.push('/donate')}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
-              >
-                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
-                  <Icon name="heart" size={20} color={C.primary} />
-                </View>
-                <AppText variant="bodyStrong" style={{ flex: 1 }}>Apoya el proyecto</AppText>
-                <Icon name="chevron-right" size={20} color={C.outline} />
-              </Pressable>
             </SectionCard>
           </View>
 

@@ -318,7 +318,7 @@ function ReviewCard({
               color={favorited ? "#fff" : C.primary}
             />
             <AppText variant="bodyStrong" color={favorited ? "#fff" : C.primary}>
-              Me gusta
+              Favorito
             </AppText>
           </Pressable>
         </View>
@@ -732,7 +732,7 @@ export default function HomeScreen() {
                 body={
                   q
                     ? "Ningún favorito coincide con tu búsqueda."
-                    : 'Toca "Me gusta" en las reseñas que más te gusten para guardarlas aquí.'
+                    : 'Toca "Favorito" en las reseñas que más te gusten para guardarlas aquí.'
                 }
                 actionLabel={q ? undefined : "Explorar lugares"}
                 onAction={q ? undefined : () => setActiveTab("ranks")}

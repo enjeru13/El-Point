@@ -410,7 +410,7 @@ export default function ProfileScreen() {
                 <EmptyState
                   icon="heart-outline"
                   title="Sin favoritos todavía"
-                  body="Toca 'Me gusta' en un lugar para guardarlo aquí."
+                  body="Toca 'Favorito' en un lugar para guardarlo aquí."
                   actionLabel="Explorar lugares"
                   onAction={() => router.push('/(customer)/search')}
                 />
@@ -459,31 +459,38 @@ export default function ProfileScreen() {
                   onAction={() => router.push('/(customer)/search')}
                 />
               ) : (
-                reviews.map(r => (
-                  <Pressable
-                    key={r.id}
-                    onPress={() => r.restaurant && router.push(`/restaurant/${r.restaurant.id}`)}
-                    style={{ backgroundColor: C.surface, borderRadius: 20, padding: 16, flexDirection: 'row', gap: 14, borderWidth: 1, borderColor: C.border, ...shadow.sm }}
-                  >
-                    <View style={{ width: 60, height: 60, borderRadius: 14, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border, flexShrink: 0 }}>
-                      <Icon name={r.restaurant?.icon ?? 'silverware-fork-knife'} size={28} color={C.primary} />
-                    </View>
-                    <View style={{ flex: 1, gap: 6 }}>
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <AppText variant="bodyStrong" numberOfLines={1}>
-                          {r.restaurant?.name ?? 'Local'}
-                        </AppText>
-                        <StarRow rating={r.rating} />
+                <>
+                  {reviews.slice(0, 6).map(r => (
+                    <Pressable
+                      key={r.id}
+                      onPress={() => r.restaurant && router.push(`/restaurant/${r.restaurant.id}`)}
+                      style={{ backgroundColor: C.surface, borderRadius: 20, padding: 16, flexDirection: 'row', gap: 14, borderWidth: 1, borderColor: C.border, ...shadow.sm }}
+                    >
+                      <View style={{ width: 60, height: 60, borderRadius: 14, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border, flexShrink: 0 }}>
+                        <Icon name={r.restaurant?.icon ?? 'silverware-fork-knife'} size={28} color={C.primary} />
                       </View>
-                      <AppText variant="body" color={C.onSurfaceVariant} numberOfLines={2}>
-                        {r.body}
-                      </AppText>
-                      <AppText variant="label" color={C.outline}>
-                        {timeAgo(r.created_at)}
-                      </AppText>
-                    </View>
-                  </Pressable>
-                ))
+                      <View style={{ flex: 1, gap: 6 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <AppText variant="bodyStrong" numberOfLines={1}>
+                            {r.restaurant?.name ?? 'Local'}
+                          </AppText>
+                          <StarRow rating={r.rating} />
+                        </View>
+                        <AppText variant="body" color={C.onSurfaceVariant} numberOfLines={2}>
+                          {r.body}
+                        </AppText>
+                        <AppText variant="label" color={C.outline}>
+                          {timeAgo(r.created_at)}
+                        </AppText>
+                      </View>
+                    </Pressable>
+                  ))}
+                  {reviews.length > 6 && (
+                    <AppText variant="bodySm" color={C.outline} align="center">
+                      +{reviews.length - 6} reseña{reviews.length - 6 === 1 ? '' : 's'} más
+                    </AppText>
+                  )}
+                </>
               )}
             </View>
 
