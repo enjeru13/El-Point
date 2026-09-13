@@ -622,6 +622,9 @@ export default function HomeScreen() {
             />
           </View>
 
+          {/* Tinte + borde en vez de relleno solido con sombra de color --
+              esa sombra difuminada se cortaba feo contra la barra de
+              categorias justo debajo. Sin sombra, cero riesgo de corte. */}
           <Pressable
             onPress={openQuickPick}
             style={{
@@ -631,23 +634,24 @@ export default function HomeScreen() {
               paddingHorizontal: 16,
               paddingVertical: 12,
               borderRadius: 16,
-              backgroundColor: C.primary,
-              ...shadow.primary,
+              backgroundColor: C.primaryFixed,
+              borderWidth: 1,
+              borderColor: C.border,
             }}
           >
             <View
               style={{
                 width: 32, height: 32, borderRadius: 10,
-                backgroundColor: "rgba(255,255,255,0.2)",
+                backgroundColor: C.primary,
                 alignItems: "center", justifyContent: "center",
               }}
             >
               <Icon name="dice-5-outline" size={18} color="#fff" />
             </View>
-            <AppText variant="bodyStrong" color="#fff" style={{ flex: 1 }}>
+            <AppText variant="bodyStrong" color={C.primary} style={{ flex: 1 }}>
               ¿Qué comer hoy?
             </AppText>
-            <Icon name="arrow-right" size={18} color="#fff" />
+            <Icon name="arrow-right" size={18} color={C.primary} />
           </Pressable>
         </View>
 
