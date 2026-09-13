@@ -190,10 +190,21 @@ export function TourGuide({
 
   const win = Dimensions.get("window");
   const s = steps[step];
-  const cx = Math.max(rect.x - origin.x - HALO, 0);
-  const cy = Math.max(rect.y - origin.y - HALO, 0);
-  const cw = Math.min(rect.width + HALO * 2, win.width - cx);
-  const ch = rect.height + HALO * 2;
+  // Clamp the ring to the screen on all 4 sides. Clamping only cx/cw and
+  // leaving cy/ch unbounded (the old code) let the ring's bottom edge run
+  // past the screen for any target near the bottom — and even the cx/cw
+  // clamp alone was wrong: when the halo got eaten by clamping on one side,
+  // the box kept its full un-eaten width/height, over-covering the other
+  // side. Shrink by however much each edge got pushed in, then cap the far
+  // edge too, so the ring always traces the target and never the void.
+  const rawX = rect.x - origin.x - HALO;
+  const rawY = rect.y - origin.y - HALO;
+  const rawW = rect.width + HALO * 2;
+  const rawH = rect.height + HALO * 2;
+  const cx = Math.max(rawX, 0);
+  const cy = Math.max(rawY, 0);
+  const cw = Math.min(rawW - (cx - rawX), win.width - cx);
+  const ch = Math.min(rawH - (cy - rawY), win.height - cy);
 
   // Estimate until the card actually renders and reports its real height
   // (onLayout below) — a fixed guess was placing it too high/low above the
