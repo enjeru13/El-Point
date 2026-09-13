@@ -812,7 +812,7 @@ export default function RestaurantProfileScreen() {
                     }}
                   >
                     <Icon name="fire" size={12} color="#fff" />
-                    <AppText variant="caption" color="#fff" style={{ fontSize: 12 }}>
+                    <AppText variant="caption" color="#fff" style={{ fontSize: 12, lineHeight: 16 }}>
                       DESTACADO
                     </AppText>
                   </View>
@@ -829,7 +829,7 @@ export default function RestaurantProfileScreen() {
                       borderColor: C.border,
                     }}
                   >
-                    <AppText variant="caption" style={{ fontSize: 12 }}>
+                    <AppText variant="caption" style={{ fontSize: 12, lineHeight: 16 }}>
                       {c.label.toUpperCase()}
                     </AppText>
                   </View>
