@@ -165,46 +165,65 @@ function ReviewCard({
 
       {/* Contenido */}
       <View style={{ padding: compact ? 12 : 16, gap: compact ? 6 : 10 }}>
-        <AppText
-          variant="heading"
-          style={{ fontSize: compact ? 17 : 20, lineHeight: compact ? 21 : 25 }}
-          numberOfLines={1}
-        >
-          {item.restaurant.name}
-        </AppText>
+        {/* Nombre corto (~16 car.) -> las insignias de Original/Destacado
+            entran en su misma línea; nombre largo -> bajan a la línea de
+            categoría/distancia para no atropellar el numberOfLines={1}. */}
+        {(() => {
+          const nameShort = item.restaurant.name.length <= 16;
+          const founder = isFounder(item.restaurant);
+          const boosted = isBoosted(item.restaurant);
+          const founderBadge = founder && (
+            <View key="founder" style={{
+              width: 20, height: 20, borderRadius: 10,
+              alignItems: "center", justifyContent: "center",
+              backgroundColor: "#f0c26022", borderWidth: 1, borderColor: "#f0c26066",
+            }}>
+              <Icon name="crown" size={11} color="#b8860b" />
+            </View>
+          );
+          const boostedBadge = boosted && (
+            <View key="boosted" style={{
+              flexDirection: "row", alignItems: "center", gap: 3,
+              paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99,
+              backgroundColor: C.primary + "22", borderWidth: 1, borderColor: C.primary + "55",
+            }}>
+              <Icon name="fire" size={11} color={C.primary} />
+              <AppText variant="caption" color={C.primary} style={{ fontSize: 10 }}>Destacado</AppText>
+            </View>
+          );
 
-        {(dist || cat || isBoosted(item.restaurant) || isFounder(item.restaurant)) && (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            {isFounder(item.restaurant) && (
-              <View style={{
-                width: 20, height: 20, borderRadius: 10,
-                alignItems: "center", justifyContent: "center",
-                backgroundColor: "#f0c26022", borderWidth: 1, borderColor: "#f0c26066",
-              }}>
-                <Icon name="crown" size={11} color="#b8860b" />
+          return (
+            <>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <AppText
+                  variant="heading"
+                  style={{ fontSize: compact ? 17 : 20, lineHeight: compact ? 21 : 25, flexShrink: 1 }}
+                  numberOfLines={1}
+                >
+                  {item.restaurant.name}
+                </AppText>
+                {nameShort && founderBadge}
+                {nameShort && boostedBadge}
               </View>
-            )}
-            {isBoosted(item.restaurant) && (
-              <View style={{
-                flexDirection: "row", alignItems: "center", gap: 3,
-                paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99,
-                backgroundColor: C.primary + "22", borderWidth: 1, borderColor: C.primary + "55",
-              }}>
-                <Icon name="fire" size={11} color={C.primary} />
-                <AppText variant="caption" color={C.primary} style={{ fontSize: 10 }}>Destacado</AppText>
-              </View>
-            )}
-            {cat && (
-              <AppText variant="caption" color={C.outline}>{cat.label}</AppText>
-            )}
-            {dist && (
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
-                <Icon name="map-marker-distance" size={12} color={C.primary} />
-                <AppText variant="caption" color={C.primary}>{dist}</AppText>
-              </View>
-            )}
-          </View>
-        )}
+
+              {(dist || cat || (!nameShort && (founder || boosted))) && (
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                  {!nameShort && founderBadge}
+                  {!nameShort && boostedBadge}
+                  {cat && (
+                    <AppText variant="caption" color={C.outline}>{cat.label}</AppText>
+                  )}
+                  {dist && (
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                      <Icon name="map-marker-distance" size={12} color={C.primary} />
+                      <AppText variant="caption" color={C.primary}>{dist}</AppText>
+                    </View>
+                  )}
+                </View>
+              )}
+            </>
+          );
+        })()}
 
         {r.amenities.length > 0 && (
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
