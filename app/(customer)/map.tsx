@@ -171,7 +171,10 @@ function MarkerImageFactory({
 
 // ─── Bottom card ──────────────────────────────────────────────────────────────
 
-const CARD_H = 222;
+// La sheet ahora se dimensiona sola al contenido (enableDynamicSizing) --
+// esto solo sirve de estimado generoso para levantar el botón de GPS por
+// encima de ella sin que se vea el ajuste de golpe.
+const CARD_H_ESTIMATE = 260;
 
 function RestaurantCard({
   restaurant,
@@ -203,31 +206,11 @@ function RestaurantCard({
         </View>
 
         <View style={{ flex: 1, justifyContent: 'center', gap: 3 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <AppText variant="heading" style={{ fontSize: 17, lineHeight: 21, flexShrink: 1 }} numberOfLines={1}>
               {restaurant.name}
             </AppText>
-            {isFounder(restaurant) && (
-              <View style={{
-                width: 20, height: 20, borderRadius: 10,
-                alignItems: 'center', justifyContent: 'center',
-                backgroundColor: '#f0c26022', borderWidth: 1, borderColor: '#f0c26066',
-              }}>
-                <Icon name="crown" size={11} color="#b8860b" />
-              </View>
-            )}
-            {isBoosted(restaurant) && (
-              <View style={{
-                flexDirection: 'row', alignItems: 'center', gap: 3,
-                paddingHorizontal: 7, paddingVertical: 2, borderRadius: 99,
-                backgroundColor: C.primary + '22', borderWidth: 1, borderColor: C.primary + '55',
-              }}>
-                <Icon name="fire" size={11} color={C.primary} />
-                <AppText variant="caption" color={C.primary} style={{ fontSize: 10 }}>Destacado</AppText>
-              </View>
-            )}
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <AppText variant="caption" color={C.outlineVariant}>|</AppText>
             <StarBadge rating={restaurant.rating_avg} count={restaurant.rating_count} size="sm" />
             {restaurant.rating_count > 0 && (
               <AppText variant="caption" color={C.outline}>
@@ -235,6 +218,29 @@ function RestaurantCard({
               </AppText>
             )}
           </View>
+          {(isFounder(restaurant) || isBoosted(restaurant)) && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              {isFounder(restaurant) && (
+                <View style={{
+                  width: 20, height: 20, borderRadius: 10,
+                  alignItems: 'center', justifyContent: 'center',
+                  backgroundColor: '#f0c26022', borderWidth: 1, borderColor: '#f0c26066',
+                }}>
+                  <Icon name="crown" size={11} color="#b8860b" />
+                </View>
+              )}
+              {isBoosted(restaurant) && (
+                <View style={{
+                  flexDirection: 'row', alignItems: 'center', gap: 3,
+                  paddingHorizontal: 7, paddingVertical: 2, borderRadius: 99,
+                  backgroundColor: C.primary + '22', borderWidth: 1, borderColor: C.primary + '55',
+                }}>
+                  <Icon name="fire" size={11} color={C.primary} />
+                  <AppText variant="caption" color={C.primary} style={{ fontSize: 10 }}>Destacado</AppText>
+                </View>
+              )}
+            </View>
+          )}
           {!!meta && (
             <AppText variant="caption" color={C.outline}>{meta}</AppText>
           )}
@@ -303,7 +309,6 @@ export default function MapScreen() {
   const gpsY     = useRef(new Animated.Value(0)).current;
   const pingAnim = useRef(new Animated.Value(1)).current;
   const mapRef   = useRef<MapView>(null);
-  const sheetSnap = useMemo(() => [CARD_H], []);
 
   // Coach-mark targets for the first-use tour.
   const tourSearchRef = useRef<View>(null);
@@ -396,7 +401,7 @@ export default function MapScreen() {
     }
   }
 
-  const GPS_LIFT = CARD_H + 20;
+  const GPS_LIFT = CARD_H_ESTIMATE + 20;
 
   function liftGps(up: boolean) {
     gpsY.stopAnimation();
@@ -580,9 +585,8 @@ export default function MapScreen() {
       <BottomSheet
         ref={sheetRef}
         index={-1}
-        snapPoints={sheetSnap}
         detached
-        enableDynamicSizing={false}
+        enableDynamicSizing
         enablePanDownToClose
         bottomInset={FLOATING_NAV_H + Math.max(insets.bottom, 12)}
         style={{ marginHorizontal: 12 }}
