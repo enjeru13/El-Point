@@ -26,19 +26,17 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
   const badgeRing = isDark ? "rgba(255,255,255,0.35)" : "rgba(28,27,27,0.08)";
 
   const ointSize = Math.round(26 * scale);
-  // Diámetro = altura aprox. de una mayúscula a este tamaño, para que el
-  // círculo ocupe el mismo lugar visual que ocuparía la "P" de "Point".
-  const badge = Math.round(ointSize * 0.74);
+  // Círculo tan alto como la línea de "oint" — la P llena el mismo
+  // espacio que ocuparía la letra si estuviera escrita.
+  const badge = ointSize;
 
   return (
-    <View style={{ flexDirection: "row", alignItems: "flex-end", gap: Math.round(6 * scale) }}>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: Math.round(6 * scale) }}>
       <Text
         style={{
           fontFamily: "Outfit_700Bold",
           fontSize: Math.round(13 * scale),
-          lineHeight: Math.round(13 * scale),
           color: subColor,
-          marginBottom: Math.round(4 * scale),
         }}
       >
         el
@@ -59,7 +57,6 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
           shadowOpacity: 0.2,
           shadowRadius: Math.round(2.5 * scale),
           elevation: 2,
-          marginBottom: Math.round(1 * scale),
         }}
       >
         <Text
@@ -81,7 +78,7 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
           lineHeight: ointSize,
           letterSpacing: -0.5,
           color: textColor,
-          marginLeft: -Math.round(3 * scale),
+          marginLeft: -Math.round(2 * scale),
         }}
       >
         oint
