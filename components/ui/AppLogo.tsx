@@ -16,9 +16,16 @@ const PIN_RATIO = 689 / 557;
  * ícono real, así el logo y el ícono se leen como la misma marca.
  */
 export function AppLogo({ size = "md", variant = "light" }: Props) {
-  const { C } = useTheme();
+  const { C, scheme } = useTheme();
   const scale = size === "sm" ? 0.75 : size === "lg" ? 1.8 : 1;
   const isDark = variant === "dark";
+  // El pin necesita colores invertidos en fondo claro (la lágrima es
+  // blanca, se pierde) — pero en fondo oscuro los colores del ícono real
+  // (lágrima blanca, círculo naranja) ya contrastan bien y son los que
+  // reconoce el usuario. "dark" explícito = fondo fijo oscuro (héroes de
+  // login/splash); con "light" (el default, sigue el tema) el fondo real
+  // puede ser oscuro igual si el tema de la app está en modo oscuro.
+  const pinOnDarkBg = isDark || scheme === "dark";
 
   const textColor = isDark ? "#ffffff" : C.onSurface;
   const subColor = isDark ? "rgba(255,255,255,0.62)" : C.onSurfaceVariant;
@@ -60,7 +67,11 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
       </View>
 
       <Image
-        source={require("@/assets/images/logo-pin.png")}
+        source={
+          pinOnDarkBg
+            ? require("@/assets/images/logo-pin-dark.png")
+            : require("@/assets/images/logo-pin.png")
+        }
         style={{ width: pinW, height: pinH, marginBottom: -Math.round(pinH * 0.05) }}
         contentFit="contain"
       />
