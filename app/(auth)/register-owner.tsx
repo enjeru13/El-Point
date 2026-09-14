@@ -122,7 +122,29 @@ export default function RegisterOwnerScreen() {
     }
   }
 
-  async function pickImage(setter: (uri: string) => void) {
+  function pickImage(setter: (uri: string) => void) {
+    Alert.alert("Agregar foto", undefined, [
+      { text: "Tomar foto", onPress: () => pickImageFromCamera(setter) },
+      { text: "Elegir de galería", onPress: () => pickImageFromLibrary(setter) },
+      { text: "Cancelar", style: "cancel" },
+    ]);
+  }
+
+  async function pickImageFromCamera(setter: (uri: string) => void) {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) {
+      toast.error("Permiso de cámara denegado");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      quality: 0.85,
+    });
+    if (!result.canceled) setter(result.assets[0].uri);
+  }
+
+  async function pickImageFromLibrary(setter: (uri: string) => void) {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
