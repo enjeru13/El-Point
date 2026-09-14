@@ -128,7 +128,7 @@ function ResultRow({
     userLoc && item.lat != null && item.lng != null
       ? fmtKm(distanceKm(userLoc, item.lat, item.lng))
       : null;
-  const meta = [catLabel(item), price, dist].filter(Boolean).join('  ·  ');
+  const meta = [catLabel(item), price, dist].filter(Boolean).join('  |  ');
 
   return (
     <Pressable

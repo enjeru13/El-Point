@@ -186,7 +186,7 @@ function RestaurantCard({
   const { C } = useTheme();
   const meta = [priceLabel(restaurant.price_level), restaurant.distanceLabel]
     .filter(Boolean)
-    .join('  ·  ');
+    .join('  |  ');
 
   return (
     <View style={{ paddingHorizontal: 16, paddingBottom: 16, paddingTop: 2, gap: 12 }}>
