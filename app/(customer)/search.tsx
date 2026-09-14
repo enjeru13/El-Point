@@ -256,42 +256,6 @@ function PlaceCard({
 
       {/* Body */}
       <View style={{ padding: featured ? 16 : 14, gap: 6 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          {isFounder(item) && <FounderChip />}
-          {isBoosted(item) && (
-            <View style={{
-              flexDirection: 'row', alignItems: 'center', gap: 4,
-              paddingHorizontal: 9, paddingVertical: 3, borderRadius: 99,
-              backgroundColor: C.primary + '22', borderWidth: 1, borderColor: C.primary + '55',
-            }}>
-              <Icon name="fire" size={12} color={C.primary} />
-              <AppText variant="caption" color={C.primary} style={{ fontSize: 11 }}>Destacado</AppText>
-            </View>
-          )}
-          <View style={{
-            paddingHorizontal: 9, paddingVertical: 3, borderRadius: 99,
-            backgroundColor: C.secondaryContainer, borderWidth: 1.5, borderColor: C.border,
-          }}>
-            <AppText variant="caption" color={C.onSurface} style={{ fontSize: 11 }}>
-              {catLabel(item)}
-            </AppText>
-          </View>
-          {!!price && (
-            <AppText variant="caption" color={C.outline}>{price}</AppText>
-          )}
-          <AppText variant="caption" color={C.outline}>
-            {item.rating_count > 0
-              ? `${item.rating_count} ${item.rating_count === 1 ? 'rank' : 'ranks'}`
-              : 'Nuevo'}
-          </AppText>
-          {dist && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-              <Icon name="map-marker-distance" size={12} color={C.primary} />
-              <AppText variant="caption" color={C.primary}>{dist}</AppText>
-            </View>
-          )}
-        </View>
-
         <AppText
           variant={featured ? 'title' : 'heading'}
           style={featured ? { fontSize: 24, lineHeight: 28 } : { fontSize: 18, lineHeight: 22 }}
@@ -299,6 +263,51 @@ function PlaceCard({
         >
           {item.name}
         </AppText>
+
+        <View style={{
+          alignSelf: 'flex-start',
+          paddingHorizontal: 9, paddingVertical: 3, borderRadius: 99,
+          backgroundColor: C.secondaryContainer, borderWidth: 1.5, borderColor: C.border,
+        }}>
+          <AppText variant="caption" color={C.onSurface} style={{ fontSize: 11 }}>
+            {catLabel(item)}
+          </AppText>
+        </View>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 1 }}>
+            <AppText variant="caption" color={C.outline}>
+              {item.rating_count > 0
+                ? `★ ${item.rating_avg} (${item.rating_count})`
+                : 'Nuevo'}
+            </AppText>
+            {!!price && (
+              <AppText variant="caption" color={C.outline}>{price}</AppText>
+            )}
+            {dist && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                <Icon name="map-marker-distance" size={12} color={C.primary} />
+                <AppText variant="caption" color={C.primary}>{dist}</AppText>
+              </View>
+            )}
+          </View>
+
+          {(isFounder(item) || isBoosted(item)) && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              {isFounder(item) && <FounderChip />}
+              {isBoosted(item) && (
+                <View style={{
+                  flexDirection: 'row', alignItems: 'center', gap: 4,
+                  paddingHorizontal: 9, paddingVertical: 3, borderRadius: 99,
+                  backgroundColor: C.primary + '22', borderWidth: 1, borderColor: C.primary + '55',
+                }}>
+                  <Icon name="fire" size={12} color={C.primary} />
+                  <AppText variant="caption" color={C.primary} style={{ fontSize: 11 }}>Destacado</AppText>
+                </View>
+              )}
+            </View>
+          )}
+        </View>
 
         {item.address && (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
