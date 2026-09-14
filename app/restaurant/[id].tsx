@@ -982,36 +982,6 @@ export default function RestaurantProfileScreen() {
             </View>
           )}
 
-          {/* ── Acciones ── */}
-          {!isOwnerHere && (
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              <Button
-                label={myReview ? "Editar rank" : "Rankear"}
-                onPress={() => (myReview ? startEditReview(myReview) : startCreateReview())}
-                icon={myReview ? "pencil-outline" : "fire"}
-                size="sm"
-                fullWidth={false}
-                style={{ flex: 2 }}
-              />
-              <Button
-                label="Ir"
-                onPress={() =>
-                  restaurant.address &&
-                  Linking.openURL(
-                    `https://maps.google.com/?q=${encodeURIComponent(restaurant.address)}`,
-                  )
-                }
-                disabled={!restaurant.address}
-                variant="secondary"
-                icon="navigation-variant"
-                iconColor={C.secondary}
-                size="sm"
-                fullWidth={false}
-                style={{ flex: 1 }}
-              />
-            </View>
-          )}
-
           {/* ── Info ── */}
           <View
             style={{
@@ -1325,13 +1295,30 @@ export default function RestaurantProfileScreen() {
                 </AppText>
               </View>
               {!isOwnerHere && (
-                <Button
-                  label={myReview ? "Editar mi rank" : "Deja tu rank"}
-                  onPress={() => (myReview ? startEditReview(myReview) : startCreateReview())}
-                  icon={myReview ? "pencil-outline" : "fire"}
-                  size="sm"
-                  fullWidth={false}
-                />
+                <View style={{ flexDirection: "row", gap: 8 }}>
+                  <Button
+                    label={myReview ? "Editar mi rank" : "Deja tu rank"}
+                    onPress={() => (myReview ? startEditReview(myReview) : startCreateReview())}
+                    icon={myReview ? "pencil-outline" : "fire"}
+                    size="sm"
+                    fullWidth={false}
+                  />
+                  <Button
+                    label="Ir"
+                    onPress={() =>
+                      restaurant.address &&
+                      Linking.openURL(
+                        `https://maps.google.com/?q=${encodeURIComponent(restaurant.address)}`,
+                      )
+                    }
+                    disabled={!restaurant.address}
+                    variant="secondary"
+                    icon="navigation-variant"
+                    iconColor={C.secondary}
+                    size="sm"
+                    fullWidth={false}
+                  />
+                </View>
               )}
             </View>
 
