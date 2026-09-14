@@ -84,20 +84,43 @@ const MARKER_H = 92;
 
 function markerCacheKey(r: Restaurant, scheme: string): string {
   const rating = r.rating_count > 0 ? r.rating_avg.toFixed(1) : '-';
-  return `${r.id}:${r.icon}:${rating}:${scheme}`;
+  // El estilo ahora depende de destacado/original -- si cambia (un boost
+  // que arranca o vence) sin que cambien icono/rating, hay que invalidar
+  // el bitmap cacheado igual.
+  const boosted = isBoosted(r) ? 'b' : '';
+  const founder = isFounder(r) ? 'f' : '';
+  return `${r.id}:${r.icon}:${rating}:${scheme}:${boosted}${founder}`;
 }
 
 function MarkerTemplate({ restaurant }: { restaurant: Restaurant }) {
   const { C, shadow } = useTheme();
+  const boosted = isBoosted(restaurant);
+  const founder = isFounder(restaurant);
+  // Destacado gana el color del anillo si ambos aplican (mas urgente/pago
+  // que Original, que ya de por si no necesita destacarse para pagar).
+  const ringColor = boosted ? C.primary : founder ? '#f0c260' : C.outlineVariant;
   return (
     <View style={{ width: MARKER_W, height: MARKER_H, alignItems: 'center', justifyContent: 'flex-end' }}>
-      <View style={{
-        width: 46, height: 46, borderRadius: 23,
-        backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center',
-        borderWidth: 2.5, borderColor: C.outlineVariant,
-        ...shadow.sm,
-      }}>
-        <Icon name={restaurant.icon} size={22} color={C.primary} />
+      <View style={{ width: 46, height: 46 }}>
+        <View style={{
+          width: 46, height: 46, borderRadius: 23,
+          backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center',
+          borderWidth: 2.5, borderColor: ringColor,
+          ...shadow.sm,
+        }}>
+          <Icon name={restaurant.icon} size={22} color={C.primary} />
+        </View>
+        {(boosted || founder) && (
+          <View style={{
+            position: 'absolute', top: -4, right: -4,
+            width: 18, height: 18, borderRadius: 9,
+            backgroundColor: boosted ? C.primary : '#f0c260',
+            alignItems: 'center', justifyContent: 'center',
+            borderWidth: 1.5, borderColor: C.surface,
+          }}>
+            <Icon name={boosted ? 'fire' : 'crown'} size={10} color={boosted ? '#fff' : '#3a2a05'} />
+          </View>
+        )}
       </View>
       <View style={{
         width: 0, height: 0,
