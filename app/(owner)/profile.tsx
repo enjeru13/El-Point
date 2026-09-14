@@ -318,40 +318,34 @@ export default function OwnerProfileScreen() {
         <AppText variant="title">Mi perfil</AppText>
         {editing ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <Pressable
+            <Button
+              label="Cancelar"
               onPress={cancel}
               disabled={busy}
-              style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: C.outlineVariant }}
-            >
-              <AppText variant="label" color={C.onSurfaceVariant}>Cancelar</AppText>
-            </Pressable>
-            <Pressable
+              variant="secondary"
+              size="sm"
+              fullWidth={false}
+            />
+            <Button
+              label="Guardar"
               onPress={save}
-              disabled={busy}
-              style={{
-                flexDirection: 'row', alignItems: 'center', gap: 6,
-                paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
-                backgroundColor: C.primary, borderWidth: 1, borderColor: C.border, ...shadow.sm,
-              }}
-            >
-              {busy ? <ActivityIndicator size="small" color="#fff" /> : <Icon name="check" size={15} color="#fff" />}
-              <AppText variant="label" color="#fff">Guardar</AppText>
-            </Pressable>
+              loading={busy}
+              icon="check"
+              size="sm"
+              fullWidth={false}
+            />
           </View>
         ) : (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <View ref={tourEditRef} collapsable={false}>
-              <Pressable
+              <Button
+                label="Editar"
                 onPress={() => setEditing(true)}
-                style={{
-                  flexDirection: 'row', alignItems: 'center', gap: 6,
-                  paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
-                  backgroundColor: C.primaryFixed, borderWidth: 1, borderColor: C.border, ...shadow.sm,
-                }}
-              >
-                <Icon name="pencil-outline" size={15} color={C.primary} />
-                <AppText variant="label" color={C.primary}>Editar</AppText>
-              </Pressable>
+                variant="secondary"
+                icon="pencil-outline"
+                size="sm"
+                fullWidth={false}
+              />
             </View>
             <Pressable
               onPress={() => router.push('/settings')}
