@@ -8,6 +8,7 @@ export type FeedRestaurant = {
   address: string | null;
   rating_avg: number;
   rating_count: number;
+  price_level: number | null;
   promo_text: string | null;
   cover_url: string | null;
   lat: number | null;
@@ -45,7 +46,7 @@ function num(v: any): number | null {
 }
 
 const RESTAURANT_EMBED = `restaurant:restaurants (
-  id, name, address, rating_avg, rating_count, promo_text, cover_url, latitude, longitude, boost_until, founder_rank,
+  id, name, address, rating_avg, rating_count, price_level, promo_text, cover_url, latitude, longitude, boost_until, founder_rank,
   restaurant_categories ( categories ( slug, label, icon ) ),
   restaurant_amenities ( amenities ( id, slug, label, icon ) )
 )`;
@@ -78,6 +79,7 @@ async function fetchFeed(): Promise<FeedItem[]> {
         address: r.restaurant.address,
         rating_avg: r.restaurant.rating_avg,
         rating_count: r.restaurant.rating_count,
+        price_level: num(r.restaurant.price_level),
         promo_text: r.restaurant.promo_text ?? null,
         cover_url: r.restaurant.cover_url ?? null,
         lat: num(r.restaurant.latitude),
@@ -122,6 +124,7 @@ async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
       address: f.restaurant.address,
       rating_avg: f.restaurant.rating_avg,
       rating_count: f.restaurant.rating_count,
+      price_level: num(f.restaurant.price_level),
       promo_text: f.restaurant.promo_text ?? null,
       cover_url: f.restaurant.cover_url ?? null,
       lat: num(f.restaurant.latitude),

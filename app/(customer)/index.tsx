@@ -49,6 +49,11 @@ const PINNED: { slug: string; label: string; icon: string }[] = [
   { slug: "promo", label: "Promos", icon: "tag" },
 ];
 
+function priceLabel(level: number | null): string {
+  if (!level || level < 1) return "";
+  return "$".repeat(Math.min(level, 3));
+}
+
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const min = Math.floor(diff / 60000);
@@ -90,6 +95,8 @@ function ReviewCard({
     userLoc && r.lat != null && r.lng != null
       ? fmtKm(distanceKm(userLoc, r.lat, r.lng))
       : null;
+  const price = priceLabel(r.price_level);
+  const meta = [cat?.label, price, dist].filter(Boolean).join("  |  ");
 
   return (
     <Pressable
@@ -205,18 +212,8 @@ function ReviewCard({
                 {boostedBadge}
               </View>
 
-              {(dist || cat) && (
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  {cat && (
-                    <AppText variant="caption" color={C.outline}>{cat.label}</AppText>
-                  )}
-                  {dist && (
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
-                      <Icon name="map-marker-distance" size={12} color={C.primary} />
-                      <AppText variant="caption" color={C.primary}>{dist}</AppText>
-                    </View>
-                  )}
-                </View>
+              {!!meta && (
+                <AppText variant="caption" color={C.outline}>{meta}</AppText>
               )}
             </>
           );
