@@ -769,12 +769,21 @@ export default function RestaurantProfileScreen() {
             />
           )}
 
-          {/* Scrim degradado para legibilidad sobre la foto */}
-          <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 190 }}>
-            <View style={{ flex: 1, backgroundColor: "rgba(28,27,27,0.12)" }} />
-            <View style={{ flex: 1, backgroundColor: "rgba(28,27,27,0.34)" }} />
-            <View style={{ flex: 1, backgroundColor: "rgba(28,27,27,0.62)" }} />
-          </View>
+          {/* Scrim para legibilidad sobre la foto -- un solo tono plano.
+              Antes eran 3 bandas de opacidad distinta simulando un
+              degradado (sin librería de gradiente real), se notaba el
+              escalón entre ellas como dos tonos pegados, feo. */}
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 190,
+              backgroundColor: "rgba(28,27,27,0.55)",
+            }}
+          />
 
           {/* Info overlay */}
           <View
