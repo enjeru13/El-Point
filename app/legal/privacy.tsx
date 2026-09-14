@@ -26,7 +26,7 @@ export default function PrivacyScreen() {
           Contenido que creas: reseñas, calificaciones, fotos, favoritos, preferencias de categorías.
         </LegalBullet>
         <LegalBullet>
-          Datos de negocio (dueños): nombre del local, dirección, teléfono, redes, RIF y foto de fachada para la verificación. El RIF y la foto de fachada no se muestran públicamente.
+          Datos de negocio (dueños): nombre del local, dirección o zona, teléfono, redes, RIF y una foto de verificación (fachada o cocina, según el tipo de local). El RIF y la foto de verificación no se muestran públicamente.
         </LegalBullet>
         <LegalBullet>
           Token de notificaciones push del dispositivo, para enviarte avisos.

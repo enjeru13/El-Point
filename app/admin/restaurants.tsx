@@ -110,7 +110,7 @@ function QueueCard({
         >
           <Icon name="camera-plus-outline" size={20} color={C.outline} />
           <AppText variant="caption" color={C.outline}>
-            Sin foto de fachada
+            Sin foto de verificación
           </AppText>
         </View>
       )}

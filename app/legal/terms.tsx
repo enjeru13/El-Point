@@ -68,8 +68,8 @@ export default function TermsScreen() {
           autorizado.
         </LegalBullet>
         <LegalBullet>
-          Debes aportar datos verídicos (nombre, dirección, RIF y foto de
-          fachada) para la verificación.
+          Debes aportar datos verídicos (nombre, dirección o zona, RIF y una
+          foto de verificación del local o de tu cocina) para la revisión.
         </LegalBullet>
         <LegalBullet>
           El equipo revisa cada local antes de publicarlo. Podemos rechazar o

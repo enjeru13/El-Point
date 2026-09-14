@@ -188,7 +188,7 @@ export default function OwnerProfileScreen() {
       updateMut.mutate({ verification_photo_path: path });
       const signed = await verificationPhotoUrl(path);
       setVerifUrl(signed ? `${signed}#${Date.now()}` : null);
-      toast.success('Foto de fachada actualizada');
+      toast.success(restaurant.ghost_kitchen ? 'Foto de la cocina actualizada' : 'Foto de fachada actualizada');
     } catch (e: any) {
       toast.error(e?.message ?? 'No se pudo subir la foto');
     } finally {
@@ -478,10 +478,10 @@ export default function OwnerProfileScreen() {
               <>
                 <View style={{ height: 1, backgroundColor: C.border, opacity: 0.4 }} />
 
-                {/* Foto de fachada */}
+                {/* Foto de fachada -- o de la cocina, si es cocina fantasma */}
                 <View style={{ gap: 6 }}>
                   <AppText variant="overline" color={C.onSurfaceVariant}>
-                    FOTO DE FACHADA
+                    {restaurant.ghost_kitchen ? 'FOTO DE LA COCINA' : 'FOTO DE FACHADA'}
                   </AppText>
                   <Pressable
                     onPress={pickFacade}
@@ -507,9 +507,9 @@ export default function OwnerProfileScreen() {
                       />
                     ) : (
                       <View style={{ alignItems: 'center', gap: 4 }}>
-                        <Icon name="storefront-outline" size={26} color={C.outline} />
+                        <Icon name={restaurant.ghost_kitchen ? 'mdi:pot-steam-outline' : 'storefront-outline'} size={26} color={C.outline} />
                         <AppText variant="caption" color={C.outline}>
-                          Subir foto de la fachada
+                          Subir foto de {restaurant.ghost_kitchen ? 'tu cocina' : 'la fachada'}
                         </AppText>
                       </View>
                     )}
