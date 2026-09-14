@@ -84,21 +84,17 @@ const MARKER_H = 92;
 
 function markerCacheKey(r: Restaurant, scheme: string): string {
   const rating = r.rating_count > 0 ? r.rating_avg.toFixed(1) : '-';
-  // El estilo ahora depende de destacado/original -- si cambia (un boost
-  // que arranca o vence) sin que cambien icono/rating, hay que invalidar
-  // el bitmap cacheado igual.
+  // El estilo ahora depende de destacado -- si cambia (un boost que
+  // arranca o vence) sin que cambien icono/rating, hay que invalidar el
+  // bitmap cacheado igual.
   const boosted = isBoosted(r) ? 'b' : '';
-  const founder = isFounder(r) ? 'f' : '';
-  return `${r.id}:${r.icon}:${rating}:${scheme}:${boosted}${founder}`;
+  return `${r.id}:${r.icon}:${rating}:${scheme}:${boosted}`;
 }
 
 function MarkerTemplate({ restaurant }: { restaurant: Restaurant }) {
   const { C, shadow } = useTheme();
   const boosted = isBoosted(restaurant);
-  const founder = isFounder(restaurant);
-  // Destacado gana el color del anillo si ambos aplican (mas urgente/pago
-  // que Original, que ya de por si no necesita destacarse para pagar).
-  const ringColor = boosted ? C.primary : founder ? '#f0c260' : C.outlineVariant;
+  const ringColor = boosted ? C.primary : C.outlineVariant;
   return (
     <View style={{ width: MARKER_W, height: MARKER_H, alignItems: 'center', justifyContent: 'flex-end' }}>
       <View style={{ width: 46, height: 46 }}>
@@ -110,15 +106,15 @@ function MarkerTemplate({ restaurant }: { restaurant: Restaurant }) {
         }}>
           <Icon name={restaurant.icon} size={22} color={C.primary} />
         </View>
-        {(boosted || founder) && (
+        {boosted && (
           <View style={{
             position: 'absolute', top: -4, right: -4,
             width: 18, height: 18, borderRadius: 9,
-            backgroundColor: boosted ? C.primary : '#f0c260',
+            backgroundColor: C.primary,
             alignItems: 'center', justifyContent: 'center',
             borderWidth: 1.5, borderColor: C.surface,
           }}>
-            <Icon name={boosted ? 'fire' : 'crown'} size={10} color={boosted ? '#fff' : '#3a2a05'} />
+            <Icon name="fire" size={10} color="#fff" />
           </View>
         )}
       </View>
