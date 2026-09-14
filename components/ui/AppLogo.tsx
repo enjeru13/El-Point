@@ -1,4 +1,5 @@
 import { useTheme } from "@/lib/ThemeContext";
+import { Image } from "expo-image";
 import { Text, View } from "react-native";
 
 type Props = {
@@ -6,15 +7,13 @@ type Props = {
   variant?: "light" | "dark";
 };
 
-// Marca fija — el mismo naranja del ícono de la app, sin importar tema. El
-// logo es identidad, no debe cambiar de color con light/dark.
-const BRAND = "#c8451f";
+// Proporción real del recorte en assets/images/logo-pin.png (alto/ancho).
+const PIN_RATIO = 689 / 557;
 
 /**
- * Logo de marca: "el" + la P de "Point" reemplazada por el círculo+P del
- * ícono de la app — se lee como una sola palabra ("el 🅟oint" = "el
- * Point") con la marca del ícono integrada en el propio wordmark, en vez
- * de un icono suelto al lado del texto.
+ * Logo de marca: "el Point" en tipografía limpia + el pin del ícono de la
+ * app como acento al final, en vez de un punto plano — mismo mark que el
+ * ícono real, así el logo y el ícono se leen como la misma marca.
  */
 export function AppLogo({ size = "md", variant = "light" }: Props) {
   const { C } = useTheme();
@@ -23,21 +22,17 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
 
   const textColor = isDark ? "#ffffff" : C.onSurface;
   const subColor = isDark ? "rgba(255,255,255,0.62)" : C.onSurfaceVariant;
-  const badgeRing = isDark ? "rgba(255,255,255,0.35)" : "rgba(28,27,27,0.08)";
 
-  const ointSize = Math.round(26 * scale);
-  // Círculo tan alto como la línea de "oint" — la P llena el mismo
-  // espacio que ocuparía la letra si estuviera escrita.
-  const badge = ointSize;
+  const pointSize = Math.round(26 * scale);
+  const pinH = Math.round(pointSize * 1.1);
+  const pinW = Math.round(pinH / PIN_RATIO);
 
-  // Cada pieza va en un contenedor de la MISMA altura (el alto del
-  // círculo), centrada adentro con justifyContent — así las tres quedan
-  // alineadas contra una referencia común en vez de fiarse del lineHeight
-  // "natural" de cada <Text>, que varía entre piezas de distinto tamaño y
-  // no se centra igual en RN (se notaba corrido en iOS).
+  // "el" y "Point" van en contenedores de la misma altura, centrados
+  // adentro — el lineHeight "natural" de cada <Text> no coincide entre
+  // tamaños distintos y se ve corrido si se deja al alineado del row.
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: Math.round(6 * scale) }}>
-      <View style={{ height: badge, justifyContent: "center" }}>
+      <View style={{ height: pointSize, justifyContent: "center" }}>
         <Text
           style={{
             fontFamily: "Outfit_700Bold",
@@ -50,49 +45,25 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
         </Text>
       </View>
 
-      <View
-        style={{
-          width: badge,
-          height: badge,
-          borderRadius: badge / 2,
-          backgroundColor: BRAND,
-          alignItems: "center",
-          justifyContent: "center",
-          borderWidth: 1,
-          borderColor: badgeRing,
-          shadowColor: "#000000",
-          shadowOffset: { width: 0, height: Math.round(1.5 * scale) },
-          shadowOpacity: 0.2,
-          shadowRadius: Math.round(2.5 * scale),
-          elevation: 2,
-        }}
-      >
+      <View style={{ height: pointSize, justifyContent: "center" }}>
         <Text
           style={{
             fontFamily: "Outfit_800ExtraBold",
-            fontSize: Math.round(badge * 0.56),
-            color: "#ffffff",
-            includeFontPadding: false,
-          }}
-        >
-          P
-        </Text>
-      </View>
-
-      <View style={{ height: badge, justifyContent: "center" }}>
-        <Text
-          style={{
-            fontFamily: "Outfit_800ExtraBold",
-            fontSize: ointSize,
+            fontSize: pointSize,
             letterSpacing: -0.5,
             color: textColor,
             includeFontPadding: false,
-            marginLeft: -Math.round(2 * scale),
           }}
         >
-          oint
+          Point
         </Text>
       </View>
+
+      <Image
+        source={require("@/assets/images/logo-pin.png")}
+        style={{ width: pinW, height: pinH, marginBottom: -Math.round(pinH * 0.05) }}
+        contentFit="contain"
+      />
     </View>
   );
 }

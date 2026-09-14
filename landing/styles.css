@@ -76,25 +76,17 @@ strong { font-weight: 700; }
   border-bottom: 1px solid var(--border);
 }
 .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 66px; }
-/* marca — réplica del AppLogo de la app: «el» + la P de «Point»
-   reemplazada por el círculo+P del ícono, pegada a «oint» -- se lee como
-   una sola palabra con la marca del ícono integrada en el wordmark. */
+/* marca — réplica del AppLogo de la app: «el Point» en tipografía limpia
+   + el pin del ícono real como acento final, en vez de un punto plano. */
 .brand { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-display); color: var(--text); }
 .brand:hover { text-decoration: none; }
 .brand .lg-el {
   font-weight: 700; font-size: 13px; line-height: 1; color: var(--text-soft);
 }
-.brand .lg-badge {
-  width: 22px; height: 22px; border-radius: 99px;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: #c8451f; color: #fff; font-weight: 800; font-size: 12px; line-height: 1;
-  border: 1px solid rgba(0,0,0,0.08);
-  box-shadow: 0 1.5px 2.5px rgba(0,0,0,0.18);
-}
 .brand .lg-point {
   font-weight: 800; font-size: 22px; line-height: 1; letter-spacing: -0.5px;
-  margin-left: -2px;
 }
+.brand .lg-pin { height: 24px; width: auto; margin-bottom: -1px; }
 .nav-links { display: flex; gap: 24px; align-items: center; }
 .nav-links a { color: var(--text-soft); font-size: 0.95rem; font-weight: 600; }
 .nav-links a:hover { color: var(--text); text-decoration: none; }
