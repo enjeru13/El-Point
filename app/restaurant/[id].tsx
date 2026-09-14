@@ -787,9 +787,9 @@ export default function RestaurantProfileScreen() {
               gap: 8,
             }}
           >
-            {/* Original/Destacado siempre en la línea del nombre, pegadas
-                al final -- el nombre lleva flex:1 y se trunca con elipsis
-                si hace falta espacio. Mismo criterio que la card de Home. */}
+            {/* Orden: nombre -> categorías (fila propia) -> estrellas+precio
+                a la izquierda con Original/Destacado a la derecha, en esa
+                misma fila. */}
             {(() => {
               const founder = isFounder(restaurant);
               const boosted = isBoosted(restaurant);
@@ -834,6 +834,15 @@ export default function RestaurantProfileScreen() {
 
               return (
                 <>
+                  <AppText
+                    variant="display"
+                    color="#fff"
+                    style={{ fontSize: 36, lineHeight: 40 }}
+                    numberOfLines={1}
+                  >
+                    {restaurant.name}
+                  </AppText>
+
                   {restaurant.categories.length > 0 && (
                     <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
                       {restaurant.categories.map((c) => (
@@ -856,50 +865,40 @@ export default function RestaurantProfileScreen() {
                     </View>
                   )}
 
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                    <AppText
-                      variant="display"
-                      color="#fff"
-                      style={{ fontSize: 36, lineHeight: 40, flex: 1 }}
-                      numberOfLines={1}
-                    >
-                      {restaurant.name}
-                    </AppText>
-                    {founderBadge}
-                    {boostedBadge}
+                  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 16, flexShrink: 1 }}>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                        <Icon name="star" size={16} color={C.secondaryContainer} />
+                        <AppText variant="bodyStrong" color="#fff">
+                          {restaurant.rating_count > 0
+                            ? `${restaurant.rating_avg} (${restaurant.rating_count})`
+                            : "Sin ranks aún"}
+                        </AppText>
+                      </View>
+                      {(restaurant.address || priceStr) && (
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                          <Icon
+                            name="map-marker"
+                            size={16}
+                            color="rgba(255,255,255,0.7)"
+                          />
+                          <AppText variant="body" color="rgba(255,255,255,0.85)">
+                            {[priceStr].filter(Boolean).join(" • ") || "Ver ubicación"}
+                          </AppText>
+                        </View>
+                      )}
+                    </View>
+
+                    {(founder || boosted) && (
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                        {founderBadge}
+                        {boostedBadge}
+                      </View>
+                    )}
                   </View>
                 </>
               );
             })()}
-
-            <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
-            >
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
-              >
-                <Icon name="star" size={16} color={C.secondaryContainer} />
-                <AppText variant="bodyStrong" color="#fff">
-                  {restaurant.rating_count > 0
-                    ? `${restaurant.rating_avg} (${restaurant.rating_count})`
-                    : "Sin ranks aún"}
-                </AppText>
-              </View>
-              {(restaurant.address || priceStr) && (
-                <View
-                  style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
-                >
-                  <Icon
-                    name="map-marker"
-                    size={16}
-                    color="rgba(255,255,255,0.7)"
-                  />
-                  <AppText variant="body" color="rgba(255,255,255,0.85)">
-                    {[priceStr].filter(Boolean).join(" • ") || "Ver ubicación"}
-                  </AppText>
-                </View>
-              )}
-            </View>
           </View>
         </View>
 
