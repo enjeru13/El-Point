@@ -1024,25 +1024,11 @@ export default function RestaurantProfileScreen() {
                         const d = restaurant.hours!.days[dow];
                         const today = new Date().getDay() === dow;
                         return (
-                          <View key={dow} style={{ flexDirection: "row", alignItems: "center" }}>
-                            {/* Columna del día a ancho fijo -- con space-between
-                                el nombre del día (Lunes vs Miércoles) corría el
-                                borde izquierdo de la hora fila a fila, se veía
-                                escalonado. Ahora las horas quedan centradas en
-                                el resto del ancho, siempre en la misma columna. */}
-                            <AppText
-                              variant={today ? "label" : "bodySm"}
-                              color={today ? C.primary : C.onSurfaceVariant}
-                              style={[{ width: 92 }, today ? { fontFamily: "PlusJakartaSans_700Bold" } : undefined]}
-                            >
+                          <View key={dow} style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                            <AppText variant={today ? "label" : "bodySm"} color={today ? C.primary : C.onSurfaceVariant} style={today ? { fontFamily: "PlusJakartaSans_700Bold" } : undefined}>
                               {DAY_LABELS_LONG[dow]}
                             </AppText>
-                            <AppText
-                              variant="bodySm"
-                              color={today ? C.primary : C.onSurfaceVariant}
-                              align="center"
-                              style={[{ flex: 1 }, today ? { fontFamily: "PlusJakartaSans_700Bold" } : undefined]}
-                            >
+                            <AppText variant="bodySm" color={today ? C.primary : C.onSurfaceVariant} style={today ? { fontFamily: "PlusJakartaSans_700Bold" } : undefined}>
                               {formatRange(d)}
                             </AppText>
                           </View>
