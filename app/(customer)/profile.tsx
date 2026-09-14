@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
+  Alert,
   Animated,
   Easing,
   Pressable,
@@ -143,13 +144,37 @@ export default function ProfileScreen() {
     );
   }
 
+  function pickAvatarSource(): Promise<string | null> {
+    return new Promise((resolve) => {
+      Alert.alert('Agregar foto', undefined, [
+        {
+          text: 'Tomar foto',
+          onPress: async () => {
+            const perm = await ImagePicker.requestCameraPermissionsAsync();
+            if (!perm.granted) { resolve(null); return; }
+            const r = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.85 });
+            resolve(r.canceled ? null : r.assets[0].uri);
+          },
+        },
+        {
+          text: 'Elegir de galería',
+          onPress: async () => {
+            const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.85 });
+            resolve(r.canceled ? null : r.assets[0].uri);
+          },
+        },
+        { text: 'Cancelar', style: 'cancel', onPress: () => resolve(null) },
+      ]);
+    });
+  }
+
   async function pickAvatar() {
     if (!profile) return;
-    const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.85 });
-    if (r.canceled) return;
+    const uri = await pickAvatarSource();
+    if (!uri) return;
     setAvatarUploading(true);
     try {
-      const url = await uploadAvatar(profile.id, r.assets[0].uri);
+      const url = await uploadAvatar(profile.id, uri);
       updateMut.mutate({ avatar_url: url });
     } catch (e: any) {
       toast.error(e?.message ?? 'No se pudo subir el avatar');

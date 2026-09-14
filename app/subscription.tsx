@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/lib/ThemeContext";
 import { useToast } from "@/lib/toast";
@@ -49,10 +49,26 @@ export default function SubscriptionScreen() {
   const left = r ? daysUntil(r.paid_until) : null;
   const expired = left !== null && left < 0;
 
-  async function pickPhoto() {
-    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.85 });
-    if (res.canceled) return;
-    setPhotoUri(res.assets[0].uri);
+  function pickPhoto() {
+    Alert.alert("Agregar foto", undefined, [
+      {
+        text: "Tomar foto",
+        onPress: async () => {
+          const perm = await ImagePicker.requestCameraPermissionsAsync();
+          if (!perm.granted) { toast.error("Permiso de cámara denegado"); return; }
+          const res = await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], quality: 0.85 });
+          if (!res.canceled) setPhotoUri(res.assets[0].uri);
+        },
+      },
+      {
+        text: "Elegir de galería",
+        onPress: async () => {
+          const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.85 });
+          if (!res.canceled) setPhotoUri(res.assets[0].uri);
+        },
+      },
+      { text: "Cancelar", style: "cancel" },
+    ]);
   }
 
   function onSubmit() {
