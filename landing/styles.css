@@ -76,19 +76,22 @@ strong { font-weight: 700; }
   border-bottom: 1px solid var(--border);
 }
 .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 66px; }
-/* marca — réplica del AppLogo de la app: «el Point•» */
-.brand { display: inline-flex; align-items: flex-end; gap: 3px; font-family: var(--font-display); color: var(--text); }
+/* marca — réplica del AppLogo de la app: círculo+P (misma marca del
+   ícono) + «el Point». Antes era solo texto con un punto suelto. */
+.brand { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-display); color: var(--text); }
 .brand:hover { text-decoration: none; }
+.brand .lg-badge {
+  width: 24px; height: 24px; border-radius: 99px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #c8451f; color: #fff; font-weight: 800; font-size: 14px; line-height: 1;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 2px 3px rgba(0,0,0,0.18);
+}
 .brand .lg-el {
-  border: 1px solid var(--border); border-radius: 6px;
-  padding: 2px 6px; margin-bottom: 3px;
-  font-weight: 700; font-size: 12px; line-height: 1; color: var(--text-soft);
+  font-weight: 700; font-size: 13px; line-height: 1; color: var(--text-soft);
+  margin-right: 4px;
 }
 .brand .lg-point { font-weight: 800; font-size: 22px; line-height: 1; letter-spacing: -0.5px; }
-.brand .lg-dot {
-  width: 7px; height: 7px; border-radius: 99px; margin: 0 0 3px 2px;
-  background: var(--brand); border: 1px solid var(--border);
-}
 .nav-links { display: flex; gap: 24px; align-items: center; }
 .nav-links a { color: var(--text-soft); font-size: 0.95rem; font-weight: 600; }
 .nav-links a:hover { color: var(--text); text-decoration: none; }
