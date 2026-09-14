@@ -30,17 +30,25 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
   // espacio que ocuparía la letra si estuviera escrita.
   const badge = ointSize;
 
+  // Cada pieza va en un contenedor de la MISMA altura (el alto del
+  // círculo), centrada adentro con justifyContent — así las tres quedan
+  // alineadas contra una referencia común en vez de fiarse del lineHeight
+  // "natural" de cada <Text>, que varía entre piezas de distinto tamaño y
+  // no se centra igual en RN (se notaba corrido en iOS).
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: Math.round(6 * scale) }}>
-      <Text
-        style={{
-          fontFamily: "Outfit_700Bold",
-          fontSize: Math.round(13 * scale),
-          color: subColor,
-        }}
-      >
-        el
-      </Text>
+      <View style={{ height: badge, justifyContent: "center" }}>
+        <Text
+          style={{
+            fontFamily: "Outfit_700Bold",
+            fontSize: Math.round(13 * scale),
+            color: subColor,
+            includeFontPadding: false,
+          }}
+        >
+          el
+        </Text>
+      </View>
 
       <View
         style={{
@@ -63,26 +71,28 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
           style={{
             fontFamily: "Outfit_800ExtraBold",
             fontSize: Math.round(badge * 0.56),
-            lineHeight: Math.round(badge * 0.62),
             color: "#ffffff",
+            includeFontPadding: false,
           }}
         >
           P
         </Text>
       </View>
 
-      <Text
-        style={{
-          fontFamily: "Outfit_800ExtraBold",
-          fontSize: ointSize,
-          lineHeight: ointSize,
-          letterSpacing: -0.5,
-          color: textColor,
-          marginLeft: -Math.round(2 * scale),
-        }}
-      >
-        oint
-      </Text>
+      <View style={{ height: badge, justifyContent: "center" }}>
+        <Text
+          style={{
+            fontFamily: "Outfit_800ExtraBold",
+            fontSize: ointSize,
+            letterSpacing: -0.5,
+            color: textColor,
+            includeFontPadding: false,
+            marginLeft: -Math.round(2 * scale),
+          }}
+        >
+          oint
+        </Text>
+      </View>
     </View>
   );
 }
