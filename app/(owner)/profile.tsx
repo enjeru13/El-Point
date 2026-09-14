@@ -559,8 +559,8 @@ export default function OwnerProfileScreen() {
             {restaurant.categories.length > 0 && (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
                 {restaurant.categories.map(c => (
-                  <View key={c.slug} style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99, backgroundColor: C.secondaryContainer, borderWidth: 1, borderColor: C.border }}>
-                    <AppText variant="caption" style={{ fontSize: 12, lineHeight: 16 }}>{c.label}</AppText>
+                  <View key={c.slug} style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99, backgroundColor: C.secondaryContainer, borderWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' }}>
+                    <AppText variant="label">{c.label}</AppText>
                   </View>
                 ))}
               </View>
@@ -668,7 +668,7 @@ export default function OwnerProfileScreen() {
                 {restaurant.amenities.map((a) => (
                   <View key={a.slug} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 99, backgroundColor: C.secondaryContainer, borderWidth: 1, borderColor: C.border }}>
                     <Icon name={a.icon} size={14} color={C.onSurface} />
-                    <AppText variant="caption" style={{ fontSize: 12, lineHeight: 16 }}>{a.label}</AppText>
+                    <AppText variant="label">{a.label}</AppText>
                   </View>
                 ))}
               </View>

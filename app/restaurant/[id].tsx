@@ -467,9 +467,16 @@ export default function RestaurantProfileScreen() {
     if (!r) return;
 
     // Solo la dirección (sin repetir el nombre, que ya va en la primera
-    // línea del mensaje) — el link queda mucho más corto y limpio.
+    // línea del mensaje) — el link queda mucho más corto y limpio. Algunas
+    // direcciones ya incluyen "San Cristóbal" al final (el dueño la
+    // escribió completa) — no lo repitas ahí, salía duplicado en el link.
+    const addressHasCity = r.address?.toLowerCase().includes("san cristóbal");
     const mapsQuery = encodeURIComponent(
-      r.address ? `${r.address}, San Cristóbal` : `${r.name}, San Cristóbal`,
+      r.address
+        ? addressHasCity
+          ? r.address
+          : `${r.address}, San Cristóbal`
+        : `${r.name}, San Cristóbal`,
     );
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
     const appUrl = `elpoint://restaurant/${r.id}`;
@@ -490,10 +497,12 @@ export default function RestaurantProfileScreen() {
     ].filter((l) => l !== null);
 
     try {
+      // Sin `url` aparte -- en iOS, Share.share con message Y url a la vez
+      // pega el url otra vez al final del texto (por eso salía repetido).
+      // El link ya va dentro de `message`.
       await Share.share({
         title: `${r.name} · El Point`,
         message: lines.join("\n"),
-        url: mapsUrl,
       });
     } catch {
       // usuario canceló el diálogo
@@ -778,68 +787,94 @@ export default function RestaurantProfileScreen() {
               gap: 8,
             }}
           >
-            {/* Chips */}
-            {(restaurant.categories.length > 0 || isBoosted(restaurant) || isFounder(restaurant)) && (
-              <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
-                {isFounder(restaurant) && (
-                  <View
-                    style={{
-                      width: 26,
-                      height: 26,
-                      borderRadius: 13,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: "rgba(240,194,96,0.25)",
-                      borderWidth: 1,
-                      borderColor: "rgba(240,194,96,0.6)",
-                    }}
-                  >
-                    <Icon name="crown" size={13} color="#f0c260" />
-                  </View>
-                )}
-                {isBoosted(restaurant) && (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 4,
-                      paddingHorizontal: 10,
-                      paddingVertical: 4,
-                      borderRadius: 99,
-                      backgroundColor: "rgba(255,255,255,0.18)",
-                      borderWidth: 1,
-                      borderColor: "rgba(255,255,255,0.35)",
-                    }}
-                  >
-                    <Icon name="fire" size={12} color="#fff" />
-                    <AppText variant="caption" color="#fff" style={{ fontSize: 12, lineHeight: 16 }}>
-                      DESTACADO
-                    </AppText>
-                  </View>
-                )}
-                {restaurant.categories.map((c) => (
-                  <View
-                    key={c.slug}
-                    style={{
-                      paddingHorizontal: 10,
-                      paddingVertical: 4,
-                      borderRadius: 99,
-                      backgroundColor: C.secondaryContainer,
-                      borderWidth: 1,
-                      borderColor: C.border,
-                    }}
-                  >
-                    <AppText variant="caption" style={{ fontSize: 12, lineHeight: 16 }}>
-                      {c.label.toUpperCase()}
-                    </AppText>
-                  </View>
-                ))}
-              </View>
-            )}
+            {/* Nombre corto (~16 car.) -> Original/Destacado van en su misma
+                línea; nombre largo -> bajan a la fila de categorías para no
+                atropellar el numberOfLines={1}. Mismo criterio que la card
+                de Home. */}
+            {(() => {
+              const nameShort = restaurant.name.length <= 16;
+              const founder = isFounder(restaurant);
+              const boosted = isBoosted(restaurant);
+              const founderBadge = founder && (
+                <View
+                  key="founder"
+                  style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: 13,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "rgba(240,194,96,0.25)",
+                    borderWidth: 1,
+                    borderColor: "rgba(240,194,96,0.6)",
+                  }}
+                >
+                  <Icon name="crown" size={13} color="#f0c260" />
+                </View>
+              );
+              const boostedBadge = boosted && (
+                <View
+                  key="boosted"
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 4,
+                    paddingHorizontal: 10,
+                    paddingVertical: 4,
+                    borderRadius: 99,
+                    backgroundColor: "rgba(255,255,255,0.18)",
+                    borderWidth: 1,
+                    borderColor: "rgba(255,255,255,0.35)",
+                  }}
+                >
+                  <Icon name="fire" size={12} color="#fff" />
+                  <AppText variant="label" color="#fff">
+                    DESTACADO
+                  </AppText>
+                </View>
+              );
 
-            <AppText variant="display" color="#fff" style={{ fontSize: 36, lineHeight: 40 }}>
-              {restaurant.name}
-            </AppText>
+              return (
+                <>
+                  {(restaurant.categories.length > 0 || (!nameShort && (founder || boosted))) && (
+                    <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+                      {!nameShort && founderBadge}
+                      {!nameShort && boostedBadge}
+                      {restaurant.categories.map((c) => (
+                        <View
+                          key={c.slug}
+                          style={{
+                            paddingHorizontal: 10,
+                            paddingVertical: 4,
+                            borderRadius: 99,
+                            backgroundColor: C.secondaryContainer,
+                            borderWidth: 1,
+                            borderColor: C.border,
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <AppText variant="label">{c.label.toUpperCase()}</AppText>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                    <AppText
+                      variant="display"
+                      color="#fff"
+                      style={{ fontSize: 36, lineHeight: 40, flexShrink: 1 }}
+                      numberOfLines={nameShort ? 1 : undefined}
+                    >
+                      {restaurant.name}
+                    </AppText>
+                    {nameShort && founderBadge}
+                    {nameShort && boostedBadge}
+                  </View>
+                </>
+              );
+            })()}
 
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}

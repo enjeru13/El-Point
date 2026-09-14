@@ -197,14 +197,25 @@ export function TourGuide({
   // the box kept its full un-eaten width/height, over-covering the other
   // side. Shrink by however much each edge got pushed in, then cap the far
   // edge too, so the ring always traces the target and never the void.
+  //
+  // The far edge has to be measured against the overlay's OWN visible size
+  // (win.width/height minus origin), not the raw window size — cx/cy are
+  // already in the overlay's local space (shifted by -origin to self-correct
+  // for devices where the overlay doesn't sit at true (0,0), the same
+  // Android quirk this component works around elsewhere). Comparing a
+  // local-space coordinate against the absolute window size under-clamps by
+  // exactly `origin` on whatever device needed the correction in the first
+  // place — which is how the ring kept escaping.
+  const localW = win.width - origin.x;
+  const localH = win.height - origin.y;
   const rawX = rect.x - origin.x - HALO;
   const rawY = rect.y - origin.y - HALO;
   const rawW = rect.width + HALO * 2;
   const rawH = rect.height + HALO * 2;
   const cx = Math.max(rawX, 0);
   const cy = Math.max(rawY, 0);
-  const cw = Math.min(rawW - (cx - rawX), win.width - cx);
-  const ch = Math.min(rawH - (cy - rawY), win.height - cy);
+  const cw = Math.min(rawW - (cx - rawX), localW - cx);
+  const ch = Math.min(rawH - (cy - rawY), localH - cy);
 
   // Estimate until the card actually renders and reports its real height
   // (onLayout below) — a fixed guess was placing it too high/low above the
