@@ -7,29 +7,27 @@ export function Brand({ dark = false, size = "md" }: { dark?: boolean; size?: "s
   const textColor = dark ? "#ffffff" : "var(--text)";
   const subColor = dark ? "rgba(255,255,255,0.62)" : "var(--text-soft)";
   const borderColor = dark ? "rgba(255,255,255,0.32)" : "var(--border)";
-  const pinH = Math.round(26 * 1.1);
+  const pinH = 24;
   const pinW = Math.round(pinH / PIN_RATIO);
 
   return (
-    <span className="inline-flex items-end gap-[3px]" style={{ transform: `scale(${scale})`, transformOrigin: "left center" }}>
+    <span className="inline-flex items-center gap-[6px]" style={{ transform: `scale(${scale})`, transformOrigin: "left center" }}>
       <span
         className="rounded-[6px] px-[6px] py-[2px] font-display text-[13px] font-bold leading-[13px]"
-        style={{ border: `1px solid ${borderColor}`, color: subColor, marginBottom: 3 }}
+        style={{ border: `1px solid ${borderColor}`, color: subColor }}
       >
         el
       </span>
-      <span className="inline-flex items-end">
-        <span className="font-display text-[26px] font-extrabold leading-[26px] tracking-[-0.5px]" style={{ color: textColor }}>
-          Point
-        </span>
-        <img
-          src={dark ? "/assets/logo-pin-dark.png" : "/assets/logo-pin.png"}
-          alt=""
-          width={pinW}
-          height={pinH}
-          style={{ marginLeft: 1, marginBottom: -Math.round(pinH * 0.05) }}
-        />
+      <span className="font-display text-[26px] font-extrabold leading-[26px] tracking-[-0.5px]" style={{ color: textColor }}>
+        Point
       </span>
+      <img
+        src={dark ? "/assets/logo-pin-dark.png" : "/assets/logo-pin.png"}
+        alt=""
+        width={pinW}
+        height={pinH}
+        style={{ marginBottom: -1 }}
+      />
     </span>
   );
 }
