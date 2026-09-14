@@ -11,10 +11,10 @@ type Props = {
 const BRAND = "#c8451f";
 
 /**
- * Logo de marca: círculo+P (misma marca del ícono de la app) + wordmark
- * "el Point". Antes era solo texto ("el" en chip + "Point" + un punto
- * suelto) — ahora el círculo+P hace de ancla visual y conecta el logo con
- * el ícono en la pantalla de inicio.
+ * Logo de marca: "el" + la P de "Point" reemplazada por el círculo+P del
+ * ícono de la app — se lee como una sola palabra ("el 🅟oint" = "el
+ * Point") con la marca del ícono integrada en el propio wordmark, en vez
+ * de un icono suelto al lado del texto.
  */
 export function AppLogo({ size = "md", variant = "light" }: Props) {
   const { C } = useTheme();
@@ -25,10 +25,25 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
   const subColor = isDark ? "rgba(255,255,255,0.62)" : C.onSurfaceVariant;
   const badgeRing = isDark ? "rgba(255,255,255,0.35)" : "rgba(28,27,27,0.08)";
 
-  const badge = Math.round(24 * scale);
+  const ointSize = Math.round(26 * scale);
+  // Diámetro = altura aprox. de una mayúscula a este tamaño, para que el
+  // círculo ocupe el mismo lugar visual que ocuparía la "P" de "Point".
+  const badge = Math.round(ointSize * 0.74);
 
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: Math.round(7 * scale) }}>
+    <View style={{ flexDirection: "row", alignItems: "flex-end", gap: Math.round(6 * scale) }}>
+      <Text
+        style={{
+          fontFamily: "Outfit_700Bold",
+          fontSize: Math.round(13 * scale),
+          lineHeight: Math.round(13 * scale),
+          color: subColor,
+          marginBottom: Math.round(4 * scale),
+        }}
+      >
+        el
+      </Text>
+
       <View
         style={{
           width: badge,
@@ -40,10 +55,11 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
           borderWidth: 1,
           borderColor: badgeRing,
           shadowColor: "#000000",
-          shadowOffset: { width: 0, height: Math.round(2 * scale) },
+          shadowOffset: { width: 0, height: Math.round(1.5 * scale) },
           shadowOpacity: 0.2,
-          shadowRadius: Math.round(3 * scale),
+          shadowRadius: Math.round(2.5 * scale),
           elevation: 2,
+          marginBottom: Math.round(1 * scale),
         }}
       >
         <Text
@@ -58,31 +74,18 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
         </Text>
       </View>
 
-      <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
-        <Text
-          style={{
-            fontFamily: "Outfit_700Bold",
-            fontSize: Math.round(13 * scale),
-            lineHeight: Math.round(13 * scale),
-            color: subColor,
-            marginBottom: Math.round(4 * scale),
-            marginRight: Math.round(4 * scale),
-          }}
-        >
-          el
-        </Text>
-        <Text
-          style={{
-            fontFamily: "Outfit_800ExtraBold",
-            fontSize: Math.round(26 * scale),
-            lineHeight: Math.round(26 * scale),
-            letterSpacing: -0.5,
-            color: textColor,
-          }}
-        >
-          Point
-        </Text>
-      </View>
+      <Text
+        style={{
+          fontFamily: "Outfit_800ExtraBold",
+          fontSize: ointSize,
+          lineHeight: ointSize,
+          letterSpacing: -0.5,
+          color: textColor,
+          marginLeft: -Math.round(3 * scale),
+        }}
+      >
+        oint
+      </Text>
     </View>
   );
 }
