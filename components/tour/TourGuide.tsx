@@ -72,8 +72,15 @@ export function TourGuide({
   // whatever the true offset is, instead of guessing why it's non-zero.
   const overlayRef = useRef<View>(null);
   const [origin, setOrigin] = useState({ x: 0, y: 0 });
+  // origin starts at a guessed (0,0) and gets corrected async once the
+  // overlay's onLayout fires — rendering the cutout/ring before that
+  // correction lands used the wrong origin for one frame, then jumped to
+  // the right spot the instant it arrived: a visible flicker on the very
+  // first step of a screen (later steps on the same mount reuse the
+  // already-correct origin, so they don't flicker). Hold the visible
+  // content back until the first real measurement is in.
+  const [originReady, setOriginReady] = useState(false);
   const fade = useRef(new Animated.Value(0)).current;
-  const pulse = useRef(new Animated.Value(1)).current;
   const retriesRef = useRef(0);
 
   const measure = useCallback(
@@ -130,6 +137,7 @@ export function TourGuide({
   const start = useCallback(() => {
     setRect(null);
     setMeasuredCardH(null);
+    setOriginReady(false);
     setStep(0);
     setVisible(true);
     requestAnimationFrame(() => measure(0));
@@ -158,18 +166,6 @@ export function TourGuide({
       useNativeDriver: true,
     }).start();
   }, [step, visible, rect]);
-
-  useEffect(() => {
-    if (!visible) return;
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1.1, duration: 900, easing: Easing.out(Easing.ease), useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 1, duration: 900, easing: Easing.in(Easing.ease), useNativeDriver: true }),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [visible]);
 
   function goNext() {
     impact("light");
@@ -242,32 +238,25 @@ export function TourGuide({
       onLayout={() => {
         overlayRef.current?.measureInWindow((ox, oy) => {
           if (ox !== origin.x || oy !== origin.y) setOrigin({ x: ox, y: oy });
+          setOriginReady(true);
         });
       }}
-      pointerEvents="box-none"
+      pointerEvents={originReady ? "box-none" : "none"}
       style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, elevation: 999, zIndex: 999 }}
     >
+      {!originReady ? null : (
       <Pressable style={{ flex: 1 }} onPress={goNext} accessible={false}>
-        {/* Dim everywhere except a cutout around the target (4 bars) */}
+        {/* Dim everywhere except a cutout around the target (4 bars). No
+            ring drawn around the cutout on purpose — a hard-edged border
+            traced the target's exact measured box, and any imprecision in
+            that measurement (there's always some, across devices) showed up
+            as a bright orange line visibly running off past the screen
+            edge. The dim/bright contrast alone already spotlights the
+            target clearly without a border that can misdraw. */}
         <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, height: cy, backgroundColor: DIM }} />
         <View pointerEvents="none" style={{ position: "absolute", top: cy + ch, left: 0, right: 0, bottom: 0, backgroundColor: DIM }} />
         <View pointerEvents="none" style={{ position: "absolute", top: cy, left: 0, width: cx, height: ch, backgroundColor: DIM }} />
         <View pointerEvents="none" style={{ position: "absolute", top: cy, left: cx + cw, right: 0, height: ch, backgroundColor: DIM }} />
-
-        <Animated.View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            left: cx,
-            top: cy,
-            width: cw,
-            height: ch,
-            borderRadius: 18,
-            borderWidth: 2.5,
-            borderColor: C.primary,
-            transform: [{ scale: pulse }],
-          }}
-        />
 
         <Animated.View
           onLayout={(e) => {
@@ -377,6 +366,7 @@ export function TourGuide({
           </Pressable>
         </Animated.View>
       </Pressable>
+      )}
     </View>
   );
 }
