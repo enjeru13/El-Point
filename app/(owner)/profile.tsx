@@ -104,6 +104,8 @@ export default function OwnerProfileScreen() {
   const [promo, setPromo]         = useState('');
   const [priceLevel, setPriceLevel] = useState<number | null>(null);
   const [isActive, setIsActive]   = useState(true);
+  const [ghostKitchen, setGhostKitchen] = useState(false);
+  const [zoneLabel, setZoneLabel] = useState('');
   const [hours, setHoursState]    = useState<Hours>(DEFAULT_HOURS);
   const [amenityIds, setAmenityIds] = useState<Set<number>>(new Set());
   const [uploading, setUploading] = useState<'logo' | 'cover' | 'menu' | null>(null);
@@ -228,6 +230,8 @@ export default function OwnerProfileScreen() {
     setHoursState(restaurant.hours ?? DEFAULT_HOURS);
     setRifDraft(restaurant.rif ?? '');
     setAmenityIds(new Set(restaurant.amenities.map((a) => a.id)));
+    setGhostKitchen(restaurant.ghost_kitchen);
+    setZoneLabel(restaurant.zone_label ?? '');
   }, [restaurant]);
 
   function toggleAmenity(id: number) {
@@ -251,6 +255,8 @@ export default function OwnerProfileScreen() {
     setIsActive(restaurant.is_active);
     setHoursState(restaurant.hours ?? DEFAULT_HOURS);
     setAmenityIds(new Set(restaurant.amenities.map((a) => a.id)));
+    setGhostKitchen(restaurant.ghost_kitchen);
+    setZoneLabel(restaurant.zone_label ?? '');
     setEditing(false);
   }
 
@@ -272,6 +278,8 @@ export default function OwnerProfileScreen() {
         price_level: priceLevel,
         is_active: isActive,
         hours,
+        ghost_kitchen: ghostKitchen,
+        zone_label: ghostKitchen ? (zoneLabel.trim() || null) : null,
       },
       {
         onSuccess: () => { setEditing(false); toast.success('Cambios guardados'); },
@@ -780,6 +788,41 @@ export default function OwnerProfileScreen() {
             trackColor={{ false: C.surfaceContainerHighest, true: C.primaryContainer }}
             thumbColor={isActive ? C.primary : C.outline}
           />
+        </View>
+
+        {/* Cocina fantasma */}
+        <View style={{ borderRadius: 20, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16 }}>
+            <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
+              <Icon name="mdi:ghost" size={20} color={C.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <AppText variant="bodyStrong">Cocina fantasma</AppText>
+              <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 1 }}>
+                Sin local físico -- solo delivery o pickup. No sale como pin en el mapa.
+              </AppText>
+            </View>
+            <Switch
+              value={ghostKitchen}
+              onValueChange={setGhostKitchen}
+              disabled={!editing}
+              trackColor={{ false: C.surfaceContainerHighest, true: C.primaryContainer }}
+              thumbColor={ghostKitchen ? C.primary : C.outline}
+            />
+          </View>
+          {ghostKitchen && (
+            <>
+              <Divider />
+              <Field
+                icon="mdi:map-marker-radius-outline"
+                label="Zona / sector"
+                value={zoneLabel}
+                editing={editing}
+                onChangeText={setZoneLabel}
+                placeholder="Ej. Barrio Obrero"
+              />
+            </>
+          )}
         </View>
 
         {/* Fotos y menú */}

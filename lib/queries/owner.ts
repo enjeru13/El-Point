@@ -30,6 +30,8 @@ export type OwnerRestaurant = {
   paid_until: string | null;
   host_streak_weeks: number;
   created_at: string;
+  ghost_kitchen: boolean;
+  zone_label: string | null;
   categories: RestaurantCategory[];
   amenities: RestaurantAmenity[];
 };
@@ -48,6 +50,7 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
        logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
        status, status_reason, submitted_at, verification_photo_path, rif,
        rating_avg, rating_count, boost_until, founder_rank, paid_until, host_streak_weeks, created_at,
+       ghost_kitchen, zone_label,
        restaurant_categories ( categories ( slug, label, icon ) ),
        restaurant_amenities ( amenities ( id, slug, label, icon ) )`,
     )
@@ -108,6 +111,8 @@ export type OwnerRestaurantPatch = Partial<{
   hours: Hours;
   rif: string | null;
   verification_photo_path: string | null;
+  ghost_kitchen: boolean;
+  zone_label: string | null;
 }>;
 
 export function useUpdateMyRestaurant(restaurantId: string | undefined) {
@@ -115,9 +120,12 @@ export function useUpdateMyRestaurant(restaurantId: string | undefined) {
   return useMutation({
     mutationFn: async (patch: OwnerRestaurantPatch) => {
       if (!restaurantId) throw new Error("Sin restaurante");
+      // ghost_kitchen/zone_label son columnas nuevas -- database.types.ts
+      // no las conoce hasta que se regeneren los tipos contra la migración
+      // ya pusheada. `as any` puntual en vez de aflojar todo el patch.
       const { error } = await supabase
         .from("restaurants")
-        .update(patch)
+        .update(patch as any)
         .eq("id", restaurantId);
       if (error) throw error;
     },
