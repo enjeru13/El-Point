@@ -741,13 +741,15 @@ export default function RegisterOwnerScreen() {
                   de 24 h; te avisamos cuando quede aprobado.
                 </AppText>
                 <AppText variant="bodySm" color={C.outline} style={{ marginTop: 8 }}>
-                  Solo la foto de la fachada es obligatoria. El logo, la portada y
-                  el menú los puedes agregar ahora o después desde tu perfil.
+                  Solo la foto de {ghostKitchen ? "tu cocina" : "la fachada"} es
+                  obligatoria. El logo, la portada y el menú los puedes agregar
+                  ahora o después desde tu perfil.
                 </AppText>
               </View>
 
               <View style={{ gap: 20 }}>
-                {/* Foto de fachada — verificación */}
+                {/* Foto de fachada — verificación (o de la cocina, si es
+                    cocina fantasma: no hay fachada que fotografiar) */}
                 <View style={{ gap: 8 }}>
                   <View
                     style={{
@@ -758,7 +760,7 @@ export default function RegisterOwnerScreen() {
                     }}
                   >
                     <AppText variant="bodyStrong" color={C.onSurfaceVariant}>
-                      Foto de la fachada *
+                      Foto de {ghostKitchen ? "tu cocina" : "la fachada"} *
                     </AppText>
                     <View
                       style={{
@@ -776,8 +778,9 @@ export default function RegisterOwnerScreen() {
                     </View>
                   </View>
                   <AppText variant="bodySm" color={C.outline} style={{ marginLeft: 4 }}>
-                    El frente del local con el letrero visible. La usamos solo
-                    para verificar que el local existe.
+                    {ghostKitchen
+                      ? "Tu espacio de trabajo o lo que preparas. La usamos solo para verificar que el local existe."
+                      : "El frente del local con el letrero visible. La usamos solo para verificar que el local existe."}
                   </AppText>
                   <Pressable
                     onPress={() => pickImage(setFacadeUri)}
@@ -814,13 +817,13 @@ export default function RegisterOwnerScreen() {
                           }}
                         >
                           <Icon
-                            name="storefront-outline"
+                            name={ghostKitchen ? "mdi:pot-steam-outline" : "storefront-outline"}
                             size={36}
                             color={C.primary}
                           />
                         </View>
                         <AppText variant="bodyStrong" color={C.onSurfaceVariant}>
-                          Subir foto de la fachada
+                          Subir foto de {ghostKitchen ? "tu cocina" : "la fachada"}
                         </AppText>
                         <AppText variant="bodySm" color={C.outline}>
                           PNG, JPG · máx 10MB
