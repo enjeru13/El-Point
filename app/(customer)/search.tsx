@@ -281,35 +281,33 @@ function PlaceCard({
           )}
         </View>
 
-        <View style={{
-          alignSelf: 'flex-start',
-          paddingHorizontal: 9, paddingVertical: 3, borderRadius: 99,
-          backgroundColor: C.secondaryContainer, borderWidth: 1.5, borderColor: C.border,
-        }}>
-          <AppText variant="caption" color={C.onSurface} style={{ fontSize: 11 }}>
-            {catLabel(item)}
-          </AppText>
-        </View>
-
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <AppText variant="caption" color={C.outline}>
-            {item.rating_count > 0
-              ? `★ ${item.rating_avg} (${item.rating_count})`
-              : 'Nuevo'}
-          </AppText>
+          <View style={{
+            alignSelf: 'flex-start',
+            paddingHorizontal: 9, paddingVertical: 3, borderRadius: 99,
+            backgroundColor: C.secondaryContainer, borderWidth: 1.5, borderColor: C.border,
+          }}>
+            <AppText variant="caption" color={C.onSurface} style={{ fontSize: 11 }}>
+              {catLabel(item)}
+            </AppText>
+          </View>
+          {/* El rating ya sale en la esquina de la foto (StarBadge) --
+              repetirlo acá era redundante, así que el precio ocupa ese
+              lugar en su lugar, junto a la categoría. */}
           {!!price && (
             <>
               <AppText variant="caption" color={C.outlineVariant}>|</AppText>
               <AppText variant="caption" color={C.outline}>{price}</AppText>
             </>
           )}
-          {dist && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-              <Icon name="map-marker-distance" size={12} color={C.primary} />
-              <AppText variant="caption" color={C.primary}>{dist}</AppText>
-            </View>
-          )}
         </View>
+
+        {dist && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+            <Icon name="map-marker-distance" size={12} color={C.primary} />
+            <AppText variant="caption" color={C.primary}>{dist}</AppText>
+          </View>
+        )}
 
         {item.address && (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
