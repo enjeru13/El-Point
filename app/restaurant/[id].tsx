@@ -451,6 +451,11 @@ export default function RestaurantProfileScreen() {
   const favIdsQ = useFavoriteIds();
   const toggleFav = useToggleFavorite();
   const toast = useToast();
+  // Alto real del bloque nombre/categorías/estrellas sobre la foto, medido
+  // -- el scrim debajo usa este valor en vez de un alto fijo adivinado, así
+  // empieza justo donde arranca el título y no más arriba (varía si el
+  // local tiene categorías o no).
+  const [infoH, setInfoH] = useState<number | null>(null);
 
   const saved = !!id && (favIdsQ.data?.has(id) ?? false);
   function onToggleSave() {
@@ -769,10 +774,11 @@ export default function RestaurantProfileScreen() {
             />
           )}
 
-          {/* Scrim para legibilidad sobre la foto -- un solo tono plano.
-              Antes eran 3 bandas de opacidad distinta simulando un
-              degradado (sin librería de gradiente real), se notaba el
-              escalón entre ellas como dos tonos pegados, feo. */}
+          {/* Scrim para legibilidad sobre la foto -- un solo tono plano,
+              alto = el contenido medido (infoH) para que empiece justo en
+              el título y no más arriba. Antes eran 3 bandas de opacidad
+              distinta simulando un degradado, con un alto fijo que dejaba
+              franja oscura vacía por encima del título. */}
           <View
             pointerEvents="none"
             style={{
@@ -780,13 +786,17 @@ export default function RestaurantProfileScreen() {
               left: 0,
               right: 0,
               bottom: 0,
-              height: 190,
+              height: infoH ?? 150,
               backgroundColor: "rgba(28,27,27,0.55)",
             }}
           />
 
           {/* Info overlay */}
           <View
+            onLayout={(e) => {
+              const h = e.nativeEvent.layout.height;
+              if (h > 0 && h !== infoH) setInfoH(h);
+            }}
             style={{
               position: "absolute",
               bottom: 0,
