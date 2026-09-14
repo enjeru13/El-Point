@@ -862,8 +862,26 @@ export default function RestaurantProfileScreen() {
                     {restaurant.name}
                   </AppText>
 
-                  {restaurant.categories.length > 0 && (
+                  {(restaurant.categories.length > 0 || restaurant.ghost_kitchen) && (
                     <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+                      {restaurant.ghost_kitchen && (
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 4,
+                            paddingHorizontal: 10,
+                            paddingVertical: 4,
+                            borderRadius: 99,
+                            backgroundColor: "rgba(255,255,255,0.18)",
+                            borderWidth: 1,
+                            borderColor: "rgba(255,255,255,0.35)",
+                          }}
+                        >
+                          <Icon name="mdi:ghost" size={12} color="#fff" />
+                          <AppText variant="label" color="#fff">Cocina fantasma</AppText>
+                        </View>
+                      )}
                       {restaurant.categories.map((c) => (
                         <View
                           key={c.slug}
@@ -1040,14 +1058,16 @@ export default function RestaurantProfileScreen() {
               );
             })()}
 
-            {/* Dirección */}
-            {restaurant.address && (
+            {/* Dirección — o, si es cocina fantasma (sin local físico), la
+                zona aproximada + pedir directo por WhatsApp en vez de un
+                link a un mapa que no lleva a ningún lado real. */}
+            {restaurant.ghost_kitchen ? (
               <Pressable
-                onPress={() =>
-                  Linking.openURL(
-                    `https://maps.google.com/?q=${encodeURIComponent(restaurant.address!)}`,
-                  )
-                }
+                onPress={() => {
+                  const url = whatsappUrl(restaurant.whatsapp);
+                  if (url) Linking.openURL(url);
+                }}
+                disabled={!whatsappUrl(restaurant.whatsapp)}
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
@@ -1067,15 +1087,55 @@ export default function RestaurantProfileScreen() {
                     justifyContent: "center",
                   }}
                 >
-                  <Icon name="map-marker-outline" size={18} color={C.primary} />
+                  <Icon name="mdi:ghost" size={18} color={C.primary} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <AppText variant="bodyStrong">
-                    {restaurant.address}
+                  <AppText variant="bodyStrong">Pedir por WhatsApp</AppText>
+                  <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                    Cocina fantasma{restaurant.zone_label ? ` · ${restaurant.zone_label}` : ""} — sin local físico
                   </AppText>
                 </View>
-                <Icon name="chevron-right" size={18} color={C.outline} />
+                {whatsappUrl(restaurant.whatsapp) && (
+                  <Icon name="chevron-right" size={18} color={C.outline} />
+                )}
               </Pressable>
+            ) : (
+              restaurant.address && (
+                <Pressable
+                  onPress={() =>
+                    Linking.openURL(
+                      `https://maps.google.com/?q=${encodeURIComponent(restaurant.address!)}`,
+                    )
+                  }
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 14,
+                    padding: 16,
+                    borderBottomWidth: 1,
+                    borderBottomColor: C.outlineVariant,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 10,
+                      backgroundColor: C.primaryFixed,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon name="map-marker-outline" size={18} color={C.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <AppText variant="bodyStrong">
+                      {restaurant.address}
+                    </AppText>
+                  </View>
+                  <Icon name="chevron-right" size={18} color={C.outline} />
+                </Pressable>
+              )
             )}
 
             {/* Teléfono */}
@@ -1303,21 +1363,37 @@ export default function RestaurantProfileScreen() {
                     size="sm"
                     fullWidth={false}
                   />
-                  <Button
-                    label="Ir"
-                    onPress={() =>
-                      restaurant.address &&
-                      Linking.openURL(
-                        `https://maps.google.com/?q=${encodeURIComponent(restaurant.address)}`,
-                      )
-                    }
-                    disabled={!restaurant.address}
-                    variant="secondary"
-                    icon="navigation-variant"
-                    iconColor={C.secondary}
-                    size="sm"
-                    fullWidth={false}
-                  />
+                  {restaurant.ghost_kitchen ? (
+                    <Button
+                      label="Pedir"
+                      onPress={() => {
+                        const url = whatsappUrl(restaurant.whatsapp);
+                        if (url) Linking.openURL(url);
+                      }}
+                      disabled={!whatsappUrl(restaurant.whatsapp)}
+                      variant="secondary"
+                      icon="whatsapp"
+                      iconColor={C.secondary}
+                      size="sm"
+                      fullWidth={false}
+                    />
+                  ) : (
+                    <Button
+                      label="Ir"
+                      onPress={() =>
+                        restaurant.address &&
+                        Linking.openURL(
+                          `https://maps.google.com/?q=${encodeURIComponent(restaurant.address)}`,
+                        )
+                      }
+                      disabled={!restaurant.address}
+                      variant="secondary"
+                      icon="navigation-variant"
+                      iconColor={C.secondary}
+                      size="sm"
+                      fullWidth={false}
+                    />
+                  )}
                 </View>
               )}
             </View>

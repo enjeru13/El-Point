@@ -25,6 +25,11 @@ export function isFounder(r: { founder_rank?: number | null } | null | undefined
   return typeof r?.founder_rank === "number";
 }
 
+/** Sin local físico — solo delivery/pickup. No sale como pin en el mapa. */
+export function isGhostKitchen(r: { ghost_kitchen?: boolean | null } | null | undefined): boolean {
+  return !!r?.ghost_kitchen;
+}
+
 export type RestaurantDetail = {
   id: string;
   owner_id: string | null;
@@ -47,6 +52,8 @@ export type RestaurantDetail = {
   rating_count: number;
   boost_until: string | null;
   founder_rank: number | null;
+  ghost_kitchen: boolean;
+  zone_label: string | null;
   categories: RestaurantCategory[];
   amenities: RestaurantAmenity[];
 };
@@ -62,6 +69,7 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
       `id, owner_id, name, description, address, whatsapp, instagram, phone,
        price_level, logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
        status, status_reason, rating_avg, rating_count, boost_until, founder_rank,
+       ghost_kitchen, zone_label,
        restaurant_categories ( categories ( slug, label, icon ) ),
        restaurant_amenities ( amenities ( id, slug, label, icon ) )`,
     )
