@@ -63,6 +63,8 @@ export default function RegisterOwnerScreen() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
     null,
   );
+  const [ghostKitchen, setGhostKitchen] = useState(false);
+  const [zoneLabel, setZoneLabel] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [instagram, setInstagram] = useState("");
   const [rif, setRif] = useState("");
@@ -150,7 +152,9 @@ export default function RegisterOwnerScreen() {
       : step === 1
         ? !!(name.trim() && selectedCats.size > 0)
         : step === 2
-          ? !!(address.trim() && coords)
+          ? ghostKitchen
+            ? !!zoneLabel.trim()
+            : !!(address.trim() && coords)
           : step === 3
             ? !!facadeUri
             : true;
@@ -191,21 +195,27 @@ export default function RegisterOwnerScreen() {
 
     const ownerId = data.session.user.id;
 
+    // p_lat/p_lng ahora aceptan null (cocina fantasma) y p_ghost_kitchen/
+    // p_zone_label son parámetros nuevos -- database.types.ts todavía tiene
+    // la firma vieja hasta que se regeneren los tipos contra la migración
+    // ya pusheada.
     const { data: newId, error: rpcError } = await supabase.rpc(
-      "create_owner_restaurant",
+      "create_owner_restaurant" as any,
       {
         p_name: name.trim(),
         p_description: "",
-        p_address: address.trim(),
-        p_lat: coords?.lat ?? 0,
-        p_lng: coords?.lng ?? 0,
+        p_address: ghostKitchen ? "" : address.trim(),
+        p_lat: ghostKitchen ? null : (coords?.lat ?? null),
+        p_lng: ghostKitchen ? null : (coords?.lng ?? null),
         p_whatsapp: whatsapp.trim(),
         p_instagram: instagram.trim(),
         p_category_ids: Array.from(selectedCats),
         p_rif: rif.trim(),
         p_amenity_ids: Array.from(selectedAmenities),
+        p_ghost_kitchen: ghostKitchen,
+        p_zone_label: ghostKitchen ? zoneLabel.trim() : "",
       },
-    );
+    ) as any;
 
     if (rpcError || !newId) {
       setLoading(false);
@@ -547,17 +557,52 @@ export default function RegisterOwnerScreen() {
               </View>
 
               <View style={{ gap: 20 }}>
-                {/* Dirección */}
-                <Field
-                  label="Dirección *"
-                  icon="map-marker-outline"
-                  placeholder="Calle, sector y ciudad"
-                  value={address}
-                  onChangeText={setAddress}
-                />
+                {/* Cocina fantasma */}
+                <Pressable
+                  onPress={() => setGhostKitchen((v) => !v)}
+                  style={{
+                    flexDirection: "row", alignItems: "center", gap: 14,
+                    padding: 14, borderRadius: 16,
+                    backgroundColor: ghostKitchen ? C.primaryFixed : C.surface,
+                    borderWidth: 1, borderColor: ghostKitchen ? C.primary : C.outlineVariant,
+                  }}
+                >
+                  <Icon name="mdi:ghost" size={22} color={ghostKitchen ? C.primary : C.onSurfaceVariant} />
+                  <View style={{ flex: 1 }}>
+                    <AppText variant="bodyStrong">Soy cocina fantasma</AppText>
+                    <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                      Solo delivery o pickup, sin local al que llegar
+                    </AppText>
+                  </View>
+                  <Icon
+                    name={ghostKitchen ? "check-circle" : "checkbox-blank-circle-outline"}
+                    size={22}
+                    color={ghostKitchen ? C.primary : C.outlineVariant}
+                  />
+                </Pressable>
 
-                {/* Punto en el mapa */}
-                <View style={{ gap: 8 }}>
+                {ghostKitchen ? (
+                  <Field
+                    label="Zona / sector *"
+                    icon="mdi:map-marker-radius-outline"
+                    placeholder="Ej. Barrio Obrero"
+                    value={zoneLabel}
+                    onChangeText={setZoneLabel}
+                    hint="No hace falta la dirección exacta ni marcar el mapa"
+                  />
+                ) : (
+                  <>
+                    {/* Dirección */}
+                    <Field
+                      label="Dirección *"
+                      icon="map-marker-outline"
+                      placeholder="Calle, sector y ciudad"
+                      value={address}
+                      onChangeText={setAddress}
+                    />
+
+                    {/* Punto en el mapa */}
+                    <View style={{ gap: 8 }}>
                   <AppText variant="overline" color={C.outline} style={{ marginLeft: 4 }}>
                     UBICACIÓN EN EL MAPA *
                   </AppText>
@@ -650,6 +695,8 @@ export default function RegisterOwnerScreen() {
                     </View>
                   )}
                 </View>
+                  </>
+                )}
 
                 <Field
                   label="WhatsApp (opcional)"
