@@ -1,4 +1,4 @@
-import { Flag } from "lucide-react";
+import { Flag, Ghost } from "lucide-react";
 import { useReportedRestaurants, useResolveRestaurantReport, type ReportedRestaurant } from "../lib/queries/admin";
 import { reasonLabel, RESTAURANT_REPORT_REASONS } from "../lib/reasons";
 import { Badge, Button, EmptyState, PageHeader, PageLoading, StripeCard, timeAgo } from "../components/ui";
@@ -13,8 +13,18 @@ function Row({ r }: { r: ReportedRestaurant }) {
           <p className="font-display text-base font-bold text-text">{r.name}</p>
           <Badge>{r.owner_name}</Badge>
           <Badge tone="danger">{r.reports.length} {r.reports.length === 1 ? "reporte" : "reportes"}</Badge>
+          {r.ghost_kitchen && (
+            <Badge tone="brand">
+              <span className="inline-flex items-center gap-1">
+                <Ghost className="h-3 w-3" strokeWidth={2} />
+                Cocina fantasma
+              </span>
+            </Badge>
+          )}
         </div>
-        <p className="mt-0.5 text-sm text-text-soft">{r.address ?? "Sin dirección"}</p>
+        <p className="mt-0.5 text-sm text-text-soft">
+          {r.ghost_kitchen ? (r.zone_label ?? "Sin zona indicada") : (r.address ?? "Sin dirección")}
+        </p>
         {r.status_reason && (
           <p className="mt-1 text-xs text-text-soft">Motivo de suspensión: {r.status_reason}</p>
         )}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AtSign, Clock, MessageCircle, Store } from "lucide-react";
+import { AtSign, Clock, Ghost, MessageCircle, Store } from "lucide-react";
 import { useRestaurantQueue, useReviewRestaurant, type PendingRestaurant } from "../lib/queries/admin";
 import { Badge, Button, EmptyState, PageHeader, PageLoading, StripeCard, timeAgo } from "../components/ui";
 
@@ -14,6 +14,8 @@ function Row({ r }: { r: PendingRestaurant }) {
         <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-surface-2">
           {r.photo_url ? (
             <img src={r.photo_url} alt="" className="h-full w-full object-cover" />
+          ) : r.ghost_kitchen ? (
+            <Ghost className="h-6 w-6 text-text-soft" strokeWidth={1.5} />
           ) : (
             <Store className="h-6 w-6 text-text-soft" strokeWidth={1.5} />
           )}
@@ -23,8 +25,20 @@ function Row({ r }: { r: PendingRestaurant }) {
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-display text-base font-bold text-text">{r.name}</p>
             <Badge>{r.owner_name}</Badge>
+            {r.ghost_kitchen && (
+              <Badge tone="brand">
+                <span className="inline-flex items-center gap-1">
+                  <Ghost className="h-3 w-3" strokeWidth={2} />
+                  Cocina fantasma
+                </span>
+              </Badge>
+            )}
           </div>
-          <p className="mt-0.5 text-sm text-text-soft">{r.address ?? "Sin dirección"}</p>
+          <p className="mt-0.5 text-sm text-text-soft">
+            {r.ghost_kitchen
+              ? (r.zone_label ?? "Sin zona indicada")
+              : (r.address ?? "Sin dirección")}
+          </p>
           {r.categories.length > 0 && (
             <p className="mt-1 text-xs text-text-soft">{r.categories.join(" · ")}</p>
           )}

@@ -24,6 +24,8 @@ export type PendingRestaurant = {
   owner_name: string;
   categories: string[];
   photo_url: string | null;
+  ghost_kitchen: boolean;
+  zone_label: string | null;
 };
 
 const QUEUE_KEY = ["admin-restaurant-queue"] as const;
@@ -34,7 +36,7 @@ async function fetchPendingRestaurants(): Promise<PendingRestaurant[]> {
     .from("restaurants")
     .select(
       `id, name, address, whatsapp, instagram, rif, status, status_reason,
-       submitted_at, verification_photo_path,
+       submitted_at, verification_photo_path, ghost_kitchen, zone_label,
        owner:profiles!owner_id ( username, full_name ),
        restaurant_categories ( categories ( label ) )`,
     )
@@ -61,6 +63,8 @@ async function fetchPendingRestaurants(): Promise<PendingRestaurant[]> {
       photo_url: r.verification_photo_path
         ? await verificationPhotoUrl(r.verification_photo_path)
         : null,
+      ghost_kitchen: !!r.ghost_kitchen,
+      zone_label: r.zone_label ?? null,
     })),
   );
 }
@@ -107,6 +111,8 @@ export type ReportedRestaurant = {
   status: "pending" | "approved" | "rejected" | "suspended";
   status_reason: string | null;
   owner_name: string;
+  ghost_kitchen: boolean;
+  zone_label: string | null;
   reports: { reason: RestaurantReportReason; note: string | null; created_at: string }[];
 };
 
@@ -114,7 +120,7 @@ async function fetchReportedRestaurants(): Promise<ReportedRestaurant[]> {
   const { data, error } = await supabase
     .from("restaurants")
     .select(
-      `id, name, address, status, status_reason,
+      `id, name, address, status, status_reason, ghost_kitchen, zone_label,
        owner:profiles!owner_id ( username, full_name ),
        restaurant_reports ( reason, note, created_at )`,
     )
@@ -130,6 +136,8 @@ async function fetchReportedRestaurants(): Promise<ReportedRestaurant[]> {
     status: r.status,
     status_reason: r.status_reason,
     owner_name: r.owner?.username ? `@${r.owner.username}` : (r.owner?.full_name ?? "Dueño"),
+    ghost_kitchen: !!r.ghost_kitchen,
+    zone_label: r.zone_label ?? null,
     reports: ((r.restaurant_reports ?? []) as any[])
       .map((rep) => ({
         reason: rep.reason as RestaurantReportReason,
