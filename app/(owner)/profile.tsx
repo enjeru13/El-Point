@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   Switch,
@@ -145,18 +146,45 @@ export default function OwnerProfileScreen() {
     return () => { alive = false; };
   }, [restaurant?.verification_photo_path]);
 
+  /** Pregunta cámara o galería (mismo patrón que ReviewSheet.addPhotos) --
+   *  antes solo abría la galería. */
+  function pickImageSource(options: ImagePicker.ImagePickerOptions): Promise<string | null> {
+    return new Promise((resolve) => {
+      Alert.alert('Agregar foto', undefined, [
+        {
+          text: 'Tomar foto',
+          onPress: async () => {
+            const perm = await ImagePicker.requestCameraPermissionsAsync();
+            if (!perm.granted) {
+              toast.error('Permiso de cámara denegado');
+              resolve(null);
+              return;
+            }
+            const r = await ImagePicker.launchCameraAsync(options);
+            resolve(r.canceled ? null : r.assets[0].uri);
+          },
+        },
+        {
+          text: 'Elegir de galería',
+          onPress: async () => {
+            const r = await ImagePicker.launchImageLibraryAsync(options);
+            resolve(r.canceled ? null : r.assets[0].uri);
+          },
+        },
+        { text: 'Cancelar', style: 'cancel', onPress: () => resolve(null) },
+      ]);
+    });
+  }
+
   async function pickFacade() {
     if (!restaurant) return;
-    const r = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.85,
-    });
-    if (r.canceled) return;
+    const uri = await pickImageSource({ mediaTypes: ['images'], quality: 0.85 });
+    if (!uri) return;
     setVerifUploading(true);
     try {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error('Sesión expirada');
-      const path = await uploadRestaurantVerification(u.user.id, restaurant.id, r.assets[0].uri);
+      const path = await uploadRestaurantVerification(u.user.id, restaurant.id, uri);
       updateMut.mutate({ verification_photo_path: path });
       const signed = await verificationPhotoUrl(path);
       setVerifUrl(signed ? `${signed}#${Date.now()}` : null);
@@ -221,16 +249,16 @@ export default function OwnerProfileScreen() {
 
   async function pickPhoto(kind: 'logo' | 'cover') {
     if (!restaurant) return;
-    const r = await ImagePicker.launchImageLibraryAsync({
+    const uri = await pickImageSource({
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: kind === 'cover' ? [16, 9] : [1, 1],
       quality: 0.85,
     });
-    if (r.canceled) return;
+    if (!uri) return;
     setUploading(kind);
     try {
-      const url = await uploadRestaurantImage(restaurant.id, kind, r.assets[0].uri);
+      const url = await uploadRestaurantImage(restaurant.id, kind, uri);
       updateMut.mutate(kind === 'logo' ? { logo_url: url } : { cover_url: url });
     } catch (e: any) {
       toast.error(e?.message ?? 'No se pudo subir la imagen');
