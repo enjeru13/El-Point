@@ -16,6 +16,8 @@ export type SearchResult = {
   lng: number | null;
   boost_until: string | null;
   founder_rank: number | null;
+  ghost_kitchen: boolean;
+  zone_label: string | null;
   categories: RestaurantCategory[];
   amenities: RestaurantAmenity[];
 };
@@ -25,7 +27,7 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
     .from("restaurants")
     .select(
       `id, name, address, price_level, rating_avg, rating_count, cover_url, hours,
-       latitude, longitude, boost_until, founder_rank,
+       latitude, longitude, boost_until, founder_rank, ghost_kitchen, zone_label,
        restaurant_categories ( categories ( slug, label, icon ) ),
        restaurant_amenities ( amenities ( id, slug, label, icon ) )`,
     )
@@ -47,6 +49,8 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
     lng: typeof r.longitude === "number" ? r.longitude : null,
     boost_until: r.boost_until ?? null,
     founder_rank: r.founder_rank ?? null,
+    ghost_kitchen: !!r.ghost_kitchen,
+    zone_label: r.zone_label ?? null,
     categories: (r.restaurant_categories ?? [])
       .map((rc: any) => rc.categories)
       .filter(Boolean),

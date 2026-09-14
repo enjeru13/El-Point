@@ -110,6 +110,19 @@ function FounderChip() {
   );
 }
 
+function GhostChip() {
+  const { C } = useTheme();
+  return (
+    <View style={{
+      width: 20, height: 20, borderRadius: 10,
+      alignItems: 'center', justifyContent: 'center',
+      backgroundColor: C.surfaceContainerHighest, borderWidth: 1, borderColor: C.outlineVariant,
+    }}>
+      <Icon name="mdi:ghost" size={11} color={C.onSurfaceVariant} />
+    </View>
+  );
+}
+
 /** Fila compacta para la lista de resultados (todo lo que no es el destacado). */
 function ResultRow({
   item,
@@ -164,6 +177,7 @@ function ResultRow({
           </AppText>
           {isFounder(item) && <FounderChip />}
           {isBoosted(item) && <BoostChip />}
+          {item.ghost_kitchen && <GhostChip />}
         </View>
         <AppText variant="caption" color={C.outline} numberOfLines={1}>
           {meta}
@@ -264,7 +278,7 @@ function PlaceCard({
           >
             {item.name}
           </AppText>
-          {(isFounder(item) || isBoosted(item)) && (
+          {(isFounder(item) || isBoosted(item) || item.ghost_kitchen) && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               {isFounder(item) && <FounderChip />}
               {isBoosted(item) && (
@@ -277,6 +291,7 @@ function PlaceCard({
                   <AppText variant="caption" color={C.primary} style={{ fontSize: 11 }}>Destacado</AppText>
                 </View>
               )}
+              {item.ghost_kitchen && <GhostChip />}
             </View>
           )}
         </View>
@@ -412,6 +427,7 @@ export default function SearchScreen() {
   const [sort, setSort]         = useState<SortKey>(null);
   const [price, setPrice]       = useState<PriceKey>(null);
   const [onlyOpen, setOnlyOpen] = useState(false);
+  const [onlyGhost, setOnlyGhost] = useState(false);
   const [amenitySlugs, setAmenitySlugs] = useState<Set<string>>(new Set());
   const [recents, setRecents]   = useState<string[]>([]);
   const [userLoc, setUserLoc]   = useState<LatLng | null>(null);
@@ -464,7 +480,7 @@ export default function SearchScreen() {
     saveRecents([]);
   }
 
-  const hasActiveFilters = sort !== null || price !== null || onlyOpen || amenitySlugs.size > 0;
+  const hasActiveFilters = sort !== null || price !== null || onlyOpen || onlyGhost || amenitySlugs.size > 0;
 
   function toggleAmenity(slug: string) {
     setAmenitySlugs((prev) => {
@@ -487,10 +503,11 @@ export default function SearchScreen() {
       const matchCat = !activeCat || r.categories.some(c => c.slug === activeCat);
       const matchPrice = !price || r.price_level === price;
       const matchOpen = !onlyOpen || isOpenNow(r.hours).open;
+      const matchGhost = !onlyGhost || r.ghost_kitchen;
       const matchAmenities =
         amenitySlugs.size === 0 ||
         [...amenitySlugs].every(s => r.amenities.some(a => a.slug === s));
-      return matchQuery && matchCat && matchPrice && matchOpen && matchAmenities;
+      return matchQuery && matchCat && matchPrice && matchOpen && matchGhost && matchAmenities;
     });
     if (sort === 'near' && userLoc) {
       const d = (r: SearchResult) =>
@@ -532,7 +549,7 @@ export default function SearchScreen() {
       );
     }
     return list;
-  }, [all, query, activeCat, price, sort, onlyOpen, amenitySlugs, userLoc]);
+  }, [all, query, activeCat, price, sort, onlyOpen, onlyGhost, amenitySlugs, userLoc]);
 
   const popular = useMemo(
     () =>
@@ -559,7 +576,7 @@ export default function SearchScreen() {
     setOnlyOpen(false);
     inputRef.current?.blur();
   }
-  function resetFilters() { setSort(null); setPrice(null); setOnlyOpen(false); setAmenitySlugs(new Set()); }
+  function resetFilters() { setSort(null); setPrice(null); setOnlyOpen(false); setOnlyGhost(false); setAmenitySlugs(new Set()); }
   function goToPlace(id: string) {
     if (query.trim()) pushRecent(query);
     router.push(`/restaurant/${id}`);
@@ -808,20 +825,28 @@ export default function SearchScreen() {
 
           <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
 
-          <Pressable
-            onPress={() => setOnlyOpen(v => !v)}
-            style={{
-              flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start',
-              paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99,
-              backgroundColor: onlyOpen ? C.secondaryContainer : C.surface,
-              borderWidth: 1, borderColor: onlyOpen ? C.border : C.outlineVariant,
-            }}
-          >
-            <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: onlyOpen ? C.secondary : C.outline }} />
-            <AppText variant="label" color={onlyOpen ? C.onSurface : C.onSurfaceVariant}>
-              Abiertos ahora
-            </AppText>
-          </Pressable>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <Pressable
+              onPress={() => setOnlyOpen(v => !v)}
+              style={{
+                flexDirection: 'row', alignItems: 'center', gap: 8,
+                paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99,
+                backgroundColor: onlyOpen ? C.secondaryContainer : C.surface,
+                borderWidth: 1, borderColor: onlyOpen ? C.border : C.outlineVariant,
+              }}
+            >
+              <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: onlyOpen ? C.secondary : C.outline }} />
+              <AppText variant="label" color={onlyOpen ? C.onSurface : C.onSurfaceVariant}>
+                Abiertos ahora
+              </AppText>
+            </Pressable>
+            <Chip
+              label="Cocina fantasma"
+              icon="mdi:ghost"
+              active={onlyGhost}
+              onPress={() => setOnlyGhost(v => !v)}
+            />
+          </View>
 
           {(amenitiesQ.data ?? []).length > 0 && (
             <>

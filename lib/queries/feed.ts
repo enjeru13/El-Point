@@ -15,6 +15,8 @@ export type FeedRestaurant = {
   lng: number | null;
   boost_until: string | null;
   founder_rank: number | null;
+  ghost_kitchen: boolean;
+  zone_label: string | null;
   categories: RestaurantCategory[];
   amenities: RestaurantAmenity[];
 };
@@ -46,7 +48,7 @@ function num(v: any): number | null {
 }
 
 const RESTAURANT_EMBED = `restaurant:restaurants (
-  id, name, address, rating_avg, rating_count, price_level, promo_text, cover_url, latitude, longitude, boost_until, founder_rank,
+  id, name, address, rating_avg, rating_count, price_level, promo_text, cover_url, latitude, longitude, boost_until, founder_rank, ghost_kitchen, zone_label,
   restaurant_categories ( categories ( slug, label, icon ) ),
   restaurant_amenities ( amenities ( id, slug, label, icon ) )
 )`;
@@ -86,6 +88,8 @@ async function fetchFeed(): Promise<FeedItem[]> {
         lng: num(r.restaurant.longitude),
         boost_until: r.restaurant.boost_until ?? null,
         founder_rank: r.restaurant.founder_rank ?? null,
+        ghost_kitchen: !!r.restaurant.ghost_kitchen,
+        zone_label: r.restaurant.zone_label ?? null,
         categories: mapCategories(r.restaurant.restaurant_categories),
         amenities: mapAmenities(r.restaurant.restaurant_amenities),
       },
@@ -131,6 +135,8 @@ async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
       lng: num(f.restaurant.longitude),
       boost_until: f.restaurant.boost_until ?? null,
       founder_rank: f.restaurant.founder_rank ?? null,
+      ghost_kitchen: !!f.restaurant.ghost_kitchen,
+      zone_label: f.restaurant.zone_label ?? null,
       categories: mapCategories(f.restaurant.restaurant_categories),
       amenities: mapAmenities(f.restaurant.restaurant_amenities),
       favorited_at: f.created_at,

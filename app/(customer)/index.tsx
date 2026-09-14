@@ -197,6 +197,15 @@ function ReviewCard({
               <AppText variant="caption" color={C.primary} style={{ fontSize: 10 }}>Destacado</AppText>
             </View>
           );
+          const ghostBadge = r.ghost_kitchen && (
+            <View key="ghost" style={{
+              width: 20, height: 20, borderRadius: 10,
+              alignItems: "center", justifyContent: "center",
+              backgroundColor: C.surfaceContainerHighest, borderWidth: 1, borderColor: C.outlineVariant,
+            }}>
+              <Icon name="mdi:ghost" size={11} color={C.onSurfaceVariant} />
+            </View>
+          );
 
           return (
             <>
@@ -210,6 +219,7 @@ function ReviewCard({
                 </AppText>
                 {founderBadge}
                 {boostedBadge}
+                {ghostBadge}
               </View>
 
               {!!meta && (
