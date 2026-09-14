@@ -165,11 +165,10 @@ function ReviewCard({
 
       {/* Contenido */}
       <View style={{ padding: compact ? 12 : 16, gap: compact ? 6 : 10 }}>
-        {/* Nombre corto (~16 car.) -> las insignias de Original/Destacado
-            entran en su misma línea; nombre largo -> bajan a la línea de
-            categoría/distancia para no atropellar el numberOfLines={1}. */}
+        {/* Original/Destacado siempre en la línea del nombre, pegadas al
+            final de la card -- el nombre lleva flex:1 y se trunca con
+            elipsis si hace falta espacio, en vez de bajar a otra fila. */}
         {(() => {
-          const nameShort = item.restaurant.name.length <= 16;
           const founder = isFounder(item.restaurant);
           const boosted = isBoosted(item.restaurant);
           const founderBadge = founder && (
@@ -197,19 +196,17 @@ function ReviewCard({
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <AppText
                   variant="heading"
-                  style={{ fontSize: compact ? 17 : 20, lineHeight: compact ? 21 : 25, flexShrink: 1 }}
+                  style={{ fontSize: compact ? 17 : 20, lineHeight: compact ? 21 : 25, flex: 1 }}
                   numberOfLines={1}
                 >
                   {item.restaurant.name}
                 </AppText>
-                {nameShort && founderBadge}
-                {nameShort && boostedBadge}
+                {founderBadge}
+                {boostedBadge}
               </View>
 
-              {(dist || cat || (!nameShort && (founder || boosted))) && (
+              {(dist || cat) && (
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  {!nameShort && founderBadge}
-                  {!nameShort && boostedBadge}
                   {cat && (
                     <AppText variant="caption" color={C.outline}>{cat.label}</AppText>
                   )}

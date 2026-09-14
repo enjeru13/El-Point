@@ -787,12 +787,10 @@ export default function RestaurantProfileScreen() {
               gap: 8,
             }}
           >
-            {/* Nombre corto (~16 car.) -> Original/Destacado van en su misma
-                línea; nombre largo -> bajan a la fila de categorías para no
-                atropellar el numberOfLines={1}. Mismo criterio que la card
-                de Home. */}
+            {/* Original/Destacado siempre en la línea del nombre, pegadas
+                al final -- el nombre lleva flex:1 y se trunca con elipsis
+                si hace falta espacio. Mismo criterio que la card de Home. */}
             {(() => {
-              const nameShort = restaurant.name.length <= 16;
               const founder = isFounder(restaurant);
               const boosted = isBoosted(restaurant);
               const founderBadge = founder && (
@@ -836,10 +834,8 @@ export default function RestaurantProfileScreen() {
 
               return (
                 <>
-                  {(restaurant.categories.length > 0 || (!nameShort && (founder || boosted))) && (
+                  {restaurant.categories.length > 0 && (
                     <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
-                      {!nameShort && founderBadge}
-                      {!nameShort && boostedBadge}
                       {restaurant.categories.map((c) => (
                         <View
                           key={c.slug}
@@ -864,13 +860,13 @@ export default function RestaurantProfileScreen() {
                     <AppText
                       variant="display"
                       color="#fff"
-                      style={{ fontSize: 36, lineHeight: 40, flexShrink: 1 }}
-                      numberOfLines={nameShort ? 1 : undefined}
+                      style={{ fontSize: 36, lineHeight: 40, flex: 1 }}
+                      numberOfLines={1}
                     >
                       {restaurant.name}
                     </AppText>
-                    {nameShort && founderBadge}
-                    {nameShort && boostedBadge}
+                    {founderBadge}
+                    {boostedBadge}
                   </View>
                 </>
               );
