@@ -534,7 +534,9 @@ export default function OwnerProfileScreen() {
                     )}
                   </Pressable>
                   <AppText variant="caption" color={C.outline}>
-                    El frente del local con el letrero visible.
+                    {restaurant.ghost_kitchen
+                      ? 'Tu espacio de trabajo o lo que preparas.'
+                      : 'El frente del local con el letrero visible.'}
                   </AppText>
                 </View>
 
