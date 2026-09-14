@@ -20,7 +20,9 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { TimePickerSheet, type TimePickerHandle } from '@/components/ui/TimePickerSheet';
-import { useMyRestaurant, useUpdateMyRestaurant, useUpdateRestaurantAmenities, useResubmitRestaurant } from '@/lib/queries/owner';
+import { useMyRestaurant, useUpdateMyRestaurant, useUpdateRestaurantAmenities, useResubmitRestaurant, useSetRestaurantZoneLocation } from '@/lib/queries/owner';
+import * as Location from 'expo-location';
+import MapView from 'react-native-maps';
 import { useAmenities } from '@/lib/queries/amenities';
 import { Chip } from '@/components/ui/Chip';
 import {
@@ -91,6 +93,7 @@ export default function OwnerProfileScreen() {
   const restaurant = restaurantQ.data ?? null;
   const updateMut = useUpdateMyRestaurant(restaurant?.id);
   const updateAmenitiesMut = useUpdateRestaurantAmenities(restaurant?.id);
+  const setZoneLocationMut = useSetRestaurantZoneLocation(restaurant?.id);
   const resubmit = useResubmitRestaurant();
   const amenitiesQ = useAmenities();
 
@@ -106,6 +109,10 @@ export default function OwnerProfileScreen() {
   const [isActive, setIsActive]   = useState(true);
   const [ghostKitchen, setGhostKitchen] = useState(false);
   const [zoneLabel, setZoneLabel] = useState('');
+  const [showZonePin, setShowZonePin] = useState(false);
+  const [zoneCoords, setZoneCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [zoneLocating, setZoneLocating] = useState(false);
+  const zoneMapRef = useRef<MapView>(null);
   const [hours, setHoursState]    = useState<Hours>(DEFAULT_HOURS);
   const [amenityIds, setAmenityIds] = useState<Set<number>>(new Set());
   const [uploading, setUploading] = useState<'logo' | 'cover' | 'menu' | null>(null);
@@ -159,6 +166,37 @@ export default function OwnerProfileScreen() {
     } finally {
       setVerifUploading(false);
     }
+  }
+
+  async function detectZoneLocation() {
+    setZoneLocating(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        toast.error('Permiso de ubicación denegado');
+        return;
+      }
+      const loc = await Location.getCurrentPositionAsync({});
+      const region = {
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+        latitudeDelta: 0.02,
+        longitudeDelta: 0.02,
+      };
+      setZoneCoords({ lat: region.latitude, lng: region.longitude });
+      zoneMapRef.current?.animateToRegion(region, 500);
+    } catch {
+      toast.error('No pudimos obtener tu ubicación');
+    } finally {
+      setZoneLocating(false);
+    }
+  }
+
+  function saveZonePin() {
+    setZoneLocationMut.mutate(zoneCoords, {
+      onSuccess: () => toast.success(zoneCoords ? 'Ubicación aproximada guardada' : 'Ubicación quitada'),
+      onError: (e: any) => toast.error(e?.message ?? 'No se pudo guardar'),
+    });
   }
 
   function saveRif() {
@@ -232,6 +270,11 @@ export default function OwnerProfileScreen() {
     setAmenityIds(new Set(restaurant.amenities.map((a) => a.id)));
     setGhostKitchen(restaurant.ghost_kitchen);
     setZoneLabel(restaurant.zone_label ?? '');
+    setZoneCoords(
+      restaurant.lat != null && restaurant.lng != null
+        ? { lat: restaurant.lat, lng: restaurant.lng }
+        : null,
+    );
   }, [restaurant]);
 
   function toggleAmenity(id: number) {
@@ -821,6 +864,74 @@ export default function OwnerProfileScreen() {
                 onChangeText={setZoneLabel}
                 placeholder="Ej. Barrio Obrero"
               />
+              <Divider />
+              <View style={{ padding: 16, gap: 10 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <Icon name={zoneCoords ? 'check-circle' : 'map-marker-outline'} size={16} color={zoneCoords ? C.secondary : C.outline} />
+                  <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ flex: 1 }}>
+                    {zoneCoords
+                      ? 'Ubicación aproximada marcada — entras al orden "cerca de mí".'
+                      : 'Sin ubicación aproximada (opcional) — no entras al orden "cerca de mí" todavía.'}
+                  </AppText>
+                  {editing && (
+                    <Pressable onPress={() => setShowZonePin((v) => !v)} hitSlop={8}>
+                      <AppText variant="label" color={C.primary}>{showZonePin ? 'Ocultar' : zoneCoords ? 'Cambiar' : 'Marcar'}</AppText>
+                    </Pressable>
+                  )}
+                </View>
+
+                {editing && showZonePin && (
+                  <View style={{ gap: 8 }}>
+                    <AppText variant="bodySm" color={C.outline}>
+                      No hace falta que sea exacto — solo una zona aproximada.
+                    </AppText>
+                    <View style={{ height: 180, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: zoneCoords ? C.secondary : C.outlineVariant }}>
+                      <MapView
+                        ref={zoneMapRef}
+                        style={{ flex: 1 }}
+                        initialRegion={{
+                          latitude: zoneCoords?.lat ?? 7.7669,
+                          longitude: zoneCoords?.lng ?? -72.2251,
+                          latitudeDelta: zoneCoords ? 0.015 : 0.06,
+                          longitudeDelta: zoneCoords ? 0.015 : 0.06,
+                        }}
+                        onRegionChangeComplete={(r) => setZoneCoords({ lat: r.latitude, lng: r.longitude })}
+                      />
+                      <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
+                        <Icon name="map-marker" size={34} color={C.primary} style={{ marginBottom: 34 }} />
+                      </View>
+                      <Pressable
+                        onPress={detectZoneLocation}
+                        disabled={zoneLocating}
+                        style={{
+                          position: 'absolute', right: 10, bottom: 10,
+                          flexDirection: 'row', alignItems: 'center', gap: 6,
+                          paddingHorizontal: 12, paddingVertical: 8, borderRadius: 99,
+                          backgroundColor: C.surface, borderWidth: 1, borderColor: C.border,
+                          ...shadow.sm,
+                        }}
+                      >
+                        <Icon name="crosshairs-gps" size={15} color={C.primary} />
+                        <AppText variant="label" color={C.onSurface} style={{ fontSize: 13 }}>
+                          {zoneLocating ? 'Ubicando…' : 'Mi ubicación'}
+                        </AppText>
+                      </Pressable>
+                    </View>
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      <Button label="Guardar ubicación" onPress={saveZonePin} loading={setZoneLocationMut.isPending} size="sm" fullWidth={false} />
+                      {zoneCoords && (
+                        <Button
+                          label="Quitar"
+                          onPress={() => { setZoneCoords(null); setZoneLocationMut.mutate(null, { onSuccess: () => toast.success('Ubicación quitada') }); }}
+                          variant="secondary"
+                          size="sm"
+                          fullWidth={false}
+                        />
+                      )}
+                    </View>
+                  </View>
+                )}
+              </View>
             </>
           )}
         </View>
