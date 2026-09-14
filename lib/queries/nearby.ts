@@ -69,7 +69,10 @@ export function useRestaurantAmenitiesMap() {
   });
 }
 
-// The RPC does not return categories; this builds restaurant_id -> icon.
+export type RestaurantCategoryMeta = { icon: string; label: string };
+
+// The RPC does not return categories; this builds restaurant_id -> {icon, label}
+// (first category only — same "one badge" convention as the rest of the app).
 export function useRestaurantIcons() {
   return useQuery({
     queryKey: ["restaurant-icons"],
@@ -77,12 +80,14 @@ export function useRestaurantIcons() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("restaurant_categories")
-        .select("restaurant_id, categories ( icon )");
+        .select("restaurant_id, categories ( icon, label )");
       if (error) throw error;
-      const m = new Map<string, string>();
+      const m = new Map<string, RestaurantCategoryMeta>();
       for (const row of (data ?? []) as any[]) {
-        const icon = row.categories?.icon;
-        if (icon && !m.has(row.restaurant_id)) m.set(row.restaurant_id, icon);
+        const c = row.categories;
+        if (c?.icon && !m.has(row.restaurant_id)) {
+          m.set(row.restaurant_id, { icon: c.icon, label: c.label });
+        }
       }
       return m;
     },

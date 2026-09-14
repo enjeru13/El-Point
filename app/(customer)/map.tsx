@@ -19,7 +19,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FLOATING_NAV_H } from '@/lib/theme';
 import { useTheme } from '@/lib/ThemeContext';
 import { SearchBar } from '@/components/ui/SearchBar';
-import { StarBadge } from '@/components/ui/StarBadge';
 import { Chip } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/lib/toast';
@@ -35,7 +34,7 @@ import { capWidth, useIsTablet } from '@/lib/responsive';
 const DEFAULT_ORIGIN = { latitude: 7.7669, longitude: -72.2251 };
 const RADIUS_KM = 8;
 
-type Restaurant = NearbyRestaurant & { icon: string; distanceLabel: string; amenities: NearbyAmenity[] };
+type Restaurant = NearbyRestaurant & { icon: string; categoryLabel: string | null; distanceLabel: string; amenities: NearbyAmenity[] };
 
 function fmtDistance(m: number): string {
   return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
@@ -184,7 +183,7 @@ function RestaurantCard({
   onViewProfile: () => void;
 }) {
   const { C } = useTheme();
-  const meta = [priceLabel(restaurant.price_level), restaurant.distanceLabel]
+  const meta = [restaurant.categoryLabel, priceLabel(restaurant.price_level), restaurant.distanceLabel]
     .filter(Boolean)
     .join('  |  ');
 
@@ -206,41 +205,36 @@ function RestaurantCard({
         </View>
 
         <View style={{ flex: 1, justifyContent: 'center', gap: 3 }}>
+          {/* Nombre a la izquierda, Original/Destacado a la derecha en la
+              misma línea. El rank (estrellas) queda pendiente de ubicar. */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <AppText variant="heading" style={{ fontSize: 17, lineHeight: 21, flexShrink: 1 }} numberOfLines={1}>
+            <AppText variant="heading" style={{ fontSize: 17, lineHeight: 21, flex: 1 }} numberOfLines={1}>
               {restaurant.name}
             </AppText>
-            <AppText variant="caption" color={C.outlineVariant}>|</AppText>
-            <StarBadge rating={restaurant.rating_avg} count={restaurant.rating_count} size="sm" />
-            {restaurant.rating_count > 0 && (
-              <AppText variant="caption" color={C.outline}>
-                {restaurant.rating_count} {restaurant.rating_count === 1 ? 'rank' : 'ranks'}
-              </AppText>
+            {(isFounder(restaurant) || isBoosted(restaurant)) && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                {isFounder(restaurant) && (
+                  <View style={{
+                    width: 20, height: 20, borderRadius: 10,
+                    alignItems: 'center', justifyContent: 'center',
+                    backgroundColor: '#f0c26022', borderWidth: 1, borderColor: '#f0c26066',
+                  }}>
+                    <Icon name="crown" size={11} color="#b8860b" />
+                  </View>
+                )}
+                {isBoosted(restaurant) && (
+                  <View style={{
+                    flexDirection: 'row', alignItems: 'center', gap: 3,
+                    paddingHorizontal: 7, paddingVertical: 2, borderRadius: 99,
+                    backgroundColor: C.primary + '22', borderWidth: 1, borderColor: C.primary + '55',
+                  }}>
+                    <Icon name="fire" size={11} color={C.primary} />
+                    <AppText variant="caption" color={C.primary} style={{ fontSize: 10 }}>Destacado</AppText>
+                  </View>
+                )}
+              </View>
             )}
           </View>
-          {(isFounder(restaurant) || isBoosted(restaurant)) && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              {isFounder(restaurant) && (
-                <View style={{
-                  width: 20, height: 20, borderRadius: 10,
-                  alignItems: 'center', justifyContent: 'center',
-                  backgroundColor: '#f0c26022', borderWidth: 1, borderColor: '#f0c26066',
-                }}>
-                  <Icon name="crown" size={11} color="#b8860b" />
-                </View>
-              )}
-              {isBoosted(restaurant) && (
-                <View style={{
-                  flexDirection: 'row', alignItems: 'center', gap: 3,
-                  paddingHorizontal: 7, paddingVertical: 2, borderRadius: 99,
-                  backgroundColor: C.primary + '22', borderWidth: 1, borderColor: C.primary + '55',
-                }}>
-                  <Icon name="fire" size={11} color={C.primary} />
-                  <AppText variant="caption" color={C.primary} style={{ fontSize: 10 }}>Destacado</AppText>
-                </View>
-              )}
-            </View>
-          )}
           {!!meta && (
             <AppText variant="caption" color={C.outline}>{meta}</AppText>
           )}
@@ -330,7 +324,8 @@ export default function MapScreen() {
     const am = amenitiesMapQ.data;
     return (nearbyQ.data ?? []).map(r => ({
       ...r,
-      icon: icons?.get(r.id) ?? 'silverware-fork-knife',
+      icon: icons?.get(r.id)?.icon ?? 'silverware-fork-knife',
+      categoryLabel: icons?.get(r.id)?.label ?? null,
       distanceLabel: fmtDistance(r.distance_m),
       amenities: am?.get(r.id) ?? [],
     }));
