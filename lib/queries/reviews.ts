@@ -42,6 +42,16 @@ export function canEditReview(r: Pick<Review, "created_at">): boolean {
   return Date.now() - new Date(r.created_at).getTime() < REVIEW_EDIT_WINDOW_MS;
 }
 
+// Cada cuánto puede dejar un rank nuevo en el mismo local (ver
+// trg_reviews_rate_limit en la DB -- esto solo evita el viaje redondo,
+// la DB es la que de verdad lo hace cumplir).
+export const REVIEW_RATE_LIMIT_MS = 7 * 24 * 60 * 60 * 1000;
+
+export function canPostNewReview(mostRecent: Pick<Review, "created_at"> | undefined): boolean {
+  if (!mostRecent) return true;
+  return Date.now() - new Date(mostRecent.created_at).getTime() >= REVIEW_RATE_LIMIT_MS;
+}
+
 export function reviewKeys(restaurantId: string) {
   return ["reviews", restaurantId] as const;
 }
@@ -132,8 +142,8 @@ export function useSubmitReview(restaurantId: string) {
         .select("id")
         .single();
       if (error) {
-        if (error.code === "23505")
-          throw new Error("Ya dejaste tu rank en este local. Edítalo desde tu reseña.");
+        if (error.message?.includes("review_rate_limited"))
+          throw new Error("Ya dejaste un rank en este local esta semana. Vuelve a intentarlo en unos días.");
         throw error;
       }
 

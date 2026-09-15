@@ -19,6 +19,7 @@ import {
   useToggleHelpful,
   useReplyToReview,
   canEditReview,
+  canPostNewReview,
   REPORT_REASONS,
   type Review,
   type ReportReason,
@@ -614,9 +615,12 @@ export default function RestaurantProfileScreen() {
   // Distribución sólo con reseñas visibles (una oculta propia no debe sesgarla).
   const ratedReviews = reviews.filter((r) => r.moderation === "visible");
   const isOwnerHere = !!myProfileQ.data?.id && myProfileQ.data.id === restaurant.owner_id;
+  // reviews viene ordenado created_at desc -- el primero que matchea es el más reciente.
   const myReview = myProfileQ.data?.id
     ? reviews.find((r) => r.author?.id === myProfileQ.data!.id)
     : undefined;
+  const myReviewEditable = !!myReview && canEditReview(myReview);
+  const canRankAgain = canPostNewReview(myReview);
   const heroIcon = restaurant.categories[0]?.icon ?? "silverware-fork-knife";
   const priceStr = priceLabel(restaurant.price_level);
   const dist = [5, 4, 3, 2, 1].map(
@@ -1357,9 +1361,19 @@ export default function RestaurantProfileScreen() {
               {!isOwnerHere && (
                 <View style={{ flexDirection: "row", gap: 8 }}>
                   <Button
-                    label={myReview ? "Editar mi rank" : "Deja tu rank"}
-                    onPress={() => (myReview ? startEditReview(myReview) : startCreateReview())}
-                    icon={myReview ? "pencil-outline" : "fire"}
+                    label={
+                      myReviewEditable
+                        ? "Editar mi rank"
+                        : canRankAgain
+                          ? "Deja tu rank"
+                          : "Ya rankeaste esta semana"
+                    }
+                    onPress={() => {
+                      if (myReviewEditable) startEditReview(myReview!);
+                      else if (canRankAgain) startCreateReview();
+                    }}
+                    disabled={!myReviewEditable && !canRankAgain}
+                    icon={myReviewEditable ? "pencil-outline" : "fire"}
                     size="sm"
                     fullWidth={false}
                   />
