@@ -12,6 +12,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "admin-web", "run", "dev", "--", "--port", "5183"],
       "port": 5183
+    },
+    {
+      "name": "landing",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "landing", "-l", "4173"],
+      "port": 4173
     }
   ]
 }
