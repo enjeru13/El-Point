@@ -93,27 +93,10 @@ export function SplashScreenView() {
         opacityScale={dark ? 1.6 : 0.7}
       />
 
-      <Animated.View
-        style={{
-          opacity: entrance,
-          transform: [
-            {
-              translateY: entrance.interpolate({
-                inputRange: [0, 1],
-                outputRange: [12, 0],
-              }),
-            },
-            {
-              scale: entrance.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.94, 1],
-              }),
-            },
-          ],
-        }}
-      >
-        <AppLogo size="lg" variant={dark ? "dark" : "light"} />
-      </Animated.View>
+      {/* Sin fade/scale de entrada: la splash nativa ya muestra este mismo
+          logo (splash-logo*.png, mismo tamaño), animarlo aquí sería un
+          parpadeo al pasar de una a otra. */}
+      <AppLogo size="lg" variant={dark ? "dark" : "light"} />
 
       <Animated.View
         style={{

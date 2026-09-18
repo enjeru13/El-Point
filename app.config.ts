@@ -50,12 +50,30 @@ const config: ExpoConfig = {
     [
       "expo-splash-screen",
       {
-        image: "./assets/images/splash-icon.png",
-        imageWidth: 200,
         resizeMode: "contain",
         backgroundColor: "#ffffff",
         dark: {
           backgroundColor: "#0b0b0d",
+        },
+        // iOS: wordmark "el Point" + pin, mismo tamaño (197 pt) y colores que el
+        // logo de SplashScreenView -- el paso nativo -> JS no cambia de logo.
+        ios: {
+          image: "./assets/images/splash-logo.png",
+          imageWidth: 197,
+          dark: {
+            image: "./assets/images/splash-logo-dark.png",
+            backgroundColor: "#0b0b0d",
+          },
+        },
+        // Android 12+ recorta el ícono a un círculo de 192 dp: un wordmark
+        // ancho se cortaría, ahí va solo el pin.
+        android: {
+          image: "./assets/images/logo-pin.png",
+          imageWidth: 120,
+          dark: {
+            image: "./assets/images/logo-pin-dark.png",
+            backgroundColor: "#0b0b0d",
+          },
         },
       },
     ],
