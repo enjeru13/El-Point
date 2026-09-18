@@ -183,7 +183,13 @@ export default function RootLayout() {
     setNavReady(true);
   }, [ready, session, role, fontsLoaded, segments, onboardingSeen]);
 
-  if (!ready || !fontsLoaded || (session && role === null) || !navReady)
+  // Sin fuentes todavía: no montar nada -- la splash nativa sigue visible
+  // (preventAutoHideAsync). Montar SplashScreenView aquí medía el texto del
+  // logo con la fuente del sistema y luego lo cambiaba a Outfit sin
+  // re-medir: peso distinto y la "t" de "Point" cortada.
+  if (!fontsLoaded) return null;
+
+  if (!ready || (session && role === null) || !navReady)
     return <SplashScreenView />;
 
   return (
