@@ -173,6 +173,9 @@ export type Database = {
           is_admin: boolean
           level: number
           push_token: string | null
+          referral_code: string | null
+          referral_reward_claimed: boolean
+          referred_by: string | null
           role: string
           search_radius_km: number
           settings: Json
@@ -195,6 +198,9 @@ export type Database = {
           is_admin?: boolean
           level?: number
           push_token?: string | null
+          referral_code?: string | null
+          referral_reward_claimed?: boolean
+          referred_by?: string | null
           role?: string
           search_radius_km?: number
           settings?: Json
@@ -217,6 +223,9 @@ export type Database = {
           is_admin?: boolean
           level?: number
           push_token?: string | null
+          referral_code?: string | null
+          referral_reward_claimed?: boolean
+          referred_by?: string | null
           role?: string
           search_radius_km?: number
           settings?: Json
@@ -228,7 +237,15 @@ export type Database = {
           username?: string | null
           xp?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       restaurant_amenities: {
         Row: {
@@ -290,6 +307,73 @@ export type Database = {
           },
         ]
       }
+      restaurant_payments: {
+        Row: {
+          amount: number | null
+          id: string
+          method: string
+          note: string | null
+          owner_id: string
+          proof_path: string
+          reference: string
+          restaurant_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string
+        }
+        Insert: {
+          amount?: number | null
+          id?: string
+          method: string
+          note?: string | null
+          owner_id: string
+          proof_path: string
+          reference: string
+          restaurant_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+        }
+        Update: {
+          amount?: number | null
+          id?: string
+          method?: string
+          note?: string | null
+          owner_id?: string
+          proof_path?: string
+          reference?: string
+          restaurant_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_payments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_payments_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_payments_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurant_reports: {
         Row: {
           created_at: string
@@ -340,6 +424,8 @@ export type Database = {
           cover_url: string | null
           created_at: string
           description: string | null
+          founder_rank: number | null
+          ghost_kitchen: boolean
           host_streak_weeks: number
           hours: Json | null
           id: string
@@ -352,6 +438,7 @@ export type Database = {
           menu_pdf_url: string | null
           name: string
           owner_id: string | null
+          paid_until: string | null
           phone: string | null
           price_level: number | null
           promo_text: string | null
@@ -365,6 +452,7 @@ export type Database = {
           updated_at: string
           verification_photo_path: string | null
           whatsapp: string | null
+          zone_label: string | null
         }
         Insert: {
           address?: string | null
@@ -373,6 +461,8 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           description?: string | null
+          founder_rank?: number | null
+          ghost_kitchen?: boolean
           host_streak_weeks?: number
           hours?: Json | null
           id?: string
@@ -385,6 +475,7 @@ export type Database = {
           menu_pdf_url?: string | null
           name: string
           owner_id?: string | null
+          paid_until?: string | null
           phone?: string | null
           price_level?: number | null
           promo_text?: string | null
@@ -398,6 +489,7 @@ export type Database = {
           updated_at?: string
           verification_photo_path?: string | null
           whatsapp?: string | null
+          zone_label?: string | null
         }
         Update: {
           address?: string | null
@@ -406,6 +498,8 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           description?: string | null
+          founder_rank?: number | null
+          ghost_kitchen?: boolean
           host_streak_weeks?: number
           hours?: Json | null
           id?: string
@@ -418,6 +512,7 @@ export type Database = {
           menu_pdf_url?: string | null
           name?: string
           owner_id?: string | null
+          paid_until?: string | null
           phone?: string | null
           price_level?: number | null
           promo_text?: string | null
@@ -431,6 +526,7 @@ export type Database = {
           updated_at?: string
           verification_photo_path?: string | null
           whatsapp?: string | null
+          zone_label?: string | null
         }
         Relationships: [
           {
@@ -928,6 +1024,10 @@ export type Database = {
           week_start: string
         }[]
       }
+      admin_resolve_payment: {
+        Args: { p_action: string; p_note?: string; p_payment_id: string }
+        Returns: undefined
+      }
       admin_set_restaurant_boost: {
         Args: { p_days: number; p_restaurant_id: string }
         Returns: string
@@ -936,22 +1036,41 @@ export type Database = {
         Args: { p_amount: number; p_user: string }
         Returns: undefined
       }
-      create_owner_restaurant: {
-        Args: {
-          p_address: string
-          p_amenity_ids?: number[]
-          p_category_ids: number[]
-          p_description: string
-          p_instagram: string
-          p_lat: number
-          p_lng: number
-          p_name: string
-          p_rif?: string
-          p_verification_photo_path?: string
-          p_whatsapp: string
-        }
-        Returns: string
-      }
+      create_owner_restaurant:
+        | {
+            Args: {
+              p_address: string
+              p_amenity_ids?: number[]
+              p_category_ids: number[]
+              p_description: string
+              p_instagram: string
+              p_lat: number
+              p_lng: number
+              p_name: string
+              p_rif?: string
+              p_verification_photo_path?: string
+              p_whatsapp: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_address: string
+              p_amenity_ids?: number[]
+              p_category_ids: number[]
+              p_description: string
+              p_ghost_kitchen?: boolean
+              p_instagram: string
+              p_lat: number
+              p_lng: number
+              p_name: string
+              p_rif?: string
+              p_verification_photo_path?: string
+              p_whatsapp: string
+              p_zone_label?: string
+            }
+            Returns: string
+          }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {
@@ -1000,6 +1119,7 @@ export type Database = {
         Args: { p_days: number; p_restaurant_id: string }
         Returns: undefined
       }
+      generate_referral_code: { Args: never; Returns: string }
       geometry: { Args: { "": string }; Returns: unknown }
       geometry_above: {
         Args: { geom1: unknown; geom2: unknown }
@@ -1110,6 +1230,7 @@ export type Database = {
       longtransactionsenabled: { Args: never; Returns: boolean }
       mission_title: { Args: { p_mission: string }; Returns: string }
       mission_xp: { Args: { p_mission: string }; Returns: number }
+      my_referral_count: { Args: never; Returns: number }
       nearby_restaurants: {
         Args: {
           filter_category?: string
@@ -1122,6 +1243,7 @@ export type Database = {
           boost_until: string
           cover_url: string
           distance_m: number
+          founder_rank: number
           id: string
           lat: number
           lng: number
@@ -1181,9 +1303,14 @@ export type Database = {
         Args: { p_restaurant_id: string }
         Returns: undefined
       }
+      send_subscription_reminders: { Args: never; Returns: undefined }
       send_weekly_owner_reports: { Args: never; Returns: undefined }
       set_restaurant_amenities: {
         Args: { p_amenity_ids: number[]; p_restaurant_id: string }
+        Returns: undefined
+      }
+      set_restaurant_zone_location: {
+        Args: { p_lat: number; p_lng: number; p_restaurant_id: string }
         Returns: undefined
       }
       st_3dclosestpoint: {

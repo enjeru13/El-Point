@@ -124,12 +124,9 @@ export function useUpdateMyRestaurant(restaurantId: string | undefined) {
   return useMutation({
     mutationFn: async (patch: OwnerRestaurantPatch) => {
       if (!restaurantId) throw new Error("Sin restaurante");
-      // ghost_kitchen/zone_label son columnas nuevas -- database.types.ts
-      // no las conoce hasta que se regeneren los tipos contra la migración
-      // ya pusheada. `as any` puntual en vez de aflojar todo el patch.
       const { error } = await supabase
         .from("restaurants")
-        .update(patch as any)
+        .update(patch)
         .eq("id", restaurantId);
       if (error) throw error;
     },
@@ -147,10 +144,11 @@ export function useSetRestaurantZoneLocation(restaurantId: string | undefined) {
   return useMutation({
     mutationFn: async (coords: { lat: number; lng: number } | null) => {
       if (!restaurantId) throw new Error("Sin restaurante");
-      const { error } = await supabase.rpc("set_restaurant_zone_location" as any, {
+      const { error } = await supabase.rpc("set_restaurant_zone_location", {
         p_restaurant_id: restaurantId,
-        p_lat: coords?.lat ?? null,
-        p_lng: coords?.lng ?? null,
+        // null quita el pin (la función lo acepta; los tipos generados no lo saben)
+        p_lat: (coords?.lat ?? null) as number,
+        p_lng: (coords?.lng ?? null) as number,
       });
       if (error) throw error;
     },

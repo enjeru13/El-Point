@@ -73,9 +73,8 @@ export type RestaurantPayment = {
 
 const MY_PAYMENTS_KEY = ["my-restaurant-payments"] as const;
 
-// `restaurant_payments` is brand new — the generated Supabase types don't
-// know about it until `supabase gen types` runs again against the pushed
-// migration. Typed as `RestaurantPayment` by hand instead below.
+// Tipada a mano (RestaurantPayment): en los tipos generados `status` y
+// `method` salen como string, no como las uniones que usa la app.
 function paymentsTable() {
   return (supabase as any).from("restaurant_payments");
 }
