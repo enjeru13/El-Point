@@ -359,6 +359,17 @@ export default function SettingsScreen() {
             </Pressable>
           )}
 
+          {__DEV__ && (
+            <Pressable
+              onPress={() => router.push('/splash-preview' as any)}
+              style={{ alignSelf: 'center', paddingVertical: 6 }}
+            >
+              <AppText variant="caption" color={C.outline}>
+                DEV · Ver splash
+              </AppText>
+            </Pressable>
+          )}
+
           <AppText variant="bodySm" color={C.outline} align="center">
             El Point v0.1.0
           </AppText>
