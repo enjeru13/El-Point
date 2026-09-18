@@ -5,8 +5,7 @@ import { useRouter } from "expo-router";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/lib/ThemeContext";
-import { useMyProfile } from "@/lib/queries/me";
-import { RANKS, rankForLevel, xpForLevel } from "@/lib/queries/me";
+import { RANKS, rankForLevel, useMyProfile, xpForLevel } from "@/lib/queries/me";
 import { capWidth, useIsTablet } from "@/lib/responsive";
 
 // Mismo orden que RANKS (lib/queries/me.ts) — cada tramo va de min a max.
@@ -208,7 +207,7 @@ export default function RankInfoScreen() {
               Rankea al menos un local por semana. Desde tu 2da semana seguida
               ganas <AppText variant="bodyStrong" color={C.onSurface}>+15 XP extra</AppText> cada
               semana que la mantengas, y a las 4 semanas seguidas desbloqueas
-              el logro "Un mes en racha" (+100 XP).
+              el logro &quot;Un mes en racha&quot; (+100 XP).
             </AppText>
             <AppText variant="caption" color={C.outline} style={{ lineHeight: 15 }}>
               Si te saltas una semana completa sin rankear, la racha se

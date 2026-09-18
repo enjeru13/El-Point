@@ -2,7 +2,7 @@ import { LegalBullet, LegalDoc, LegalP, LegalSection } from "@/components/ui/Leg
 
 export default function TermsScreen() {
   return (
-    <LegalDoc title="Términos de Servicio" updated="7 de septiembre de 2026">
+    <LegalDoc title="Términos de Servicio" updated="18 de septiembre de 2026">
       <LegalP>
         Bienvenido a El Point. Estos Términos regulan el uso de la aplicación y
         sus servicios. Al crear una cuenta o usar la app, aceptas estos
@@ -13,7 +13,7 @@ export default function TermsScreen() {
         <LegalP>
           El Point es una comunidad para descubrir, calificar y compartir
           lugares para comer en San Cristóbal, Táchira. Los usuarios publican
-          reseñas ("ranks"), fotos y favoritos; los dueños de locales pueden
+          reseñas (&quot;ranks&quot;), fotos y favoritos; los dueños de locales pueden
           registrar y gestionar el perfil de su restaurante.
         </LegalP>
       </LegalSection>
@@ -96,7 +96,7 @@ export default function TermsScreen() {
 
       <LegalSection n={7} title="Disponibilidad y cambios">
         <LegalP>
-          El Point se ofrece "tal cual". Podemos cambiar, pausar o descontinuar
+          El Point se ofrece &quot;tal cual&quot;. Podemos cambiar, pausar o descontinuar
           funciones sin previo aviso. Haremos lo posible por mantener el
           servicio disponible, pero no garantizamos que esté libre de errores o
           interrupciones.

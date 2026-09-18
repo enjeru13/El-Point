@@ -162,7 +162,7 @@ export default function BoostInfoScreen() {
           </View>
           <AppText variant="body" color={C.onSurfaceVariant} style={{ lineHeight: 21 }}>
             Mientras esté activo, tu local aparece primero en el mapa y en
-            Explorar, y lleva la insignia "Destacado". Más visibilidad, más
+            Explorar, y lleva la insignia &quot;Destacado&quot;. Más visibilidad, más
             clientes — y es gratis: se gana, no se compra.
           </AppText>
         </View>

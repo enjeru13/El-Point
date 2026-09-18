@@ -2,7 +2,7 @@ import { LegalBullet, LegalDoc, LegalP, LegalSection } from "@/components/ui/Leg
 
 export default function PrivacyScreen() {
   return (
-    <LegalDoc title="Política de Privacidad" updated="7 de septiembre de 2026">
+    <LegalDoc title="Política de Privacidad" updated="18 de septiembre de 2026">
       <LegalP>
         Esta Política explica qué datos recoge El Point, para qué los usa y qué
         control tienes sobre ellos. Al usar la app, aceptas lo aquí descrito.
@@ -75,7 +75,7 @@ export default function PrivacyScreen() {
           Acceder y corregir tus datos desde tu perfil y Ajustes.
         </LegalBullet>
         <LegalBullet>
-          Eliminar tu cuenta desde Ajustes → "Eliminar mi cuenta", o desde la
+          Eliminar tu cuenta desde Ajustes → &quot;Eliminar mi cuenta&quot;, o desde la
           página web de eliminación de cuenta.
         </LegalBullet>
         <LegalBullet>

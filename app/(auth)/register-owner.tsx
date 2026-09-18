@@ -555,7 +555,7 @@ export default function RegisterOwnerScreen() {
                 >
                   <Icon name="fire" size={22} color={C.secondary} />
                   <AppText variant="bodyStrong" style={{ flex: 1 }}>
-                    Arranca como "Destacado"
+                    Arranca como &quot;Destacado&quot;
                   </AppText>
                 </View>
                 <AppText variant="body" color={C.onSecondaryContainer}>

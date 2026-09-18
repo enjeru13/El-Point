@@ -755,7 +755,7 @@ export default function OwnerProfileScreen() {
               </View>
             ) : (
               <AppText variant="bodySm" color={C.outline}>
-                Aún no marcaste comodidades. Toca "Editar" para agregar.
+                Aún no marcaste comodidades. Toca &quot;Editar&quot; para agregar.
               </AppText>
             )}
           </View>
@@ -837,7 +837,7 @@ export default function OwnerProfileScreen() {
               </View>
             ) : (
               <AppText variant="bodySm" color={C.outline}>
-                Sin oferta activa. Toca "Editar" para agregar una.
+                Sin oferta activa. Toca &quot;Editar&quot; para agregar una.
               </AppText>
             )}
           </View>

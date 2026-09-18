@@ -412,7 +412,7 @@ export default function ProfileScreen() {
                   </>
                 ) : favCats.size === 0 ? (
                   <AppText variant="bodySm" color={C.outline}>
-                    Aún no elegiste tus categorías favoritas. Toca "Editar perfil" para elegirlas.
+                    Aún no elegiste tus categorías favoritas. Toca &quot;Editar perfil&quot; para elegirlas.
                   </AppText>
                 ) : (
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: 10, columnGap: 8 }}>

@@ -76,3 +76,5 @@ export const SearchBar = forwardRef<TextInput, Props>(
     );
   },
 );
+
+SearchBar.displayName = "SearchBar";

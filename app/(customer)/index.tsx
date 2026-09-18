@@ -291,7 +291,7 @@ function ReviewCard({
               style={{ lineHeight: 22, fontStyle: "italic" }}
               numberOfLines={3}
             >
-              "{item.body}"
+              &quot;{item.body}&quot;
             </AppText>
           </View>
         )}
