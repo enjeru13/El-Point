@@ -14,7 +14,7 @@ import {
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { useFonts } from 'expo-font';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments, type ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
@@ -33,10 +33,16 @@ import { hasSeenOnboarding } from '@/lib/onboarding';
 import { SettingsBridge } from '@/components/SettingsBridge';
 import { PushBridge } from '@/components/PushBridge';
 import { SplashScreenView } from '@/components/ui/SplashScreenView';
+import { ErrorScreen } from '@/components/ErrorScreen';
 
 SplashScreen.preventAutoHideAsync();
 
 type UserRole = 'customer' | 'restaurant_owner' | null;
+
+// expo-router usa este export como pantalla de error de toda la app.
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  return <ErrorScreen error={error} retry={retry} />;
+}
 
 export default function RootLayout() {
   const router = useRouter();

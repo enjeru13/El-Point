@@ -59,3 +59,15 @@ export async function registerForPush(): Promise<void> {
 export async function unregisterPush(uid: string): Promise<void> {
   await supabase.from("profiles").update({ push_token: null }).eq("id", uid);
 }
+
+/** Solo para QA: devuelve el token de esta instalación (sin guardarlo) o el motivo por el que no hay. */
+export async function getPushTokenForQa(): Promise<{ token: string | null; reason?: string }> {
+  if (!Device.isDevice) return { token: null, reason: "Simulador: no hay push" };
+  const { status } = await Notifications.getPermissionsAsync();
+  if (status !== "granted") return { token: null, reason: "Permiso de notificaciones no concedido" };
+  try {
+    return { token: (await Notifications.getExpoPushTokenAsync({ projectId })).data };
+  } catch (e: any) {
+    return { token: null, reason: e?.message ?? "No se pudo obtener el token" };
+  }
+}

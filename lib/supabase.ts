@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import * as SecureStore from "expo-secure-store";
 import type { Database } from "./database.types";
+import { QA_MODE, qaFetch } from "./qa";
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_KEY!;
@@ -21,5 +22,6 @@ export const supabase = createClient<Database>(
       persistSession: true,
       detectSessionInUrl: false,
     },
+    ...(QA_MODE ? { global: { fetch: qaFetch } } : {}),
   },
 );

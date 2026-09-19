@@ -3,7 +3,8 @@ import { Icon } from "@/components/ui/Icon";
 import { copyToClipboard } from "@/lib/clipboard";
 import { ONBOARDING_KEY } from "@/lib/onboarding";
 import { useMyProfile } from "@/lib/queries/me";
-import { QA_MODE } from "@/lib/qa";
+import { getPushTokenForQa } from "@/lib/push";
+import { QA_MODE, qaFlags } from "@/lib/qa";
 import { queryClient } from "@/lib/query";
 import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
 import { useTheme } from "@/lib/ThemeContext";
@@ -13,7 +14,9 @@ import Constants from "expo-constants";
 import * as Device from "expo-device";
 import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Platform, Pressable, ScrollView, View } from "react-native";
+import { onlineManager } from "@tanstack/react-query";
+import { useState } from "react";
+import { Platform, Pressable, ScrollView, Switch, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function supabaseHost(): string {
@@ -55,6 +58,41 @@ function ActionRow({
   );
 }
 
+function ToggleRow({
+  icon,
+  label,
+  hint,
+  value,
+  onChange,
+}: {
+  icon: string;
+  label: string;
+  hint?: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  const { C } = useTheme();
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 14, paddingHorizontal: 18, paddingVertical: 14 }}>
+      <Icon name={icon} size={20} color={C.primary} />
+      <View style={{ flex: 1 }}>
+        <AppText variant="bodyStrong">{label}</AppText>
+        {hint ? (
+          <AppText variant="caption" color={C.onSurfaceVariant}>
+            {hint}
+          </AppText>
+        ) : null}
+      </View>
+      <Switch
+        value={value}
+        onValueChange={onChange}
+        trackColor={{ false: C.surfaceContainerHighest, true: C.primaryContainer }}
+        thumbColor={value ? C.primary : C.outline}
+      />
+    </View>
+  );
+}
+
 function RowDivider() {
   const { C } = useTheme();
   return <View style={{ height: 1, backgroundColor: C.outlineVariant, marginHorizontal: 18 }} />;
@@ -67,9 +105,15 @@ export default function QaScreen() {
   const isTablet = useIsTablet();
   const toast = useToast();
   const profileQ = useMyProfile();
+  const [offline, setOffline] = useState(!onlineManager.isOnline());
+  const [failNet, setFailNet] = useState(qaFlags.failNetwork);
+  const [slow, setSlow] = useState(qaFlags.latencyMs > 0);
+  const [boom, setBoom] = useState(false);
 
   // El build de producción no debe exponer esta pantalla ni por deep link.
   if (!QA_MODE) return null;
+
+  if (boom) throw new Error("QA: crash forzado desde Herramientas QA");
 
   const profile = profileQ.data;
   const info: [string, string][] = [
@@ -87,6 +131,17 @@ export default function QaScreen() {
     const text = ["El Point · diagnóstico", ...info.map(([k, v]) => `${k}: ${v}`)].join("\n");
     const ok = await copyToClipboard(text);
     if (ok) toast.success("Diagnóstico copiado");
+    else toast.error("No se pudo copiar (falta el módulo nativo en este build)");
+  }
+
+  async function copyPushToken() {
+    const { token, reason } = await getPushTokenForQa();
+    if (!token) {
+      toast.error(reason ?? "Sin token");
+      return;
+    }
+    const ok = await copyToClipboard(token);
+    if (ok) toast.success("Token copiado");
     else toast.error("No se pudo copiar (falta el módulo nativo en este build)");
   }
 
@@ -141,6 +196,66 @@ export default function QaScreen() {
               </AppText>
             </View>
           ))}
+        </View>
+
+        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: "hidden", ...shadow.sm }}>
+          <ToggleRow
+            icon="wifi-off"
+            label="Sin conexión (datos en caché)"
+            hint="Pausa las consultas de la app; no afecta subidas de fotos"
+            value={offline}
+            onChange={(v) => {
+              setOffline(v);
+              onlineManager.setOnline(!v);
+            }}
+          />
+          <RowDivider />
+          <ToggleRow
+            icon="lan-disconnect"
+            label="Fallar todas las peticiones"
+            hint="Como si no hubiera red: error en cada llamada al servidor"
+            value={failNet}
+            onChange={(v) => {
+              setFailNet(v);
+              qaFlags.failNetwork = v;
+            }}
+          />
+          <RowDivider />
+          <ToggleRow
+            icon="timer-sand"
+            label="Peticiones lentas (+3 s)"
+            hint="Para ver skeletons, cargas y botones deshabilitados"
+            value={slow}
+            onChange={(v) => {
+              setSlow(v);
+              qaFlags.latencyMs = v ? 3000 : 0;
+            }}
+          />
+          <RowDivider />
+          <ActionRow
+            icon="bell-ring-outline"
+            label="Lanzar los 3 avisos"
+            hint="Éxito, error e información, uno tras otro"
+            onPress={() => {
+              toast.success("Aviso de éxito");
+              setTimeout(() => toast.error("Aviso de error"), 1800);
+              setTimeout(() => toast.info("Aviso informativo"), 3600);
+            }}
+          />
+          <RowDivider />
+          <ActionRow
+            icon="key-outline"
+            label="Copiar token de push"
+            hint="Pégalo en expo.dev/notifications para mandarte un push real"
+            onPress={copyPushToken}
+          />
+          <RowDivider />
+          <ActionRow
+            icon="bug-outline"
+            label="Forzar crash de pantalla"
+            hint="Lanza un error de render para ver la pantalla de error"
+            onPress={() => setBoom(true)}
+          />
         </View>
 
         <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: "hidden", ...shadow.sm }}>
