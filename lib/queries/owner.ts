@@ -52,7 +52,7 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
     .select(
       `id, name, description, address, phone, whatsapp, instagram, price_level,
        logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
-       status, status_reason, submitted_at, verification_photo_path, rif,
+       status, status_reason, submitted_at,
        rating_avg, rating_count, boost_until, founder_rank, paid_until, host_streak_weeks, created_at,
        ghost_kitchen, zone_label, latitude, longitude,
        restaurant_categories ( categories ( slug, label, icon ) ),
@@ -68,8 +68,16 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
   if (!data) return null;
 
   const { restaurant_categories, restaurant_amenities, restaurant_payment_methods, hours, latitude, longitude, ...rest } = data as any;
+
+  // RIF y foto de verificación no son legibles con select directo (privados):
+  // el dueño los lee de sus propios locales por esta función.
+  const { data: priv } = await supabase.rpc("get_my_restaurant_private" as any);
+  const mine = ((priv ?? []) as any[]).find((p) => p.restaurant_id === rest.id);
+
   return {
-    ...(rest as Omit<OwnerRestaurant, "categories" | "amenities" | "payment_methods" | "hours" | "lat" | "lng">),
+    ...(rest as Omit<OwnerRestaurant, "categories" | "amenities" | "payment_methods" | "hours" | "lat" | "lng" | "rif" | "verification_photo_path">),
+    rif: (mine?.rif ?? null) as string | null,
+    verification_photo_path: (mine?.verification_photo_path ?? null) as string | null,
     hours: parseHours(hours),
     lat: typeof latitude === "number" ? latitude : null,
     lng: typeof longitude === "number" ? longitude : null,

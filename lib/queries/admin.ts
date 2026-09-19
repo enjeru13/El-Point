@@ -30,8 +30,8 @@ async function fetchPendingRestaurants(): Promise<PendingRestaurant[]> {
   const { data, error } = await supabase
     .from("restaurants")
     .select(
-      `id, name, address, whatsapp, instagram, rif, status, status_reason,
-       submitted_at, verification_photo_path,
+      `id, name, address, whatsapp, instagram, status, status_reason,
+       submitted_at,
        owner:profiles!owner_id ( username, full_name ),
        restaurant_categories ( categories ( label ) )`,
     )
@@ -40,6 +40,13 @@ async function fetchPendingRestaurants(): Promise<PendingRestaurant[]> {
 
   if (error) throw error;
 
+  // RIF y foto de verificación: privados, solo por la función de admin.
+  const ids = (data ?? []).map((r: any) => r.id);
+  const { data: priv } = ids.length
+    ? await supabase.rpc("admin_restaurant_private" as any, { p_ids: ids })
+    : { data: [] };
+  const privById = new Map<string, any>(((priv ?? []) as any[]).map((p) => [p.restaurant_id, p]));
+
   return Promise.all(
     (data ?? []).map(async (r: any) => ({
       id: r.id,
@@ -47,7 +54,7 @@ async function fetchPendingRestaurants(): Promise<PendingRestaurant[]> {
       address: r.address,
       whatsapp: r.whatsapp,
       instagram: r.instagram,
-      rif: r.rif,
+      rif: privById.get(r.id)?.rif ?? null,
       status: r.status,
       status_reason: r.status_reason,
       submitted_at: r.submitted_at,
@@ -58,8 +65,8 @@ async function fetchPendingRestaurants(): Promise<PendingRestaurant[]> {
       categories: ((r.restaurant_categories ?? []) as any[])
         .map((rc) => rc.categories?.label)
         .filter(Boolean),
-      photo_url: r.verification_photo_path
-        ? await verificationPhotoUrl(r.verification_photo_path)
+      photo_url: privById.get(r.id)?.verification_photo_path
+        ? await verificationPhotoUrl(privById.get(r.id).verification_photo_path)
         : null,
     })),
   );
