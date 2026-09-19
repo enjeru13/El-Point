@@ -326,6 +326,14 @@ export default function OwnerProfileScreen() {
     });
   }
 
+  const allPaymentIds = (paymentMethodsQ.data ?? []).map((p) => p.id);
+  const allPaymentsSelected =
+    allPaymentIds.length > 0 && allPaymentIds.every((id) => paymentIds.has(id));
+
+  function toggleAllPayments() {
+    setPaymentIds(allPaymentsSelected ? new Set() : new Set(allPaymentIds));
+  }
+
   function cancel() {
     if (!restaurant) return;
     setName(restaurant.name ?? '');
@@ -786,6 +794,13 @@ export default function OwnerProfileScreen() {
           <View style={{ padding: 18 }}>
             {editing ? (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                <Chip
+                  label="Todos"
+                  icon="mdi:check-all"
+                  tone="secondary"
+                  active={allPaymentsSelected}
+                  onPress={toggleAllPayments}
+                />
                 {(paymentMethodsQ.data ?? []).map((pm) => (
                   <Chip
                     key={pm.id}
@@ -799,7 +814,10 @@ export default function OwnerProfileScreen() {
               </View>
             ) : restaurant.payment_methods.length > 0 ? (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                {restaurant.payment_methods.map((p) => (
+                {(allPaymentIds.length > 0 && restaurant.payment_methods.length === allPaymentIds.length
+                  ? [{ slug: 'all', label: 'Todos los métodos de pago', icon: 'mdi:check-all' }]
+                  : restaurant.payment_methods
+                ).map((p) => (
                   <View key={p.slug} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 99, backgroundColor: C.secondaryContainer, borderWidth: 1, borderColor: C.border }}>
                     <Icon name={p.icon} size={14} color={C.onSurface} />
                     <AppText variant="label">{p.label}</AppText>

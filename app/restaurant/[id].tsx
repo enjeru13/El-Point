@@ -34,6 +34,7 @@ import {
 import { ReportSheet, type ReportSheetHandle } from "@/components/ui/ReportSheet";
 import { whatsappUrl, instagramUrl, instagramHandle } from "@/lib/contact";
 import { useMyProfile } from "@/lib/queries/me";
+import { usePaymentMethods } from "@/lib/queries/paymentMethods";
 import { useFavoriteIds, useToggleFavorite } from "@/lib/queries/feed";
 import { useToast } from "@/lib/toast";
 import { impact } from "@/lib/haptics";
@@ -449,6 +450,7 @@ export default function RestaurantProfileScreen() {
   const toggleHelpful = useToggleHelpful(id);
   const replyMut = useReplyToReview(id);
   const myProfileQ = useMyProfile();
+  const paymentCatalogQ = usePaymentMethods();
   const favIdsQ = useFavoriteIds();
   const toggleFav = useToggleFavorite();
   const toast = useToast();
@@ -1347,7 +1349,11 @@ export default function RestaurantProfileScreen() {
                 </AppText>
               </View>
               <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-                {restaurant.payment_methods.map((p) => (
+                {(paymentCatalogQ.data?.length &&
+                restaurant.payment_methods.length === paymentCatalogQ.data.length
+                  ? [{ slug: "all", label: "Todos los métodos de pago", icon: "mdi:check-all" }]
+                  : restaurant.payment_methods
+                ).map((p) => (
                   <View
                     key={p.slug}
                     style={{
