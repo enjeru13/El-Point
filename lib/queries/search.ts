@@ -1,4 +1,5 @@
 import { parseHours, type Hours } from "@/lib/hours";
+import type { PaymentMethod } from "@/lib/queries/paymentMethods";
 import type { RestaurantAmenity, RestaurantCategory } from "@/lib/queries/restaurants";
 import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
@@ -20,6 +21,7 @@ export type SearchResult = {
   zone_label: string | null;
   categories: RestaurantCategory[];
   amenities: RestaurantAmenity[];
+  payment_methods: PaymentMethod[];
 };
 
 async function fetchActiveRestaurants(): Promise<SearchResult[]> {
@@ -29,7 +31,8 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
       `id, name, address, price_level, rating_avg, rating_count, cover_url, hours,
        latitude, longitude, boost_until, founder_rank, ghost_kitchen, zone_label,
        restaurant_categories ( categories ( slug, label, icon ) ),
-       restaurant_amenities ( amenities ( id, slug, label, icon ) )`,
+       restaurant_amenities ( amenities ( id, slug, label, icon ) ),
+       restaurant_payment_methods ( payment_methods ( id, slug, label, icon ) )`,
     )
     .eq("is_active", true)
     .eq("status", "approved");
@@ -56,6 +59,9 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
       .filter(Boolean),
     amenities: (r.restaurant_amenities ?? [])
       .map((ra: any) => ra.amenities)
+      .filter(Boolean),
+    payment_methods: (r.restaurant_payment_methods ?? [])
+      .map((rp: any) => rp.payment_methods)
       .filter(Boolean),
   }));
 }

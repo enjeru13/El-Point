@@ -27,6 +27,7 @@ import { isBoosted, isFounder } from '@/lib/queries/restaurants';
 import { StarBadge } from '@/components/ui/StarBadge';
 import { useCategories } from '@/lib/queries/categories';
 import { useAmenities } from '@/lib/queries/amenities';
+import { usePaymentMethods } from '@/lib/queries/paymentMethods';
 import { isOpenNow } from '@/lib/hours';
 import { distanceKm, fmtKm, type LatLng } from '@/lib/geo';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -412,6 +413,7 @@ export default function SearchScreen() {
   const searchQ = useRestaurantSearch();
   const categoriesQ = useCategories();
   const amenitiesQ = useAmenities();
+  const paymentMethodsQ = usePaymentMethods();
 
   const [query, setQuery]       = useState('');
   const [activeCat, setActiveCat] = useState<string | null>(null);
@@ -429,6 +431,7 @@ export default function SearchScreen() {
   const [onlyOpen, setOnlyOpen] = useState(false);
   const [onlyGhost, setOnlyGhost] = useState(false);
   const [amenitySlugs, setAmenitySlugs] = useState<Set<string>>(new Set());
+  const [paymentSlugs, setPaymentSlugs] = useState<Set<string>>(new Set());
   const [recents, setRecents]   = useState<string[]>([]);
   const [userLoc, setUserLoc]   = useState<LatLng | null>(null);
   const [locBusy, setLocBusy]   = useState(false);
@@ -480,10 +483,17 @@ export default function SearchScreen() {
     saveRecents([]);
   }
 
-  const hasActiveFilters = sort !== null || price !== null || onlyOpen || onlyGhost || amenitySlugs.size > 0;
+  const hasActiveFilters = sort !== null || price !== null || onlyOpen || onlyGhost || amenitySlugs.size > 0 || paymentSlugs.size > 0;
 
   function toggleAmenity(slug: string) {
     setAmenitySlugs((prev) => {
+      const next = new Set(prev);
+      next.has(slug) ? next.delete(slug) : next.add(slug);
+      return next;
+    });
+  }
+  function togglePayment(slug: string) {
+    setPaymentSlugs((prev) => {
       const next = new Set(prev);
       next.has(slug) ? next.delete(slug) : next.add(slug);
       return next;
@@ -507,7 +517,12 @@ export default function SearchScreen() {
       const matchAmenities =
         amenitySlugs.size === 0 ||
         [...amenitySlugs].every(s => r.amenities.some(a => a.slug === s));
-      return matchQuery && matchCat && matchPrice && matchOpen && matchGhost && matchAmenities;
+      // Métodos de pago: basta con que acepte AL MENOS UNO de los elegidos
+      // (a diferencia de comodidades) -- quien paga solo necesita que uno le sirva.
+      const matchPayments =
+        paymentSlugs.size === 0 ||
+        r.payment_methods.some(p => paymentSlugs.has(p.slug));
+      return matchQuery && matchCat && matchPrice && matchOpen && matchGhost && matchAmenities && matchPayments;
     });
     if (sort === 'near' && userLoc) {
       const d = (r: SearchResult) =>
@@ -549,7 +564,7 @@ export default function SearchScreen() {
       );
     }
     return list;
-  }, [all, query, activeCat, price, sort, onlyOpen, onlyGhost, amenitySlugs, userLoc]);
+  }, [all, query, activeCat, price, sort, onlyOpen, onlyGhost, amenitySlugs, paymentSlugs, userLoc]);
 
   const popular = useMemo(
     () =>
@@ -576,7 +591,7 @@ export default function SearchScreen() {
     setOnlyOpen(false);
     inputRef.current?.blur();
   }
-  function resetFilters() { setSort(null); setPrice(null); setOnlyOpen(false); setOnlyGhost(false); setAmenitySlugs(new Set()); }
+  function resetFilters() { setSort(null); setPrice(null); setOnlyOpen(false); setOnlyGhost(false); setAmenitySlugs(new Set()); setPaymentSlugs(new Set()); }
   function goToPlace(id: string) {
     if (query.trim()) pushRecent(query);
     router.push(`/restaurant/${id}`);
@@ -861,6 +876,26 @@ export default function SearchScreen() {
                       icon={am.icon}
                       active={amenitySlugs.has(am.slug)}
                       onPress={() => toggleAmenity(am.slug)}
+                    />
+                  ))}
+                </View>
+              </View>
+            </>
+          )}
+
+          {(paymentMethodsQ.data ?? []).length > 0 && (
+            <>
+              <View style={{ height: 1, backgroundColor: C.outlineVariant }} />
+              <View style={{ gap: 8 }}>
+                <AppText variant="overline" color={C.onSurfaceVariant}>MÉTODOS DE PAGO</AppText>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {(paymentMethodsQ.data ?? []).map(pm => (
+                    <Chip
+                      key={pm.slug}
+                      label={pm.label}
+                      icon={pm.icon}
+                      active={paymentSlugs.has(pm.slug)}
+                      onPress={() => togglePayment(pm.slug)}
                     />
                   ))}
                 </View>
