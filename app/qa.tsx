@@ -15,7 +15,7 @@ import * as Device from "expo-device";
 import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { onlineManager } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Platform, Pressable, ScrollView, Switch, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -109,6 +109,25 @@ export default function QaScreen() {
   const [failNet, setFailNet] = useState(qaFlags.failNetwork);
   const [slow, setSlow] = useState(qaFlags.latencyMs > 0);
   const [boom, setBoom] = useState(false);
+  const [upd, setUpd] = useState<{ channel: string; id: string } | null>(null);
+
+  // expo-updates solo existe en builds posteriores a instalarlo: se pregunta
+  // primero (importarlo sin el módulo nativo lanza, como pasa con clipboard).
+  useEffect(() => {
+    (async () => {
+      try {
+        const { requireOptionalNativeModule } = await import("expo-modules-core");
+        if (!requireOptionalNativeModule("ExpoUpdates")) return;
+        const Updates = await import("expo-updates");
+        setUpd({
+          channel: Updates.channel ?? "—",
+          id: Updates.updateId ? Updates.updateId.slice(0, 8) : "de fábrica (sin update)",
+        });
+      } catch {
+        // sin módulo: se queda en "—"
+      }
+    })();
+  }, []);
 
   // El build de producción no debe exponer esta pantalla ni por deep link.
   if (!QA_MODE) return null;
@@ -122,6 +141,8 @@ export default function QaScreen() {
     ["Plataforma", `${Platform.OS} ${Platform.Version}`],
     ["Dispositivo", Device.modelName ?? "—"],
     ["Servidor", supabaseHost()],
+    ["Canal", upd?.channel ?? "—"],
+    ["Update", upd?.id ?? "—"],
     ["Usuario", profile?.username ? `@${profile.username}` : "—"],
     ["Rol", profile?.role ?? "—"],
     ["ID", profile?.id ?? "—"],
@@ -132,6 +153,31 @@ export default function QaScreen() {
     const ok = await copyToClipboard(text);
     if (ok) toast.success("Diagnóstico copiado");
     else toast.error("No se pudo copiar (falta el módulo nativo en este build)");
+  }
+
+  async function checkForUpdate() {
+    try {
+      const { requireOptionalNativeModule } = await import("expo-modules-core");
+      if (!requireOptionalNativeModule("ExpoUpdates")) {
+        toast.error("Este build no trae actualizaciones por aire");
+        return;
+      }
+      const Updates = await import("expo-updates");
+      if (!Updates.isEnabled) {
+        toast.info("Las actualizaciones están desactivadas en este modo");
+        return;
+      }
+      toast.info("Buscando actualización…");
+      const check = await Updates.checkForUpdateAsync();
+      if (!check.isAvailable) {
+        toast.success("Ya tienes la última versión");
+        return;
+      }
+      await Updates.fetchUpdateAsync();
+      await Updates.reloadAsync();
+    } catch (e: any) {
+      toast.error(e?.message ?? "No se pudo buscar la actualización");
+    }
   }
 
   async function copyPushToken() {
@@ -264,6 +310,13 @@ export default function QaScreen() {
             label="Copiar diagnóstico"
             hint="Versión, dispositivo y usuario, para pegar en un reporte"
             onPress={copyDiagnostics}
+          />
+          <RowDivider />
+          <ActionRow
+            icon="cloud-download-outline"
+            label="Buscar actualización"
+            hint="Baja y aplica el último update de este canal, sin reinstalar"
+            onPress={checkForUpdate}
           />
           <RowDivider />
           <ActionRow
