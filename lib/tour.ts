@@ -28,7 +28,7 @@ export async function resetAllTours(): Promise<void> {
   try {
     const keys = await AsyncStorage.getAllKeys();
     const mine = keys.filter((k) => k.startsWith(PREFIX));
-    if (mine.length) await AsyncStorage.removeMany(mine);
+    if (mine.length) await AsyncStorage.multiRemove(mine);
   } catch {}
   DeviceEventEmitter.emit(TOUR_RESET_EVENT);
 }
