@@ -178,7 +178,7 @@ export default function RootLayout() {
     // Signed in: only redirect if the user is in the wrong place.
     // Leave stack routes like /restaurant/[id] alone. The post-signup
     // welcome screen lives under (auth) but drives its own CTA — don't bounce.
-    const onWelcome = inAuth && segments[1] === 'welcome';
+    const onWelcome = inAuth && (segments as string[])[1] === 'welcome';
     if (inAuth && !onWelcome) {
       router.replace(role === 'restaurant_owner' ? '/(owner)' : '/(customer)');
     } else if (!onWelcome && role === 'restaurant_owner' && inCustomer) {
