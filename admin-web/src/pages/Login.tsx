@@ -50,7 +50,7 @@ export function Login() {
 
       <Card className="relative w-full max-w-sm p-8">
         <div className="mb-7 flex flex-col items-center gap-3 text-center">
-          <Brand size="lg" />
+          <Brand size="lg" align="center" />
           <p className="text-sm text-text-soft">Panel de moderación · entra con tu cuenta de admin.</p>
         </div>
 
