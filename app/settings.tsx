@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, Switch, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QA_MODE } from '@/lib/qa';
+import Constants from 'expo-constants';
 import { supabase } from '@/lib/supabase';
 import { unregisterPush } from '@/lib/push';
 import { useTheme } from '@/lib/ThemeContext';
@@ -357,7 +358,7 @@ export default function SettingsScreen() {
           )}
 
           <AppText variant="bodySm" color={C.outline} align="center">
-            El Point v0.1.0
+            El Point v{Constants.expoConfig?.version ?? '—'}
           </AppText>
         </ScrollView>
       )}
