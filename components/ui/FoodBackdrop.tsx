@@ -69,13 +69,17 @@ function buildLayout(seed: number): Placed[] {
   const out: Placed[] = [];
   let n = 0;
   for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      // stagger alternate rows so it doesn't read as a grid
-      const offset = r % 2 === 0 ? 0 : cellW * 0.5;
+    // Filas impares: centros en los bordes de celda (0, cellW, ..., W) con una
+    // columna extra. Antes se corrían media celda a la derecha y el borde
+    // izquierdo quedaba vacío mientras el último ícono se aplastaba a la derecha.
+    const odd = r % 2 === 1;
+    const count = odd ? cols + 1 : cols;
+    for (let c = 0; c < count; c++) {
       const size = 30 + Math.round(rand() * 30);
       const jitterX = (rand() - 0.5) * cellW * 0.55;
       const jitterY = (rand() - 0.5) * cellH * 0.55;
-      const x = c * cellW + offset + cellW * 0.5 + jitterX - size / 2;
+      const centerX = odd ? c * cellW : c * cellW + cellW * 0.5;
+      const x = centerX + jitterX - size / 2;
       const y = r * cellH + cellH * 0.5 + jitterY - size / 2;
       out.push({
         key: `${r}-${c}`,
