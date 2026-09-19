@@ -188,8 +188,7 @@ export function useUpdateRestaurantPaymentMethods(restaurantId: string | undefin
   return useMutation({
     mutationFn: async (methodIds: number[]) => {
       if (!restaurantId) throw new Error("Sin restaurante");
-      // RPC nuevo: los tipos generados no lo conocen hasta regenerarlos.
-      const { error } = await supabase.rpc("set_restaurant_payment_methods" as any, {
+      const { error } = await supabase.rpc("set_restaurant_payment_methods", {
         p_restaurant_id: restaurantId,
         p_method_ids: methodIds,
       });

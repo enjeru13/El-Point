@@ -161,6 +161,30 @@ export type Database = {
           },
         ]
       }
+      payment_methods: {
+        Row: {
+          icon: string
+          id: number
+          label: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          icon: string
+          id: number
+          label: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          icon?: string
+          id?: number
+          label?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -300,6 +324,36 @@ export type Database = {
           },
           {
             foreignKeyName: "restaurant_categories_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurant_payment_methods: {
+        Row: {
+          payment_method_id: number
+          restaurant_id: string
+        }
+        Insert: {
+          payment_method_id: number
+          restaurant_id: string
+        }
+        Update: {
+          payment_method_id?: number
+          restaurant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_payment_methods_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_payment_methods_restaurant_id_fkey"
             columns: ["restaurant_id"]
             isOneToOne: false
             referencedRelation: "restaurants"
@@ -1307,6 +1361,10 @@ export type Database = {
       send_weekly_owner_reports: { Args: never; Returns: undefined }
       set_restaurant_amenities: {
         Args: { p_amenity_ids: number[]; p_restaurant_id: string }
+        Returns: undefined
+      }
+      set_restaurant_payment_methods: {
+        Args: { p_method_ids: number[]; p_restaurant_id: string }
         Returns: undefined
       }
       set_restaurant_zone_location: {

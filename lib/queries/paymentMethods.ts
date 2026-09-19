@@ -13,9 +13,7 @@ export function usePaymentMethods() {
     queryKey: ["payment-methods"],
     staleTime: 30 * 60_000,
     queryFn: async (): Promise<PaymentMethod[]> => {
-      // Tabla nueva: los tipos generados no la conocen hasta regenerarlos
-      // contra la DB con la migración ya pusheada.
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("payment_methods")
         .select("id, slug, label, icon")
         .order("sort_order");
