@@ -1,4 +1,5 @@
 import { SplashScreenView } from "@/components/ui/SplashScreenView";
+import { QA_MODE } from "@/lib/qa";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, Pressable, Text, useColorScheme, View } from "react-native";
@@ -17,6 +18,8 @@ export default function SplashPreview() {
   const [showJs, setShowJs] = useState(false);
 
   const fg = dark ? "#ffffff" : "#1c1b1b";
+
+  if (!QA_MODE) return null;
 
   return (
     <View style={{ flex: 1 }}>

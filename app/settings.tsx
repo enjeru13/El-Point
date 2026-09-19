@@ -2,7 +2,7 @@ import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, Switch, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as SecureStore from 'expo-secure-store';
+import { QA_MODE } from '@/lib/qa';
 import { supabase } from '@/lib/supabase';
 import { unregisterPush } from '@/lib/push';
 import { useTheme } from '@/lib/ThemeContext';
@@ -345,27 +345,13 @@ export default function SettingsScreen() {
             </AppText>
           </Pressable>
 
-          {__DEV__ && (
+          {QA_MODE && (
             <Pressable
-              onPress={async () => {
-                await SecureStore.deleteItemAsync('elpoint_onboarding_seen');
-                router.replace('/onboarding');
-              }}
+              onPress={() => router.push('/qa' as any)}
               style={{ alignSelf: 'center', paddingVertical: 6 }}
             >
               <AppText variant="caption" color={C.outline}>
-                DEV · Ver onboarding
-              </AppText>
-            </Pressable>
-          )}
-
-          {__DEV__ && (
-            <Pressable
-              onPress={() => router.push('/splash-preview' as any)}
-              style={{ alignSelf: 'center', paddingVertical: 6 }}
-            >
-              <AppText variant="caption" color={C.outline}>
-                DEV · Ver splash
+                QA · Herramientas de prueba
               </AppText>
             </Pressable>
           )}
