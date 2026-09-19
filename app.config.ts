@@ -3,6 +3,14 @@ import type { ExpoConfig } from "expo/config";
 // app.json can't interpolate env vars — it's static JSON. This file can, so
 // the Google Maps key actually resolves instead of being the literal string
 // "EXPO_PUBLIC_GOOGLE_MAPS_KEY" baked into the native build.
+// iOS: el esquema de URL de Google Sign-In es el ID de cliente iOS invertido
+// (123-abc.apps.googleusercontent.com -> com.googleusercontent.apps.123-abc).
+// Sin la variable el plugin se omite y la app usa el inicio de sesión web.
+const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+const googleIosUrlScheme = googleIosClientId
+  ? `com.googleusercontent.apps.${googleIosClientId.replace(".apps.googleusercontent.com", "")}`
+  : undefined;
+
 const config: ExpoConfig = {
   name: "El Point",
   slug: "El-Point",
@@ -75,6 +83,26 @@ const config: ExpoConfig = {
             backgroundColor: "#0b0b0d",
           },
         },
+      },
+    ],
+    ...(googleIosUrlScheme
+      ? ([["@react-native-google-signin/google-signin", { iosUrlScheme: googleIosUrlScheme }]] as [string, object][])
+      : []),
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "El Point necesita acceso a tus fotos para que puedas subir tu foto de perfil, las fotos de tus reseñas y las de tu local.",
+        cameraPermission:
+          "El Point usa la cámara para que tomes fotos de tus reseñas, tu perfil y tu local.",
+        microphonePermission: false,
+      },
+    ],
+    [
+      "expo-location",
+      {
+        locationWhenInUsePermission:
+          "El Point usa tu ubicación para mostrarte los locales cercanos y calcular las distancias.",
       },
     ],
     "expo-secure-store",
