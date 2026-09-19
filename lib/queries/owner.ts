@@ -71,7 +71,7 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
 
   // RIF y foto de verificación no son legibles con select directo (privados):
   // el dueño los lee de sus propios locales por esta función.
-  const { data: priv } = await supabase.rpc("get_my_restaurant_private" as any);
+  const { data: priv } = await supabase.rpc("get_my_restaurant_private");
   const mine = ((priv ?? []) as any[]).find((p) => p.restaurant_id === rest.id);
 
   return {

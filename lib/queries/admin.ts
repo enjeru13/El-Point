@@ -43,7 +43,7 @@ async function fetchPendingRestaurants(): Promise<PendingRestaurant[]> {
   // RIF y foto de verificación: privados, solo por la función de admin.
   const ids = (data ?? []).map((r: any) => r.id);
   const { data: priv } = ids.length
-    ? await supabase.rpc("admin_restaurant_private" as any, { p_ids: ids })
+    ? await supabase.rpc("admin_restaurant_private", { p_ids: ids })
     : { data: [] };
   const privById = new Map<string, any>(((priv ?? []) as any[]).map((p) => [p.restaurant_id, p]));
 

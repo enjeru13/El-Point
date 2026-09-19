@@ -1082,6 +1082,14 @@ export type Database = {
         Args: { p_action: string; p_note?: string; p_payment_id: string }
         Returns: undefined
       }
+      admin_restaurant_private: {
+        Args: { p_ids: string[] }
+        Returns: {
+          restaurant_id: string
+          rif: string
+          verification_photo_path: string
+        }[]
+      }
       admin_set_restaurant_boost: {
         Args: { p_days: number; p_restaurant_id: string }
         Returns: string
@@ -1305,6 +1313,14 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_my_restaurant_private: {
+        Args: never
+        Returns: {
+          restaurant_id: string
+          rif: string
+          verification_photo_path: string
+        }[]
       }
       gettransactionid: { Args: never; Returns: unknown }
       grant_mission: {
