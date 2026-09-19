@@ -22,6 +22,13 @@ const config: ExpoConfig = {
   icon: "./assets/images/icon.png",
   scheme: "elpoint",
   userInterfaceStyle: "automatic",
+  // Actualizaciones por aire (EAS Update): arreglos solo de JS llegan sin build
+  // nuevo. Cambiar código nativo (plugins, librerías nativas) exige subir
+  // `version`: la política appVersion ata cada update a una versión concreta.
+  runtimeVersion: { policy: "appVersion" },
+  updates: {
+    url: "https://u.expo.dev/38fff885-5f06-46f6-b050-fa4fd90e9954",
+  },
   newArchEnabled: true,
   owner: "enjeru1304",
   web: {
