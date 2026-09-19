@@ -1,4 +1,5 @@
 import { parseHours, type Hours } from "@/lib/hours";
+import type { PaymentMethod } from "@/lib/queries/paymentMethods";
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -56,6 +57,7 @@ export type RestaurantDetail = {
   zone_label: string | null;
   categories: RestaurantCategory[];
   amenities: RestaurantAmenity[];
+  payment_methods: PaymentMethod[];
 };
 
 export function restaurantKeys(id: string) {
@@ -71,7 +73,8 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
        status, status_reason, rating_avg, rating_count, boost_until, founder_rank,
        ghost_kitchen, zone_label,
        restaurant_categories ( categories ( slug, label, icon ) ),
-       restaurant_amenities ( amenities ( id, slug, label, icon ) )`,
+       restaurant_amenities ( amenities ( id, slug, label, icon ) ),
+       restaurant_payment_methods ( payment_methods ( id, slug, label, icon ) )`,
     )
     .eq("id", id)
     .single();
@@ -90,12 +93,17 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
     .map((ra: any) => ra.amenities)
     .filter(Boolean);
 
-  const { restaurant_categories, restaurant_amenities, hours, ...rest } = row;
+  const payment_methods: PaymentMethod[] = (row.restaurant_payment_methods ?? [])
+    .map((rp: any) => rp.payment_methods)
+    .filter(Boolean);
+
+  const { restaurant_categories, restaurant_amenities, restaurant_payment_methods, hours, ...rest } = row;
   return {
-    ...(rest as Omit<RestaurantDetail, "categories" | "amenities" | "hours">),
+    ...(rest as Omit<RestaurantDetail, "categories" | "amenities" | "payment_methods" | "hours">),
     hours: parseHours(hours),
     categories,
     amenities,
+    payment_methods,
   };
 }
 

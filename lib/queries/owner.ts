@@ -1,4 +1,5 @@
 import { parseHours, type Hours } from "@/lib/hours";
+import type { PaymentMethod } from "@/lib/queries/paymentMethods";
 import type { RestaurantAmenity, RestaurantCategory } from "@/lib/queries/restaurants";
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -36,6 +37,7 @@ export type OwnerRestaurant = {
   lng: number | null;
   categories: RestaurantCategory[];
   amenities: RestaurantAmenity[];
+  payment_methods: PaymentMethod[];
 };
 
 export const ownerRestaurantKey = ["owner-restaurant"] as const;
@@ -54,7 +56,8 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
        rating_avg, rating_count, boost_until, founder_rank, paid_until, host_streak_weeks, created_at,
        ghost_kitchen, zone_label, latitude, longitude,
        restaurant_categories ( categories ( slug, label, icon ) ),
-       restaurant_amenities ( amenities ( id, slug, label, icon ) )`,
+       restaurant_amenities ( amenities ( id, slug, label, icon ) ),
+       restaurant_payment_methods ( payment_methods ( id, slug, label, icon ) )`,
     )
     .eq("owner_id", uid)
     .order("created_at", { ascending: true })
@@ -64,9 +67,9 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
   if (error) throw error;
   if (!data) return null;
 
-  const { restaurant_categories, restaurant_amenities, hours, latitude, longitude, ...rest } = data as any;
+  const { restaurant_categories, restaurant_amenities, restaurant_payment_methods, hours, latitude, longitude, ...rest } = data as any;
   return {
-    ...(rest as Omit<OwnerRestaurant, "categories" | "amenities" | "hours" | "lat" | "lng">),
+    ...(rest as Omit<OwnerRestaurant, "categories" | "amenities" | "payment_methods" | "hours" | "lat" | "lng">),
     hours: parseHours(hours),
     lat: typeof latitude === "number" ? latitude : null,
     lng: typeof longitude === "number" ? longitude : null,
@@ -75,6 +78,9 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
       .filter(Boolean),
     amenities: (restaurant_amenities ?? [])
       .map((ra: any) => ra.amenities)
+      .filter(Boolean),
+    payment_methods: (restaurant_payment_methods ?? [])
+      .map((rp: any) => rp.payment_methods)
       .filter(Boolean),
   };
 }
@@ -167,6 +173,25 @@ export function useUpdateRestaurantAmenities(restaurantId: string | undefined) {
       const { error } = await supabase.rpc("set_restaurant_amenities", {
         p_restaurant_id: restaurantId,
         p_amenity_ids: amenityIds,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ownerRestaurantKey });
+    },
+  });
+}
+
+/** Reemplaza el conjunto completo de métodos de pago (RPC atómico). */
+export function useUpdateRestaurantPaymentMethods(restaurantId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (methodIds: number[]) => {
+      if (!restaurantId) throw new Error("Sin restaurante");
+      // RPC nuevo: los tipos generados no lo conocen hasta regenerarlos.
+      const { error } = await supabase.rpc("set_restaurant_payment_methods" as any, {
+        p_restaurant_id: restaurantId,
+        p_method_ids: methodIds,
       });
       if (error) throw error;
     },

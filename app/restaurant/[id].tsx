@@ -1337,6 +1337,39 @@ export default function RestaurantProfileScreen() {
             </View>
           )}
 
+          {/* ── Métodos de pago ── */}
+          {restaurant.payment_methods.length > 0 && (
+            <View style={{ gap: 12 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Icon name="wallet-outline" size={18} color={C.primary} />
+                <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>
+                  Métodos de pago
+                </AppText>
+              </View>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+                {restaurant.payment_methods.map((p) => (
+                  <View
+                    key={p.slug}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                      paddingHorizontal: 14,
+                      paddingVertical: 10,
+                      borderRadius: 16,
+                      backgroundColor: C.surface,
+                      borderWidth: 1,
+                      borderColor: C.border,
+                    }}
+                  >
+                    <Icon name={p.icon} size={17} color={C.primary} />
+                    <AppText variant="bodySm">{p.label}</AppText>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
           {/* ── Comunidad / Reviews ── */}
           <View style={{ gap: 12 }}>
             <View

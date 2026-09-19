@@ -21,10 +21,11 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { TimePickerSheet, type TimePickerHandle } from '@/components/ui/TimePickerSheet';
-import { useMyRestaurant, useUpdateMyRestaurant, useUpdateRestaurantAmenities, useResubmitRestaurant, useSetRestaurantZoneLocation } from '@/lib/queries/owner';
+import { useMyRestaurant, useUpdateMyRestaurant, useUpdateRestaurantAmenities, useUpdateRestaurantPaymentMethods, useResubmitRestaurant, useSetRestaurantZoneLocation } from '@/lib/queries/owner';
 import * as Location from 'expo-location';
 import MapView from 'react-native-maps';
 import { useAmenities } from '@/lib/queries/amenities';
+import { usePaymentMethods } from '@/lib/queries/paymentMethods';
 import { Chip } from '@/components/ui/Chip';
 import {
   uploadRestaurantImage,
@@ -94,9 +95,11 @@ export default function OwnerProfileScreen() {
   const restaurant = restaurantQ.data ?? null;
   const updateMut = useUpdateMyRestaurant(restaurant?.id);
   const updateAmenitiesMut = useUpdateRestaurantAmenities(restaurant?.id);
+  const updatePaymentsMut = useUpdateRestaurantPaymentMethods(restaurant?.id);
   const setZoneLocationMut = useSetRestaurantZoneLocation(restaurant?.id);
   const resubmit = useResubmitRestaurant();
   const amenitiesQ = useAmenities();
+  const paymentMethodsQ = usePaymentMethods();
 
   const [editing, setEditing] = useState(false);
   const [name, setName]           = useState('');
@@ -116,6 +119,7 @@ export default function OwnerProfileScreen() {
   const zoneMapRef = useRef<MapView>(null);
   const [hours, setHoursState]    = useState<Hours>(DEFAULT_HOURS);
   const [amenityIds, setAmenityIds] = useState<Set<number>>(new Set());
+  const [paymentIds, setPaymentIds] = useState<Set<number>>(new Set());
   const [uploading, setUploading] = useState<'logo' | 'cover' | 'menu' | null>(null);
 
   const [verifUploading, setVerifUploading] = useState(false);
@@ -296,6 +300,7 @@ export default function OwnerProfileScreen() {
     setHoursState(restaurant.hours ?? DEFAULT_HOURS);
     setRifDraft(restaurant.rif ?? '');
     setAmenityIds(new Set(restaurant.amenities.map((a) => a.id)));
+    setPaymentIds(new Set(restaurant.payment_methods.map((p) => p.id)));
     setGhostKitchen(restaurant.ghost_kitchen);
     setZoneLabel(restaurant.zone_label ?? '');
     setZoneCoords(
@@ -307,6 +312,14 @@ export default function OwnerProfileScreen() {
 
   function toggleAmenity(id: number) {
     setAmenityIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function togglePayment(id: number) {
+    setPaymentIds((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
@@ -326,6 +339,7 @@ export default function OwnerProfileScreen() {
     setIsActive(restaurant.is_active);
     setHoursState(restaurant.hours ?? DEFAULT_HOURS);
     setAmenityIds(new Set(restaurant.amenities.map((a) => a.id)));
+    setPaymentIds(new Set(restaurant.payment_methods.map((p) => p.id)));
     setGhostKitchen(restaurant.ghost_kitchen);
     setZoneLabel(restaurant.zone_label ?? '');
     setEditing(false);
@@ -359,6 +373,9 @@ export default function OwnerProfileScreen() {
     );
     updateAmenitiesMut.mutate(Array.from(amenityIds), {
       onError: (e: any) => toast.error(e?.message ?? 'No se pudieron guardar las comodidades'),
+    });
+    updatePaymentsMut.mutate(Array.from(paymentIds), {
+      onError: (e: any) => toast.error(e?.message ?? 'No se pudieron guardar los métodos de pago'),
     });
   }
 
@@ -756,6 +773,42 @@ export default function OwnerProfileScreen() {
             ) : (
               <AppText variant="bodySm" color={C.outline}>
                 Aún no marcaste comodidades. Toca &quot;Editar&quot; para agregar.
+              </AppText>
+            )}
+          </View>
+        </View>
+
+        {/* Métodos de pago */}
+        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
+            <AppText variant="bodyStrong">Métodos de pago</AppText>
+          </View>
+          <View style={{ padding: 18 }}>
+            {editing ? (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {(paymentMethodsQ.data ?? []).map((pm) => (
+                  <Chip
+                    key={pm.id}
+                    label={pm.label}
+                    icon={pm.icon}
+                    tone="secondary"
+                    active={paymentIds.has(pm.id)}
+                    onPress={() => togglePayment(pm.id)}
+                  />
+                ))}
+              </View>
+            ) : restaurant.payment_methods.length > 0 ? (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                {restaurant.payment_methods.map((p) => (
+                  <View key={p.slug} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 99, backgroundColor: C.secondaryContainer, borderWidth: 1, borderColor: C.border }}>
+                    <Icon name={p.icon} size={14} color={C.onSurface} />
+                    <AppText variant="label">{p.label}</AppText>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <AppText variant="bodySm" color={C.outline}>
+                Aún no indicaste cómo pueden pagarte. Toca &quot;Editar&quot; para agregar.
               </AppText>
             )}
           </View>
