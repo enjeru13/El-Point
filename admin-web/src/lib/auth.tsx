@@ -27,12 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<AdminProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function loadProfile(uid: string) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, full_name, is_admin")
-      .eq("id", uid)
-      .single();
+  async function loadProfile() {
+    const { data } = await supabase.rpc("get_my_profile").maybeSingle();
     setProfile((data as AdminProfile) ?? null);
   }
 
@@ -41,12 +37,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(async ({ data }) => {
       if (!alive) return;
       setSession(data.session);
-      if (data.session) await loadProfile(data.session.user.id);
+      if (data.session) await loadProfile();
       setLoading(false);
     });
     const { data: sub } = supabase.auth.onAuthStateChange(async (_evt, s) => {
       setSession(s);
-      if (s) await loadProfile(s.user.id);
+      if (s) await loadProfile();
       else setProfile(null);
     });
     return () => {

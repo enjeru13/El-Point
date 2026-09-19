@@ -1272,6 +1272,40 @@ export type Database = {
         Returns: boolean
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
+      get_my_profile: {
+        Args: never
+        Returns: {
+          avatar_url: string | null
+          banned_at: string | null
+          bio: string | null
+          created_at: string
+          favorite_categories: number[]
+          full_name: string | null
+          id: string
+          is_admin: boolean
+          level: number
+          push_token: string | null
+          referral_code: string | null
+          referral_reward_claimed: boolean
+          referred_by: string | null
+          role: string
+          search_radius_km: number
+          settings: Json
+          streak_best: number
+          streak_week_start: string | null
+          streak_weeks: number
+          strikes: number
+          updated_at: string
+          username: string | null
+          xp: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       gettransactionid: { Args: never; Returns: unknown }
       grant_mission: {
         Args: { p_mission: string; p_user: string }

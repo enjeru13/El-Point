@@ -26,13 +26,9 @@ async function fetchMyProfile(): Promise<MyProfile | null> {
   const uid = userData.user?.id;
   if (!uid) return null;
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(
-      "id, role, username, full_name, avatar_url, bio, level, xp, streak_weeks, streak_best, search_radius_km, settings, favorite_categories, is_admin, strikes, banned_at, created_at",
-    )
-    .eq("id", uid)
-    .maybeSingle();
+  // Las columnas sensibles (is_admin, strikes, settings, xp...) ya no se leen
+  // con select directo: solo la propia fila, por esta función.
+  const { data, error } = await supabase.rpc("get_my_profile").maybeSingle();
 
   if (error) throw error;
   if (!data) return null;

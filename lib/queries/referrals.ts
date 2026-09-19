@@ -15,7 +15,7 @@ export function useMyReferralInfo() {
       if (!uid) return { code: null, count: 0 };
 
       const [{ data: profile, error: pErr }, { data: count, error: cErr }] = await Promise.all([
-        supabase.from("profiles").select("referral_code").eq("id", uid).single(),
+        supabase.rpc("get_my_profile").maybeSingle(),
         supabase.rpc("my_referral_count"),
       ]);
       if (pErr) throw pErr;
