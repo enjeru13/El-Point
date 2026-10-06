@@ -33,7 +33,7 @@ import { distanceKm, fmtKm, type LatLng } from '@/lib/geo';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Chip } from '@/components/ui/Chip';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
-import { capWidth, useIsTablet } from '@/lib/responsive';
+import { capWidth, sideGutter, useResponsive } from '@/lib/responsive';
 
 type SortKey = 'rank' | 'reviews' | 'near' | null;
 type PriceKey = 1 | 2 | 3 | null;
@@ -408,7 +408,7 @@ export default function SearchScreen() {
   const router   = useRouter();
   const toast    = useToast();
   const inputRef = useRef<TextInput>(null);
-  const isTablet = useIsTablet();
+  const { isTablet, width: winW } = useResponsive();
 
   const searchQ = useRestaurantSearch();
   const categoriesQ = useCategories();
@@ -641,13 +641,14 @@ export default function SearchScreen() {
             </Pressable>
           </View>
         </View>
+        </View>
 
-        {/* ── Chips de categoría ── */}
+        {/* ── Chips de categoría ── (a todo el ancho; el primero se alinea con la columna) */}
         <View ref={tourChipsRef} collapsable={false}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 16, gap: 8, alignItems: 'center' }}
+            contentContainerStyle={{ paddingHorizontal: sideGutter(winW, isTablet), gap: 8, alignItems: 'center' }}
             style={{ marginTop: 12, height: 44 }}
           >
             <Chip label="Todo" active={!activeCat} onPress={() => setActiveCat(null)} />
@@ -661,7 +662,6 @@ export default function SearchScreen() {
               />
             ))}
           </ScrollView>
-        </View>
         </View>
       </View>
 

@@ -40,7 +40,7 @@ import { useToast } from "@/lib/toast";
 import { impact } from "@/lib/haptics";
 import { isOpenNow, formatRange, DAY_LABELS_LONG } from "@/lib/hours";
 import { useTheme } from "@/lib/ThemeContext";
-import { capWidth, useIsTablet } from "@/lib/responsive";
+import { capWidth, CONTENT_MAX_W, useResponsive } from "@/lib/responsive";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   forwardRef,
@@ -161,7 +161,7 @@ const ReviewSheet = forwardRef<
 >(({ restaurantName, submitting, errorMessage, editing, onSubmit }, ref) => {
   const { C } = useTheme();
   const insets = useSafeAreaInsets();
-  const isTablet = useIsTablet();
+  const { isTablet } = useResponsive();
   const RATING_COLORS = [
     "",
     C.error,
@@ -437,7 +437,7 @@ export default function RestaurantProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const isTablet = useIsTablet();
+  const { isTablet, width: winW } = useResponsive();
 
   const restaurantQ = useRestaurant(id);
   const reviewsQ = useReviews(id);
@@ -736,7 +736,7 @@ export default function RestaurantProfileScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: C.background }}>
       <Animated.ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + 100, ...capWidth(isTablet) }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
         showsVerticalScrollIndicator={false}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -808,7 +808,9 @@ export default function RestaurantProfileScreen() {
               bottom: 0,
               left: 0,
               right: 0,
-              padding: 20,
+              paddingVertical: 20,
+              // El hero ocupa todo el ancho; el texto se alinea con la columna de contenido.
+              paddingHorizontal: isTablet ? Math.max(20, (winW - CONTENT_MAX_W) / 2 + 20) : 20,
               gap: 8,
             }}
           >
@@ -946,7 +948,7 @@ export default function RestaurantProfileScreen() {
         </View>
 
         {/* ── Contenido ── */}
-        <View style={{ padding: 16, gap: 20 }}>
+        <View style={{ padding: 16, gap: 20, ...capWidth(isTablet) }}>
           {/* ── Aviso: es tu local ── */}
           {isOwnerHere && (
             <Pressable

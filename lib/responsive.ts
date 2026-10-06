@@ -28,3 +28,15 @@ export function useIsTablet(): boolean {
 export function capWidth(isTablet: boolean, maxWidth: number = CONTENT_MAX_W) {
   return isTablet ? { maxWidth, width: "100%" as const, alignSelf: "center" as const } : {};
 }
+
+/** Padding lateral para un ScrollView horizontal (o un bloque) que ocupa TODO
+ *  el ancho de la pantalla pero cuyo primer elemento debe alinearse con una
+ *  columna de contenido centrada de `maxWidth`. En teléfono es solo `base`. */
+export function sideGutter(
+  width: number,
+  isTablet: boolean,
+  base: number = 16,
+  maxWidth: number = CONTENT_MAX_W,
+): number {
+  return isTablet ? Math.max(base, (width - maxWidth) / 2 + base) : base;
+}
