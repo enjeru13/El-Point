@@ -16,6 +16,7 @@ import { Field } from '@/components/ui/Field';
 import { supabase } from '@/lib/supabase';
 import { authErrorEs } from '@/lib/authErrors';
 import { signInWithGoogle } from '@/lib/oauth';
+import { AppleSignInButton } from '@/components/ui/AppleSignInButton';
 import { useToast } from '@/lib/toast';
 import { useTheme } from '@/lib/ThemeContext';
 import { Button } from '@/components/ui/Button';
@@ -277,6 +278,7 @@ export default function RegisterScreen() {
                 icon="google"
                 style={{ marginTop: 16 }}
               />
+              <AppleSignInButton style={{ marginTop: 10 }} />
 
               {/* Partner card */}
               <View style={{ marginTop: 36, gap: 8 }}>

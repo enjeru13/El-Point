@@ -16,6 +16,7 @@ import { FounderWelcomeModal } from '@/components/ui/FounderWelcomeModal';
 import { hasSeenFounderWelcome, markFounderWelcomeSeen } from '@/lib/founderWelcome';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 import { capWidth, useIsTablet } from '@/lib/responsive';
+import { PAYMENTS_IN_APP } from '@/lib/billing';
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -334,8 +335,8 @@ export default function OwnerHomeScreen() {
                 gap: 6, paddingVertical: 12, borderTopWidth: 2, borderTopColor: C.border,
               }}
             >
-              <Icon name="credit-card-outline" size={16} color={C.error} />
-              <AppText variant="label" color={C.error}>Actualizar mi suscripción</AppText>
+              <Icon name={PAYMENTS_IN_APP ? "credit-card-outline" : "calendar-remove-outline"} size={16} color={C.error} />
+              <AppText variant="label" color={C.error}>{PAYMENTS_IN_APP ? "Actualizar mi suscripción" : "Ver mi plan"}</AppText>
             </Pressable>
           )}
           {isBoosted(restaurant) && (

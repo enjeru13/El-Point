@@ -6,6 +6,7 @@ import { Field } from "@/components/ui/Field";
 import { supabase } from "@/lib/supabase";
 import { authErrorEs } from "@/lib/authErrors";
 import { signInWithGoogle } from "@/lib/oauth";
+import { AppleSignInButton } from "@/components/ui/AppleSignInButton";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -169,6 +170,7 @@ export default function LoginScreen() {
               variant="secondary"
               icon="google"
             />
+            <AppleSignInButton />
 
             <View style={{ flexDirection: "row", justifyContent: "center", gap: 4 }}>
               <AppText variant="body" color={C.onSurfaceVariant}>

@@ -21,6 +21,7 @@ import {
 } from "@/lib/queries/payments";
 import { capWidth, useIsTablet } from "@/lib/responsive";
 import { PaymentMethodPicker } from "@/components/ui/PaymentMethodPicker";
+import { PAYMENTS_IN_APP } from "@/lib/billing";
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "En revisión",
@@ -182,15 +183,38 @@ export default function SubscriptionScreen() {
                       : `${left} ${left === 1 ? "día" : "días"} restantes`}
                 </AppText>
                 <AppText variant="bodySm" color={C.onSurfaceVariant}>
-                  {expired
-                    ? "Sube tu comprobante de pago para reactivar tu local."
-                    : "Al vencerse necesitas pagar la suscripción anual (10 USD) para seguir activo."}
+                  {PAYMENTS_IN_APP
+                    ? expired
+                      ? "Sube tu comprobante de pago para reactivar tu local."
+                      : "Al vencerse necesitas pagar la suscripción anual (10 USD) para seguir activo."
+                    : expired
+                      ? "Tu local no aparece en el mapa ni en las búsquedas mientras el plan esté vencido."
+                      : r.paid_until
+                        ? `Tu plan está activo hasta el ${new Date(r.paid_until).toLocaleDateString("es-VE", { day: "numeric", month: "long", year: "numeric" })}.`
+                        : "Tu local está activo."}
                 </AppText>
               </View>
             </View>
           )}
 
-          {!founder && (
+          {!founder && !PAYMENTS_IN_APP && (
+            <Pressable
+              onPress={() => router.push("/support" as any)}
+              style={{
+                flexDirection: "row", alignItems: "center", gap: 12,
+                padding: 14, borderRadius: 16,
+                backgroundColor: C.surface, borderWidth: 1, borderColor: C.border,
+              }}
+            >
+              <Icon name="lifebuoy" size={20} color={C.primary} />
+              <AppText variant="bodySm" style={{ flex: 1 }}>
+                ¿Dudas sobre tu plan? Escríbenos desde Soporte.
+              </AppText>
+              <Icon name="chevron-right" size={18} color={C.outline} />
+            </Pressable>
+          )}
+
+          {!founder && PAYMENTS_IN_APP && (
             <>
               {/* Cómo pagar */}
               <View style={{ gap: 10 }}>

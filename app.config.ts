@@ -37,6 +37,7 @@ const config: ExpoConfig = {
   },
   ios: {
     supportsTablet: true,
+    usesAppleSignIn: true,
     bundleIdentifier: "com.elpoint.app",
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
@@ -112,6 +113,7 @@ const config: ExpoConfig = {
           "El Point usa tu ubicación para mostrarte los locales cercanos y calcular las distancias.",
       },
     ],
+    "expo-apple-authentication",
     "expo-secure-store",
     "expo-font",
     ["expo-notifications", { color: "#c8451f" }],

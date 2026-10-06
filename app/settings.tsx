@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, Switch, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QA_MODE } from '@/lib/qa';
+import { PAYMENTS_IN_APP } from '@/lib/billing';
 import Constants from 'expo-constants';
 import { supabase } from '@/lib/supabase';
 import { unregisterPush } from '@/lib/push';
@@ -196,7 +197,7 @@ export default function SettingsScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <AppText variant="bodyStrong">Suscripción</AppText>
-                    <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 1 }}>Tu plan y cómo pagar</AppText>
+                    <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 1 }}>{PAYMENTS_IN_APP ? 'Tu plan y cómo pagar' : 'Estado de tu plan'}</AppText>
                   </View>
                   <Icon name="chevron-right" size={20} color={C.outline} />
                 </Pressable>
