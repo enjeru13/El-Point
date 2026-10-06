@@ -33,7 +33,8 @@ import { distanceKm, fmtKm, type LatLng } from '@/lib/geo';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Chip } from '@/components/ui/Chip';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
-import { capWidth, sideGutter, useResponsive } from '@/lib/responsive';
+import { capWidth, useResponsive } from '@/lib/responsive';
+import { ChipRow } from '@/components/ui/ChipRow';
 
 type SortKey = 'rank' | 'reviews' | 'near' | null;
 type PriceKey = 1 | 2 | 3 | null;
@@ -408,7 +409,7 @@ export default function SearchScreen() {
   const router   = useRouter();
   const toast    = useToast();
   const inputRef = useRef<TextInput>(null);
-  const { isTablet, width: winW } = useResponsive();
+  const { isTablet } = useResponsive();
 
   const searchQ = useRestaurantSearch();
   const categoriesQ = useCategories();
@@ -603,7 +604,7 @@ export default function SearchScreen() {
       {/* ── Header ── */}
       <View style={{
         paddingTop: insets.top + 10,
-        paddingBottom: 12,
+        paddingBottom: 2,
         backgroundColor: C.background,
         borderBottomWidth: 1, borderBottomColor: C.outlineVariant,
       }}>
@@ -643,14 +644,9 @@ export default function SearchScreen() {
         </View>
         </View>
 
-        {/* ── Chips de categoría ── (a todo el ancho; el primero se alinea con la columna) */}
-        <View ref={tourChipsRef} collapsable={false}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: sideGutter(winW, isTablet), gap: 8, alignItems: 'center' }}
-            style={{ marginTop: 12, height: 44 }}
-          >
+        {/* ── Chips de categoría ── (misma columna que la barra; sin recortar el halo) */}
+        <View ref={tourChipsRef} collapsable={false} style={{ marginTop: -2 }}>
+          <ChipRow constrain fadeColor={C.background}>
             <Chip label="Todo" active={!activeCat} onPress={() => setActiveCat(null)} />
             {(categoriesQ.data ?? []).map(cat => (
               <Chip
@@ -661,7 +657,7 @@ export default function SearchScreen() {
                 onPress={() => setActiveCat(activeCat === cat.slug ? null : cat.slug)}
               />
             ))}
-          </ScrollView>
+          </ChipRow>
         </View>
       </View>
 

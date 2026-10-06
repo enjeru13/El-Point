@@ -7,7 +7,6 @@ import {
   Animated,
   Easing,
   Pressable,
-  ScrollView,
   View,
 } from 'react-native';
 import { Image } from 'expo-image';
@@ -26,7 +25,8 @@ import { useNearby, useRestaurantIcons, useRestaurantAmenitiesMap, type NearbyRe
 import { isBoosted, isFounder } from '@/lib/queries/restaurants';
 import { useCategories } from '@/lib/queries/categories';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
-import { capWidth, sideGutter, useResponsive } from '@/lib/responsive';
+import { capWidth, useResponsive } from '@/lib/responsive';
+import { ChipRow } from '@/components/ui/ChipRow';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -309,7 +309,7 @@ export default function MapScreen() {
   const router  = useRouter();
   const insets  = useSafeAreaInsets();
   const toast   = useToast();
-  const { isTablet, width: winW } = useResponsive();
+  const { isTablet } = useResponsive();
 
   const [userLocation, setUserLocation]     = useState<{ latitude: number; longitude: number } | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
@@ -527,12 +527,8 @@ export default function MapScreen() {
         <View ref={tourSearchRef} collapsable={false} style={{ paddingHorizontal: 12, ...capWidth(isTablet) }}>
           <SearchBar value={search} onChangeText={t => { setSearch(t); if (selected) closeSheet(); }} variant="floating" />
         </View>
-        <View ref={tourChipsRef} collapsable={false}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 6, paddingHorizontal: sideGutter(winW, isTablet, 12), paddingBottom: 4, paddingTop: 2 }}
-          >
+        <View ref={tourChipsRef} collapsable={false} style={{ marginTop: -6, marginBottom: -4 }}>
+          <ChipRow gap={6} side={12}>
             {[...PINNED, ...(categoriesQ.data ?? [])].map(cat => (
               <Chip
                 key={cat.slug}
@@ -542,7 +538,7 @@ export default function MapScreen() {
                 onPress={() => { setActiveCategory(cat.slug); if (selected) closeSheet(); }}
               />
             ))}
-          </ScrollView>
+          </ChipRow>
         </View>
 
         {/* Estado */}
