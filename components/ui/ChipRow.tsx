@@ -42,12 +42,21 @@ export function ChipRow({
   fadeColor,
   gap = 8,
   side = 16,
+  fade,
+  padY = 12,
+  contained = false,
 }: {
   children: ReactNode;
   constrain?: boolean;
   fadeColor?: string;
   gap?: number;
   side?: number;
+  /** Difumina los extremos aunque no sea tablet (por defecto solo con `constrain` en tablet). */
+  fade?: boolean;
+  /** Margen vertical; menor si la fila va dentro de una barra. */
+  padY?: number;
+  /** La fila ya vive dentro de su columna/barra: el primer chip va a `side`, sin alinearse con la columna de la pantalla. */
+  contained?: boolean;
 }) {
   const { isTablet, width } = useResponsive();
   const [x, setX] = useState(0);
@@ -55,14 +64,14 @@ export function ChipRow({
   const [contentW, setContentW] = useState(0);
 
   const capped = constrain && isTablet;
-  const showFade = capped && !!fadeColor;
+  const showFade = (fade ?? capped) && !!fadeColor;
   const canScroll = contentW > viewW + 1;
   const leftFade = showFade && canScroll && x > 4;
   const rightFade = showFade && canScroll && x + viewW < contentW - 4;
 
   // Fuera de la columna (teléfono, o sin `constrain`): a todo el ancho, con el
   // primer chip alineado al borde de la columna de contenido.
-  const edge = capped ? side : Math.max(side, isTablet ? (width - CONTENT_MAX_W) / 2 + side : side);
+  const edge = capped || contained ? side : Math.max(side, isTablet ? (width - CONTENT_MAX_W) / 2 + side : side);
 
   return (
     <View
@@ -81,7 +90,7 @@ export function ChipRow({
         onContentSizeChange={(w) => setContentW(w)}
         contentContainerStyle={{
           paddingHorizontal: edge,
-          paddingVertical: 12,
+          paddingVertical: padY,
           gap,
           alignItems: "center",
         }}

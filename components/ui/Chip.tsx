@@ -9,12 +9,15 @@ export function Chip({
   onPress,
   icon,
   tone = "primary",
+  flat = false,
 }: {
   label: string;
   active: boolean;
   onPress: () => void;
   icon?: string;
   tone?: "primary" | "secondary";
+  /** Sin halo cuando está activo: para chips dentro de una barra que lo recortaría. */
+  flat?: boolean;
 }) {
   const { C, shadow } = useTheme();
   const activeBg = tone === "secondary" ? C.secondary : C.primary;
@@ -31,7 +34,7 @@ export function Chip({
         borderWidth: 1,
         borderColor: active ? C.border : C.outlineVariant,
         backgroundColor: active ? activeBg : C.surface,
-        ...(active ? (tone === "secondary" ? shadow.sm : shadow.primary) : {}),
+        ...(active && !flat ? (tone === "secondary" ? shadow.sm : shadow.primary) : {}),
       }}
     >
       {icon && (

@@ -527,18 +527,26 @@ export default function MapScreen() {
         <View ref={tourSearchRef} collapsable={false} style={{ paddingHorizontal: 12, ...capWidth(isTablet) }}>
           <SearchBar value={search} onChangeText={t => { setSearch(t); if (selected) closeSheet(); }} variant="floating" />
         </View>
-        <View ref={tourChipsRef} collapsable={false} style={{ marginTop: -6, marginBottom: -4 }}>
-          <ChipRow gap={6} side={12}>
-            {[...PINNED, ...(categoriesQ.data ?? [])].map(cat => (
-              <Chip
-                key={cat.slug}
-                label={cat.label}
-                icon={cat.icon}
-                active={activeCategory === cat.slug}
-                onPress={() => { setActiveCategory(cat.slug); if (selected) closeSheet(); }}
-              />
-            ))}
-          </ChipRow>
+        {/* Barra de filtros: misma caja que la de búsqueda, con los chips dentro
+            y los extremos difuminados. Sombra en el contenedor externo y recorte
+            en el interno (con overflow hidden la sombra de iOS se cortaría). */}
+        <View ref={tourChipsRef} collapsable={false} style={{ paddingHorizontal: 12, ...capWidth(isTablet) }}>
+          <View style={{ borderRadius: 99, backgroundColor: C.surface, ...shadow.sm }}>
+            <View style={{ borderRadius: 99, overflow: 'hidden', borderWidth: 1, borderColor: C.outlineVariant }}>
+              <ChipRow contained fade fadeColor={C.surface} gap={6} side={8} padY={7}>
+                {[...PINNED, ...(categoriesQ.data ?? [])].map(cat => (
+                  <Chip
+                    key={cat.slug}
+                    flat
+                    label={cat.label}
+                    icon={cat.icon}
+                    active={activeCategory === cat.slug}
+                    onPress={() => { setActiveCategory(cat.slug); if (selected) closeSheet(); }}
+                  />
+                ))}
+              </ChipRow>
+            </View>
+          </View>
         </View>
 
         {/* Estado */}
