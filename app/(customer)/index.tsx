@@ -30,6 +30,7 @@ import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { TourGuide, type TourStep } from "@/components/tour/TourGuide";
 import { capWidth, useIsTablet } from "@/lib/responsive";
+import { ChipRow } from "@/components/ui/ChipRow";
 import * as Location from "expo-location";
 import {
   Pressable,
@@ -681,15 +682,7 @@ export default function HomeScreen() {
         {/* ── 1: Filtros pegajosos (categorías + tabs) ── */}
         <View style={{ backgroundColor: C.background }}>
           <View ref={tourChipsRef} collapsable={false}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingHorizontal: 20,
-                paddingVertical: 12,
-                gap: 8,
-              }}
-            >
+            <ChipRow constrain fadeColor={C.background} side={20}>
               {[...PINNED, ...(categoriesQ.data ?? [])].map((cat) => (
                 <Chip
                   key={cat.slug}
@@ -699,7 +692,7 @@ export default function HomeScreen() {
                   onPress={() => setActiveCategory(cat.slug)}
                 />
               ))}
-            </ScrollView>
+            </ChipRow>
           </View>
 
           <View
