@@ -184,7 +184,7 @@ export default function SubscriptionScreen() {
                 <AppText variant="bodySm" color={C.onSurfaceVariant}>
                   {expired
                     ? "Sube tu comprobante de pago para reactivar tu local."
-                    : "Al vencerse necesitás pagar la suscripción anual (10 USD) para seguir activo."}
+                    : "Al vencerse necesitas pagar la suscripción anual (10 USD) para seguir activo."}
                 </AppText>
               </View>
             </View>
