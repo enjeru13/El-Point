@@ -473,3 +473,78 @@ section { padding: 62px 0; position: relative; }
 .news-item h4 { font-family: var(--font-display); margin: 0 0 2px; font-size: 1.02rem; }
 .news-item p { margin: 0; color: var(--text-soft); font-size: 0.93rem; }
 .plan .plan-cta { margin-top: auto; align-self: flex-start; padding: 9px 16px; font-size: 0.92rem; }
+
+
+/* ═══ Lavado de cara ═══ */
+
+/* Hero grande y con opinión */
+.hero { padding: 72px 0 84px; }
+.hero h1 { font-size: clamp(2.7rem, 7.6vw, 5rem); line-height: 1.02; letter-spacing: -0.03em; margin-bottom: 0.45em; }
+.hero h1 .hl {
+  display: inline; color: var(--brand);
+  background: linear-gradient(transparent 62%, color-mix(in srgb, var(--brand) 22%, transparent) 62%);
+}
+.hero .lead { font-size: 1.28rem; max-width: 34ch; }
+.hero .wrap { grid-template-columns: 1.02fr 0.98fr; }
+
+.duo { position: relative; justify-self: center; width: min(540px, 100%); height: 600px; }
+@media (max-width: 900px) { .duo { height: 470px; } }
+.duo .glow {
+  position: absolute; inset: 8% 6%; border-radius: 50%; z-index: 0; filter: blur(60px);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--brand) 45%, transparent), transparent);
+}
+.phone {
+  position: absolute; margin: 0; z-index: 1; width: min(250px, 44vw); padding: 7px; border-radius: 38px;
+  background: #101012; box-shadow: var(--shadow-lg); border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.phone img { display: block; width: 100%; height: auto; border-radius: 31px; }
+.phone-a { left: 0; top: 46px; transform: rotate(-6deg); }
+.phone-b { right: 0; top: 0; transform: rotate(5deg); z-index: 2; }
+.float {
+  position: absolute; z-index: 3; display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface); color: var(--text); font-weight: 700; font-size: 0.86rem;
+  padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+  animation: bob 5s ease-in-out infinite;
+}
+.float .i { color: var(--brand); }
+.float.f1 { left: 4%; bottom: 14%; }
+.float.f2 { right: 8%; bottom: 6%; animation-delay: -1.6s; }
+.float.f3 { left: 36%; top: 4%; animation-delay: -3.2s; background: var(--brand); color: #fff; border-color: transparent; }
+@keyframes bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
+
+/* Banda de números */
+.stats {
+  padding: 0; color: #fff; position: relative;
+  background: linear-gradient(120deg, #b83c19, #e0632f 55%, #ff7a3a);
+}
+.stats .wrap { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+@media (max-width: 820px) { .stats .wrap { grid-template-columns: repeat(2, 1fr); } }
+.stat { padding: 34px 22px; border-right: 1px solid rgba(255, 255, 255, 0.22); min-width: 0; }
+.stat:last-child { border-right: 0; }
+@media (max-width: 820px) {
+  .stat:nth-child(2) { border-right: 0; }
+  .stat:nth-child(-n+2) { border-bottom: 1px solid rgba(255, 255, 255, 0.22); }
+}
+.stat b { display: block; font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1; letter-spacing: -0.02em; }
+.stat span { display: block; margin-top: 8px; font-size: 0.95rem; line-height: 1.35; opacity: 0.92; }
+
+/* Cinta de categorías */
+.marquee { overflow: hidden; border-bottom: 1px solid var(--border); background: var(--surface); padding: 20px 0; }
+.marquee .track { display: flex; gap: 26px; width: max-content; animation: slide 46s linear infinite; }
+.marquee:hover .track { animation-play-state: paused; }
+.marquee span { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.4rem, 3.4vw, 2.1rem); letter-spacing: -0.01em; white-space: nowrap; }
+.marquee .dot { color: var(--brand); font-size: 1.2rem; align-self: center; }
+@keyframes slide { to { transform: translateX(-50%); } }
+
+/* Revelado suave: solo se mueve, nunca se oculta */
+.js .reveal { transform: translateY(18px); transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.js .reveal.in { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee .track, .float { animation: none; }
+  .marquee .track { flex-wrap: wrap; width: auto; justify-content: center; }
+  .js .reveal { transform: none; transition: none; }
+}
+
+/* debe ir después de la regla de 2 columnas del hero */
+@media (max-width: 900px) { .hero .wrap { grid-template-columns: 1fr; } .hero .lead { max-width: none; } }
