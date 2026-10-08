@@ -23,15 +23,17 @@ const NAV: {
   label: string;
   icon: LucideIcon;
   end?: boolean;
+  /** Título del grupo; se muestra encima de este ítem. */
+  section?: string;
   key?: "restaurants" | "reported" | "reviews" | "support" | "payments" | "expiredSubs";
 }[] = [
   { to: "/", label: "Resumen", icon: LayoutDashboard, end: true },
   { to: "/estadisticas", label: "Estadísticas", icon: BarChart3 },
-  { to: "/restaurantes", label: "Locales pendientes", icon: Store, key: "restaurants" },
+  { to: "/pagos", label: "Pagos", icon: Banknote, key: "payments", section: "Negocio" },
+  { to: "/suscripciones", label: "Suscripciones", icon: CreditCard, key: "expiredSubs" },
+  { to: "/restaurantes", label: "Locales pendientes", icon: Store, key: "restaurants", section: "Moderación" },
   { to: "/reportados", label: "Locales reportados", icon: Flag, key: "reported" },
   { to: "/resenas", label: "Reseñas reportadas", icon: MessageSquareWarning, key: "reviews" },
-  { to: "/pagos", label: "Pagos", icon: Banknote, key: "payments" },
-  { to: "/suscripciones", label: "Suscripciones", icon: CreditCard, key: "expiredSubs" },
   { to: "/soporte", label: "Soporte", icon: LifeBuoy, key: "support" },
 ];
 
@@ -67,11 +69,14 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       </div>
 
       <nav className="flex flex-1 flex-col gap-0.5">
-        {NAV.map(({ to, label, icon: Icon, end, key }) => {
+        {NAV.map(({ to, label, icon: Icon, end, key, section }) => {
           const count = key ? counts?.[key] : undefined;
           return (
+            <div key={to} className="flex flex-col">
+              {section && (
+                <p className="mb-1 mt-5 px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-white/30">{section}</p>
+              )}
             <NavLink
-              key={to}
               to={to}
               end={end}
               className={({ isActive }) =>
@@ -100,6 +105,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                 </>
               )}
             </NavLink>
+            </div>
           );
         })}
       </nav>
@@ -179,7 +185,7 @@ export function Layout() {
       )}
 
       <main className="min-w-0 flex-1 bg-bg">
-        <div className="mx-auto max-w-5xl px-4 py-6 sm:px-8 sm:py-10">
+        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
           <Outlet />
         </div>
       </main>
