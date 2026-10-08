@@ -43,6 +43,9 @@
       <symbol id="ic-wifi" viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/></symbol>
       <symbol id="ic-tree" viewBox="0 0 24 24"><path d="m17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14h-.3a1 1 0 0 1-.7-1.7L9 9h-.2A1 1 0 0 1 8 7.3L12 3l4 4.3a1 1 0 0 1-.8 1.7H15l3 3.3a1 1 0 0 1-.7 1.7H17Z"/><path d="M12 22v-3"/></symbol>
       <symbol id="ic-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+      <symbol id="ic-ghost" viewBox="0 0 24 24"><path d="M9 10h.01"/><path d="M15 10h.01"/><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/></symbol>
+      <symbol id="ic-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+      <symbol id="ic-chart" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
       <symbol id="ic-whatsapp" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
       <symbol id="ic-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
     </defs>
@@ -86,14 +89,12 @@
             ninguna promo. Gratis y sin publicidad.
           </p>
           <div class="stores" id="descargar">
-            <a class="badge-link" href="https://play.google.com/store/apps/details?id=com.elpoint.app" target="_blank" rel="noopener" aria-label="Consíguelo en Google Play">
-              <img src="assets/googleplay-es.svg" alt="Consíguelo en Google Play" />
-            </a>
-            <a class="store" href="#" aria-disabled="true">
+            <a class="store store-main" href="#" aria-disabled="true">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.5 2-3.7 2.1-3.8-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.1 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.3 2.5 1.3-.1 1.8-.8 3.4-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.2 3.2-2.5.6-.9 1-1.8 1.3-2.8-3.4-1.3-3.9-4.8-3.9-4.9ZM14 5.4c.7-.9 1.2-2 1-3.2-1 .1-2.2.7-2.9 1.5-.7.8-1.2 2-1 3.1 1.1.1 2.2-.5 2.9-1.4Z"/></svg>
               App Store <span class="tag">Pronto</span>
             </a>
           </div>
+          <p class="store-note">Primero en iPhone y iPad. Android, después.</p>
           <div class="cta-row">
             <a class="btn btn-ghost" href="#duenos">Tengo un local <svg class="i"><use href="#ic-arrow-right"/></svg></a>
           </div>
@@ -239,6 +240,36 @@
       </div>
     </section>
 
+
+    <!-- Novedades -->
+    <section id="novedades">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Novedades</span>
+          <h2>Lo nuevo en El Point.</h2>
+          <p>Así está la app hoy, para quien come y para quien cocina.</p>
+        </div>
+
+        <h3 class="news-group">Para comensales</h3>
+        <div class="news">
+          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-ghost"/></svg></div><div><h4>Cocinas fantasma</h4><p>Locales que solo hacen delivery o pickup, con su propio filtro y zona aproximada.</p></div></div>
+          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-wallet"/></svg></div><div><h4>Métodos de pago</h4><p>Cada local indica cómo puedes pagarle, y puedes filtrar por el método que usas.</p></div></div>
+          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-wifi"/></svg></div><div><h4>Más comodidades</h4><p>Planta eléctrica, menú infantil, A/C, wifi y más, para elegir con datos.</p></div></div>
+          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-camera"/></svg></div><div><h4>Foto desde la cámara</h4><p>Toma la foto de tu rank en el momento, sin pasar por la galería.</p></div></div>
+          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-star"/></svg></div><div><h4>Ranks más honestos</h4><p>Un rank por local cada semana, para que las notas reflejen visitas reales.</p></div></div>
+          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-map"/></svg></div><div><h4>Mapa y filtros renovados</h4><p>Categorías simplificadas y filtros que se ven bien también en iPad.</p></div></div>
+        </div>
+
+        <h3 class="news-group">Para dueños</h3>
+        <div class="news">
+          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-chart"/></svg></div><div><h4>Quién te ve</h4><p>Cuántas personas abren tu local y tocan WhatsApp, llamar, cómo llegar, Instagram o menú.</p></div></div>
+          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-flame"/></svg></div><div><h4>Destacado con tu plan</h4><p>Cada plan que pagas suma días de Destacado: 3, 7 o 21.</p></div></div>
+          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-store"/></svg></div><div><h4>Tu perfil completo</h4><p>Fotos, horario, menú en PDF, comodidades y métodos de pago en un solo lugar.</p></div></div>
+          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-bell"/></svg></div><div><h4>Avisos de tu plan</h4><p>Te avisamos antes de que venza y cuando se activa.</p></div></div>
+        </div>
+      </div>
+    </section>
+
     <!-- Para dueños -->
     <section id="duenos" class="band">
       <div class="wrap">
@@ -286,17 +317,20 @@
             <h3>Mensual</h3>
             <p class="price"><b>US$3</b><span>al mes</span></p>
             <p class="plan-note">Sin compromiso. Cancelas cuando quieras.</p>
+            <a class="btn btn-ghost plan-cta" href="https://wa.me/584149797876?text=Hola%2C%20quiero%20el%20plan%20mensual%20de%20El%20Point%20para%20mi%20local.%20Mi%20local%20se%20llama%3A%20" target="_blank" rel="noopener">Quiero este plan</a>
           </div>
           <div class="plan">
             <h3>Trimestral</h3>
             <p class="price"><b>US$7</b><span>cada 3 meses</span></p>
             <p class="plan-note">US$2,33 al mes. Ahorras 22 %.</p>
+            <a class="btn btn-ghost plan-cta" href="https://wa.me/584149797876?text=Hola%2C%20quiero%20el%20plan%20trimestral%20de%20El%20Point%20para%20mi%20local.%20Mi%20local%20se%20llama%3A%20" target="_blank" rel="noopener">Quiero este plan</a>
           </div>
           <div class="plan plan-best">
             <span class="plan-tag">Mejor precio</span>
             <h3>Anual</h3>
             <p class="price"><b>US$18</b><span>al año</span></p>
             <p class="plan-note">US$1,50 al mes. Ahorras la mitad frente al mensual.</p>
+            <a class="btn btn-ghost plan-cta" href="https://wa.me/584149797876?text=Hola%2C%20quiero%20el%20plan%20anual%20de%20El%20Point%20para%20mi%20local.%20Mi%20local%20se%20llama%3A%20" target="_blank" rel="noopener">Quiero este plan</a>
           </div>
         </div>
 
@@ -364,12 +398,9 @@
       <div class="wrap">
         <div class="box">
           <h2>Descubre tu próximo lugar.</h2>
-          <p>El Point ya está en Google Play. App Store, pronto.</p>
+          <p>Muy pronto en App Store. La versión de Android viene después.</p>
           <div class="stores">
-            <a class="badge-link" href="https://play.google.com/store/apps/details?id=com.elpoint.app" target="_blank" rel="noopener" aria-label="Consíguelo en Google Play">
-              <img src="assets/googleplay-es.svg" alt="Consíguelo en Google Play" />
-            </a>
-            <a class="store" href="#" aria-disabled="true">
+            <a class="store store-main" href="#" aria-disabled="true">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.5 2-3.7 2.1-3.8-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.1 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.3 2.5 1.3-.1 1.8-.8 3.4-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.2 3.2-2.5.6-.9 1-1.8 1.3-2.8-3.4-1.3-3.9-4.8-3.9-4.9ZM14 5.4c.7-.9 1.2-2 1-3.2-1 .1-2.2.7-2.9 1.5-.7.8-1.2 2-1 3.1 1.1.1 2.2-.5 2.9-1.4Z"/></svg>
               App Store <span class="tag">Pronto</span>
             </a>
