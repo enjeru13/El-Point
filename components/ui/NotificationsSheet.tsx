@@ -143,6 +143,11 @@ function NotifCard({
       bg: C.error + "22",
       color: C.error,
     },
+    plan_active: {
+      icon: "check-decagram-outline",
+      bg: C.primaryFixed,
+      color: C.primary,
+    },
   };
   const cfg = CONFIG[notif.type] ?? CONFIG.like;
 

@@ -16,8 +16,7 @@ export type RestaurantEventType =
  */
 export function trackRestaurantEvent(restaurantId: string, type: RestaurantEventType): void {
   if (!restaurantId) return;
-  // RPC nuevo: los tipos generados no lo conocen hasta regenerarlos tras el db push.
-  (supabase as any)
+  supabase
     .rpc("track_restaurant_event", { p_restaurant_id: restaurantId, p_type: type })
     .then(
       () => {},
@@ -36,8 +35,8 @@ export function useRestaurantStats(restaurantId: string | undefined, days: numbe
     enabled: !!restaurantId,
     staleTime: 60_000,
     queryFn: async (): Promise<RestaurantStats> => {
-      const { data, error } = await (supabase as any).rpc("get_restaurant_stats", {
-        p_restaurant_id: restaurantId,
+      const { data, error } = await supabase.rpc("get_restaurant_stats", {
+        p_restaurant_id: restaurantId!,
         p_days: days,
       });
       if (error) throw error;

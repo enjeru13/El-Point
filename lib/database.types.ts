@@ -331,6 +331,48 @@ export type Database = {
           },
         ]
       }
+      restaurant_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          hour_bucket: string
+          id: number
+          restaurant_id: string
+          viewer_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          hour_bucket?: string
+          id?: never
+          restaurant_id: string
+          viewer_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          hour_bucket?: string
+          id?: never
+          restaurant_id?: string
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_events_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_events_viewer_id_fkey"
+            columns: ["viewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurant_payment_methods: {
         Row: {
           payment_method_id: number
@@ -1322,6 +1364,14 @@ export type Database = {
           verification_photo_path: string
         }[]
       }
+      get_restaurant_stats: {
+        Args: { p_days?: number; p_restaurant_id: string }
+        Returns: {
+          day: string
+          event_type: string
+          total: number
+        }[]
+      }
       gettransactionid: { Args: never; Returns: unknown }
       grant_mission: {
         Args: { p_mission: string; p_user: string }
@@ -2001,6 +2051,10 @@ export type Database = {
       st_wrapx: {
         Args: { geom: unknown; move: number; wrap: number }
         Returns: unknown
+      }
+      track_restaurant_event: {
+        Args: { p_restaurant_id: string; p_type: string }
+        Returns: undefined
       }
       unlockrows: { Args: { "": string }; Returns: number }
       updategeometrysrid: {
