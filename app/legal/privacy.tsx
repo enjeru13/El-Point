@@ -2,7 +2,7 @@ import { LegalBullet, LegalDoc, LegalP, LegalSection } from "@/components/ui/Leg
 
 export default function PrivacyScreen() {
   return (
-    <LegalDoc title="Política de Privacidad" updated="18 de septiembre de 2026">
+    <LegalDoc title="Política de Privacidad" updated="7 de octubre de 2026">
       <LegalP>
         Esta Política explica qué datos recoge El Point, para qué los usa y qué
         control tienes sobre ellos. Al usar la app, aceptas lo aquí descrito.
@@ -27,6 +27,9 @@ export default function PrivacyScreen() {
         </LegalBullet>
         <LegalBullet>
           Datos de negocio (dueños): nombre del local, dirección o zona, teléfono, redes, RIF y una foto de verificación (fachada o cocina, según el tipo de local). El RIF y la foto de verificación no se muestran públicamente.
+        </LegalBullet>
+        <LegalBullet>
+          Interacciones con locales: cuando abres un local o tocas WhatsApp, llamar, cómo llegar, Instagram o el menú, se cuenta para mostrarle al dueño cuántas personas lo ven y le escriben. El dueño recibe solo totales, nunca quién fue.
         </LegalBullet>
         <LegalBullet>
           Token de notificaciones push del dispositivo, para enviarte avisos.

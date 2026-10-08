@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews } from '@/lib/queries/reviews';
+import { useRestaurantStats } from '@/lib/queries/analytics';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 import { capWidth, useIsTablet } from '@/lib/responsive';
 
@@ -115,6 +116,8 @@ export default function AnalyticsScreen() {
   }
 
   const periodDays = period === 'Semana' ? 7 : period === 'Mes' ? 28 : 365;
+  const statsQ = useRestaurantStats(restaurant?.id, periodDays);
+  const stats = statsQ.data;
   const since = Date.now() - periodDays * DAY;
   const periodReviews = useMemo(
     () => reviews.filter(r => new Date(r.created_at).getTime() >= since),
@@ -211,6 +214,30 @@ export default function AnalyticsScreen() {
             <MetricCard icon="clock-outline" label="Última reseña" value={lastReview ? timeAgo(lastReview) : '—'} />
           </View>
         </View>
+
+        {/* Interacciones: cuánta gente ve el local y le escribe */}
+        {stats && (
+          <View style={{ gap: 10 }}>
+            <View style={{ gap: 2 }}>
+              <AppText variant="heading" style={{ fontSize: 17 }}>Quién te ve</AppText>
+              <AppText variant="caption" color={C.outline}>
+                {periodWord} · se cuenta desde que se activó esta función
+              </AppText>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <MetricCard icon="eye-outline"      label="Visitas al local" value={String(stats.view)} />
+              <MetricCard icon="whatsapp"         label="Toques a WhatsApp" value={String(stats.whatsapp)} />
+            </View>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <MetricCard icon="phone-outline"    label="Llamadas" value={String(stats.call)} />
+              <MetricCard icon="map-marker-outline" label="Cómo llegar" value={String(stats.directions)} />
+            </View>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <MetricCard icon="instagram"        label="Instagram" value={String(stats.instagram)} />
+              <MetricCard icon="book-open-outline" label="Menú" value={String(stats.menu)} />
+            </View>
+          </View>
+        )}
 
         {/* Bar chart - reseñas */}
         <View ref={tourChartRef} collapsable={false} style={{ padding: 18, borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, gap: 4, ...shadow.sm }}>

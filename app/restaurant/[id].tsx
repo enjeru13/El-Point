@@ -41,10 +41,12 @@ import { impact } from "@/lib/haptics";
 import { isOpenNow, formatRange, DAY_LABELS_LONG } from "@/lib/hours";
 import { useTheme } from "@/lib/ThemeContext";
 import { capWidth, CONTENT_MAX_W, useResponsive } from "@/lib/responsive";
+import { trackRestaurantEvent, type RestaurantEventType } from "@/lib/queries/analytics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   forwardRef,
   useCallback,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -451,6 +453,17 @@ export default function RestaurantProfileScreen() {
   const replyMut = useReplyToReview(id);
   const myProfileQ = useMyProfile();
   const paymentCatalogQ = usePaymentMethods();
+
+  // Una visita por apertura del local (el servidor descarta al dueño y repeticiones).
+  const viewedId = restaurantQ.data?.id;
+  useEffect(() => {
+    if (viewedId) trackRestaurantEvent(viewedId, "view");
+  }, [viewedId]);
+
+  function openTracked(type: RestaurantEventType, url: string) {
+    trackRestaurantEvent(id, type);
+    Linking.openURL(url);
+  }
   const favIdsQ = useFavoriteIds();
   const toggleFav = useToggleFavorite();
   const toast = useToast();
@@ -1073,7 +1086,7 @@ export default function RestaurantProfileScreen() {
               <Pressable
                 onPress={() => {
                   const url = whatsappUrl(restaurant.whatsapp);
-                  if (url) Linking.openURL(url);
+                  if (url) openTracked("whatsapp", url);
                 }}
                 disabled={!whatsappUrl(restaurant.whatsapp)}
                 style={{
@@ -1111,9 +1124,7 @@ export default function RestaurantProfileScreen() {
               restaurant.address && (
                 <Pressable
                   onPress={() =>
-                    Linking.openURL(
-                      `https://maps.google.com/?q=${encodeURIComponent(restaurant.address!)}`,
-                    )
+                    openTracked("directions", `https://maps.google.com/?q=${encodeURIComponent(restaurant.address!)}`)
                   }
                   style={{
                     flexDirection: "row",
@@ -1149,7 +1160,7 @@ export default function RestaurantProfileScreen() {
             {/* Teléfono */}
             {restaurant.phone && (
               <Pressable
-                onPress={() => Linking.openURL(`tel:${restaurant.phone}`)}
+                onPress={() => openTracked("call", `tel:${restaurant.phone}`)}
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
@@ -1181,7 +1192,7 @@ export default function RestaurantProfileScreen() {
             {/* WhatsApp */}
             {whatsappUrl(restaurant.whatsapp) && (
               <Pressable
-                onPress={() => Linking.openURL(whatsappUrl(restaurant.whatsapp)!)}
+                onPress={() => openTracked("whatsapp", whatsappUrl(restaurant.whatsapp)!)}
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
@@ -1213,7 +1224,7 @@ export default function RestaurantProfileScreen() {
             {/* Instagram */}
             {instagramUrl(restaurant.instagram) && (
               <Pressable
-                onPress={() => Linking.openURL(instagramUrl(restaurant.instagram)!)}
+                onPress={() => openTracked("instagram", instagramUrl(restaurant.instagram)!)}
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
@@ -1244,7 +1255,7 @@ export default function RestaurantProfileScreen() {
           {/* ── Menú PDF ── */}
           {restaurant.menu_pdf_url && (
             <Pressable
-              onPress={() => Linking.openURL(restaurant.menu_pdf_url!)}
+              onPress={() => openTracked("menu", restaurant.menu_pdf_url!)}
               style={{
                 flexDirection: "row",
                 alignItems: "center",
@@ -1423,7 +1434,7 @@ export default function RestaurantProfileScreen() {
                       label="Pedir"
                       onPress={() => {
                         const url = whatsappUrl(restaurant.whatsapp);
-                        if (url) Linking.openURL(url);
+                        if (url) openTracked("whatsapp", url);
                       }}
                       disabled={!whatsappUrl(restaurant.whatsapp)}
                       variant="secondary"
@@ -1437,9 +1448,7 @@ export default function RestaurantProfileScreen() {
                       label="Ir"
                       onPress={() =>
                         restaurant.address &&
-                        Linking.openURL(
-                          `https://maps.google.com/?q=${encodeURIComponent(restaurant.address)}`,
-                        )
+                        openTracked("directions", `https://maps.google.com/?q=${encodeURIComponent(restaurant.address)}`)
                       }
                       disabled={!restaurant.address}
                       variant="secondary"
