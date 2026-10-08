@@ -37,7 +37,7 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; color-scheme: light dark; }
 
 body {
   margin: 0;
@@ -304,13 +304,13 @@ section { padding: 62px 0; position: relative; }
   color: var(--text-soft); margin-bottom: 18px;
 }
 .rank-track {
-  list-style: none; margin: 0; padding: 0 0 8px;
+  list-style: none; margin: 0; padding: 8px 0 8px;
   display: flex; gap: 8px;
   position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
 }
 .rank-track::before {
-  content: ""; position: absolute; left: 6px; right: 6px; top: 6px; height: 2px;
+  content: ""; position: absolute; left: 6px; right: 6px; top: 15px; height: 2px;
   background: linear-gradient(90deg, var(--brand), color-mix(in srgb, var(--brand) 25%, var(--border)));
 }
 .rank-track li {
