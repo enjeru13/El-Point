@@ -47,6 +47,13 @@ export function canEditReview(r: Pick<Review, "created_at">): boolean {
 // la DB es la que de verdad lo hace cumplir).
 export const REVIEW_RATE_LIMIT_MS = 7 * 24 * 60 * 60 * 1000;
 
+/** Días que faltan para poder dejar otro rank en el mismo local (0 si ya puede). */
+export function daysUntilRankAgain(mostRecent: Pick<Review, "created_at"> | undefined): number {
+  if (!mostRecent) return 0;
+  const left = new Date(mostRecent.created_at).getTime() + REVIEW_RATE_LIMIT_MS - Date.now();
+  return left <= 0 ? 0 : Math.ceil(left / (24 * 60 * 60 * 1000));
+}
+
 export function canPostNewReview(mostRecent: Pick<Review, "created_at"> | undefined): boolean {
   if (!mostRecent) return true;
   return Date.now() - new Date(mostRecent.created_at).getTime() >= REVIEW_RATE_LIMIT_MS;

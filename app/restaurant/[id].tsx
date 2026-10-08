@@ -20,6 +20,7 @@ import {
   useReplyToReview,
   canEditReview,
   canPostNewReview,
+  daysUntilRankAgain,
   REPORT_REASONS,
   type Review,
   type ReportReason,
@@ -1412,23 +1413,18 @@ export default function RestaurantProfileScreen() {
               </View>
               {!isOwnerHere && (
                 <View style={{ flexDirection: "row", gap: 8 }}>
-                  <Button
-                    label={
-                      myReviewEditable
-                        ? "Editar mi rank"
-                        : canRankAgain
-                          ? "Deja tu rank"
-                          : "Ya rankeaste esta semana"
-                    }
-                    onPress={() => {
-                      if (myReviewEditable) startEditReview(myReview!);
-                      else if (canRankAgain) startCreateReview();
-                    }}
-                    disabled={!myReviewEditable && !canRankAgain}
-                    icon={myReviewEditable ? "pencil-outline" : "fire"}
-                    size="sm"
-                    fullWidth={false}
-                  />
+                  {(myReviewEditable || canRankAgain) && (
+                    <Button
+                      label={myReviewEditable ? "Editar mi rank" : "Deja tu rank"}
+                      onPress={() => {
+                        if (myReviewEditable) startEditReview(myReview!);
+                        else startCreateReview();
+                      }}
+                      icon={myReviewEditable ? "pencil-outline" : "fire"}
+                      size="sm"
+                      fullWidth={false}
+                    />
+                  )}
                   {restaurant.ghost_kitchen ? (
                     <Button
                       label="Pedir"
@@ -1461,6 +1457,17 @@ export default function RestaurantProfileScreen() {
                 </View>
               )}
             </View>
+
+            {/* Aviso discreto: ya rankeó y todavía no puede repetir ni editar. */}
+            {!isOwnerHere && !myReviewEditable && !canRankAgain && (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <Icon name="clock-check-outline" size={14} color={C.outline} />
+                <AppText variant="caption" color={C.outline}>
+                  Ya dejaste tu rank. Podrás rankear de nuevo en{" "}
+                  {daysUntilRankAgain(myReview)} {daysUntilRankAgain(myReview) === 1 ? "día" : "días"}.
+                </AppText>
+              </View>
+            )}
 
             {/* Rating summary */}
             <View
