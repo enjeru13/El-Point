@@ -14,6 +14,7 @@ export type NearbyRestaurant = {
   logo_url: string | null;
   boost_until: string | null;
   founder_rank: number | null;
+  has_plan: boolean;
   distance_m: number;
 };
 

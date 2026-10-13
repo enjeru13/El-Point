@@ -9,6 +9,7 @@ import { useTheme } from '@/lib/ThemeContext';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews, type Review } from '@/lib/queries/reviews';
 import { isBoosted, isFounder } from '@/lib/queries/restaurants';
+import { hasPlan } from '@/lib/plan';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { Avatar } from '@/components/ui/Avatar';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -98,11 +99,10 @@ export default function OwnerHomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showFounderWelcome, setShowFounderWelcome] = useState(false);
 
-  // Hidden from discovery (map/búsqueda/home) once the trial or the paid
-  // year lapses — Originales never hit this, RLS enforces it server-side too.
-  const subscriptionExpired =
-    !!restaurant && !isFounder(restaurant) &&
-    !!restaurant.paid_until && new Date(restaurant.paid_until) <= new Date();
+  // Perfil básico: el local sigue visible en el mapa, pero sin contacto, menú,
+  // fotos ni respuestas. Pasa cuando la prueba o el plan vencen. Los
+  // Originales nunca caen aquí.
+  const subscriptionExpired = !!restaurant && restaurant.status === 'approved' && !hasPlan(restaurant);
 
   useEffect(() => {
     if (!restaurant || !isFounder(restaurant)) return;
@@ -304,11 +304,11 @@ export default function OwnerHomeScreen() {
 
             <View style={{ flex: 1, gap: 2 }}>
               <AppText variant="bodyStrong">
-                {subscriptionExpired ? 'Oculto del mapa y búsquedas' : restaurant.is_active ? 'Local visible' : 'Local oculto'}
+                {subscriptionExpired ? 'Perfil básico' : restaurant.is_active ? 'Local visible' : 'Local oculto'}
               </AppText>
               <AppText variant="bodySm" color={C.onSurfaceVariant}>
                 {subscriptionExpired
-                  ? 'Tu suscripción venció. Puedes seguir usando la app y respondiendo reseñas, pero los comensales no te encuentran.'
+                  ? 'Tu local sigue en el mapa, pero sin contacto, menú, fotos ni respuestas a reseñas. Activa un plan para mostrarlos.'
                   : restaurant.is_active
                     ? 'Visible en mapa y búsquedas'
                     : 'No aparece para los comensales'}
@@ -321,7 +321,7 @@ export default function OwnerHomeScreen() {
               borderWidth: 1, borderColor: C.border,
             }}>
               <AppText variant="caption" color={subscriptionExpired ? '#fff' : restaurant.is_active ? C.onSurface : C.outline}>
-                {subscriptionExpired ? 'VENCIDO' : restaurant.is_active ? 'ACTIVO' : 'PAUSADO'}
+                {subscriptionExpired ? 'BÁSICO' : restaurant.is_active ? 'ACTIVO' : 'PAUSADO'}
               </AppText>
             </View>
           </View>

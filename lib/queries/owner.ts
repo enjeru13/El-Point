@@ -50,8 +50,8 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
   const { data, error } = await supabase
     .from("restaurants")
     .select(
-      `id, name, description, address, phone, whatsapp, instagram, price_level,
-       logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
+      `id, name, description, address, price_level,
+       logo_url, cover_url, promo_text, hours, is_active,
        status, status_reason, submitted_at,
        rating_avg, rating_count, boost_until, founder_rank, paid_until, host_streak_weeks, created_at,
        ghost_kitchen, zone_label, latitude, longitude,
@@ -75,7 +75,12 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
   const mine = ((priv ?? []) as any[]).find((p) => p.restaurant_id === rest.id);
 
   return {
-    ...(rest as Omit<OwnerRestaurant, "categories" | "amenities" | "payment_methods" | "hours" | "lat" | "lng" | "rif" | "verification_photo_path">),
+    ...(rest as Omit<OwnerRestaurant, "categories" | "amenities" | "payment_methods" | "hours" | "lat" | "lng" | "rif" | "verification_photo_path" | "phone" | "whatsapp" | "instagram" | "menu_pdf_url">),
+    // El contacto tampoco se lee con select directo: viene de la misma función.
+    phone: (mine?.phone ?? null) as string | null,
+    whatsapp: (mine?.whatsapp ?? null) as string | null,
+    instagram: (mine?.instagram ?? null) as string | null,
+    menu_pdf_url: (mine?.menu_pdf_url ?? null) as string | null,
     rif: (mine?.rif ?? null) as string | null,
     verification_photo_path: (mine?.verification_photo_path ?? null) as string | null,
     hours: parseHours(hours),

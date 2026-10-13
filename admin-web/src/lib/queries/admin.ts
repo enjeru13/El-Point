@@ -35,7 +35,7 @@ async function fetchPendingRestaurants(): Promise<PendingRestaurant[]> {
   const { data, error } = await supabase
     .from("restaurants")
     .select(
-      `id, name, address, whatsapp, instagram, status, status_reason,
+      `id, name, address, status, status_reason,
        submitted_at, ghost_kitchen, zone_label,
        owner:profiles!owner_id ( username, full_name ),
        restaurant_categories ( categories ( label ) )`,
@@ -57,8 +57,8 @@ async function fetchPendingRestaurants(): Promise<PendingRestaurant[]> {
       id: r.id,
       name: r.name,
       address: r.address,
-      whatsapp: r.whatsapp,
-      instagram: r.instagram,
+      whatsapp: privById.get(r.id)?.whatsapp ?? null,
+      instagram: privById.get(r.id)?.instagram ?? null,
       rif: privById.get(r.id)?.rif ?? null,
       status: r.status,
       status_reason: r.status_reason,

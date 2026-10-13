@@ -1,3 +1,4 @@
+import { hasPlan } from "@/lib/plan";
 import type { RestaurantAmenity, RestaurantCategory } from "@/lib/queries/restaurants";
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -15,6 +16,7 @@ export type FeedRestaurant = {
   lng: number | null;
   boost_until: string | null;
   founder_rank: number | null;
+  has_plan: boolean;
   ghost_kitchen: boolean;
   zone_label: string | null;
   categories: RestaurantCategory[];
@@ -48,7 +50,7 @@ function num(v: any): number | null {
 }
 
 const RESTAURANT_EMBED = `restaurant:restaurants (
-  id, name, address, rating_avg, rating_count, price_level, promo_text, cover_url, latitude, longitude, boost_until, founder_rank, ghost_kitchen, zone_label,
+  id, name, address, rating_avg, rating_count, price_level, promo_text, cover_url, latitude, longitude, boost_until, founder_rank, paid_until, ghost_kitchen, zone_label,
   restaurant_categories ( categories ( slug, label, icon ) ),
   restaurant_amenities ( amenities ( id, slug, label, icon ) )
 )`;
@@ -82,16 +84,17 @@ async function fetchFeed(): Promise<FeedItem[]> {
         rating_avg: r.restaurant.rating_avg,
         rating_count: r.restaurant.rating_count,
         price_level: num(r.restaurant.price_level),
-        promo_text: r.restaurant.promo_text ?? null,
-        cover_url: r.restaurant.cover_url ?? null,
+        promo_text: hasPlan(r.restaurant) ? (r.restaurant.promo_text ?? null) : null,
+        cover_url: hasPlan(r.restaurant) ? (r.restaurant.cover_url ?? null) : null,
         lat: num(r.restaurant.latitude),
         lng: num(r.restaurant.longitude),
-        boost_until: r.restaurant.boost_until ?? null,
+        boost_until: hasPlan(r.restaurant) ? (r.restaurant.boost_until ?? null) : null,
         founder_rank: r.restaurant.founder_rank ?? null,
+        has_plan: hasPlan(r.restaurant),
         ghost_kitchen: !!r.restaurant.ghost_kitchen,
         zone_label: r.restaurant.zone_label ?? null,
         categories: mapCategories(r.restaurant.restaurant_categories),
-        amenities: mapAmenities(r.restaurant.restaurant_amenities),
+        amenities: hasPlan(r.restaurant) ? mapAmenities(r.restaurant.restaurant_amenities) : [],
       },
     }));
 
@@ -129,16 +132,17 @@ async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
       rating_avg: f.restaurant.rating_avg,
       rating_count: f.restaurant.rating_count,
       price_level: num(f.restaurant.price_level),
-      promo_text: f.restaurant.promo_text ?? null,
-      cover_url: f.restaurant.cover_url ?? null,
+      promo_text: hasPlan(f.restaurant) ? (f.restaurant.promo_text ?? null) : null,
+      cover_url: hasPlan(f.restaurant) ? (f.restaurant.cover_url ?? null) : null,
       lat: num(f.restaurant.latitude),
       lng: num(f.restaurant.longitude),
-      boost_until: f.restaurant.boost_until ?? null,
+      boost_until: hasPlan(f.restaurant) ? (f.restaurant.boost_until ?? null) : null,
       founder_rank: f.restaurant.founder_rank ?? null,
+      has_plan: hasPlan(f.restaurant),
       ghost_kitchen: !!f.restaurant.ghost_kitchen,
       zone_label: f.restaurant.zone_label ?? null,
       categories: mapCategories(f.restaurant.restaurant_categories),
-      amenities: mapAmenities(f.restaurant.restaurant_amenities),
+      amenities: hasPlan(f.restaurant) ? mapAmenities(f.restaurant.restaurant_amenities) : [],
       favorited_at: f.created_at,
     }));
 }

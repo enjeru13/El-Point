@@ -984,7 +984,9 @@ export default function RestaurantProfileScreen() {
                   Este es tu local
                 </AppText>
                 <AppText variant="caption" color={C.onSurfaceVariant}>
-                  Así es como lo ven los clientes
+                  {restaurant.has_plan
+                    ? "Así es como lo ven los clientes"
+                    : "Perfil básico: sin plan no se ven contacto, menú ni fotos"}
                 </AppText>
               </View>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
@@ -1034,7 +1036,7 @@ export default function RestaurantProfileScreen() {
             }}
           >
             {/* Horario */}
-            {(() => {
+            {restaurant.has_plan && (() => {
               const os = isOpenNow(restaurant.hours);
               const canExpand = !!restaurant.hours;
               return (
@@ -1156,6 +1158,52 @@ export default function RestaurantProfileScreen() {
                   <Icon name="chevron-right" size={18} color={C.outline} />
                 </Pressable>
               )
+            )}
+
+            {/* Contacto bloqueado: el local no tiene plan. Cada toque se cuenta
+                para decirle al dueño cuánta gente quiso contactarlo. */}
+            {!restaurant.has_plan && !restaurant.ghost_kitchen && (
+              <Pressable
+                onPress={() => {
+                  if (isOwnerHere) {
+                    router.push("/subscription" as any);
+                    return;
+                  }
+                  trackRestaurantEvent(id, "blocked");
+                  toast.info("Este local todavía no tiene contacto en El Point");
+                }}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 14,
+                  padding: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: C.outlineVariant,
+                }}
+              >
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    backgroundColor: C.surfaceContainerHighest,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="lock-outline" size={18} color={C.outline} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <AppText variant="bodyStrong" color={C.onSurfaceVariant}>
+                    Contacto no disponible
+                  </AppText>
+                  <AppText variant="bodySm" color={C.outline}>
+                    {isOwnerHere
+                      ? "Activa un plan para mostrar tu WhatsApp, teléfono e Instagram"
+                      : "Este local aún no activó su perfil completo"}
+                  </AppText>
+                </View>
+              </Pressable>
             )}
 
             {/* Teléfono */}
@@ -1817,11 +1865,20 @@ export default function RestaurantProfileScreen() {
                     </View>
                   ) : isOwnerHere ? (
                     <Pressable
-                      onPress={() => { setReplyingId(r.id); setReplyText(""); }}
+                      onPress={() => {
+                        if (!restaurant.has_plan) {
+                          router.push("/subscription" as any);
+                          return;
+                        }
+                        setReplyingId(r.id);
+                        setReplyText("");
+                      }}
                       style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start" }}
                     >
-                      <Icon name="reply" size={15} color={C.secondary} />
-                      <AppText variant="bodyStrong" color={C.secondary} style={{ fontSize: 14 }}>Responder</AppText>
+                      <Icon name={restaurant.has_plan ? "reply" : "lock-outline"} size={15} color={C.secondary} />
+                      <AppText variant="bodyStrong" color={C.secondary} style={{ fontSize: 14 }}>
+                        {restaurant.has_plan ? "Responder" : "Responder · con plan"}
+                      </AppText>
                     </Pressable>
                   ) : null}
 

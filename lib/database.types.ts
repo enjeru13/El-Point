@@ -1127,9 +1127,13 @@ export type Database = {
       admin_restaurant_private: {
         Args: { p_ids: string[] }
         Returns: {
+          instagram: string
+          menu_pdf_url: string
+          phone: string
           restaurant_id: string
           rif: string
           verification_photo_path: string
+          whatsapp: string
         }[]
       }
       admin_set_restaurant_boost: {
@@ -1359,11 +1363,26 @@ export type Database = {
       get_my_restaurant_private: {
         Args: never
         Returns: {
+          instagram: string
+          menu_pdf_url: string
+          phone: string
           restaurant_id: string
           rif: string
           verification_photo_path: string
+          whatsapp: string
         }[]
       }
+      get_restaurant_contact: {
+        Args: { p_restaurant_id: string }
+        Returns: {
+          has_plan: boolean
+          instagram: string
+          menu_pdf_url: string
+          phone: string
+          whatsapp: string
+        }[]
+      }
+      restaurant_has_plan: { Args: { p_id: string }; Returns: boolean }
       get_restaurant_stats: {
         Args: { p_days?: number; p_restaurant_id: string }
         Returns: {
@@ -1398,6 +1417,7 @@ export type Database = {
           cover_url: string
           distance_m: number
           founder_rank: number
+          has_plan: boolean
           id: string
           lat: number
           lng: number

@@ -1,4 +1,5 @@
 import { parseHours, type Hours } from "@/lib/hours";
+import { hasPlan } from "@/lib/plan";
 import type { PaymentMethod } from "@/lib/queries/paymentMethods";
 import type { RestaurantAmenity, RestaurantCategory } from "@/lib/queries/restaurants";
 import { supabase } from "@/lib/supabase";
@@ -17,6 +18,7 @@ export type SearchResult = {
   lng: number | null;
   boost_until: string | null;
   founder_rank: number | null;
+  has_plan: boolean;
   ghost_kitchen: boolean;
   zone_label: string | null;
   categories: RestaurantCategory[];
@@ -29,7 +31,7 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
     .from("restaurants")
     .select(
       `id, name, address, price_level, rating_avg, rating_count, cover_url, hours,
-       latitude, longitude, boost_until, founder_rank, ghost_kitchen, zone_label,
+       latitude, longitude, boost_until, founder_rank, paid_until, ghost_kitchen, zone_label,
        restaurant_categories ( categories ( slug, label, icon ) ),
        restaurant_amenities ( amenities ( id, slug, label, icon ) ),
        restaurant_payment_methods ( payment_methods ( id, slug, label, icon ) )`,
@@ -39,31 +41,37 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
 
   if (error) throw error;
 
-  return (data ?? []).map((r: any) => ({
+  return (data ?? []).map((r: any) => {
+    // Sin plan el local sigue apareciendo, pero con perfil básico: sin foto,
+    // horario, comodidades ni pagos (así tampoco entra en esos filtros).
+    const plan = hasPlan(r);
+    return {
     id: r.id,
     name: r.name,
     address: r.address,
     price_level: r.price_level,
     rating_avg: r.rating_avg,
     rating_count: r.rating_count,
-    cover_url: r.cover_url ?? null,
-    hours: parseHours(r.hours),
+    cover_url: plan ? (r.cover_url ?? null) : null,
+    hours: plan ? parseHours(r.hours) : null,
     lat: typeof r.latitude === "number" ? r.latitude : null,
     lng: typeof r.longitude === "number" ? r.longitude : null,
-    boost_until: r.boost_until ?? null,
+    boost_until: plan ? (r.boost_until ?? null) : null,
     founder_rank: r.founder_rank ?? null,
+    has_plan: plan,
     ghost_kitchen: !!r.ghost_kitchen,
     zone_label: r.zone_label ?? null,
     categories: (r.restaurant_categories ?? [])
       .map((rc: any) => rc.categories)
       .filter(Boolean),
-    amenities: (r.restaurant_amenities ?? [])
-      .map((ra: any) => ra.amenities)
-      .filter(Boolean),
-    payment_methods: (r.restaurant_payment_methods ?? [])
-      .map((rp: any) => rp.payment_methods)
-      .filter(Boolean),
-  }));
+    amenities: plan
+      ? (r.restaurant_amenities ?? []).map((ra: any) => ra.amenities).filter(Boolean)
+      : [],
+    payment_methods: plan
+      ? (r.restaurant_payment_methods ?? []).map((rp: any) => rp.payment_methods).filter(Boolean)
+      : [],
+    };
+  });
 }
 
 // Small-city dataset: fetch active restaurants once, filter/sort on the client.

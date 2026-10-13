@@ -549,3 +549,12 @@ section { padding: 62px 0; position: relative; }
 
 /* debe ir después de la regla de 2 columnas del hero */
 @media (max-width: 900px) { .hero .wrap { grid-template-columns: 1fr; } .hero .lead { max-width: none; } }
+
+
+/* ── Perfil básico vs. completo ── */
+.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 28px 0; }
+.cmp { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; min-width: 0; }
+.cmp h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 1.15rem; }
+.cmp .tag { font-family: var(--font-body); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; background: var(--surface-2, var(--border)); color: var(--text-soft); }
+.cmp-plan { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand) inset; }
+.cmp-plan .tag { background: var(--brand); color: #fff; }

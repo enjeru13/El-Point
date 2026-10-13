@@ -39,6 +39,8 @@ import { instagramHandle } from '@/lib/contact';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 import { capWidth, useIsTablet } from '@/lib/responsive';
 import { isFounder } from '@/lib/queries/restaurants';
+import { hasPlan } from '@/lib/plan';
+import { PlanLock } from '@/components/ui/PlanLock';
 import { FounderBadge } from '@/components/ui/FounderBadge';
 
 function Divider() {
@@ -93,6 +95,8 @@ export default function OwnerProfileScreen() {
   const toast = useToast();
   const restaurantQ = useMyRestaurant();
   const restaurant = restaurantQ.data ?? null;
+  // Perfil básico (sin plan): contacto, menú, fotos, horario, promo, comodidades y pagos van bloqueados.
+  const plan = !!restaurant && hasPlan(restaurant);
   const updateMut = useUpdateMyRestaurant(restaurant?.id);
   const updateAmenitiesMut = useUpdateRestaurantAmenities(restaurant?.id);
   const updatePaymentsMut = useUpdateRestaurantPaymentMethods(restaurant?.id);
@@ -135,12 +139,14 @@ export default function OwnerProfileScreen() {
   const tourPhotosRef = useRef<View>(null);
   const scrollRef     = useRef<ScrollView>(null);
   const scrollY       = useRef(0);
-  const tourSteps: TourStep[] = [
+  const allTourSteps: TourStep[] = [
     { ref: tourEditRef, icon: 'pencil-outline', title: 'Edita tu local', text: 'Toca aquí para actualizar dirección, contacto, comodidades y más.' },
     { ref: tourInfoRef, icon: 'store-outline', title: 'Información del negocio', text: 'Dirección, teléfono, WhatsApp, Instagram y tu rango de precio.' },
     { ref: tourHoursRef, icon: 'clock-outline', title: 'Tu horario', text: 'Marca los días abiertos y las horas de cada uno.' },
     { ref: tourPhotosRef, icon: 'camera-plus-outline', title: 'Fotos y menú', text: 'Portada, logo y tu carta en PDF: lo primero que ve el comensal.' },
   ];
+  // Sin plan esas dos secciones están bloqueadas: el recorrido no las señala.
+  const tourSteps = plan ? allTourSteps : allTourSteps.filter((st) => st.ref !== tourHoursRef && st.ref !== tourPhotosRef);
 
   useEffect(() => {
     let alive = true;
@@ -672,7 +678,7 @@ export default function OwnerProfileScreen() {
               </View>
             )}
 
-            {editing ? (
+            {editing && plan ? (
               <View style={{ marginTop: 12, gap: 6 }}>
                 <AppText variant="overline" color={C.outline}>DESCRIPCIÓN DEL LOCAL</AppText>
                 <AppTextInput
@@ -712,12 +718,34 @@ export default function OwnerProfileScreen() {
 
           <Field icon="map-marker" label="Dirección" value={address} editing={editing} onChangeText={setAddress} placeholder="Calle, sector, ciudad" />
           <Divider />
-          <Field icon="phone-outline" label="Teléfono" value={phone} editing={editing} onChangeText={setPhone} placeholder="+58 276 000 0000" keyboardType="phone-pad" />
-          <Divider />
-          <Field icon="whatsapp" label="WhatsApp" value={whatsapp} editing={editing} onChangeText={setWhatsapp} placeholder="+58 412 000 0000" keyboardType="phone-pad" />
-          <Divider />
-          <Field icon="instagram" label="Instagram" value={instagram} editing={editing} onChangeText={setInstagram} placeholder="tu_local" />
-          <Divider />
+          {plan ? (
+            <>
+              <Field icon="phone-outline" label="Teléfono" value={phone} editing={editing} onChangeText={setPhone} placeholder="+58 276 000 0000" keyboardType="phone-pad" />
+              <Divider />
+              <Field icon="whatsapp" label="WhatsApp" value={whatsapp} editing={editing} onChangeText={setWhatsapp} placeholder="+58 412 000 0000" keyboardType="phone-pad" />
+              <Divider />
+              <Field icon="instagram" label="Instagram" value={instagram} editing={editing} onChangeText={setInstagram} placeholder="tu_local" />
+              <Divider />
+            </>
+          ) : (
+            <>
+              {restaurant.ghost_kitchen ? (
+                <>
+                  <Field icon="whatsapp" label="WhatsApp" value={whatsapp} editing={editing} onChangeText={setWhatsapp} placeholder="+58 412 000 0000" keyboardType="phone-pad" />
+                  <Divider />
+                </>
+              ) : null}
+              <PlanLock
+                compact
+                title="Contacto"
+                body={restaurant.ghost_kitchen
+                  ? 'Teléfono e Instagram vienen con el plan. El WhatsApp sigue visible.'
+                  : 'WhatsApp, llamada e Instagram vienen con el plan.'}
+                onPress={() => router.push('/subscription' as any)}
+              />
+              <Divider />
+            </>
+          )}
 
           {/* Precio */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12, paddingHorizontal: 18 }}>
@@ -751,6 +779,9 @@ export default function OwnerProfileScreen() {
         </View>
 
         {/* Comodidades */}
+        {!plan ? (
+          <PlanLock title="Comodidades" body="Muestra wifi, estacionamiento, aire acondicionado y más para que te elijan." onPress={() => router.push('/subscription' as any)} />
+        ) : (
         <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
           <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
             <AppText variant="bodyStrong">Comodidades</AppText>
@@ -785,8 +816,12 @@ export default function OwnerProfileScreen() {
             )}
           </View>
         </View>
+        )}
 
         {/* Métodos de pago */}
+        {!plan ? (
+          <PlanLock title="Métodos de pago" body="Indica cómo te pueden pagar y entra en los filtros de búsqueda." onPress={() => router.push('/subscription' as any)} />
+        ) : (
         <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
           <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
             <AppText variant="bodyStrong">Métodos de pago</AppText>
@@ -831,8 +866,12 @@ export default function OwnerProfileScreen() {
             )}
           </View>
         </View>
+        )}
 
         {/* Horario */}
+        {!plan ? (
+          <PlanLock title="Horario" body="Tu horario y el “abierto ahora” se ven en tu perfil." onPress={() => router.push('/subscription' as any)} />
+        ) : (
         <View ref={tourHoursRef} collapsable={false} style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
           <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
             <AppText variant="bodyStrong">Horario</AppText>
@@ -883,8 +922,12 @@ export default function OwnerProfileScreen() {
             })}
           </View>
         </View>
+        )}
 
         {/* Oferta */}
+        {!plan ? (
+          <PlanLock title="Oferta / promoción" body="Publica una promo y avisamos a quienes te tienen en favoritos." onPress={() => router.push('/subscription' as any)} />
+        ) : (
         <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
           <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
             <AppText variant="bodyStrong">Oferta / promoción</AppText>
@@ -913,6 +956,7 @@ export default function OwnerProfileScreen() {
             )}
           </View>
         </View>
+        )}
 
         {/* Visibilidad */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: 20, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, ...shadow.sm }}>
@@ -1038,6 +1082,9 @@ export default function OwnerProfileScreen() {
         </View>
 
         {/* Fotos y menú */}
+        {!plan ? (
+          <PlanLock title="Fotos y menú" body="Portada, logo y tu carta en PDF: lo primero que ve el comensal." onPress={() => router.push('/subscription' as any)} />
+        ) : (
         <View ref={tourPhotosRef} collapsable={false} style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
           <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
             <AppText variant="bodyStrong">Fotos y menú</AppText>
@@ -1131,6 +1178,7 @@ export default function OwnerProfileScreen() {
             <Icon name="chevron-right" size={18} color={C.outline} />
           </Pressable>
         </View>
+        )}
 
       </ScrollView>
 

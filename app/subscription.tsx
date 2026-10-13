@@ -22,6 +22,7 @@ import {
 import { capWidth, useIsTablet } from "@/lib/responsive";
 import { PaymentMethodPicker } from "@/components/ui/PaymentMethodPicker";
 import { PAYMENTS_IN_APP } from "@/lib/billing";
+import { PLAN_PERKS } from "@/lib/plan";
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "En revisión",
@@ -177,7 +178,7 @@ export default function SubscriptionScreen() {
               <View style={{ flex: 1 }}>
                 <AppText variant="bodyStrong">
                   {left === null
-                    ? "Sin plan activo todavía"
+                    ? "Perfil básico"
                     : expired
                       ? "Tu plan venció"
                       : `${left} ${left === 1 ? "día" : "días"} restantes`}
@@ -188,12 +189,34 @@ export default function SubscriptionScreen() {
                       ? "Sube tu comprobante de pago para reactivar tu local."
                       : "Al vencerse necesitas pagar la suscripción anual (10 USD) para seguir activo."
                     : expired
-                      ? "Tu local no aparece en el mapa ni en las búsquedas mientras el plan esté vencido."
+                      ? "Tu local sigue en el mapa, pero con perfil básico: sin contacto, menú ni fotos. Renueva para recuperarlos."
                       : r.paid_until
                         ? `Tu plan está activo hasta el ${new Date(r.paid_until).toLocaleDateString("es-VE", { day: "numeric", month: "long", year: "numeric" })}.`
                         : "Tu local está activo."}
                 </AppText>
               </View>
+            </View>
+          )}
+
+          {!founder && (
+            <View
+              style={{
+                padding: 16, borderRadius: 20, gap: 12,
+                backgroundColor: C.surface, borderWidth: 1, borderColor: C.border,
+              }}
+            >
+              <AppText variant="bodyStrong">Qué incluye el plan</AppText>
+              <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                Tu local siempre aparece en el mapa. Con el plan, además, los comensales ven esto:
+              </AppText>
+              {PLAN_PERKS.map((p) => (
+                <View key={p.label} style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                  <View style={{ width: 30, height: 30, borderRadius: 9, backgroundColor: C.primaryFixed, alignItems: "center", justifyContent: "center" }}>
+                    <Icon name={p.icon} size={16} color={C.primary} />
+                  </View>
+                  <AppText variant="bodySm" style={{ flex: 1 }}>{p.label}</AppText>
+                </View>
+              ))}
             </View>
           )}
 

@@ -346,7 +346,8 @@ export default function MapScreen() {
       icon: icons?.get(r.id)?.icon ?? 'silverware-fork-knife',
       categoryLabel: icons?.get(r.id)?.label ?? null,
       distanceLabel: fmtDistance(r.distance_m),
-      amenities: am?.get(r.id) ?? [],
+      // Sin plan las comodidades no se muestran, así que tampoco entran en el filtro.
+      amenities: r.has_plan ? (am?.get(r.id) ?? []) : [],
     }));
   }, [nearbyQ.data, iconsQ.data, amenitiesMapQ.data]);
 

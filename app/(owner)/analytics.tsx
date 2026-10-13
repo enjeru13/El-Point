@@ -9,6 +9,9 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews } from '@/lib/queries/reviews';
 import { useRestaurantStats } from '@/lib/queries/analytics';
+import { hasPlan } from '@/lib/plan';
+import { PlanLock } from '@/components/ui/PlanLock';
+import { useRouter } from 'expo-router';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 import { capWidth, useIsTablet } from '@/lib/responsive';
 
@@ -86,6 +89,7 @@ export default function AnalyticsScreen() {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const isTablet = useIsTablet();
+  const router = useRouter();
   const [period, setPeriod] = useState<Period>('Semana');
   const [refreshing, setRefreshing] = useState(false);
 
@@ -215,8 +219,32 @@ export default function AnalyticsScreen() {
           </View>
         </View>
 
+        {/* Sin plan: solo el gancho -- cuánta gente lo vio y cuántos quisieron escribirle. */}
+        {stats && !hasPlan(restaurant) && (
+          <View style={{ gap: 10 }}>
+            <View style={{ gap: 2 }}>
+              <AppText variant="heading" style={{ fontSize: 17 }}>Quién te ve</AppText>
+              <AppText variant="caption" color={C.outline}>{periodWord}</AppText>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <MetricCard icon="eye-outline" label="Visitas al local" value={String(stats.view)} />
+              <MetricCard icon="lock-outline" label="Quisieron contactarte" value={String(stats.blocked)} />
+            </View>
+            <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden' }}>
+              <PlanLock
+                compact
+                title="El detalle va con el plan"
+                body={stats.blocked > 0
+                  ? `${stats.blocked} ${stats.blocked === 1 ? 'persona quiso' : 'personas quisieron'} escribirte o llamarte y no pudieron. Con el plan, tu contacto queda visible.`
+                  : 'Con el plan ves quién toca WhatsApp, llamar, cómo llegar, Instagram y menú.'}
+                onPress={() => router.push('/subscription' as any)}
+              />
+            </View>
+          </View>
+        )}
+
         {/* Interacciones: cuánta gente ve el local y le escribe */}
-        {stats && (
+        {stats && hasPlan(restaurant) && (
           <View style={{ gap: 10 }}>
             <View style={{ gap: 2 }}>
               <AppText variant="heading" style={{ fontSize: 17 }}>Quién te ve</AppText>

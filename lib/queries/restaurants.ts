@@ -1,4 +1,5 @@
 import { parseHours, type Hours } from "@/lib/hours";
+import { hasPlan } from "@/lib/plan";
 import type { PaymentMethod } from "@/lib/queries/paymentMethods";
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -53,6 +54,9 @@ export type RestaurantDetail = {
   rating_count: number;
   boost_until: string | null;
   founder_rank: number | null;
+  paid_until: string | null;
+  /** Perfil completo (Original o plan vigente). Sin plan llegan vacíos contacto, menú, fotos, horario, promo, comodidades y pagos. */
+  has_plan: boolean;
   ghost_kitchen: boolean;
   zone_label: string | null;
   categories: RestaurantCategory[];
@@ -65,12 +69,15 @@ export function restaurantKeys(id: string) {
 }
 
 async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
+  // El contacto (WhatsApp, teléfono, Instagram, menú) no se lee de la tabla:
+  // lo entrega el servidor según el plan del local.
+  const contactReq = supabase.rpc("get_restaurant_contact", { p_restaurant_id: id }).maybeSingle();
   const { data, error } = await supabase
     .from("restaurants")
     .select(
-      `id, owner_id, name, description, address, whatsapp, instagram, phone,
-       price_level, logo_url, cover_url, menu_pdf_url, promo_text, hours, is_active,
-       status, status_reason, rating_avg, rating_count, boost_until, founder_rank,
+      `id, owner_id, name, description, address,
+       price_level, logo_url, cover_url, promo_text, hours, is_active,
+       status, status_reason, rating_avg, rating_count, boost_until, founder_rank, paid_until,
        ghost_kitchen, zone_label,
        restaurant_categories ( categories ( slug, label, icon ) ),
        restaurant_amenities ( amenities ( id, slug, label, icon ) ),
@@ -80,6 +87,7 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
     .single();
 
   if (error) throw error;
+  const contact = (await contactReq).data;
 
   // Cast right away — the generated Supabase types don't know about a
   // brand-new column (founder_rank) until `supabase gen types` is re-run
@@ -98,12 +106,27 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
     .filter(Boolean);
 
   const { restaurant_categories, restaurant_amenities, restaurant_payment_methods, hours, ...rest } = row;
+  const plan = hasPlan(row);
   return {
-    ...(rest as Omit<RestaurantDetail, "categories" | "amenities" | "payment_methods" | "hours">),
-    hours: parseHours(hours),
+    ...(rest as Omit<
+      RestaurantDetail,
+      "categories" | "amenities" | "payment_methods" | "hours" | "whatsapp" | "instagram" | "phone" | "menu_pdf_url" | "has_plan"
+    >),
+    whatsapp: contact?.whatsapp ?? null,
+    instagram: contact?.instagram ?? null,
+    phone: contact?.phone ?? null,
+    menu_pdf_url: contact?.menu_pdf_url ?? null,
+    has_plan: plan,
+    // Sin plan: perfil básico. Estos campos llegan vacíos para todos.
+    description: plan ? row.description : null,
+    logo_url: plan ? row.logo_url : null,
+    cover_url: plan ? row.cover_url : null,
+    promo_text: plan ? row.promo_text : null,
+    boost_until: plan ? row.boost_until : null,
+    hours: plan ? parseHours(hours) : null,
     categories,
-    amenities,
-    payment_methods,
+    amenities: plan ? amenities : [],
+    payment_methods: plan ? payment_methods : [],
   };
 }
 
