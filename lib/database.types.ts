@@ -410,7 +410,8 @@ export type Database = {
           method: string
           note: string | null
           owner_id: string
-          proof_path: string
+          plan: string | null
+          proof_path: string | null
           reference: string
           restaurant_id: string
           reviewed_at: string | null
@@ -424,7 +425,8 @@ export type Database = {
           method: string
           note?: string | null
           owner_id: string
-          proof_path: string
+          plan?: string | null
+          proof_path?: string | null
           reference: string
           restaurant_id: string
           reviewed_at?: string | null
@@ -438,7 +440,8 @@ export type Database = {
           method?: string
           note?: string | null
           owner_id?: string
-          proof_path?: string
+          plan?: string | null
+          proof_path?: string | null
           reference?: string
           restaurant_id?: string
           reviewed_at?: string | null
@@ -1120,6 +1123,17 @@ export type Database = {
           week_start: string
         }[]
       }
+      admin_register_payment: {
+        Args: {
+          p_amount?: number
+          p_method: string
+          p_note?: string
+          p_plan: string
+          p_reference: string
+          p_restaurant_id: string
+        }
+        Returns: string
+      }
       admin_resolve_payment: {
         Args: { p_action: string; p_note?: string; p_payment_id: string }
         Returns: undefined
@@ -1138,6 +1152,10 @@ export type Database = {
       }
       admin_set_restaurant_boost: {
         Args: { p_days: number; p_restaurant_id: string }
+        Returns: string
+      }
+      apply_payment_plan: {
+        Args: { p_plan: string; p_restaurant_id: string }
         Returns: string
       }
       award_xp: {
@@ -1382,7 +1400,6 @@ export type Database = {
           whatsapp: string
         }[]
       }
-      restaurant_has_plan: { Args: { p_id: string }; Returns: boolean }
       get_restaurant_stats: {
         Args: { p_days?: number; p_restaurant_id: string }
         Returns: {
@@ -1472,6 +1489,7 @@ export type Database = {
       postgis_wagyu_version: { Args: never; Returns: string }
       push_setting_key: { Args: { p_type: string }; Returns: string }
       rank_for_level: { Args: { p_level: number }; Returns: string }
+      restaurant_has_plan: { Args: { p_id: string }; Returns: boolean }
       restaurant_profile_complete: { Args: { p_id: string }; Returns: boolean }
       resubmit_restaurant: {
         Args: { p_restaurant_id: string }
