@@ -28,6 +28,7 @@ const STATUS_LABEL: Record<string, string> = {
   pending: "En revisión",
   approved: "Aprobado",
   rejected: "Rechazado",
+  voided: "Anulado",
 };
 
 export default function SubscriptionScreen() {

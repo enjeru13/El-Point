@@ -155,3 +155,67 @@ export function useRegisterPayment() {
     },
   });
 }
+
+export type RecentPayment = {
+  id: string;
+  method: PaymentMethod;
+  reference: string;
+  amount: number | null;
+  plan: PaymentPlan | null;
+  status: "approved" | "voided";
+  reviewed_at: string | null;
+  submitted_at: string;
+  note: string | null;
+  restaurant_name: string;
+};
+
+/** Pagos ya aprobados (o anulados), los más recientes primero, para poder revisarlos o anularlos. */
+export function useRecentPayments() {
+  return useQuery({
+    queryKey: ["admin-recent-payments"],
+    queryFn: async (): Promise<RecentPayment[]> => {
+      const { data, error } = await supabase
+        .from("restaurant_payments")
+        .select(
+          `id, method, reference, amount, plan, status, reviewed_at, submitted_at, note,
+           restaurant:restaurants!restaurant_id ( name )`,
+        )
+        .in("status", ["approved", "voided"])
+        .order("submitted_at", { ascending: false })
+        .limit(40);
+      if (error) throw error;
+      return (data ?? []).map((p: any) => ({
+        id: p.id,
+        method: p.method,
+        reference: p.reference,
+        amount: p.amount,
+        plan: p.plan ?? null,
+        status: p.status,
+        reviewed_at: p.reviewed_at,
+        submitted_at: p.submitted_at,
+        note: p.note,
+        restaurant_name: p.restaurant?.name ?? "Local",
+      }));
+    },
+  });
+}
+
+/** Anula un pago aprobado y le resta al local el tiempo y el Destacado que había sumado. */
+export function useVoidPayment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ paymentId, reason }: { paymentId: string; reason?: string }) => {
+      const { error } = await supabase.rpc("admin_void_payment", {
+        p_payment_id: paymentId,
+        p_reason: reason ?? null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-recent-payments"] });
+      qc.invalidateQueries({ queryKey: ["admin-paying-restaurants"] });
+      qc.invalidateQueries({ queryKey: ["admin-subscriptions"] });
+      qc.invalidateQueries({ queryKey: ["admin-counts"] });
+    },
+  });
+}

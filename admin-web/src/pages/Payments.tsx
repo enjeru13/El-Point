@@ -6,11 +6,14 @@ import {
   PLAN_LABEL,
   usePayingRestaurants,
   usePendingPayments,
+  useRecentPayments,
   useRegisterPayment,
   useResolvePayment,
+  useVoidPayment,
   type PaymentMethod,
   type PaymentPlan,
   type PendingPayment,
+  type RecentPayment,
 } from "../lib/queries/payments";
 import { Badge, Button, Card, EmptyState, PageHeader, PageLoading, StripeCard, timeAgo } from "../components/ui";
 
@@ -221,30 +224,142 @@ function Row({ p }: { p: PendingPayment }) {
   );
 }
 
+function HistoryRow({ p }: { p: RecentPayment }) {
+  const voidMut = useVoidPayment();
+  const [voiding, setVoiding] = useState(false);
+  const [reason, setReason] = useState("");
+  const Icon = METHOD_ICON[p.method];
+  const voided = p.status === "voided";
+
+  return (
+    <div className="flex flex-col gap-3 px-5 py-4">
+      <div className="flex items-center gap-4">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-2 text-text-soft">
+          <Icon className="h-5 w-5" strokeWidth={1.8} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className={`font-display text-base font-bold ${voided ? "text-text-soft line-through" : "text-text"}`}>{p.restaurant_name}</p>
+            {p.plan && <Badge>{PLAN_LABEL[p.plan].split(" · ")[0]}</Badge>}
+            <Badge tone={voided ? "danger" : "good"}>{voided ? "Anulado" : "Aprobado"}</Badge>
+          </div>
+          <p className="truncate text-sm text-text-soft">
+            {METHOD_LABEL[p.method]} · Ref. {p.reference}
+            {p.amount != null && ` · ${p.amount} USD`} · {new Date(p.submitted_at).toLocaleDateString("es-VE", { day: "numeric", month: "short" })}
+          </p>
+          {voided && p.note && <p className="truncate text-xs text-text-soft">{p.note}</p>}
+        </div>
+        {!voided && !voiding && (
+          <Button variant="ghost" onClick={() => setVoiding(true)}>
+            Anular
+          </Button>
+        )}
+      </div>
+
+      {voiding && (
+        <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface-2 p-3">
+          <p className="text-sm text-text-soft">
+            Se le resta al local lo que este pago sumó ({PLAN_EFFECT[p.plan ?? "annual"]}). El pago queda en el historial como anulado.
+          </p>
+          <input
+            autoFocus
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Motivo (opcional)"
+            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus:border-brand"
+          />
+          {voidMut.isError && (
+            <p className="text-sm text-danger" role="alert">
+              {(voidMut.error as Error).message}
+            </p>
+          )}
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setVoiding(false)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="danger"
+              loading={voidMut.isPending}
+              onClick={() => voidMut.mutate({ paymentId: p.id, reason: reason.trim() || undefined }, { onSuccess: () => setVoiding(false) })}
+            >
+              Anular pago
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function History() {
+  const q = useRecentPayments();
+  if (q.isLoading) return <PageLoading />;
+  if ((q.data ?? []).length === 0) {
+    return <EmptyState icon={Banknote} title="Sin pagos registrados" body="Cuando registres o apruebes uno, aparece aquí." />;
+  }
+  return (
+    <Card className="divide-y divide-border overflow-hidden">
+      {q.data!.map((p) => (
+        <HistoryRow key={p.id} p={p} />
+      ))}
+    </Card>
+  );
+}
+
+type Tab = "pending" | "register" | "history";
+
 export function Payments() {
   const q = usePendingPayments();
+  const pendingCount = q.data?.length ?? 0;
+  const [tab, setTab] = useState<Tab>("register");
+
+  const tabs: { key: Tab; label: string; badge?: number }[] = [
+    { key: "register", label: "Registrar pago" },
+    { key: "pending", label: "Por verificar", badge: pendingCount },
+    { key: "history", label: "Historial" },
+  ];
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Suscripciones"
+        eyebrow="Negocio"
         title="Pagos"
-        body="Registra los pagos que llegan por WhatsApp y revisa los comprobantes pendientes."
+        body="Registra los pagos que llegan por WhatsApp, verifica comprobantes y anula los que se registraron por error."
       />
 
-      <RegisterPayment />
+      <div className="inline-flex w-fit max-w-full overflow-x-auto rounded-full border border-border bg-surface-2 p-1">
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-bold transition ${
+              tab === t.key ? "bg-brand text-white shadow-sm" : "text-text-soft hover:text-text"
+            }`}
+          >
+            {t.label}
+            {!!t.badge && (
+              <span className={`rounded-full px-1.5 text-[11px] leading-5 ${tab === t.key ? "bg-white/25" : "bg-brand text-white"}`}>{t.badge}</span>
+            )}
+          </button>
+        ))}
+      </div>
 
-      {q.isLoading ? (
-        <PageLoading />
-      ) : (q.data ?? []).length === 0 ? (
-        <EmptyState icon={Banknote} title="Sin pagos pendientes" body="Nada esperando verificación ahora mismo." />
-      ) : (
-        <div className="flex flex-col gap-4">
-          {q.data!.map((p) => (
-            <Row key={p.id} p={p} />
-          ))}
-        </div>
-      )}
+      {tab === "register" && <RegisterPayment />}
+
+      {tab === "pending" &&
+        (q.isLoading ? (
+          <PageLoading />
+        ) : pendingCount === 0 ? (
+          <EmptyState icon={Banknote} title="Sin pagos pendientes" body="Nada esperando verificación ahora mismo." />
+        ) : (
+          <div className="flex flex-col gap-4">
+            {q.data!.map((p) => (
+              <Row key={p.id} p={p} />
+            ))}
+          </div>
+        ))}
+
+      {tab === "history" && <History />}
     </div>
   );
 }
