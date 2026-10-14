@@ -266,7 +266,6 @@ export default function AnalyticsScreen() {
             </View>
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <MetricCard icon="cart-outline" label="Pedidos iniciados" value={String(stats.order)} />
-              <View style={{ flex: 1 }} />
             </View>
           </View>
         )}
