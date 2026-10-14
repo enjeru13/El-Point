@@ -2,7 +2,7 @@ import { LegalBullet, LegalDoc, LegalP, LegalSection } from "@/components/ui/Leg
 
 export default function TermsScreen() {
   return (
-    <LegalDoc title="Términos de Servicio" updated="18 de septiembre de 2026">
+    <LegalDoc title="Términos de Servicio" updated="14 de octubre de 2026">
       <LegalP>
         Bienvenido a El Point. Estos Términos regulan el uso de la aplicación y
         sus servicios. Al crear una cuenta o usar la app, aceptas estos
@@ -81,7 +81,43 @@ export default function TermsScreen() {
         </LegalBullet>
       </LegalSection>
 
-      <LegalSection n={6} title="Puntos, niveles y notificaciones">
+      <LegalSection n={6} title="Planes y perfil de los locales">
+        <LegalBullet>
+          Todo local aprobado y activo aparece en el mapa y en las búsquedas sin
+          costo, con un perfil básico: nombre, categorías, dirección o zona y
+          ubicación. El dueño puede ver las reseñas que recibe.
+        </LegalBullet>
+        <LegalBullet>
+          El perfil completo se activa con un plan. Incluye contacto (WhatsApp,
+          teléfono, Instagram), menú, fotos, horario, promos, comodidades,
+          métodos de pago, respuestas a reseñas, métricas y días de Destacado.
+        </LegalBullet>
+        <LegalBullet>
+          Los primeros 3 meses desde la aprobación tienen el perfil completo sin
+          costo. Al terminar, el local sigue visible con el perfil básico hasta
+          que active un plan. No se borra ningún dato del local.
+        </LegalBullet>
+        <LegalBullet>
+          Los primeros 100 locales (&quot;Originales&quot;) mantienen el perfil
+          completo sin costo mientras cumplan estos Términos.
+        </LegalBullet>
+        <LegalBullet>
+          Los planes se gestionan directamente con el equipo de El Point. Al
+          confirmarse el pago se suma el tiempo del plan a la fecha de
+          vencimiento. Si crees que hubo un error en un cobro, escríbenos.
+        </LegalBullet>
+        <LegalBullet>
+          El Destacado viene incluido con el plan y no se vende por separado. No
+          garantiza visitas, clientes ni una posición concreta, y podemos
+          retirarlo si el local incumple estos Términos.
+        </LegalBullet>
+        <LegalBullet>
+          Podemos cambiar los planes, sus precios y lo que incluye cada nivel.
+          Te avisaremos en la app y el cambio no afecta el periodo ya pagado.
+        </LegalBullet>
+      </LegalSection>
+
+      <LegalSection n={7} title="Puntos, niveles y notificaciones">
         <LegalP>
           El XP, los niveles y los rangos son un elemento de juego sin valor
           monetario. Podemos ajustar la fórmula o revertir puntos obtenidos de
@@ -94,7 +130,7 @@ export default function TermsScreen() {
         </LegalP>
       </LegalSection>
 
-      <LegalSection n={7} title="Disponibilidad y cambios">
+      <LegalSection n={8} title="Disponibilidad y cambios">
         <LegalP>
           El Point se ofrece &quot;tal cual&quot;. Podemos cambiar, pausar o descontinuar
           funciones sin previo aviso. Haremos lo posible por mantener el
@@ -103,7 +139,7 @@ export default function TermsScreen() {
         </LegalP>
       </LegalSection>
 
-      <LegalSection n={8} title="Limitación de responsabilidad">
+      <LegalSection n={9} title="Limitación de responsabilidad">
         <LegalP>
           El Point no es responsable de la calidad, precios, higiene ni atención
           de los locales listados, ni de la exactitud de las reseñas de otros
@@ -111,14 +147,14 @@ export default function TermsScreen() {
         </LegalP>
       </LegalSection>
 
-      <LegalSection n={9} title="Cambios a estos Términos">
+      <LegalSection n={10} title="Cambios a estos Términos">
         <LegalP>
           Si hacemos cambios importantes, te avisaremos en la app. El uso
           continuado después de un cambio implica que lo aceptas.
         </LegalP>
       </LegalSection>
 
-      <LegalSection n={10} title="Contacto">
+      <LegalSection n={11} title="Contacto">
         <LegalP>
           Escríbenos a atencion.elpoint@gmail.com. El Point opera desde San Cristóbal,
           Táchira, Venezuela.
