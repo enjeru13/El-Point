@@ -33,7 +33,7 @@ import {
   type RestaurantReportReason,
 } from "@/lib/queries/restaurants";
 import { ReportSheet, type ReportSheetHandle } from "@/components/ui/ReportSheet";
-import { whatsappUrl, instagramUrl, instagramHandle } from "@/lib/contact";
+import { whatsappUrl, instagramUrl, instagramHandle, orderMessage } from "@/lib/contact";
 import { useMyProfile } from "@/lib/queries/me";
 import { usePaymentMethods } from "@/lib/queries/paymentMethods";
 import { useFavoriteIds, useToggleFavorite } from "@/lib/queries/feed";
@@ -631,6 +631,9 @@ export default function RestaurantProfileScreen() {
   // Distribución sólo con reseñas visibles (una oculta propia no debe sesgarla).
   const ratedReviews = reviews.filter((r) => r.moderation === "visible");
   const isOwnerHere = !!myProfileQ.data?.id && myProfileQ.data.id === restaurant.owner_id;
+  // Botón "Pedir" para locales con plan que lo activaron (la cocina fantasma lo tiene siempre).
+  const canOrder = !!restaurant.whatsapp && !restaurant.ghost_kitchen && restaurant.has_plan && restaurant.accepts_orders;
+  const orderUrl = whatsappUrl(restaurant.whatsapp, orderMessage(restaurant.name, restaurant.order_greeting));
   // reviews viene ordenado created_at desc -- el primero que matchea es el más reciente.
   const myReview = myProfileQ.data?.id
     ? reviews.find((r) => r.author?.id === myProfileQ.data!.id)
@@ -1082,14 +1085,49 @@ export default function RestaurantProfileScreen() {
               );
             })()}
 
+            {/* Pedir por WhatsApp (local con plan que recibe pedidos) */}
+            {canOrder && (
+              <Pressable
+                onPress={() => orderUrl && openTracked("order", orderUrl)}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 14,
+                  padding: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: C.outlineVariant,
+                }}
+              >
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    backgroundColor: C.secondaryContainer,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="whatsapp" size={18} color={C.secondary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <AppText variant="bodyStrong">Pedir por WhatsApp</AppText>
+                  <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                    Abre el chat con el mensaje listo
+                  </AppText>
+                </View>
+                <Icon name="chevron-right" size={18} color={C.outline} />
+              </Pressable>
+            )}
+
             {/* Dirección — o, si es cocina fantasma (sin local físico), la
                 zona aproximada + pedir directo por WhatsApp en vez de un
                 link a un mapa que no lleva a ningún lado real. */}
             {restaurant.ghost_kitchen ? (
               <Pressable
                 onPress={() => {
-                  const url = whatsappUrl(restaurant.whatsapp);
-                  if (url) openTracked("whatsapp", url);
+                  const url = orderUrl;
+                  if (url) openTracked("order", url);
                 }}
                 disabled={!whatsappUrl(restaurant.whatsapp)}
                 style={{
@@ -1477,8 +1515,8 @@ export default function RestaurantProfileScreen() {
                     <Button
                       label="Pedir"
                       onPress={() => {
-                        const url = whatsappUrl(restaurant.whatsapp);
-                        if (url) openTracked("whatsapp", url);
+                        const url = orderUrl;
+                        if (url) openTracked("order", url);
                       }}
                       disabled={!whatsappUrl(restaurant.whatsapp)}
                       variant="secondary"
@@ -1488,6 +1526,18 @@ export default function RestaurantProfileScreen() {
                       fullWidth={false}
                     />
                   ) : (
+                    <>
+                    {canOrder && (
+                      <Button
+                        label="Pedir"
+                        onPress={() => orderUrl && openTracked("order", orderUrl)}
+                        variant="secondary"
+                        icon="whatsapp"
+                        iconColor={C.secondary}
+                        size="sm"
+                        fullWidth={false}
+                      />
+                    )}
                     <Button
                       label="Ir"
                       onPress={() =>
@@ -1501,6 +1551,7 @@ export default function RestaurantProfileScreen() {
                       size="sm"
                       fullWidth={false}
                     />
+                    </>
                   )}
                 </View>
               )}

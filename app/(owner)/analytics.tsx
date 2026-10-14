@@ -264,6 +264,10 @@ export default function AnalyticsScreen() {
               <MetricCard icon="instagram"        label="Instagram" value={String(stats.instagram)} />
               <MetricCard icon="book-open-outline" label="Menú" value={String(stats.menu)} />
             </View>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <MetricCard icon="cart-outline" label="Pedidos iniciados" value={String(stats.order)} />
+              <View style={{ flex: 1 }} />
+            </View>
           </View>
         )}
 

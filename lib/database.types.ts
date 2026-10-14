@@ -551,6 +551,8 @@ export type Database = {
           updated_at: string
           verification_photo_path: string | null
           whatsapp: string | null
+          accepts_orders: boolean
+          order_greeting: string | null
           zone_label: string | null
         }
         Insert: {
@@ -588,6 +590,8 @@ export type Database = {
           updated_at?: string
           verification_photo_path?: string | null
           whatsapp?: string | null
+          accepts_orders?: boolean
+          order_greeting?: string | null
           zone_label?: string | null
         }
         Update: {
@@ -625,6 +629,8 @@ export type Database = {
           updated_at?: string
           verification_photo_path?: string | null
           whatsapp?: string | null
+          accepts_orders?: boolean
+          order_greeting?: string | null
           zone_label?: string | null
         }
         Relationships: [

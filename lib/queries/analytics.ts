@@ -8,7 +8,8 @@ export type RestaurantEventType =
   | "directions"
   | "instagram"
   | "menu"
-  | "blocked";
+  | "blocked"
+  | "order";
 
 /**
  * Cuenta una interacción con un local. Sin esperar y sin avisar si falla: no
@@ -27,7 +28,7 @@ export function trackRestaurantEvent(restaurantId: string, type: RestaurantEvent
 
 export type RestaurantStats = Record<RestaurantEventType, number>;
 
-const EMPTY: RestaurantStats = { view: 0, whatsapp: 0, call: 0, directions: 0, instagram: 0, menu: 0, blocked: 0 };
+const EMPTY: RestaurantStats = { view: 0, whatsapp: 0, call: 0, directions: 0, instagram: 0, menu: 0, blocked: 0, order: 0 };
 
 /** Totales por tipo de interacción en los últimos `days` días (dueño o admin). */
 export function useRestaurantStats(restaurantId: string | undefined, days: number) {

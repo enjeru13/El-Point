@@ -117,6 +117,8 @@ export default function OwnerProfileScreen() {
   const [isActive, setIsActive]   = useState(true);
   const [ghostKitchen, setGhostKitchen] = useState(false);
   const [zoneLabel, setZoneLabel] = useState('');
+  const [acceptsOrders, setAcceptsOrders] = useState(false);
+  const [orderGreeting, setOrderGreeting] = useState('');
   const [showZonePin, setShowZonePin] = useState(false);
   const [zoneCoords, setZoneCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [zoneLocating, setZoneLocating] = useState(false);
@@ -309,6 +311,8 @@ export default function OwnerProfileScreen() {
     setPaymentIds(new Set(restaurant.payment_methods.map((p) => p.id)));
     setGhostKitchen(restaurant.ghost_kitchen);
     setZoneLabel(restaurant.zone_label ?? '');
+    setAcceptsOrders(restaurant.accepts_orders);
+    setOrderGreeting(restaurant.order_greeting ?? '');
     setZoneCoords(
       restaurant.lat != null && restaurant.lng != null
         ? { lat: restaurant.lat, lng: restaurant.lng }
@@ -356,6 +360,8 @@ export default function OwnerProfileScreen() {
     setPaymentIds(new Set(restaurant.payment_methods.map((p) => p.id)));
     setGhostKitchen(restaurant.ghost_kitchen);
     setZoneLabel(restaurant.zone_label ?? '');
+    setAcceptsOrders(restaurant.accepts_orders);
+    setOrderGreeting(restaurant.order_greeting ?? '');
     setEditing(false);
   }
 
@@ -379,6 +385,8 @@ export default function OwnerProfileScreen() {
         hours,
         ghost_kitchen: ghostKitchen,
         zone_label: ghostKitchen ? (zoneLabel.trim() || null) : null,
+        accepts_orders: acceptsOrders,
+        order_greeting: orderGreeting.trim() ? orderGreeting.trim().slice(0, 200) : null,
       },
       {
         onSuccess: () => { setEditing(false); toast.success('Cambios guardados'); },
@@ -956,6 +964,74 @@ export default function OwnerProfileScreen() {
             )}
           </View>
         </View>
+        )}
+
+        {/* Pedidos por WhatsApp */}
+        {!plan && !restaurant.ghost_kitchen ? (
+          <PlanLock title="Pedidos por WhatsApp" body="Muestra un botón “Pedir” que abre tu WhatsApp con el mensaje listo." onPress={() => router.push('/subscription' as any)} />
+        ) : (
+          <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
+            <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
+              <AppText variant="bodyStrong">Pedidos por WhatsApp</AppText>
+            </View>
+            <View style={{ padding: 18, gap: 14 }}>
+              {restaurant.ghost_kitchen ? (
+                <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                  Tu cocina fantasma siempre muestra el botón “Pedir”. Aquí puedes personalizar el saludo.
+                </AppText>
+              ) : (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                  <View style={{ flex: 1 }}>
+                    <AppText variant="bodyStrong">Recibo pedidos por WhatsApp</AppText>
+                    <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                      Los comensales ven un botón “Pedir” en tu perfil.
+                    </AppText>
+                  </View>
+                  <Switch
+                    value={acceptsOrders}
+                    disabled={!editing}
+                    onValueChange={setAcceptsOrders}
+                    trackColor={{ false: C.surfaceContainerHighest, true: C.primaryContainer }}
+                    thumbColor={acceptsOrders ? C.primary : C.outline}
+                  />
+                </View>
+              )}
+
+              {(restaurant.ghost_kitchen || acceptsOrders) && (
+                <View style={{ gap: 6 }}>
+                  <AppText variant="overline" color={C.outline}>SALUDO DEL MENSAJE</AppText>
+                  {editing ? (
+                    <>
+                      <AppTextInput
+                        value={orderGreeting}
+                        onChangeText={(t) => setOrderGreeting(t.slice(0, 200))}
+                        placeholder={`Hola, quiero hacer un pedido en ${restaurant.name}. Te encontré en El Point.`}
+                        multiline
+                        style={{
+                          fontSize: 14,
+                          minHeight: 64,
+                          textAlignVertical: 'top',
+                          backgroundColor: C.surfaceContainerLow,
+                          borderWidth: 1,
+                          borderColor: C.outlineVariant,
+                          borderRadius: 12,
+                          paddingHorizontal: 12,
+                          paddingVertical: 10,
+                        }}
+                      />
+                      <AppText variant="caption" color={C.outline} align="right" style={{ fontSize: 12 }}>
+                        {orderGreeting.length}/200 · vacío usa el mensaje por defecto
+                      </AppText>
+                    </>
+                  ) : (
+                    <AppText variant="bodySm" color={restaurant.order_greeting ? C.onSurface : C.outline}>
+                      {restaurant.order_greeting ?? `Hola, quiero hacer un pedido en ${restaurant.name}. Te encontré en El Point.`}
+                    </AppText>
+                  )}
+                </View>
+              )}
+            </View>
+          </View>
         )}
 
         {/* Visibilidad */}

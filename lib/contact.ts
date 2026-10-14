@@ -37,6 +37,13 @@ export function whatsappUrl(
     : `https://wa.me/${n}`;
 }
 
+/** Mensaje por defecto cuando el dueño no personaliza el saludo. */
+export function orderMessage(restaurantName: string, greeting?: string | null): string {
+  const g = greeting?.trim();
+  if (!g) return `Hola, quiero hacer un pedido en ${restaurantName}. Te encontré en El Point.`;
+  return `${g}\n\n(${restaurantName} · vía El Point)`;
+}
+
 /** Handle de Instagram a partir de "@local", "local" o una URL pegada. */
 export function instagramHandle(raw: string | null | undefined): string | null {
   if (!raw) return null;
