@@ -1101,41 +1101,6 @@ export default function RestaurantProfileScreen() {
               );
             })()}
 
-            {/* Pedir por WhatsApp (local con plan que recibe pedidos) */}
-            {canOrder && (
-              <Pressable
-                onPress={() => orderUrl && openTracked("order", orderUrl)}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 14,
-                  padding: 16,
-                  borderBottomWidth: 1,
-                  borderBottomColor: C.outlineVariant,
-                }}
-              >
-                <View
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 10,
-                    backgroundColor: C.secondaryContainer,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Icon name="whatsapp" size={18} color={C.secondary} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <AppText variant="bodyStrong">Pedir por WhatsApp</AppText>
-                  <AppText variant="bodySm" color={C.onSurfaceVariant}>
-                    Abre el chat con el mensaje listo
-                  </AppText>
-                </View>
-                <Icon name="chevron-right" size={18} color={C.outline} />
-              </Pressable>
-            )}
-
             {/* Dirección — o, si es cocina fantasma (sin local físico), la
                 zona aproximada + pedir directo por WhatsApp en vez de un
                 link a un mapa que no lleva a ningún lado real. */}
@@ -1295,7 +1260,11 @@ export default function RestaurantProfileScreen() {
             {/* WhatsApp */}
             {whatsappUrl(restaurant.whatsapp) && (
               <Pressable
-                onPress={() => openTracked("whatsapp", whatsappUrl(restaurant.whatsapp)!)}
+                onPress={() =>
+                  canOrder && orderUrl
+                    ? openTracked("order", orderUrl)
+                    : openTracked("whatsapp", whatsappUrl(restaurant.whatsapp)!)
+                }
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
@@ -1317,9 +1286,16 @@ export default function RestaurantProfileScreen() {
                 >
                   <Icon name="whatsapp" size={18} color={C.secondary} />
                 </View>
-                <AppText variant="bodyStrong" color={C.secondary} style={{ flex: 1 }}>
-                  {restaurant.whatsapp}
-                </AppText>
+                {canOrder ? (
+                  <View style={{ flex: 1 }}>
+                    <AppText variant="bodyStrong" color={C.secondary}>Pedir por WhatsApp</AppText>
+                    <AppText variant="bodySm" color={C.onSurfaceVariant}>{restaurant.whatsapp}</AppText>
+                  </View>
+                ) : (
+                  <AppText variant="bodyStrong" color={C.secondary} style={{ flex: 1 }}>
+                    {restaurant.whatsapp}
+                  </AppText>
+                )}
                 <Icon name="chevron-right" size={18} color={C.outline} />
               </Pressable>
             )}
@@ -1542,18 +1518,6 @@ export default function RestaurantProfileScreen() {
                       fullWidth={false}
                     />
                   ) : (
-                    <>
-                    {canOrder && (
-                      <Button
-                        label="Pedir"
-                        onPress={() => orderUrl && openTracked("order", orderUrl)}
-                        variant="secondary"
-                        icon="whatsapp"
-                        iconColor={C.secondary}
-                        size="sm"
-                        fullWidth={false}
-                      />
-                    )}
                     <Button
                       label="Ir"
                       onPress={() =>
@@ -1567,7 +1531,6 @@ export default function RestaurantProfileScreen() {
                       size="sm"
                       fullWidth={false}
                     />
-                    </>
                   )}
                 </View>
               )}

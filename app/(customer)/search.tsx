@@ -65,6 +65,13 @@ function priceLabel(level: number | null): string {
 
 // ─── Components ───────────────────────────────────────────────────────────────
 
+/** Calificación ponderada (promedio bayesiano): tira hacia 3,5 mientras hay pocas reseñas. */
+function rankScore(r: { rating_avg: number; rating_count: number }): number {
+  const PRIOR = 3.5;
+  const WEIGHT = 3;
+  return (r.rating_avg * r.rating_count + PRIOR * WEIGHT) / (r.rating_count + WEIGHT);
+}
+
 function catLabel(item: SearchResult): string {
   return item.categories[0]?.label ?? 'Restaurante';
 }
@@ -547,11 +554,11 @@ export default function SearchScreen() {
         r.lat != null && r.lng != null ? distanceKm(userLoc, r.lat, r.lng) : Infinity;
       list = [...list].sort((a, b) => d(a) - d(b));
     } else if (sort === 'rank') {
-      // rated places first, by average then by how many ranks back it up
+      // con rank primero; por calificación ponderada (un 5,0 con 1 reseña no le gana a un 4,7 con 40)
       list = [...list].sort(
         (a, b) =>
           (b.rating_count > 0 ? 1 : 0) - (a.rating_count > 0 ? 1 : 0) ||
-          b.rating_avg - a.rating_avg ||
+          rankScore(b) - rankScore(a) ||
           b.rating_count - a.rating_count,
       );
     } else if (sort === 'reviews') {
@@ -571,6 +578,7 @@ export default function SearchScreen() {
         (a, b) =>
           score(a) - score(b) ||
           (isBoosted(b) ? 1 : 0) - (isBoosted(a) ? 1 : 0) ||
+          rankScore(b) - rankScore(a) ||
           b.rating_count - a.rating_count,
       );
     } else {
@@ -578,6 +586,8 @@ export default function SearchScreen() {
       list = [...list].sort(
         (a, b) =>
           (isBoosted(b) ? 1 : 0) - (isBoosted(a) ? 1 : 0) ||
+          rankScore(b) - rankScore(a) ||
+          b.rating_count - a.rating_count ||
           a.name.localeCompare(b.name, 'es'),
       );
     }
@@ -590,6 +600,7 @@ export default function SearchScreen() {
         .sort(
           (a, b) =>
             (isBoosted(b) ? 1 : 0) - (isBoosted(a) ? 1 : 0) ||
+            rankScore(b) - rankScore(a) ||
             b.rating_count - a.rating_count,
         )
         .slice(0, 8),
