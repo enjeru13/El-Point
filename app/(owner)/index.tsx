@@ -1,7 +1,7 @@
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Linking, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { Skeleton, SkeletonList } from '@/components/ui/Skeleton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -400,6 +400,33 @@ export default function OwnerHomeScreen() {
         </View>
         )}
         </View>
+
+        {/* Cartel QR "Rankéanos" (con plan) */}
+        {restaurant.status === 'approved' && (
+          <Pressable
+            onPress={() => {
+              if (!hasPlan(restaurant)) { router.push('/subscription' as any); return; }
+              Linking.openURL(`https://elpoint-app.netlify.app/qr/?id=${restaurant.id}&n=${encodeURIComponent(restaurant.name)}`);
+            }}
+            style={{
+              flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16,
+              borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, ...shadow.sm,
+            }}
+          >
+            <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name={hasPlan(restaurant) ? 'qrcode' : 'lock-outline'} size={22} color={C.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <AppText variant="bodyStrong">Cartel QR “Rankéanos”</AppText>
+              <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                {hasPlan(restaurant)
+                  ? 'Imprímelo para tu caja o tus mesas y recibe más reseñas'
+                  : 'Con el plan: un cartel con QR para que tus clientes te rankeen'}
+              </AppText>
+            </View>
+            <Icon name={hasPlan(restaurant) ? 'open-in-new' : 'chevron-right'} size={18} color={C.outline} />
+          </Pressable>
+        )}
 
         {/* Promo activa */}
         {restaurant.promo_text && (

@@ -437,7 +437,7 @@ ReviewSheet.displayName = "ReviewSheet";
 
 export default function RestaurantProfileScreen() {
   const { C, shadow } = useTheme();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, rank } = useLocalSearchParams<{ id: string; rank?: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isTablet, width: winW } = useResponsive();
@@ -537,6 +537,22 @@ export default function RestaurantProfileScreen() {
   const [editingReview, setEditingReview] = useState<
     { id: string; rating: number; body: string } | null
   >(null);
+  // Llegar con ?rank=1 (QR "Rankéanos") abre directo la hoja para dejar el rank, una sola vez.
+  const autoRankDone = useRef(false);
+  useEffect(() => {
+    if (rank !== "1" || autoRankDone.current) return;
+    const r = restaurantQ.data;
+    const list = reviewsQ.data;
+    const me = myProfileQ.data;
+    if (!r || !list || !me) return;
+    autoRankDone.current = true;
+    if (r.owner_id === me.id) return;
+    const mine = list.find((x) => x.author?.id === me.id);
+    if (!canPostNewReview(mine)) return;
+    setEditingReview(null);
+    reviewSheetRef.current?.present();
+  }, [rank, restaurantQ.data, reviewsQ.data, myProfileQ.data]);
+
   const [replyingId, setReplyingId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [hoursOpen, setHoursOpen] = useState(false);

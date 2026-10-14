@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="es-VE">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cartel QR · El Point</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --brand: #c8451f; --brand2: #e0632f; --ink: #241a16; --soft: #6b5b52; --cream: #fdf8f6; --line: #e6d8d0; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #efe7e2; color: var(--ink); font-family: "Plus Jakarta Sans", system-ui, sans-serif; }
+
+    /* Barra de controles (no se imprime) */
+    .bar {
+      position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center;
+      padding: 12px 16px; background: #fff; border-bottom: 1px solid var(--line);
+    }
+    .bar h1 { font-family: Outfit, system-ui, sans-serif; font-size: 1.05rem; margin: 0 8px 0 0; }
+    .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: #f6ede8; }
+    .seg button { border: 0; background: transparent; padding: 7px 14px; border-radius: 999px; font: 700 0.85rem inherit; font-family: inherit; color: var(--soft); cursor: pointer; }
+    .seg button[aria-pressed="true"] { background: var(--brand); color: #fff; }
+    .print { border: 0; background: var(--ink); color: #fff; padding: 9px 18px; border-radius: 999px; font: 700 0.9rem "Plus Jakarta Sans", system-ui, sans-serif; cursor: pointer; }
+    .hint { width: 100%; text-align: center; margin: 0; font-size: 0.8rem; color: var(--soft); }
+
+    .stage { padding: 24px 12px 48px; display: grid; justify-items: center; gap: 24px; }
+
+    /* ── Cartel A4 ── */
+    .poster {
+      width: 210mm; height: 297mm; background: #fff; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,.18); overflow: hidden; zoom: var(--zoom, 1);
+    }
+    .poster .band { width: 100%; background: linear-gradient(120deg, var(--brand), var(--brand2)); color: #fff; padding: 16mm 14mm 12mm; text-align: center; }
+    .poster .brand { display: inline-flex; align-items: center; gap: 4mm; margin-bottom: 8mm; }
+    .poster .brand img { height: 13mm; }
+    .poster .brand span { font: 800 9mm Outfit, system-ui, sans-serif; letter-spacing: -.3mm; }
+    .poster h2 { font: 800 25mm/0.95 Outfit, system-ui, sans-serif; margin: 0 0 4mm; letter-spacing: -.8mm; }
+    .poster .sub { font-size: 6.2mm; font-weight: 600; margin: 0; opacity: .95; }
+    .poster .qrbox { margin-top: 14mm; padding: 8mm; border: 1mm solid var(--brand); border-radius: 8mm; background: #fff; }
+    .poster .qrbox .qr { width: 100mm; height: 100mm; display: block; }
+    .qr svg { width: 100%; height: 100%; display: block; }
+    .poster .name { margin: 8mm 14mm 0; font: 800 9mm/1.1 Outfit, system-ui, sans-serif; text-align: center; }
+    .poster .steps { display: flex; gap: 6mm; margin-top: auto; padding: 0 14mm 8mm; width: 100%; }
+    .poster .step { flex: 1; text-align: center; font-weight: 700; font-size: 4.6mm; line-height: 1.25; }
+    .poster .step b { display: grid; place-items: center; width: 11mm; height: 11mm; margin: 0 auto 2.5mm; border-radius: 50%; background: var(--brand); color: #fff; font: 800 6mm Outfit, system-ui, sans-serif; }
+    .poster .foot { width: 100%; background: var(--cream); border-top: 0.4mm solid var(--line); padding: 5mm; text-align: center; font-size: 4mm; font-weight: 600; color: var(--soft); }
+
+    /* ── Tarjetas de mesa: 4 por hoja A4 ── */
+    .sheet {
+      width: 210mm; height: 297mm; background: #fff; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+      box-shadow: 0 10px 40px rgba(0,0,0,.18); zoom: var(--zoom, 1);
+    }
+    .tcard { border: 0.3mm dashed #b9a9a0; padding: 8mm; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .tcard .brand { display: flex; align-items: center; gap: 2mm; font: 800 5mm Outfit, system-ui, sans-serif; color: var(--brand); }
+    .tcard .brand img { height: 7mm; }
+    .tcard h3 { font: 800 11mm/1 Outfit, system-ui, sans-serif; margin: 4mm 0 1.5mm; letter-spacing: -.4mm; }
+    .tcard .sub { font-size: 3.6mm; font-weight: 600; margin: 0 0 3mm; color: var(--soft); }
+    .tcard .qr { width: 64mm; height: 64mm; padding: 2mm; border: 0.7mm solid var(--brand); border-radius: 4mm; }
+    .tcard .name { margin-top: 3mm; font: 800 5mm/1.1 Outfit, system-ui, sans-serif; }
+    .tcard .url { margin-top: auto; font-size: 3mm; color: var(--soft); font-weight: 600; }
+
+    body[data-mode="poster"] .sheet, body[data-mode="cards"] .poster { display: none; }
+
+    @media print {
+      @page { size: A4; margin: 0; }
+      body { background: #fff; }
+      .bar { display: none; }
+      .stage { padding: 0; gap: 0; display: block; }
+      .poster, .sheet { box-shadow: none; zoom: 1; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body data-mode="poster">
+  <div class="bar">
+    <h1>Cartel QR · Rankéanos</h1>
+    <div class="seg" role="group" aria-label="Formato">
+      <button type="button" id="m-poster" aria-pressed="true">Cartel A4</button>
+      <button type="button" id="m-cards" aria-pressed="false">4 tarjetas de mesa</button>
+    </div>
+    <button class="print" type="button" onclick="window.print()">Imprimir o guardar PDF</button>
+    <p class="hint">En la ventana de impresión elige “Guardar como PDF”, tamaño A4 y márgenes “Ninguno”.</p>
+  </div>
+
+  <div class="stage">
+    <section class="poster" id="poster">
+      <div class="band">
+        <div class="brand"><img src="../assets/logo-pin-dark.png" alt="" /><span>el Point</span></div>
+        <h2>¡Rankéanos!</h2>
+        <p class="sub">Escanea el código y cuéntanos qué tal la pasaste</p>
+      </div>
+      <div class="qrbox"><div class="qr" data-qr></div></div>
+      <p class="name" data-name></p>
+      <div class="steps">
+        <div class="step"><b>1</b>Escanea el código con la cámara</div>
+        <div class="step"><b>2</b>Dale tus estrellas y escribe tu opinión</div>
+        <div class="step"><b>3</b>Gana XP y sube de nivel</div>
+      </div>
+      <div class="foot">elpoint-app.netlify.app · San Cristóbal, Táchira</div>
+    </section>
+
+    <section class="sheet" id="sheet"></section>
+  </div>
+
+  <script src="../assets/qrcode.js"></script>
+  <script>
+    (function () {
+      var params = new URLSearchParams(location.search);
+      var id = params.get("id") || "";
+      var name = (params.get("n") || "").slice(0, 60);
+      var valid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      var url = "https://elpoint-app.netlify.app/r/?id=" + id;
+
+      function qrSvg() {
+        var q = qrcode(0, "M");
+        q.addData(url);
+        q.make();
+        return q.createSvgTag({ scalable: true, margin: 0 });
+      }
+
+      if (!valid) {
+        document.querySelector(".stage").innerHTML = '<p style="max-width:420px;text-align:center;color:#6b5b52">Falta el local. Abre este cartel desde El Point, en el Resumen de tu local.</p>';
+        document.querySelector(".bar").style.display = "none";
+        return;
+      }
+
+      var svg = qrSvg();
+      document.querySelectorAll("[data-qr]").forEach(function (el) { el.innerHTML = svg; });
+      document.querySelector("[data-name]").textContent = name;
+
+      // Tarjetas de mesa: 4 iguales.
+      var sheet = document.getElementById("sheet");
+      for (var i = 0; i < 4; i++) {
+        var c = document.createElement("div");
+        c.className = "tcard";
+        c.innerHTML =
+          '<div class="brand"><img src="../assets/logo-pin.png" alt="" /><span>el Point</span></div>' +
+          "<h3>¡Rankéanos!</h3>" +
+          '<p class="sub">Escanea y deja tu rank</p>' +
+          '<div class="qr">' + svg + "</div>" +
+          '<div class="name"></div>' +
+          '<div class="url">elpoint-app.netlify.app</div>';
+        c.querySelector(".name").textContent = name;
+        sheet.appendChild(c);
+      }
+
+      var body = document.body;
+      var bPoster = document.getElementById("m-poster");
+      var bCards = document.getElementById("m-cards");
+      function setMode(m) {
+        body.setAttribute("data-mode", m);
+        bPoster.setAttribute("aria-pressed", String(m === "poster"));
+        bCards.setAttribute("aria-pressed", String(m === "cards"));
+      }
+      bPoster.onclick = function () { setMode("poster"); };
+      bCards.onclick = function () { setMode("cards"); };
+      if (params.get("mode") === "cards") setMode("cards");
+
+      // En pantallas chicas el A4 se reduce para que quepa.
+      function fit() {
+        var z = Math.min(1, (window.innerWidth - 24) / (210 * 3.7795));
+        document.documentElement.style.setProperty("--zoom", String(z));
+      }
+      fit();
+      window.addEventListener("resize", fit);
+    })();
+  </script>
+</body>
+</html>
