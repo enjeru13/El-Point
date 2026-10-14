@@ -770,7 +770,7 @@ export default function RestaurantProfileScreen() {
         {/* ── Hero ── */}
         <View
           style={{
-            height: restaurant.cover_url ? 300 : 200,
+            height: 320,
             backgroundColor: C.primaryFixed,
             alignItems: "center",
             justifyContent: "center",
@@ -885,11 +885,43 @@ export default function RestaurantProfileScreen() {
                   </AppText>
 
                   {(restaurant.categories.length > 0 || restaurant.ghost_kitchen) && (
-                    <AppText variant="label" color="rgba(255,255,255,0.85)" numberOfLines={1}>
-                      {[restaurant.ghost_kitchen ? "Cocina fantasma" : null, ...restaurant.categories.map((c) => c.label)]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </AppText>
+                    <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+                      {restaurant.ghost_kitchen && (
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 4,
+                            paddingHorizontal: 10,
+                            paddingVertical: 4,
+                            borderRadius: 99,
+                            backgroundColor: "rgba(255,255,255,0.18)",
+                            borderWidth: 1,
+                            borderColor: "rgba(255,255,255,0.35)",
+                          }}
+                        >
+                          <Icon name="mdi:ghost" size={12} color="#fff" />
+                          <AppText variant="label" color="#fff">Cocina fantasma</AppText>
+                        </View>
+                      )}
+                      {restaurant.categories.map((c) => (
+                        <View
+                          key={c.slug}
+                          style={{
+                            paddingHorizontal: 10,
+                            paddingVertical: 4,
+                            borderRadius: 99,
+                            backgroundColor: C.secondaryContainer,
+                            borderWidth: 1,
+                            borderColor: C.border,
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <AppText variant="label">{c.label.toUpperCase()}</AppText>
+                        </View>
+                      ))}
+                    </View>
                   )}
 
                   <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
@@ -968,16 +1000,41 @@ export default function RestaurantProfileScreen() {
 
           {/* ── Promos ── */}
           {restaurant.promo_text && (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-              <Icon name="tag" size={18} color={C.primary} />
-              <AppText variant="bodyStrong" color={C.primary} style={{ flex: 1 }}>
-                {restaurant.promo_text}
-              </AppText>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                padding: 14,
+                borderRadius: 16,
+                backgroundColor: C.primary + "1f",
+                borderWidth: 1,
+                borderColor: C.primary + "40",
+                borderLeftWidth: 6,
+                borderLeftColor: C.primary,
+              }}
+            >
+              <Icon name="tag" size={20} color={C.primary} />
+              <View style={{ flex: 1 }}>
+                <AppText variant="overline" color={C.primary}>PROMOS</AppText>
+                <AppText variant="bodyStrong">
+                  {restaurant.promo_text}
+                </AppText>
+              </View>
             </View>
           )}
 
           {/* ── Info ── */}
-          <View>
+          <View
+            style={{
+              backgroundColor: C.surface,
+              borderRadius: 20,
+              borderWidth: 1,
+              borderColor: C.border,
+              overflow: "hidden",
+              ...shadow.sm,
+            }}
+          >
             {/* Horario */}
             {restaurant.has_plan && (() => {
               const os = isOpenNow(restaurant.hours);
@@ -988,7 +1045,9 @@ export default function RestaurantProfileScreen() {
                     onPress={() => canExpand && setHoursOpen((v) => !v)}
                     style={{ flexDirection: "row", alignItems: "center", gap: 14, padding: 16 }}
                   >
-                    <Icon name="clock-outline" size={20} color={C.onSurfaceVariant} />
+                    <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: os.open ? C.secondaryContainer : C.error + "22", alignItems: "center", justifyContent: "center" }}>
+                      <Icon name="clock-outline" size={18} color={os.open ? C.secondary : C.error} />
+                    </View>
                     <View style={{ flex: 1 }}>
                       <AppText variant="bodyStrong" color={os.open ? C.secondary : C.error}>
                         {os.open ? "Abierto ahora" : "Cerrado"}
@@ -1002,7 +1061,7 @@ export default function RestaurantProfileScreen() {
                     )}
                   </Pressable>
                   {hoursOpen && restaurant.hours && (
-                    <View style={{ paddingLeft: 34, paddingBottom: 12, gap: 4 }}>
+                    <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 4 }}>
                       {[1, 2, 3, 4, 5, 6, 0].map((dow) => {
                         const d = restaurant.hours!.days[dow];
                         const today = new Date().getDay() === dow;
@@ -1037,12 +1096,23 @@ export default function RestaurantProfileScreen() {
                   flexDirection: "row",
                   alignItems: "center",
                   gap: 14,
-                  paddingVertical: 14,
+                  padding: 16,
                   borderBottomWidth: 1,
                   borderBottomColor: C.outlineVariant,
                 }}
               >
-                <Icon name="mdi:ghost" size={20} color={C.onSurfaceVariant} />
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    backgroundColor: C.primaryFixed,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="mdi:ghost" size={18} color={C.primary} />
+                </View>
                 <View style={{ flex: 1 }}>
                   <AppText variant="bodyStrong">Pedir por WhatsApp</AppText>
                   <AppText variant="bodySm" color={C.onSurfaceVariant}>
@@ -1050,7 +1120,7 @@ export default function RestaurantProfileScreen() {
                   </AppText>
                 </View>
                 {whatsappUrl(restaurant.whatsapp) && (
-                  <Icon name="chevron-right" size={20} color={C.onSurfaceVariant} />
+                  <Icon name="chevron-right" size={18} color={C.outline} />
                 )}
               </Pressable>
             ) : (
@@ -1063,18 +1133,29 @@ export default function RestaurantProfileScreen() {
                     flexDirection: "row",
                     alignItems: "center",
                     gap: 14,
-                    paddingVertical: 14,
+                    padding: 16,
                     borderBottomWidth: 1,
                     borderBottomColor: C.outlineVariant,
                   }}
                 >
-                  <Icon name="map-marker-outline" size={20} color={C.onSurfaceVariant} />
+                  <View
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 10,
+                      backgroundColor: C.primaryFixed,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon name="map-marker-outline" size={18} color={C.primary} />
+                  </View>
                   <View style={{ flex: 1 }}>
                     <AppText variant="bodyStrong">
                       {restaurant.address}
                     </AppText>
                   </View>
-                  <Icon name="chevron-right" size={20} color={C.onSurfaceVariant} />
+                  <Icon name="chevron-right" size={18} color={C.outline} />
                 </Pressable>
               )
             )}
@@ -1095,12 +1176,23 @@ export default function RestaurantProfileScreen() {
                   flexDirection: "row",
                   alignItems: "center",
                   gap: 14,
-                  paddingVertical: 14,
+                  padding: 16,
                   borderBottomWidth: 1,
                   borderBottomColor: C.outlineVariant,
                 }}
               >
-                <Icon name="lock-outline" size={20} color={C.onSurfaceVariant} />
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    backgroundColor: C.surfaceContainerHighest,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="lock-outline" size={18} color={C.outline} />
+                </View>
                 <View style={{ flex: 1 }}>
                   <AppText variant="bodyStrong" color={C.onSurfaceVariant}>
                     Contacto no disponible
@@ -1122,16 +1214,27 @@ export default function RestaurantProfileScreen() {
                   flexDirection: "row",
                   alignItems: "center",
                   gap: 14,
-                  paddingVertical: 14,
+                  padding: 16,
                   borderBottomWidth: 1,
                   borderBottomColor: C.outlineVariant,
                 }}
               >
-                <Icon name="phone-outline" size={20} color={C.onSurfaceVariant} />
-                <AppText variant="bodyStrong" style={{ flex: 1 }}>
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    backgroundColor: C.secondaryContainer,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="phone-outline" size={18} color={C.secondary} />
+                </View>
+                <AppText variant="bodyStrong" color={C.secondary} style={{ flex: 1 }}>
                   {restaurant.phone}
                 </AppText>
-                <Icon name="chevron-right" size={20} color={C.onSurfaceVariant} />
+                <Icon name="chevron-right" size={18} color={C.outline} />
               </Pressable>
             )}
 
@@ -1143,16 +1246,27 @@ export default function RestaurantProfileScreen() {
                   flexDirection: "row",
                   alignItems: "center",
                   gap: 14,
-                  paddingVertical: 14,
+                  padding: 16,
                   borderBottomWidth: 1,
                   borderBottomColor: C.outlineVariant,
                 }}
               >
-                <Icon name="whatsapp" size={20} color={C.onSurfaceVariant} />
-                <AppText variant="bodyStrong" style={{ flex: 1 }}>
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    backgroundColor: C.secondaryContainer,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="whatsapp" size={18} color={C.secondary} />
+                </View>
+                <AppText variant="bodyStrong" color={C.secondary} style={{ flex: 1 }}>
                   {restaurant.whatsapp}
                 </AppText>
-                <Icon name="chevron-right" size={20} color={C.onSurfaceVariant} />
+                <Icon name="chevron-right" size={18} color={C.outline} />
               </Pressable>
             )}
 
@@ -1164,14 +1278,25 @@ export default function RestaurantProfileScreen() {
                   flexDirection: "row",
                   alignItems: "center",
                   gap: 14,
-                  paddingVertical: 14,
+                  padding: 16,
                 }}
               >
-                <Icon name="instagram" size={20} color={C.onSurfaceVariant} />
-                <AppText variant="bodyStrong" style={{ flex: 1 }}>
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    backgroundColor: C.tertiaryContainer,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="instagram" size={18} color={C.tertiary} />
+                </View>
+                <AppText variant="bodyStrong" color={C.tertiary} style={{ flex: 1 }}>
                   @{instagramHandle(restaurant.instagram)}
                 </AppText>
-                <Icon name="chevron-right" size={20} color={C.onSurfaceVariant} />
+                <Icon name="chevron-right" size={18} color={C.outline} />
               </Pressable>
             )}
           </View>
@@ -1184,25 +1309,60 @@ export default function RestaurantProfileScreen() {
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 14,
-                paddingVertical: 14,
-                borderTopWidth: 1,
-                borderBottomWidth: 1,
-                borderColor: C.outlineVariant,
+                padding: 18,
+                borderRadius: 20,
+                backgroundColor: C.primaryFixed,
+                borderWidth: 1,
+                borderColor: C.border,
+                ...shadow.md,
               }}
             >
-              <Icon name="file-pdf-box" size={22} color={C.primary} />
-              <AppText variant="bodyStrong" style={{ flex: 1 }}>
-                Ver menú completo
-              </AppText>
-              <Icon name="arrow-right" size={18} color={C.primary} />
+              <View
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 14,
+                  backgroundColor: C.primaryContainer,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderWidth: 1,
+                  borderColor: C.border,
+                }}
+              >
+                <Icon name="file-pdf-box" size={26} color={C.onPrimary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <AppText variant="heading" style={{ fontSize: 17 }}>
+                  Ver menú completo
+                </AppText>
+                <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 2 }}>
+                  Abre el menú en PDF
+                </AppText>
+              </View>
+              <Icon name="arrow-right" size={20} color={C.primary} />
             </Pressable>
           )}
 
           {/* ── Historia ── */}
           {restaurant.description && (
-            <View style={{ gap: 8 }}>
-              <AppText variant="overline" color={C.outline}>SOBRE EL LOCAL</AppText>
-              <AppText variant="body" style={{ lineHeight: 23, opacity: 0.85 }}>
+            <View
+              style={{
+                backgroundColor: C.tertiaryContainer,
+                borderRadius: 20,
+                padding: 18,
+                gap: 8,
+                borderWidth: 1,
+                borderColor: C.border,
+                ...shadow.sm,
+              }}
+            >
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+              >
+                <Icon name="book-open-outline" size={18} color={C.tertiary} />
+                <AppText variant="heading">Nuestra historia</AppText>
+              </View>
+              <AppText variant="body" style={{ lineHeight: 22, opacity: 0.85 }}>
                 {restaurant.description}
               </AppText>
             </View>
@@ -1211,14 +1371,29 @@ export default function RestaurantProfileScreen() {
           {/* ── Comodidades ── */}
           {restaurant.amenities.length > 0 && (
             <View style={{ gap: 12 }}>
-              <AppText variant="overline" color={C.outline}>COMODIDADES</AppText>
-              <View style={{ flexDirection: "row", flexWrap: "wrap", columnGap: 20, rowGap: 12 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Icon name="check-circle" size={18} color={C.primary} />
+                <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>
+                  Comodidades
+                </AppText>
+              </View>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
                 {restaurant.amenities.map((a) => (
                   <View
                     key={a.slug}
-                    style={{ flexDirection: "row", alignItems: "center", gap: 7 }}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                      paddingHorizontal: 14,
+                      paddingVertical: 10,
+                      borderRadius: 16,
+                      backgroundColor: C.surface,
+                      borderWidth: 1,
+                      borderColor: C.border,
+                    }}
                   >
-                    <Icon name={a.icon} size={17} color={C.onSurfaceVariant} />
+                    <Icon name={a.icon} size={17} color={C.primary} />
                     <AppText variant="bodySm">{a.label}</AppText>
                   </View>
                 ))}
@@ -1229,8 +1404,13 @@ export default function RestaurantProfileScreen() {
           {/* ── Métodos de pago ── */}
           {restaurant.payment_methods.length > 0 && (
             <View style={{ gap: 12 }}>
-              <AppText variant="overline" color={C.outline}>MÉTODOS DE PAGO</AppText>
-              <View style={{ flexDirection: "row", flexWrap: "wrap", columnGap: 20, rowGap: 12 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Icon name="wallet-outline" size={18} color={C.primary} />
+                <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>
+                  Métodos de pago
+                </AppText>
+              </View>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
                 {(paymentCatalogQ.data?.length &&
                 restaurant.payment_methods.length === paymentCatalogQ.data.length
                   ? [{ slug: "all", label: "Todos los métodos de pago", icon: "mdi:check-all" }]
@@ -1238,9 +1418,19 @@ export default function RestaurantProfileScreen() {
                 ).map((p) => (
                   <View
                     key={p.slug}
-                    style={{ flexDirection: "row", alignItems: "center", gap: 7 }}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                      paddingHorizontal: 14,
+                      paddingVertical: 10,
+                      borderRadius: 16,
+                      backgroundColor: C.surface,
+                      borderWidth: 1,
+                      borderColor: C.border,
+                    }}
                   >
-                    <Icon name={p.icon} size={17} color={C.onSurfaceVariant} />
+                    <Icon name={p.icon} size={17} color={C.primary} />
                     <AppText variant="bodySm">{p.label}</AppText>
                   </View>
                 ))}
@@ -1257,9 +1447,18 @@ export default function RestaurantProfileScreen() {
                 justifyContent: "space-between",
               }}
             >
-              <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+              >
+                <Icon
+                  name="comment-text-multiple"
+                  size={20}
+                  color={C.primary}
+                />
+                <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>
                   Comunidad
                 </AppText>
+              </View>
               {!isOwnerHere && (
                 <View style={{ flexDirection: "row", gap: 8 }}>
                   {(myReviewEditable || canRankAgain) && (
@@ -1321,10 +1520,15 @@ export default function RestaurantProfileScreen() {
             {/* Rating summary */}
             <View
               style={{
-                paddingVertical: 12,
+                backgroundColor: C.surface,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: C.border,
+                padding: 16,
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 20,
+                gap: 16,
+                ...shadow.sm,
               }}
             >
               <View style={{ alignItems: "center", gap: 4 }}>
@@ -1385,10 +1589,13 @@ export default function RestaurantProfileScreen() {
                   <View
                     key={i}
                     style={{
-                      paddingVertical: 16,
+                      backgroundColor: C.surface,
+                      borderRadius: 20,
+                      padding: 16,
                       gap: 10,
-                      borderTopWidth: 1,
-                      borderTopColor: C.outlineVariant,
+                      borderWidth: 1,
+                      borderColor: C.border,
+                      ...shadow.sm,
                     }}
                   >
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
@@ -1430,10 +1637,13 @@ export default function RestaurantProfileScreen() {
                 <View
                   key={r.id}
                   style={{
-                    paddingVertical: 16,
+                    backgroundColor: C.surface,
+                    borderRadius: 20,
+                    padding: 16,
                     gap: 12,
-                    borderTopWidth: 1,
-                    borderTopColor: hiddenForMe ? C.error : C.outlineVariant,
+                    borderWidth: 1,
+                    borderColor: hiddenForMe ? C.error : C.border,
+                    ...shadow.sm,
                   }}
                 >
                   {hiddenForMe && (
