@@ -5,6 +5,7 @@ import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
 import { useToast } from '@/lib/toast';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -13,6 +14,7 @@ import {
 } from '@gorhom/bottom-sheet';
 import {
   Pressable,
+  RefreshControl,
   ScrollView,
   TextInput,
   View,
@@ -412,6 +414,21 @@ export default function SearchScreen() {
   const { isTablet } = useResponsive();
 
   const searchQ = useRestaurantSearch();
+  const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+  async function onRefresh() {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        searchQ.refetch(),
+        queryClient.invalidateQueries({ queryKey: ['nearby'] }),
+        queryClient.invalidateQueries({ queryKey: ['home-feed'] }),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  }
+  const refreshControl = <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />;
   const categoriesQ = useCategories();
   const amenitiesQ = useAmenities();
   const paymentMethodsQ = usePaymentMethods();
@@ -669,6 +686,7 @@ export default function SearchScreen() {
         </View>
       ) : searching ? (
         <ScrollView
+          refreshControl={refreshControl}
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
           contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: insets.bottom + 96, ...capWidth(isTablet) }}
@@ -709,6 +727,7 @@ export default function SearchScreen() {
         </ScrollView>
       ) : (
         <ScrollView
+          refreshControl={refreshControl}
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
           contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 96, gap: 14, ...capWidth(isTablet) }}
