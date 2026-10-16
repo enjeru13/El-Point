@@ -1,6 +1,5 @@
 import { Icon } from '@/components/ui/Icon';
 import { Image } from 'expo-image';
-import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -20,28 +19,20 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { AppTextInput } from '@/components/ui/AppTextInput';
-import { TimePickerSheet, type TimePickerHandle } from '@/components/ui/TimePickerSheet';
-import { useMyRestaurant, useUpdateMyRestaurant, useUpdateRestaurantAmenities, useUpdateRestaurantPaymentMethods, useResubmitRestaurant, useSetRestaurantZoneLocation } from '@/lib/queries/owner';
+import { useMyRestaurant, useUpdateMyRestaurant, useResubmitRestaurant, useSetRestaurantZoneLocation } from '@/lib/queries/owner';
 import * as Location from 'expo-location';
 import MapView from 'react-native-maps';
-import { useAmenities } from '@/lib/queries/amenities';
-import { usePaymentMethods } from '@/lib/queries/paymentMethods';
-import { Chip } from '@/components/ui/Chip';
 import {
-  uploadRestaurantImage,
-  uploadRestaurantMenu,
   uploadRestaurantVerification,
   verificationPhotoUrl,
 } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
-import { DEFAULT_HOURS, DAY_LABELS, DAY_LABELS_LONG, formatRange, to12h, type Hours } from '@/lib/hours';
 import { instagramHandle } from '@/lib/contact';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 import { capWidth, useIsTablet } from '@/lib/responsive';
 import { isFounder } from '@/lib/queries/restaurants';
 import { hasPlan } from '@/lib/plan';
 import { PlanLock } from '@/components/ui/PlanLock';
-import { MenuEditor } from '@/components/owner/MenuEditor';
 import { FounderBadge } from '@/components/ui/FounderBadge';
 
 function Divider() {
@@ -99,12 +90,8 @@ export default function OwnerProfileScreen() {
   // Perfil básico (sin plan): contacto, menú, fotos, horario, promo, comodidades y pagos van bloqueados.
   const plan = !!restaurant && hasPlan(restaurant);
   const updateMut = useUpdateMyRestaurant(restaurant?.id);
-  const updateAmenitiesMut = useUpdateRestaurantAmenities(restaurant?.id);
-  const updatePaymentsMut = useUpdateRestaurantPaymentMethods(restaurant?.id);
   const setZoneLocationMut = useSetRestaurantZoneLocation(restaurant?.id);
   const resubmit = useResubmitRestaurant();
-  const amenitiesQ = useAmenities();
-  const paymentMethodsQ = usePaymentMethods();
 
   const [editing, setEditing] = useState(false);
   const [name, setName]           = useState('');
@@ -113,43 +100,29 @@ export default function OwnerProfileScreen() {
   const [phone, setPhone]         = useState('');
   const [whatsapp, setWhatsapp]   = useState('');
   const [instagram, setInstagram] = useState('');
-  const [promo, setPromo]         = useState('');
   const [priceLevel, setPriceLevel] = useState<number | null>(null);
   const [isActive, setIsActive]   = useState(true);
   const [ghostKitchen, setGhostKitchen] = useState(false);
   const [zoneLabel, setZoneLabel] = useState('');
-  const [acceptsOrders, setAcceptsOrders] = useState(false);
-  const [orderGreeting, setOrderGreeting] = useState('');
   const [showZonePin, setShowZonePin] = useState(false);
   const [zoneCoords, setZoneCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [zoneLocating, setZoneLocating] = useState(false);
   const zoneMapRef = useRef<MapView>(null);
-  const [hours, setHoursState]    = useState<Hours>(DEFAULT_HOURS);
-  const [amenityIds, setAmenityIds] = useState<Set<number>>(new Set());
-  const [paymentIds, setPaymentIds] = useState<Set<number>>(new Set());
-  const [uploading, setUploading] = useState<'logo' | 'cover' | 'menu' | null>(null);
 
   const [verifUploading, setVerifUploading] = useState(false);
   const [verifUrl, setVerifUrl] = useState<string | null>(null);
   const [rifDraft, setRifDraft] = useState('');
 
-  const timePickerRef = useRef<TimePickerHandle>(null);
 
   // Coach-mark targets for the first-use tour.
   const tourEditRef   = useRef<View>(null);
   const tourInfoRef   = useRef<View>(null);
-  const tourHoursRef  = useRef<View>(null);
-  const tourPhotosRef = useRef<View>(null);
   const scrollRef     = useRef<ScrollView>(null);
   const scrollY       = useRef(0);
-  const allTourSteps: TourStep[] = [
+  const tourSteps: TourStep[] = [
     { ref: tourEditRef, icon: 'pencil-outline', title: 'Edita tu local', text: 'Toca aquí para actualizar dirección, contacto, comodidades y más.' },
     { ref: tourInfoRef, icon: 'store-outline', title: 'Información del negocio', text: 'Dirección, teléfono, WhatsApp, Instagram y tu rango de precio.' },
-    { ref: tourHoursRef, icon: 'clock-outline', title: 'Tu horario', text: 'Marca los días abiertos y las horas de cada uno.' },
-    { ref: tourPhotosRef, icon: 'camera-plus-outline', title: 'Fotos y menú', text: 'Portada, logo y tu carta en PDF: lo primero que ve el comensal.' },
   ];
-  // Sin plan esas dos secciones están bloqueadas: el recorrido no las señala.
-  const tourSteps = plan ? allTourSteps : allTourSteps.filter((st) => st.ref !== tourHoursRef && st.ref !== tourPhotosRef);
 
   useEffect(() => {
     let alive = true;
@@ -247,54 +220,6 @@ export default function OwnerProfileScreen() {
     );
   }
 
-  function setDay(dow: number, patch: Partial<Hours['days'][number]>) {
-    setHoursState((h) => ({ days: h.days.map((d, i) => (i === dow ? { ...d, ...patch } : d)) }));
-  }
-
-  function openTimePicker(dow: number, which: 'open' | 'close') {
-    const d = hours.days[dow];
-    timePickerRef.current?.present({
-      title: `${DAY_LABELS_LONG[dow]} · ${which === 'open' ? 'abre' : 'cierra'}`,
-      value: d[which],
-      onPick: (hhmm) => setDay(dow, { [which]: hhmm }),
-    });
-  }
-
-  async function pickPhoto(kind: 'logo' | 'cover') {
-    if (!restaurant) return;
-    const uri = await pickImageSource({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: kind === 'cover' ? [16, 9] : [1, 1],
-      quality: 0.85,
-    });
-    if (!uri) return;
-    setUploading(kind);
-    try {
-      const url = await uploadRestaurantImage(restaurant.id, kind, uri);
-      updateMut.mutate(kind === 'logo' ? { logo_url: url } : { cover_url: url });
-    } catch (e: any) {
-      toast.error(e?.message ?? 'No se pudo subir la imagen');
-    } finally {
-      setUploading(null);
-    }
-  }
-
-  async function pickMenu() {
-    if (!restaurant) return;
-    const r = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
-    if (r.canceled) return;
-    setUploading('menu');
-    try {
-      const url = await uploadRestaurantMenu(restaurant.id, r.assets[0].uri);
-      updateMut.mutate({ menu_pdf_url: url });
-    } catch (e: any) {
-      toast.error(e?.message ?? 'No se pudo subir el menú');
-    } finally {
-      setUploading(null);
-    }
-  }
-
   useEffect(() => {
     if (!restaurant) return;
     setName(restaurant.name ?? '');
@@ -303,17 +228,11 @@ export default function OwnerProfileScreen() {
     setPhone(restaurant.phone ?? '');
     setWhatsapp(restaurant.whatsapp ?? '');
     setInstagram(restaurant.instagram ?? '');
-    setPromo(restaurant.promo_text ?? '');
     setPriceLevel(restaurant.price_level ?? null);
     setIsActive(restaurant.is_active);
-    setHoursState(restaurant.hours ?? DEFAULT_HOURS);
     setRifDraft(restaurant.rif ?? '');
-    setAmenityIds(new Set(restaurant.amenities.map((a) => a.id)));
-    setPaymentIds(new Set(restaurant.payment_methods.map((p) => p.id)));
     setGhostKitchen(restaurant.ghost_kitchen);
     setZoneLabel(restaurant.zone_label ?? '');
-    setAcceptsOrders(restaurant.accepts_orders);
-    setOrderGreeting(restaurant.order_greeting ?? '');
     setZoneCoords(
       restaurant.lat != null && restaurant.lng != null
         ? { lat: restaurant.lat, lng: restaurant.lng }
@@ -321,29 +240,6 @@ export default function OwnerProfileScreen() {
     );
   }, [restaurant]);
 
-  function toggleAmenity(id: number) {
-    setAmenityIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  }
-
-  function togglePayment(id: number) {
-    setPaymentIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  }
-
-  const allPaymentIds = (paymentMethodsQ.data ?? []).map((p) => p.id);
-  const allPaymentsSelected =
-    allPaymentIds.length > 0 && allPaymentIds.every((id) => paymentIds.has(id));
-
-  function toggleAllPayments() {
-    setPaymentIds(allPaymentsSelected ? new Set() : new Set(allPaymentIds));
-  }
 
   function cancel() {
     if (!restaurant) return;
@@ -353,25 +249,15 @@ export default function OwnerProfileScreen() {
     setPhone(restaurant.phone ?? '');
     setWhatsapp(restaurant.whatsapp ?? '');
     setInstagram(restaurant.instagram ?? '');
-    setPromo(restaurant.promo_text ?? '');
     setPriceLevel(restaurant.price_level ?? null);
     setIsActive(restaurant.is_active);
-    setHoursState(restaurant.hours ?? DEFAULT_HOURS);
-    setAmenityIds(new Set(restaurant.amenities.map((a) => a.id)));
-    setPaymentIds(new Set(restaurant.payment_methods.map((p) => p.id)));
     setGhostKitchen(restaurant.ghost_kitchen);
     setZoneLabel(restaurant.zone_label ?? '');
-    setAcceptsOrders(restaurant.accepts_orders);
-    setOrderGreeting(restaurant.order_greeting ?? '');
     setEditing(false);
   }
 
   function save() {
     if (!name.trim()) { toast.error('El nombre no puede quedar vacío'); return; }
-    const badTime = hours.days.some(
-      (d) => !d.closed && (!/^\d{1,2}:\d{2}$/.test(d.open) || !/^\d{1,2}:\d{2}$/.test(d.close)),
-    );
-    if (badTime) { toast.error('Horario inválido. Usa el formato HH:MM (ej. 12:00).'); return; }
     updateMut.mutate(
       {
         name: name.trim(),
@@ -380,26 +266,16 @@ export default function OwnerProfileScreen() {
         phone: phone.trim() || null,
         whatsapp: whatsapp.trim() || null,
         instagram: instagramHandle(instagram) ?? null,
-        promo_text: promo.trim() || null,
         price_level: priceLevel,
         is_active: isActive,
-        hours,
         ghost_kitchen: ghostKitchen,
         zone_label: ghostKitchen ? (zoneLabel.trim() || null) : null,
-        accepts_orders: acceptsOrders,
-        order_greeting: orderGreeting.trim() ? orderGreeting.trim().slice(0, 200) : null,
       },
       {
         onSuccess: () => { setEditing(false); toast.success('Cambios guardados'); },
         onError: (e: any) => toast.error(e?.message ?? 'No se pudo guardar'),
       },
     );
-    updateAmenitiesMut.mutate(Array.from(amenityIds), {
-      onError: (e: any) => toast.error(e?.message ?? 'No se pudieron guardar las comodidades'),
-    });
-    updatePaymentsMut.mutate(Array.from(paymentIds), {
-      onError: (e: any) => toast.error(e?.message ?? 'No se pudieron guardar los métodos de pago'),
-    });
   }
 
   if (restaurantQ.isLoading) {
@@ -787,261 +663,6 @@ export default function OwnerProfileScreen() {
           </View>
         </View>
 
-        {/* Comodidades */}
-        {!plan ? (
-          <PlanLock title="Comodidades" body="Muestra wifi, estacionamiento, aire acondicionado y más para que te elijan." onPress={() => router.push('/subscription' as any)} />
-        ) : (
-        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
-          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
-            <AppText variant="bodyStrong">Comodidades</AppText>
-          </View>
-          <View style={{ padding: 18 }}>
-            {editing ? (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                {(amenitiesQ.data ?? []).map((am) => (
-                  <Chip
-                    key={am.id}
-                    label={am.label}
-                    icon={am.icon}
-                    tone="secondary"
-                    active={amenityIds.has(am.id)}
-                    onPress={() => toggleAmenity(am.id)}
-                  />
-                ))}
-              </View>
-            ) : restaurant.amenities.length > 0 ? (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                {restaurant.amenities.map((a) => (
-                  <View key={a.slug} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 99, backgroundColor: C.secondaryContainer, borderWidth: 1, borderColor: C.border }}>
-                    <Icon name={a.icon} size={14} color={C.onSurface} />
-                    <AppText variant="label">{a.label}</AppText>
-                  </View>
-                ))}
-              </View>
-            ) : (
-              <AppText variant="bodySm" color={C.outline}>
-                Aún no marcaste comodidades. Toca &quot;Editar&quot; para agregar.
-              </AppText>
-            )}
-          </View>
-        </View>
-        )}
-
-        {/* Métodos de pago */}
-        {!plan ? (
-          <PlanLock title="Métodos de pago" body="Indica cómo te pueden pagar y entra en los filtros de búsqueda." onPress={() => router.push('/subscription' as any)} />
-        ) : (
-        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
-          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
-            <AppText variant="bodyStrong">Métodos de pago</AppText>
-          </View>
-          <View style={{ padding: 18 }}>
-            {editing ? (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                <Chip
-                  label="Todos"
-                  icon="mdi:check-all"
-                  tone="secondary"
-                  active={allPaymentsSelected}
-                  onPress={toggleAllPayments}
-                />
-                {(paymentMethodsQ.data ?? []).map((pm) => (
-                  <Chip
-                    key={pm.id}
-                    label={pm.label}
-                    icon={pm.icon}
-                    tone="secondary"
-                    active={paymentIds.has(pm.id)}
-                    onPress={() => togglePayment(pm.id)}
-                  />
-                ))}
-              </View>
-            ) : restaurant.payment_methods.length > 0 ? (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                {(allPaymentIds.length > 0 && restaurant.payment_methods.length === allPaymentIds.length
-                  ? [{ slug: 'all', label: 'Todos los métodos de pago', icon: 'mdi:check-all' }]
-                  : restaurant.payment_methods
-                ).map((p) => (
-                  <View key={p.slug} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 99, backgroundColor: C.secondaryContainer, borderWidth: 1, borderColor: C.border }}>
-                    <Icon name={p.icon} size={14} color={C.onSurface} />
-                    <AppText variant="label">{p.label}</AppText>
-                  </View>
-                ))}
-              </View>
-            ) : (
-              <AppText variant="bodySm" color={C.outline}>
-                Aún no indicaste cómo pueden pagarte. Toca &quot;Editar&quot; para agregar.
-              </AppText>
-            )}
-          </View>
-        </View>
-        )}
-
-        {/* Horario */}
-        {!plan ? (
-          <PlanLock title="Horario" body="Tu horario y el “abierto ahora” se ven en tu perfil." onPress={() => router.push('/subscription' as any)} />
-        ) : (
-        <View ref={tourHoursRef} collapsable={false} style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
-          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
-            <AppText variant="bodyStrong">Horario</AppText>
-          </View>
-          <View style={{ padding: 14, gap: 8 }}>
-            {[1, 2, 3, 4, 5, 6, 0].map((dow) => {
-              const d = hours.days[dow];
-              return (
-                <View key={dow} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <AppText variant="label" style={{ width: 40, fontFamily: 'PlusJakartaSans_700Bold' }}>
-                    {DAY_LABELS[dow]}
-                  </AppText>
-                  {editing ? (
-                    <>
-                      <Switch
-                        value={!d.closed}
-                        onValueChange={(v) => setDay(dow, { closed: !v })}
-                        trackColor={{ false: C.surfaceContainerHighest, true: C.primaryContainer }}
-                        thumbColor={!d.closed ? C.primary : C.outline}
-                      />
-                      {d.closed ? (
-                        <AppText variant="bodySm" color={C.outline} style={{ flex: 1 }}>Cerrado</AppText>
-                      ) : (
-                        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                          <Pressable
-                            onPress={() => openTimePicker(dow, 'open')}
-                            style={{ flex: 1, backgroundColor: C.surfaceContainerLow, borderRadius: 10, borderWidth: 1, borderColor: C.outlineVariant, paddingVertical: 8, alignItems: 'center' }}
-                          >
-                            <AppText variant="label" style={{ fontSize: 13 }}>{to12h(d.open)}</AppText>
-                          </Pressable>
-                          <AppText variant="bodySm" color={C.outline}>–</AppText>
-                          <Pressable
-                            onPress={() => openTimePicker(dow, 'close')}
-                            style={{ flex: 1, backgroundColor: C.surfaceContainerLow, borderRadius: 10, borderWidth: 1, borderColor: C.outlineVariant, paddingVertical: 8, alignItems: 'center' }}
-                          >
-                            <AppText variant="label" style={{ fontSize: 13 }}>{to12h(d.close)}</AppText>
-                          </Pressable>
-                        </View>
-                      )}
-                    </>
-                  ) : (
-                    <AppText variant="label" color={d.closed ? C.outline : C.onSurfaceVariant} style={{ flex: 1 }}>
-                      {formatRange(d)}
-                    </AppText>
-                  )}
-                </View>
-              );
-            })}
-          </View>
-        </View>
-        )}
-
-        {/* Oferta */}
-        {!plan ? (
-          <PlanLock title="Oferta / promoción" body="Publica una promo y avisamos a quienes te tienen en favoritos." onPress={() => router.push('/subscription' as any)} />
-        ) : (
-        <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
-          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
-            <AppText variant="bodyStrong">Oferta / promoción</AppText>
-          </View>
-          <View style={{ padding: 18, gap: 6 }}>
-            {editing ? (
-              <>
-                <AppTextInput
-                  value={promo}
-                  onChangeText={setPromo}
-                  placeholder="Ej. 2x1 en hamburguesas los martes"
-                  maxLength={80}
-                  style={{ fontSize: 14 }}
-                />
-                <AppText variant="caption" color={C.outline} align="right" style={{ fontSize: 12 }}>{promo.length}/80</AppText>
-              </>
-            ) : restaurant.promo_text ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Icon name="tag" size={16} color={C.primary} />
-                <AppText variant="bodyStrong" style={{ flex: 1, fontSize: 14 }}>{restaurant.promo_text}</AppText>
-              </View>
-            ) : (
-              <AppText variant="bodySm" color={C.outline}>
-                Sin oferta activa. Toca &quot;Editar&quot; para agregar una.
-              </AppText>
-            )}
-          </View>
-        </View>
-        )}
-
-        {/* Menú en la app */}
-        {!plan ? (
-          <PlanLock title="Menú en la app" body="Platos con precio en dólares, bolívares o pesos, y plato del día con aviso a quienes te siguen." onPress={() => router.push('/subscription' as any)} />
-        ) : (
-          <MenuEditor restaurant={restaurant} />
-        )}
-
-        {/* Pedidos por WhatsApp */}
-        {!plan && !restaurant.ghost_kitchen ? (
-          <PlanLock title="Pedidos por WhatsApp" body="Muestra un botón “Pedir” que abre tu WhatsApp con el mensaje listo." onPress={() => router.push('/subscription' as any)} />
-        ) : (
-          <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
-            <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
-              <AppText variant="bodyStrong">Pedidos por WhatsApp</AppText>
-            </View>
-            <View style={{ padding: 18, gap: 14 }}>
-              {restaurant.ghost_kitchen ? (
-                <AppText variant="bodySm" color={C.onSurfaceVariant}>
-                  Tu cocina fantasma siempre muestra el botón “Pedir”. Aquí puedes personalizar el saludo.
-                </AppText>
-              ) : (
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                  <View style={{ flex: 1 }}>
-                    <AppText variant="bodyStrong">Recibo pedidos por WhatsApp</AppText>
-                    <AppText variant="bodySm" color={C.onSurfaceVariant}>
-                      Los comensales ven un botón “Pedir” en tu perfil.
-                    </AppText>
-                  </View>
-                  <Switch
-                    value={acceptsOrders}
-                    disabled={!editing}
-                    onValueChange={setAcceptsOrders}
-                    trackColor={{ false: C.surfaceContainerHighest, true: C.primaryContainer }}
-                    thumbColor={acceptsOrders ? C.primary : C.outline}
-                  />
-                </View>
-              )}
-
-              {(restaurant.ghost_kitchen || acceptsOrders) && (
-                <View style={{ gap: 6 }}>
-                  <AppText variant="overline" color={C.outline}>SALUDO DEL MENSAJE</AppText>
-                  {editing ? (
-                    <>
-                      <AppTextInput
-                        value={orderGreeting}
-                        onChangeText={(t) => setOrderGreeting(t.slice(0, 200))}
-                        placeholder={`Hola, quiero hacer un pedido en ${restaurant.name}. Te encontré en El Point.`}
-                        multiline
-                        style={{
-                          fontSize: 14,
-                          minHeight: 64,
-                          textAlignVertical: 'top',
-                          backgroundColor: C.surfaceContainerLow,
-                          borderWidth: 1,
-                          borderColor: C.outlineVariant,
-                          borderRadius: 12,
-                          paddingHorizontal: 12,
-                          paddingVertical: 10,
-                        }}
-                      />
-                      <AppText variant="caption" color={C.outline} align="right" style={{ fontSize: 12 }}>
-                        {orderGreeting.length}/200 · vacío usa el mensaje por defecto
-                      </AppText>
-                    </>
-                  ) : (
-                    <AppText variant="bodySm" color={restaurant.order_greeting ? C.onSurface : C.outline}>
-                      {restaurant.order_greeting ?? `Hola, quiero hacer un pedido en ${restaurant.name}. Te encontré en El Point.`}
-                    </AppText>
-                  )}
-                </View>
-              )}
-            </View>
-          </View>
-        )}
-
         {/* Visibilidad */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: 20, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, ...shadow.sm }}>
           <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
@@ -1165,108 +786,8 @@ export default function OwnerProfileScreen() {
           )}
         </View>
 
-        {/* Fotos y menú */}
-        {!plan ? (
-          <PlanLock title="Fotos y menú" body="Portada, logo y tu carta en PDF: lo primero que ve el comensal." onPress={() => router.push('/subscription' as any)} />
-        ) : (
-        <View ref={tourPhotosRef} collapsable={false} style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: 'hidden', ...shadow.sm }}>
-          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
-            <AppText variant="bodyStrong">Fotos y menú</AppText>
-          </View>
-
-          {/* Portada */}
-          <View style={{ padding: 18, gap: 8, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
-            <AppText variant="overline" color={C.outline}>FOTO DE PORTADA</AppText>
-            <AppText variant="caption" color={C.onSurfaceVariant}>Se muestra grande arriba de tu perfil.</AppText>
-            <Pressable
-              onPress={() => pickPhoto('cover')}
-              disabled={uploading !== null}
-              style={{
-                marginTop: 4,
-                height: 150, borderRadius: 14, overflow: 'hidden',
-                borderWidth: 1, borderColor: C.border, borderStyle: restaurant.cover_url ? 'solid' : 'dashed',
-                alignItems: 'center', justifyContent: 'center',
-                backgroundColor: C.surfaceContainerLow,
-              }}
-            >
-              {restaurant.cover_url ? (
-                <Image source={{ uri: restaurant.cover_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
-              ) : (
-                <View style={{ alignItems: 'center', gap: 6 }}>
-                  <Icon name="camera-plus-outline" size={28} color={C.primary} />
-                  <AppText variant="label" color={C.onSurfaceVariant}>Elegir foto</AppText>
-                </View>
-              )}
-              {restaurant.cover_url && uploading !== 'cover' && (
-                <View style={{ position: 'absolute', bottom: 8, right: 8, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border }}>
-                  <Icon name="camera-plus-outline" size={12} color={C.onSurface} />
-                  <AppText variant="caption" color={C.onSurface} style={{ fontSize: 11 }}>Cambiar</AppText>
-                </View>
-              )}
-              {uploading === 'cover' && (
-                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.35)', alignItems: 'center', justifyContent: 'center' }}>
-                  <ActivityIndicator color="#fff" />
-                </View>
-              )}
-            </Pressable>
-          </View>
-
-          {/* Logo */}
-          <Pressable
-            onPress={() => pickPhoto('logo')}
-            disabled={uploading !== null}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}
-          >
-            <View style={{
-              width: 56, height: 56, borderRadius: 16, overflow: 'hidden',
-              borderWidth: 1, borderColor: C.border, borderStyle: restaurant.logo_url ? 'solid' : 'dashed',
-              alignItems: 'center', justifyContent: 'center', backgroundColor: C.primaryFixed,
-            }}>
-              {restaurant.logo_url ? (
-                <Image source={{ uri: restaurant.logo_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
-              ) : (
-                <Icon name="image-plus" size={22} color={C.primary} />
-              )}
-              {uploading === 'logo' && (
-                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.35)', alignItems: 'center', justifyContent: 'center' }}>
-                  <ActivityIndicator color="#fff" size="small" />
-                </View>
-              )}
-            </View>
-            <View style={{ flex: 1 }}>
-              <AppText variant="bodyStrong">Logo del local</AppText>
-              <AppText variant="caption" color={C.outline} style={{ fontSize: 12, marginTop: 1 }}>
-                {restaurant.logo_url ? 'Toca para cambiarlo' : 'Aparece junto a tu nombre'}
-              </AppText>
-            </View>
-            <Icon name="chevron-right" size={18} color={C.outline} />
-          </Pressable>
-
-          {/* Menú PDF */}
-          <Pressable
-            onPress={pickMenu}
-            disabled={uploading !== null}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18 }}
-          >
-            <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: restaurant.menu_pdf_url ? C.primary : C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
-              {uploading === 'menu'
-                ? <ActivityIndicator size="small" color={restaurant.menu_pdf_url ? '#fff' : C.primary} />
-                : <Icon name={restaurant.menu_pdf_url ? 'file-check' : 'file-pdf-box'} size={24} color={restaurant.menu_pdf_url ? '#fff' : C.primary} />}
-            </View>
-            <View style={{ flex: 1 }}>
-              <AppText variant="bodyStrong">Menú (PDF)</AppText>
-              <AppText variant="caption" color={C.outline} style={{ fontSize: 12, marginTop: 1 }}>
-                {restaurant.menu_pdf_url ? 'Cargado · toca para reemplazar' : 'Sube tu carta para los clientes'}
-              </AppText>
-            </View>
-            <Icon name="chevron-right" size={18} color={C.outline} />
-          </Pressable>
-        </View>
-        )}
-
       </ScrollView>
 
-      <TimePickerSheet ref={timePickerRef} />
       <TourGuide tourKey="owner_profile" steps={tourSteps} scrollRef={scrollRef} scrollOffset={scrollY} />
     </View>
   );
