@@ -120,6 +120,62 @@ export type Database = {
           },
         ]
       }
+      menu_items: {
+        Row: {
+          available: boolean
+          created_at: string
+          description: string | null
+          id: string
+          is_daily_special: boolean
+          name: string
+          position: number
+          price_usd: number
+          restaurant_id: string
+          section: string
+          special_date: string | null
+          special_keep: boolean
+          updated_at: string
+        }
+        Insert: {
+          available?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_daily_special?: boolean
+          name: string
+          position?: number
+          price_usd: number
+          restaurant_id: string
+          section?: string
+          special_date?: string | null
+          special_keep?: boolean
+          updated_at?: string
+        }
+        Update: {
+          available?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_daily_special?: boolean
+          name?: string
+          position?: number
+          price_usd?: number
+          restaurant_id?: string
+          section?: string
+          special_date?: string | null
+          special_keep?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -552,6 +608,7 @@ export type Database = {
           verification_photo_path: string | null
           whatsapp: string | null
           accepts_orders: boolean
+          menu_currencies: string[]
           order_greeting: string | null
           zone_label: string | null
         }
@@ -591,6 +648,7 @@ export type Database = {
           verification_photo_path?: string | null
           whatsapp?: string | null
           accepts_orders?: boolean
+          menu_currencies?: string[]
           order_greeting?: string | null
           zone_label?: string | null
         }
@@ -630,6 +688,7 @@ export type Database = {
           verification_photo_path?: string | null
           whatsapp?: string | null
           accepts_orders?: boolean
+          menu_currencies?: string[]
           order_greeting?: string | null
           zone_label?: string | null
         }

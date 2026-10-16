@@ -41,6 +41,7 @@ import { capWidth, useIsTablet } from '@/lib/responsive';
 import { isFounder } from '@/lib/queries/restaurants';
 import { hasPlan } from '@/lib/plan';
 import { PlanLock } from '@/components/ui/PlanLock';
+import { MenuEditor } from '@/components/owner/MenuEditor';
 import { FounderBadge } from '@/components/ui/FounderBadge';
 
 function Divider() {
@@ -964,6 +965,13 @@ export default function OwnerProfileScreen() {
             )}
           </View>
         </View>
+        )}
+
+        {/* Menú en la app */}
+        {!plan ? (
+          <PlanLock title="Menú en la app" body="Platos con precio en dólares, bolívares o pesos, y plato del día con aviso a quienes te siguen." onPress={() => router.push('/subscription' as any)} />
+        ) : (
+          <MenuEditor restaurant={restaurant} />
         )}
 
         {/* Pedidos por WhatsApp */}

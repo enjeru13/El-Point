@@ -36,6 +36,8 @@ import { ReportSheet, type ReportSheetHandle } from "@/components/ui/ReportSheet
 import { whatsappUrl, instagramUrl, instagramHandle, orderMessage } from "@/lib/contact";
 import { useMyProfile } from "@/lib/queries/me";
 import { usePaymentMethods } from "@/lib/queries/paymentMethods";
+import { useMenu } from "@/lib/queries/menu";
+import { MenuSection } from "@/components/restaurant/MenuSection";
 import { useFavoriteIds, useToggleFavorite } from "@/lib/queries/feed";
 import { useToast } from "@/lib/toast";
 import { impact } from "@/lib/haptics";
@@ -454,6 +456,8 @@ export default function RestaurantProfileScreen() {
   const replyMut = useReplyToReview(id);
   const myProfileQ = useMyProfile();
   const paymentCatalogQ = usePaymentMethods();
+  // Menú con precios: solo se pide si el local tiene plan (sin plan el servidor tampoco lo entrega).
+  const menuQ = useMenu(id, !!restaurantQ.data?.has_plan);
 
   // Una visita por apertura del local (el servidor descarta al dueño y repeticiones).
   const viewedId = restaurantQ.data?.id;
@@ -1330,6 +1334,11 @@ export default function RestaurantProfileScreen() {
               </Pressable>
             )}
           </View>
+
+          {/* ── Menú con precios ── */}
+          {restaurant.has_plan && (menuQ.data?.length ?? 0) > 0 && (
+            <MenuSection items={menuQ.data!} currenciesRaw={restaurant.menu_currencies} />
+          )}
 
           {/* ── Menú PDF ── */}
           {restaurant.menu_pdf_url && (
