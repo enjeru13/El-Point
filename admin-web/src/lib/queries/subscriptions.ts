@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../supabase";
 
 export type SubStatus = "founder" | "active" | "expired" | "none";
@@ -9,6 +9,7 @@ export type RestaurantSubscription = {
   owner_name: string;
   founder_rank: number | null;
   paid_until: string | null;
+  boost_until: string | null;
   status: SubStatus;
 };
 
@@ -30,7 +31,7 @@ async function fetchSubscriptions(): Promise<RestaurantSubscription[]> {
   const { data, error } = await supabase
     .from("restaurants")
     .select(
-      `id, name, founder_rank, paid_until,
+      `id, name, founder_rank, paid_until, boost_until,
        owner:profiles!owner_id ( username, full_name )`,
     )
     .eq("status", "approved")
@@ -44,10 +45,35 @@ async function fetchSubscriptions(): Promise<RestaurantSubscription[]> {
     owner_name: r.owner?.username ? `@${r.owner.username}` : (r.owner?.full_name ?? "Dueño"),
     founder_rank: r.founder_rank,
     paid_until: r.paid_until,
+    boost_until: r.boost_until ?? null,
     status: computeStatus(r.founder_rank, r.paid_until),
   }));
 }
 
 export function useSubscriptions() {
   return useQuery({ queryKey: KEY, queryFn: fetchSubscriptions });
+}
+
+export type PlanAction = "remove" | "add_days" | "set_date" | "remove_boost";
+
+/** Ajusta el plan de un local desde el panel: quitarlo, regalar días, fijar fecha o quitar el Destacado. */
+export function useAdjustPlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { restaurantId: string; action: PlanAction; days?: number; date?: string; reason?: string }) => {
+      const { error } = await supabase.rpc("admin_set_plan", {
+        p_restaurant_id: input.restaurantId,
+        p_action: input.action,
+        p_days: input.days ?? null,
+        p_date: input.date ?? null,
+        p_reason: input.reason ?? null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEY });
+      qc.invalidateQueries({ queryKey: ["admin-paying-restaurants"] });
+      qc.invalidateQueries({ queryKey: ["admin-counts"] });
+    },
+  });
 }
