@@ -3,14 +3,14 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   BarChart3,
   Banknote,
-  CreditCard,
+  ClipboardCheck,
   Flag,
+  Building2,
   LayoutDashboard,
   LifeBuoy,
   LogOut,
   Menu,
   MessageSquareWarning,
-  Store,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -29,10 +29,10 @@ const NAV: {
 }[] = [
   { to: "/", label: "Resumen", icon: LayoutDashboard, end: true },
   { to: "/estadisticas", label: "Estadísticas", icon: BarChart3 },
-  { to: "/pagos", label: "Pagos", icon: Banknote, key: "payments", section: "Negocio" },
-  { to: "/suscripciones", label: "Suscripciones", icon: CreditCard, key: "expiredSubs" },
-  { to: "/restaurantes", label: "Locales pendientes", icon: Store, key: "restaurants", section: "Moderación" },
-  { to: "/reportados", label: "Locales reportados", icon: Flag, key: "reported" },
+  { to: "/locales", label: "Locales", icon: Building2, key: "expiredSubs", section: "Negocio" },
+  { to: "/pagos", label: "Pagos", icon: Banknote, key: "payments" },
+  { to: "/restaurantes", label: "Locales pendientes", icon: ClipboardCheck, key: "restaurants", section: "Moderación" },
+  { to: "/reportados", label: "Suspendidos", icon: Flag, key: "reported" },
   { to: "/resenas", label: "Reseñas reportadas", icon: MessageSquareWarning, key: "reviews" },
   { to: "/soporte", label: "Soporte", icon: LifeBuoy, key: "support" },
 ];

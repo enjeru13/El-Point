@@ -69,7 +69,7 @@ export function Spinner({ className = "" }: { className?: string }) {
   return <Loader2 className={`h-4 w-4 animate-spin ${className}`} aria-hidden />;
 }
 
-type BadgeTone = "neutral" | "brand" | "danger" | "good";
+type BadgeTone = "neutral" | "brand" | "danger" | "good" | "warn";
 
 export function Badge({ tone = "neutral", children }: { tone?: BadgeTone; children: ReactNode }) {
   const styles: Record<BadgeTone, string> = {
@@ -77,6 +77,7 @@ export function Badge({ tone = "neutral", children }: { tone?: BadgeTone; childr
     brand: "bg-brand/10 text-brand border-brand/30",
     danger: "bg-danger/10 text-danger border-danger/30",
     good: "bg-good/10 text-good border-good/30",
+    warn: "bg-gold/10 text-gold border-gold/30",
   };
   return (
     <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${styles[tone]}`}>
@@ -138,3 +139,74 @@ export function timeAgo(iso: string): string {
   if (w < 5) return `hace ${w} sem`;
   return `hace ${Math.floor(d / 30)} mes`;
 }
+
+/** Pestañas en píldora, con contador opcional. */
+export function Tabs<T extends string>({
+  value,
+  onChange,
+  options,
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  options: { value: T; label: string; badge?: number }[];
+}) {
+  return (
+    <div className="inline-flex w-fit max-w-full overflow-x-auto rounded-full border border-border bg-surface-2 p-1">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          onClick={() => onChange(o.value)}
+          className={`flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-bold transition ${
+            o.value === value ? "bg-brand text-white shadow-sm" : "text-text-soft hover:text-text"
+          }`}
+        >
+          {o.label}
+          {!!o.badge && (
+            <span className={`rounded-full px-1.5 text-[11px] leading-5 ${o.value === value ? "bg-white/25" : "bg-brand text-white"}`}>{o.badge}</span>
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Número grande con título y una línea de contexto; para franjas de indicadores. */
+export function StatTile({
+  icon: Icon,
+  label,
+  value,
+  hint,
+  tone = "neutral",
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: ReactNode;
+  hint?: string;
+  tone?: "brand" | "good" | "danger" | "neutral";
+}) {
+  const toneClass = {
+    brand: "bg-brand/12 text-brand",
+    good: "bg-good/12 text-good",
+    danger: "bg-danger/12 text-danger",
+    neutral: "bg-surface-2 text-text-soft",
+  }[tone];
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3.5">
+      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${toneClass}`}>
+        <Icon className="h-5 w-5" strokeWidth={2} />
+      </span>
+      <div className="min-w-0">
+        <p className="font-display text-2xl font-extrabold leading-none tabular-nums text-text">{value}</p>
+        <p className="mt-1 truncate text-xs font-semibold uppercase tracking-wide text-text-soft">{label}</p>
+        {hint && <p className="truncate text-xs text-text-soft">{hint}</p>}
+      </div>
+    </div>
+  );
+}
+
+export const INPUT =
+  "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus:border-brand";
+
+/** Igual que INPUT pero sin ancho fijo: para selects y campos cortos en una fila. */
+export const INPUT_AUTO =
+  "rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus:border-brand";

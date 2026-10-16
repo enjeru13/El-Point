@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Flag, Ghost } from "lucide-react";
 import { useReportedRestaurants, useResolveRestaurantReport, type ReportedRestaurant } from "../lib/queries/admin";
 import { reasonLabel, RESTAURANT_REPORT_REASONS } from "../lib/reasons";
@@ -12,7 +13,9 @@ function Row({ r }: { r: ReportedRestaurant }) {
         <div className="flex flex-wrap items-center gap-2">
           <p className="font-display text-base font-bold text-text">{r.name}</p>
           <Badge>{r.owner_name}</Badge>
-          <Badge tone="danger">{r.reports.length} {r.reports.length === 1 ? "reporte" : "reportes"}</Badge>
+          <Badge tone="danger">
+            {r.reports.length > 0 ? `${r.reports.length} ${r.reports.length === 1 ? "reporte" : "reportes"}` : "Suspendido por el equipo"}
+          </Badge>
           {r.ghost_kitchen && (
             <Badge tone="brand">
               <span className="inline-flex items-center gap-1">
@@ -30,6 +33,7 @@ function Row({ r }: { r: ReportedRestaurant }) {
         )}
       </div>
 
+      {r.reports.length > 0 && (
       <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface-2 p-3">
         {r.reports.map((rep, i) => (
           <div key={i} className="text-sm">
@@ -39,8 +43,12 @@ function Row({ r }: { r: ReportedRestaurant }) {
           </div>
         ))}
       </div>
+      )}
 
       <div className="flex justify-end gap-2">
+        <Link to={`/locales/${r.id}`}>
+          <Button variant="ghost">Ver ficha</Button>
+        </Link>
         <Button
           variant="danger"
           loading={resolve.isPending}
@@ -63,14 +71,14 @@ export function ReportedRestaurants() {
     <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Moderación"
-        title="Locales reportados"
-        body="Suspendidos automáticamente por reportes de comensales."
+        title="Locales suspendidos"
+        body="Suspendidos por reportes de comensales o por el equipo. Reactiva los que estén bien o retira los que no."
       />
 
       {q.isLoading ? (
         <PageLoading />
       ) : (q.data ?? []).length === 0 ? (
-        <EmptyState icon={Flag} title="Sin reportes pendientes" body="Ningún local suspendido esperando revisión." />
+        <EmptyState icon={Flag} title="Sin locales suspendidos" body="Ningún local esperando revisión." />
       ) : (
         <div className="flex flex-col gap-4">
           {q.data!.map((r) => (

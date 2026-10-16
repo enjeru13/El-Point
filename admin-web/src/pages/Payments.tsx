@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Banknote, Bitcoin, Landmark, Smartphone } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Banknote, Bitcoin, Clock, Download, Landmark, MessageCircle, Receipt, Search, Smartphone, Wallet } from "lucide-react";
 import {
   METHOD_LABEL,
   PLAN_EFFECT,
   PLAN_LABEL,
   usePayingRestaurants,
   usePendingPayments,
+  usePrivateContacts,
   useRecentPayments,
   useRegisterPayment,
   useResolvePayment,
@@ -15,7 +17,9 @@ import {
   type PendingPayment,
   type RecentPayment,
 } from "../lib/queries/payments";
-import { Badge, Button, Card, EmptyState, PageHeader, PageLoading, StripeCard, timeAgo } from "../components/ui";
+import { daysUntil, useAllLocales, type LocalRow } from "../lib/queries/locales";
+import { fmtDate, fmtMoney, waLink } from "../lib/format";
+import { Badge, Button, Card, EmptyState, PageHeader, PageLoading, StatTile, StripeCard, Tabs, timeAgo } from "../components/ui";
 
 const METHOD_ICON = {
   bs_bcv: Banknote,
@@ -27,11 +31,12 @@ const METHOD_ICON = {
 
 const FIELD =
   "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus:border-brand";
+const FIELD_AUTO = FIELD.replace("w-full ", "");
 
-function RegisterPayment() {
+function RegisterPayment({ initialLocal = "" }: { initialLocal?: string }) {
   const restaurantsQ = usePayingRestaurants();
   const register = useRegisterPayment();
-  const [restaurantId, setRestaurantId] = useState("");
+  const [restaurantId, setRestaurantId] = useState(initialLocal);
   const [plan, setPlan] = useState<PaymentPlan>("monthly");
   const [method, setMethod] = useState<PaymentMethod>("bs_bcv");
   const [reference, setReference] = useState("");
@@ -230,6 +235,8 @@ function HistoryRow({ p }: { p: RecentPayment }) {
   const [reason, setReason] = useState("");
   const Icon = METHOD_ICON[p.method];
   const voided = p.status === "voided";
+  const tone = p.status === "approved" ? "good" : p.status === "rejected" ? "neutral" : "danger";
+  const label = { approved: "Aprobado", voided: "Anulado", rejected: "Rechazado" }[p.status];
 
   return (
     <div className="flex flex-col gap-3 px-5 py-4">
@@ -241,15 +248,15 @@ function HistoryRow({ p }: { p: RecentPayment }) {
           <div className="flex flex-wrap items-center gap-2">
             <p className={`font-display text-base font-bold ${voided ? "text-text-soft line-through" : "text-text"}`}>{p.restaurant_name}</p>
             {p.plan && <Badge>{PLAN_LABEL[p.plan].split(" · ")[0]}</Badge>}
-            <Badge tone={voided ? "danger" : "good"}>{voided ? "Anulado" : "Aprobado"}</Badge>
+            <Badge tone={tone}>{label}</Badge>
           </div>
           <p className="truncate text-sm text-text-soft">
             {METHOD_LABEL[p.method]} · Ref. {p.reference}
-            {p.amount != null && ` · ${p.amount} USD`} · {new Date(p.submitted_at).toLocaleDateString("es-VE", { day: "numeric", month: "short" })}
+            {p.amount != null && ` · ${fmtMoney(p.amount)}`} · {fmtDate(p.submitted_at)}
           </p>
-          {voided && p.note && <p className="truncate text-xs text-text-soft">{p.note}</p>}
+          {(voided || p.status === "rejected") && p.note && <p className="truncate text-xs text-text-soft">{p.note}</p>}
         </div>
-        {!voided && !voiding && (
+        {p.status === "approved" && !voiding && (
           <Button variant="ghost" onClick={() => setVoiding(true)}>
             Anular
           </Button>
@@ -261,13 +268,7 @@ function HistoryRow({ p }: { p: RecentPayment }) {
           <p className="text-sm text-text-soft">
             Se le resta al local lo que este pago sumó ({PLAN_EFFECT[p.plan ?? "annual"]}). El pago queda en el historial como anulado.
           </p>
-          <input
-            autoFocus
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder="Motivo (opcional)"
-            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus:border-brand"
-          />
+          <input autoFocus value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Motivo (opcional)" className={FIELD} />
           {voidMut.isError && (
             <p className="text-sm text-danger" role="alert">
               {(voidMut.error as Error).message}
@@ -291,73 +292,206 @@ function HistoryRow({ p }: { p: RecentPayment }) {
   );
 }
 
+function downloadCsv(rows: RecentPayment[]) {
+  const esc = (v: string | number | null) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const head = ["Fecha", "Local", "Plan", "Método", "Referencia", "Monto USD", "Estado", "Nota"];
+  const body = rows.map((p) =>
+    [fmtDate(p.submitted_at), p.restaurant_name, p.plan ?? "", METHOD_LABEL[p.method], p.reference, p.amount ?? "", p.status, p.note ?? ""].map(esc).join(","),
+  );
+  const blob = new Blob(["\ufeff" + [head.map(esc).join(","), ...body].join("\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `pagos-el-point-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 function History() {
   const q = useRecentPayments();
+  const [term, setTerm] = useState("");
+  const [method, setMethod] = useState<"all" | PaymentMethod>("all");
+  const [status, setStatus] = useState<"all" | RecentPayment["status"]>("all");
+
+  const all = q.data ?? [];
+  const rows = all.filter((p) => {
+    if (method !== "all" && p.method !== method) return false;
+    if (status !== "all" && p.status !== status) return false;
+    const t = term.trim().toLowerCase();
+    return !t || p.restaurant_name.toLowerCase().includes(t) || p.reference.toLowerCase().includes(t);
+  });
+  const total = rows.filter((p) => p.status === "approved").reduce((s, p) => s + (p.amount ?? 0), 0);
+
   if (q.isLoading) return <PageLoading />;
-  if ((q.data ?? []).length === 0) {
-    return <EmptyState icon={Banknote} title="Sin pagos registrados" body="Cuando registres o apruebes uno, aparece aquí." />;
-  }
+  if (all.length === 0) return <EmptyState icon={Banknote} title="Sin pagos registrados" body="Cuando registres o apruebes uno, aparece aquí." />;
+
   return (
-    <Card className="divide-y divide-border overflow-hidden">
-      {q.data!.map((p) => (
-        <HistoryRow key={p.id} p={p} />
-      ))}
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative min-w-[200px] flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-soft" strokeWidth={2} />
+          <input value={term} onChange={(e) => setTerm(e.target.value)} placeholder="Buscar por local o referencia" className={`${FIELD} pl-9`} aria-label="Buscar pagos" />
+        </div>
+        <select className={FIELD_AUTO} value={method} onChange={(e) => setMethod(e.target.value as typeof method)} aria-label="Filtrar por método">
+          <option value="all">Todos los métodos</option>
+          {(Object.keys(METHOD_LABEL) as PaymentMethod[]).map((k) => (
+            <option key={k} value={k}>
+              {METHOD_LABEL[k]}
+            </option>
+          ))}
+        </select>
+        <select className={FIELD_AUTO} value={status} onChange={(e) => setStatus(e.target.value as typeof status)} aria-label="Filtrar por estado">
+          <option value="all">Todos los estados</option>
+          <option value="approved">Aprobados</option>
+          <option value="voided">Anulados</option>
+          <option value="rejected">Rechazados</option>
+        </select>
+        <Button variant="secondary" onClick={() => downloadCsv(rows)} disabled={rows.length === 0}>
+          <Download className="h-4 w-4" strokeWidth={2} /> Exportar CSV
+        </Button>
+      </div>
+
+      {rows.length === 0 ? (
+        <EmptyState icon={Banknote} title="Ningún pago coincide" body="Prueba con otra búsqueda o quita algún filtro." />
+      ) : (
+        <Card className="overflow-hidden">
+          <div className="divide-y divide-border">
+            {rows.map((p) => (
+              <HistoryRow key={p.id} p={p} />
+            ))}
+          </div>
+          <p className="border-t border-border px-5 py-2.5 text-xs text-text-soft">
+            {rows.length} {rows.length === 1 ? "pago" : "pagos"} · {fmtMoney(total)} aprobados
+          </p>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function reminderText(l: LocalRow): string {
+  const d = daysUntil(l.paid_until) ?? 0;
+  const when = d >= 0 ? `vence el ${fmtDate(l.paid_until)}` : `venció el ${fmtDate(l.paid_until)}`;
+  return (
+    `Hola, te escribimos de El Point. El plan de ${l.name} ${when}. ` +
+    `Al renovarlo mantienes tu perfil completo (contacto, menú, fotos, promos y respuestas). ` +
+    `Hay plan mensual (US$3), trimestral (US$7) y anual (US$18). ¿Te paso los datos de pago?`
+  );
+}
+
+function Renewals({ onRegister }: { onRegister: (id: string) => void }) {
+  const q = useAllLocales();
+  const list = (q.data ?? [])
+    .filter((l) => l.status === "approved" && (l.plan === "expiring" || (l.plan === "expired" && (daysUntil(l.paid_until) ?? -999) >= -30)))
+    .sort((a, b) => (a.paid_until ?? "").localeCompare(b.paid_until ?? ""));
+  const contactsQ = usePrivateContacts(list.map((l) => l.id));
+
+  if (q.isLoading) return <PageLoading />;
+  if (list.length === 0) {
+    return <EmptyState icon={Clock} title="Nada por renovar" body="Ningún plan vence en los próximos 7 días ni venció en el último mes." />;
+  }
+
+  return (
+    <Card className="overflow-hidden">
+      <p className="border-b border-border bg-surface-2 px-5 py-2.5 text-xs text-text-soft">
+        Planes que vencen en 7 días o menos, o que vencieron en los últimos 30. El botón de WhatsApp abre el chat con el recordatorio ya escrito.
+      </p>
+      <div className="divide-y divide-border">
+        {list.map((l) => {
+          const d = daysUntil(l.paid_until) ?? 0;
+          const wa = waLink(contactsQ.data?.get(l.id)?.whatsapp, reminderText(l));
+          return (
+            <div key={l.id} className="flex flex-wrap items-center gap-3 px-5 py-4">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link to={`/locales/${l.id}`} className="font-display text-base font-bold text-text hover:underline">
+                    {l.name}
+                  </Link>
+                  <Badge tone={d >= 0 ? "warn" : "danger"}>{d >= 0 ? `Vence en ${d} d` : `Venció hace ${Math.abs(d)} d`}</Badge>
+                </div>
+                <p className="text-sm text-text-soft">
+                  {l.owner_name} · {fmtDate(l.paid_until)}
+                </p>
+              </div>
+              {wa ? (
+                <a href={wa} target="_blank" rel="noreferrer">
+                  <Button variant="secondary">
+                    <MessageCircle className="h-4 w-4" strokeWidth={2} /> Recordar
+                  </Button>
+                </a>
+              ) : (
+                <span className="text-xs text-text-soft">{contactsQ.isLoading ? "Cargando…" : "Sin WhatsApp"}</span>
+              )}
+              <Button onClick={() => onRegister(l.id)}>Registrar pago</Button>
+            </div>
+          );
+        })}
+      </div>
     </Card>
   );
 }
 
-type Tab = "pending" | "register" | "history";
+type Tab = "register" | "pending" | "renewals" | "history";
 
 export function Payments() {
-  const q = usePendingPayments();
-  const pendingCount = q.data?.length ?? 0;
-  const [tab, setTab] = useState<Tab>("register");
+  const [params, setParams] = useSearchParams();
+  const pendingQ = usePendingPayments();
+  const paymentsQ = useRecentPayments();
+  const localesQ = useAllLocales();
+  const pendingCount = pendingQ.data?.length ?? 0;
+  const initialLocal = params.get("local") ?? "";
+  const tab = (params.get("tab") ?? "register") as Tab;
+  const setTab = (t: Tab) => setParams(t === "register" ? {} : { tab: t }, { replace: true });
 
-  const tabs: { key: Tab; label: string; badge?: number }[] = [
-    { key: "register", label: "Registrar pago" },
-    { key: "pending", label: "Por verificar", badge: pendingCount },
-    { key: "history", label: "Historial" },
-  ];
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+  const thisMonth = (paymentsQ.data ?? []).filter((p) => p.status === "approved" && p.submitted_at >= monthStart);
+  const collected = thisMonth.reduce((s, p) => s + (p.amount ?? 0), 0);
+  const noAmount = thisMonth.filter((p) => p.amount == null).length;
+  const approved = (localesQ.data ?? []).filter((l) => l.status === "approved");
+  const expiring = approved.filter((l) => l.plan === "expiring").length;
+  const renewalsCount = approved.filter((l) => l.plan === "expiring" || (l.plan === "expired" && (daysUntil(l.paid_until) ?? -999) >= -30)).length;
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Negocio"
         title="Pagos"
-        body="Registra los pagos que llegan por WhatsApp, verifica comprobantes y anula los que se registraron por error."
+        body="Registra los pagos que llegan por WhatsApp, recuerda las renovaciones y revisa el historial."
       />
 
-      <div className="inline-flex w-fit max-w-full overflow-x-auto rounded-full border border-border bg-surface-2 p-1">
-        {tabs.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-bold transition ${
-              tab === t.key ? "bg-brand text-white shadow-sm" : "text-text-soft hover:text-text"
-            }`}
-          >
-            {t.label}
-            {!!t.badge && (
-              <span className={`rounded-full px-1.5 text-[11px] leading-5 ${tab === t.key ? "bg-white/25" : "bg-brand text-white"}`}>{t.badge}</span>
-            )}
-          </button>
-        ))}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile icon={Wallet} label="Cobrado este mes" value={fmtMoney(collected)} hint={noAmount ? `${noAmount} sin monto indicado` : `${thisMonth.length} ${thisMonth.length === 1 ? "pago" : "pagos"}`} tone="good" />
+        <StatTile icon={Receipt} label="Pagos este mes" value={thisMonth.length} hint="aprobados" tone="brand" />
+        <StatTile icon={Clock} label="Por renovar" value={expiring} hint="vencen en 7 días" tone={expiring ? "danger" : "neutral"} />
+        <StatTile icon={Banknote} label="Por verificar" value={pendingCount} hint="comprobantes" tone="neutral" />
       </div>
 
-      {tab === "register" && <RegisterPayment />}
+      <Tabs
+        value={tab}
+        onChange={setTab}
+        options={[
+          { value: "register", label: "Registrar pago" },
+          { value: "pending", label: "Por verificar", badge: pendingCount },
+          { value: "renewals", label: "Renovaciones", badge: renewalsCount },
+          { value: "history", label: "Historial" },
+        ]}
+      />
+
+      {tab === "register" && <RegisterPayment initialLocal={initialLocal} />}
 
       {tab === "pending" &&
-        (q.isLoading ? (
+        (pendingQ.isLoading ? (
           <PageLoading />
         ) : pendingCount === 0 ? (
           <EmptyState icon={Banknote} title="Sin pagos pendientes" body="Nada esperando verificación ahora mismo." />
         ) : (
           <div className="flex flex-col gap-4">
-            {q.data!.map((p) => (
+            {pendingQ.data!.map((p) => (
               <Row key={p.id} p={p} />
             ))}
           </div>
         ))}
+
+      {tab === "renewals" && <Renewals onRegister={(id) => setParams({ local: id }, { replace: true })} />}
 
       {tab === "history" && <History />}
     </div>

@@ -26,8 +26,8 @@ const QUEUES: { to: string; key: QueueKey; icon: LucideIcon; title: string; body
   { to: "/restaurantes", key: "restaurants", icon: Store, title: "Locales pendientes", body: "Esperando tu aprobación para salir en la app.", action: "Revisar" },
   { to: "/soporte", key: "support", icon: LifeBuoy, title: "Soporte abierto", body: "Mensajes de usuarios sin responder.", action: "Responder" },
   { to: "/resenas", key: "reviews", icon: MessageSquareWarning, title: "Reseñas reportadas", body: "Alguien las marcó como problemáticas.", action: "Moderar" },
-  { to: "/reportados", key: "reported", icon: Flag, title: "Locales reportados", body: "Suspendidos por reportes de comensales.", action: "Revisar" },
-  { to: "/suscripciones", key: "expiredSubs", icon: CreditCard, title: "Suscripciones vencidas", body: "Locales aprobados con el plan vencido.", action: "Ver" },
+  { to: "/reportados", key: "reported", icon: Flag, title: "Locales suspendidos", body: "Suspendidos por reportes o por el equipo.", action: "Revisar" },
+  { to: "/locales?plan=expired", key: "expiredSubs", icon: CreditCard, title: "Planes vencidos", body: "Locales con perfil básico: avísales para renovar.", action: "Ver" },
 ];
 
 function greeting(): string {

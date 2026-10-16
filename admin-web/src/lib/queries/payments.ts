@@ -151,6 +151,8 @@ export function useRegisterPayment() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-paying-restaurants"] });
       qc.invalidateQueries({ queryKey: ["admin-subscriptions"] });
+      qc.invalidateQueries({ queryKey: ["admin-locales"] });
+      qc.invalidateQueries({ queryKey: ["admin-local"] });
       qc.invalidateQueries({ queryKey: ["admin-counts"] });
     },
   });
@@ -162,7 +164,7 @@ export type RecentPayment = {
   reference: string;
   amount: number | null;
   plan: PaymentPlan | null;
-  status: "approved" | "voided";
+  status: "approved" | "voided" | "rejected";
   reviewed_at: string | null;
   submitted_at: string;
   note: string | null;
@@ -180,9 +182,9 @@ export function useRecentPayments() {
           `id, method, reference, amount, plan, status, reviewed_at, submitted_at, note,
            restaurant:restaurants!restaurant_id ( name )`,
         )
-        .in("status", ["approved", "voided"])
+        .in("status", ["approved", "voided", "rejected"])
         .order("submitted_at", { ascending: false })
-        .limit(40);
+        .limit(400);
       if (error) throw error;
       return (data ?? []).map((p: any) => ({
         id: p.id,
@@ -215,7 +217,26 @@ export function useVoidPayment() {
       qc.invalidateQueries({ queryKey: ["admin-recent-payments"] });
       qc.invalidateQueries({ queryKey: ["admin-paying-restaurants"] });
       qc.invalidateQueries({ queryKey: ["admin-subscriptions"] });
+      qc.invalidateQueries({ queryKey: ["admin-locales"] });
+      qc.invalidateQueries({ queryKey: ["admin-local"] });
       qc.invalidateQueries({ queryKey: ["admin-counts"] });
+    },
+  });
+}
+
+export type OwnerContact = { restaurant_id: string; whatsapp: string | null; phone: string | null };
+
+/** WhatsApp y teléfono de varios locales (solo el admin los puede leer, por función). */
+export function usePrivateContacts(ids: string[]) {
+  const key = [...ids].sort().join(",");
+  return useQuery({
+    queryKey: ["admin-private-contacts", key],
+    enabled: ids.length > 0,
+    staleTime: 5 * 60_000,
+    queryFn: async (): Promise<Map<string, OwnerContact>> => {
+      const { data, error } = await supabase.rpc("admin_restaurant_private", { p_ids: ids });
+      if (error) throw error;
+      return new Map(((data ?? []) as OwnerContact[]).map((c) => [c.restaurant_id, c]));
     },
   });
 }

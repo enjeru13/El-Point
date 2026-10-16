@@ -70,8 +70,10 @@ export function useAdjustPlan() {
       });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_d, v) => {
       qc.invalidateQueries({ queryKey: KEY });
+      qc.invalidateQueries({ queryKey: ["admin-locales"] });
+      qc.invalidateQueries({ queryKey: ["admin-local", v.restaurantId] });
       qc.invalidateQueries({ queryKey: ["admin-paying-restaurants"] });
       qc.invalidateQueries({ queryKey: ["admin-counts"] });
     },
