@@ -211,7 +211,7 @@ export function LocalDetail() {
   const wa = waLink(contact.whatsapp);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex max-w-4xl flex-col gap-6">
       <div className="flex flex-col gap-4">
         <Link to="/locales" className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-text-soft hover:text-text">
           <ArrowLeft className="h-4 w-4" strokeWidth={2} /> Locales
@@ -250,87 +250,77 @@ export function LocalDetail() {
         <StatTile icon={ShoppingBag} label="Intentos sin contacto" value={stats.blocked ?? 0} hint="tocaron un contacto bloqueado" tone={l.plan === "expired" || l.plan === "none" ? "danger" : "neutral"} />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
-        <div className="flex flex-col gap-6">
-          <Section title="Plan" icon={CircleCheck}>
-            <dl className="grid grid-cols-2 gap-4">
-              <Fact label="Estado">
-                <Badge tone={PLAN_TONE[l.plan]}>{PLAN_LABEL[l.plan]}</Badge>
-              </Fact>
-              <Fact label={l.plan === "expired" ? "Venció" : "Vence"}>
-                {l.plan === "founder" ? "Nunca" : l.paid_until ? `${fmtDate(l.paid_until)}${left != null ? ` (${left >= 0 ? `en ${left} d` : `hace ${Math.abs(left)} d`})` : ""}` : "—"}
-              </Fact>
-              <Fact label="Destacado">{boosted ? `hasta ${fmtDate(l.boost_until)}` : "No tiene"}</Fact>
-              <Fact label="Pedidos por WhatsApp">{l.accepts_orders ? "Activados" : "No"}</Fact>
-            </dl>
-            <div className="border-t border-border pt-4">
-              <PlanActions id={l.id} plan={l.plan} boosted={boosted} />
-            </div>
-          </Section>
-
-          <Section
-            title="Pagos"
-            icon={Banknote}
-            aside={
-              l.plan !== "founder" && (
-                <Link to={`/pagos?local=${l.id}`}>
-                  <Button variant="secondary">Registrar pago</Button>
-                </Link>
-              )
-            }
-          >
-            {payments.length === 0 ? (
-              <p className="text-sm text-text-soft">Sin pagos registrados.</p>
-            ) : (
-              <div className="divide-y divide-border">
-                {payments.map((p) => (
-                  <PaymentRow key={p.id} p={p} />
-                ))}
-              </div>
-            )}
-          </Section>
+      <Section title="Plan" icon={CircleCheck}>
+        <dl className="grid grid-cols-2 gap-4">
+          <Fact label="Estado">
+            <Badge tone={PLAN_TONE[l.plan]}>{PLAN_LABEL[l.plan]}</Badge>
+          </Fact>
+          <Fact label={l.plan === "expired" ? "Venció" : "Vence"}>
+            {l.plan === "founder" ? "Nunca" : l.paid_until ? `${fmtDate(l.paid_until)}${left != null ? ` (${left >= 0 ? `en ${left} d` : `hace ${Math.abs(left)} d`})` : ""}` : "—"}
+          </Fact>
+          <Fact label="Destacado">{boosted ? `hasta ${fmtDate(l.boost_until)}` : "No tiene"}</Fact>
+          <Fact label="Pedidos por WhatsApp">{l.accepts_orders ? "Activados" : "No"}</Fact>
+        </dl>
+        <div className="border-t border-border pt-4">
+          <PlanActions id={l.id} plan={l.plan} boosted={boosted} />
         </div>
-
-        <div className="flex flex-col gap-6">
-          <StatusCard id={l.id} status={l.status} reason={l.status_reason} name={l.name} />
-
-          <Section title="Datos del local">
-            <dl className="grid grid-cols-2 gap-4">
-              <Fact label="Dueño">{l.owner_name}</Fact>
-              <Fact label="Alta">{fmtDate(l.created_at)}</Fact>
-              <Fact label="WhatsApp">{contact.whatsapp ?? "—"}</Fact>
-              <Fact label="Teléfono">{contact.phone ?? "—"}</Fact>
-              <Fact label="Instagram">{contact.instagram ? `@${contact.instagram}` : "—"}</Fact>
-              <Fact label="RIF">{contact.rif ?? "—"}</Fact>
-              <Fact label={l.ghost_kitchen ? "Zona" : "Dirección"}>{(l.ghost_kitchen ? l.zone_label : l.address) ?? "—"}</Fact>
-              <Fact label="Categorías">{l.categories.length ? l.categories.join(", ") : "—"}</Fact>
-            </dl>
-            {l.description && <p className="border-t border-border pt-3 text-sm text-text-soft">{l.description}</p>}
-          </Section>
-
-          <Section title="Historial" icon={History}>
-            {timeline.length === 0 ? (
-              <p className="text-sm text-text-soft">Aún no hay movimientos.</p>
-            ) : (
-              <ol className="flex flex-col gap-3">
-                {timeline.map((e) => (
-                  <li key={e.id} className="flex gap-3">
-                    <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${e.kind === "payment" ? "bg-good" : e.kind === "plan" ? "bg-brand" : "bg-danger"}`} />
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-text">{e.title}</p>
-                      {e.detail && <p className="break-words text-sm text-text-soft">{e.detail}</p>}
-                      <p className="text-xs text-text-soft">
-                        {timeAgo(e.at)} · {fmtDate(e.at)}
-                        {e.by && ` · ${e.by}`}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </Section>
-        </div>
-      </div>
+      </Section>
+      <StatusCard id={l.id} status={l.status} reason={l.status_reason} name={l.name} />
+      <Section
+        title="Pagos"
+        icon={Banknote}
+        aside={
+          l.plan !== "founder" && (
+            <Link to={`/pagos?local=${l.id}`}>
+              <Button variant="secondary">Registrar pago</Button>
+            </Link>
+          )
+        }
+      >
+        {payments.length === 0 ? (
+          <p className="text-sm text-text-soft">Sin pagos registrados.</p>
+        ) : (
+          <div className="divide-y divide-border">
+            {payments.map((p) => (
+              <PaymentRow key={p.id} p={p} />
+            ))}
+          </div>
+        )}
+      </Section>
+      <Section title="Datos del local">
+        <dl className="grid grid-cols-2 gap-4">
+          <Fact label="Dueño">{l.owner_name}</Fact>
+          <Fact label="Alta">{fmtDate(l.created_at)}</Fact>
+          <Fact label="WhatsApp">{contact.whatsapp ?? "—"}</Fact>
+          <Fact label="Teléfono">{contact.phone ?? "—"}</Fact>
+          <Fact label="Instagram">{contact.instagram ? `@${contact.instagram}` : "—"}</Fact>
+          <Fact label="RIF">{contact.rif ?? "—"}</Fact>
+          <Fact label={l.ghost_kitchen ? "Zona" : "Dirección"}>{(l.ghost_kitchen ? l.zone_label : l.address) ?? "—"}</Fact>
+          <Fact label="Categorías">{l.categories.length ? l.categories.join(", ") : "—"}</Fact>
+        </dl>
+        {l.description && <p className="border-t border-border pt-3 text-sm text-text-soft">{l.description}</p>}
+      </Section>
+      <Section title="Historial" icon={History}>
+        {timeline.length === 0 ? (
+          <p className="text-sm text-text-soft">Aún no hay movimientos.</p>
+        ) : (
+          <ol className="flex flex-col gap-3">
+            {timeline.map((e) => (
+              <li key={e.id} className="flex gap-3">
+                <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${e.kind === "payment" ? "bg-good" : e.kind === "plan" ? "bg-brand" : "bg-danger"}`} />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-text">{e.title}</p>
+                  {e.detail && <p className="break-words text-sm text-text-soft">{e.detail}</p>}
+                  <p className="text-xs text-text-soft">
+                    {timeAgo(e.at)} · {fmtDate(e.at)}
+                    {e.by && ` · ${e.by}`}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </Section>
     </div>
   );
 }
