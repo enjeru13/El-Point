@@ -140,7 +140,7 @@ export function GallerySection({ restaurant }: { restaurant: OwnerRestaurant }) 
           <Icon name="image-multiple-outline" size={34} color={C.primary} />
           <AppText variant="bodyStrong" align="center">Aún no tienes fotos</AppText>
           <AppText variant="bodySm" color={C.onSurfaceVariant} align="center">Agrega hasta {GALLERY_LIMIT}: tus platos, tu local, tu ambiente.</AppText>
-          <Button label="Agregar fotos" onPress={addPhotos} icon="plus" fullWidth={false} />
+          <Button label="Agregar fotos" onPress={addPhotos} icon="plus" fullWidth={false} style={{ alignSelf: "center" }} />
         </View>
       ) : (
         <>
