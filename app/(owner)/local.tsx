@@ -79,10 +79,10 @@ export default function MyLocalScreen() {
       icon: "silverware-fork-knife",
       title: "Menú",
       summary: !plan
-        ? "Platos con precio y plato del día"
+        ? "Platos con precio, plato del día y PDF"
         : menuItems.length === 0
           ? "Aún sin platos"
-          : `${menuItems.length} ${menuItems.length === 1 ? "plato" : "platos"}${special ? ` · hoy: ${special.name}` : ""}`,
+          : `${menuItems.length} ${menuItems.length === 1 ? "plato" : "platos"}${special ? ` · hoy: ${special.name}` : ""}${r.menu_pdf_url ? " · con PDF" : ""}`,
       locked: !plan,
     },
     {
@@ -137,10 +137,10 @@ export default function MyLocalScreen() {
       key: "photos",
       group: "info",
       icon: "camera-plus-outline",
-      title: "Fotos y menú en PDF",
+      title: "Fotos",
       summary: !plan
-        ? "Portada, logo y carta en PDF"
-        : [r.cover_url ? "Portada ✓" : "Sin portada", r.logo_url ? "Logo ✓" : "Sin logo", r.menu_pdf_url ? "PDF ✓" : "Sin PDF"].join(" · "),
+        ? "Portada y logo de tu local"
+        : [r.cover_url ? "Portada ✓" : "Sin portada", r.logo_url ? "Logo ✓" : "Sin logo"].join(" · "),
       locked: !plan,
     },
   ];

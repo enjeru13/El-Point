@@ -1,14 +1,14 @@
 import { AppText } from "@/components/ui/AppText";
 import { Icon } from "@/components/ui/Icon";
-import { useBcvRate, useCopRate, priceLines } from "@/lib/queries/exchangeRate";
-import { isSpecialActive, normalizeCurrencies, type MenuItem } from "@/lib/queries/menu";
+import { priceLines, useEffectiveRates, type Rates } from "@/lib/queries/exchangeRate";
+import { isSpecialActive, type MenuItem, type MenuSettings } from "@/lib/queries/menu";
 import { useTheme } from "@/lib/ThemeContext";
 import { useMemo, useState } from "react";
 import { Pressable, View } from "react-native";
 
-function Prices({ usd, currencies, rates, muted }: { usd: number; currencies: ReturnType<typeof normalizeCurrencies>; rates: { bs: number | null; cop: number | null }; muted?: boolean }) {
+function Prices({ amount, settings, rates, muted }: { amount: number; settings: MenuSettings; rates: Rates; muted?: boolean }) {
   const { C } = useTheme();
-  const lines = priceLines(usd, currencies, rates);
+  const lines = priceLines(amount, settings.base, settings.currencies, rates);
   return (
     <View style={{ alignItems: "flex-end", gap: 1 }}>
       {lines.map((l, i) => (
@@ -26,14 +26,11 @@ function Prices({ usd, currencies, rates, muted }: { usd: number; currencies: Re
 
 /**
  * Menú con precios del local (solo se muestra con plan). Plato del día arriba,
- * secciones plegables y precios en las monedas que eligió el dueño.
+ * secciones plegables y precios en las monedas y con las tasas que eligió el dueño.
  */
-export function MenuSection({ items, currenciesRaw }: { items: MenuItem[]; currenciesRaw: string[] | null | undefined }) {
+export function MenuSection({ items, settings }: { items: MenuItem[]; settings: MenuSettings }) {
   const { C, shadow } = useTheme();
-  const currencies = normalizeCurrencies(currenciesRaw);
-  const bsQ = useBcvRate();
-  const copQ = useCopRate();
-  const rates = { bs: bsQ.data ?? null, cop: copQ.data ?? null };
+  const { rates, bsLocal, copLocal } = useEffectiveRates(settings);
 
   const special = items.filter((i) => isSpecialActive(i));
   const sections = useMemo(() => {
@@ -56,15 +53,25 @@ export function MenuSection({ items, currenciesRaw }: { items: MenuItem[]; curre
   function toggle(name: string) {
     setOpen((prev) => {
       const next = new Set(prev);
-      next.has(name) ? next.delete(name) : next.add(name);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
       return next;
     });
   }
 
   if (items.length === 0) return null;
 
-  const showBs = currencies.includes("bs") && rates.bs;
-  const showCop = currencies.includes("cop") && rates.cop;
+  // Qué tasas intervienen: la de bolívares si la base o alguna moneda mostrada es Bs; igual con pesos.
+  const usesBs = settings.currencies.includes("bs");
+  const usesCop = settings.currencies.includes("cop");
+  const several = settings.currencies.length > 1;
+  const notes: string[] = [];
+  if (several && usesBs && rates.bs) {
+    notes.push(`${bsLocal ? "tasa del local" : "BCV"} ${rates.bs.toLocaleString("es-VE", { maximumFractionDigits: 2 })} Bs/USD`);
+  }
+  if (several && usesCop && rates.cop) {
+    notes.push(`${copLocal ? "tasa del local" : "tasa del día"} ${Math.round(rates.cop).toLocaleString("es-VE")} COP/USD`);
+  }
 
   return (
     <View style={{ gap: 12 }}>
@@ -107,7 +114,7 @@ export function MenuSection({ items, currenciesRaw }: { items: MenuItem[]; curre
                 </AppText>
               )}
             </View>
-            <Prices usd={i.price_usd} currencies={currencies} rates={rates} muted={!i.available} />
+            <Prices amount={i.price} settings={settings} rates={rates} muted={!i.available} />
           </View>
         </View>
       ))}
@@ -126,22 +133,14 @@ export function MenuSection({ items, currenciesRaw }: { items: MenuItem[]; curre
           const isOpen = open.has(s.name);
           return (
             <View key={s.name} style={idx > 0 ? { borderTopWidth: 1, borderTopColor: C.outlineVariant } : undefined}>
-              <Pressable
-                onPress={() => toggle(s.name)}
-                style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 16 }}
-              >
+              <Pressable onPress={() => toggle(s.name)} style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 16 }}>
                 <AppText variant="bodyStrong" style={{ flex: 1 }}>
                   {s.name}
                 </AppText>
                 <AppText variant="caption" color={C.outline}>
                   {s.items.length}
                 </AppText>
-                <Icon
-                  name="chevron-right"
-                  size={18}
-                  color={C.outline}
-                  style={{ transform: [{ rotate: isOpen ? "90deg" : "0deg" }] }}
-                />
+                <Icon name="chevron-right" size={18} color={C.outline} style={{ transform: [{ rotate: isOpen ? "90deg" : "0deg" }] }} />
               </Pressable>
 
               {isOpen &&
@@ -168,7 +167,7 @@ export function MenuSection({ items, currenciesRaw }: { items: MenuItem[]; curre
                         </AppText>
                       )}
                     </View>
-                    <Prices usd={i.price_usd} currencies={currencies} rates={rates} muted={!i.available} />
+                    <Prices amount={i.price} settings={settings} rates={rates} muted={!i.available} />
                   </View>
                 ))}
             </View>
@@ -176,11 +175,9 @@ export function MenuSection({ items, currenciesRaw }: { items: MenuItem[]; curre
         })}
       </View>
 
-      {(showBs || showCop) && (
+      {notes.length > 0 && (
         <AppText variant="caption" color={C.outline}>
-          Tasas del día:{showBs ? ` BCV ${rates.bs!.toLocaleString("es-VE", { maximumFractionDigits: 2 })} Bs/USD` : ""}
-          {showBs && showCop ? " ·" : ""}
-          {showCop ? ` ${Math.round(rates.cop!).toLocaleString("es-VE")} COP/USD` : ""}. Los precios en bolívares y pesos son equivalentes aproximados.
+          Equivalentes aproximados · {notes.join(" · ")}.
         </AppText>
       )}
     </View>

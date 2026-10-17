@@ -38,6 +38,9 @@ export type OwnerRestaurant = {
   accepts_orders: boolean;
   order_greeting: string | null;
   menu_currencies: string[];
+  menu_base_currency: string;
+  menu_bs_rate: number | null;
+  menu_cop_rate: number | null;
   lat: number | null;
   lng: number | null;
   categories: RestaurantCategory[];
@@ -59,7 +62,7 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
        logo_url, cover_url, promo_text, hours, is_active,
        status, status_reason, submitted_at,
        rating_avg, rating_count, boost_until, founder_rank, paid_until, plan_period_start, plan_kind, host_streak_weeks, created_at,
-       ghost_kitchen, zone_label, accepts_orders, order_greeting, menu_currencies, latitude, longitude,
+       ghost_kitchen, zone_label, accepts_orders, order_greeting, menu_currencies, menu_base_currency, menu_bs_rate, menu_cop_rate, latitude, longitude,
        restaurant_categories ( categories ( slug, label, icon ) ),
        restaurant_amenities ( amenities ( id, slug, label, icon ) ),
        restaurant_payment_methods ( payment_methods ( id, slug, label, icon ) )`,
@@ -144,6 +147,9 @@ export type OwnerRestaurantPatch = Partial<{
   accepts_orders: boolean;
   order_greeting: string | null;
   menu_currencies: string[];
+  menu_base_currency: string;
+  menu_bs_rate: number | null;
+  menu_cop_rate: number | null;
 }>;
 
 export function useUpdateMyRestaurant(restaurantId: string | undefined) {

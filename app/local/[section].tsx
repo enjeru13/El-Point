@@ -29,7 +29,7 @@ type Def = {
 const SECTIONS: Record<string, Def> = {
   menu: {
     title: "Menú",
-    lockBody: "Platos con precio en dólares, bolívares o pesos, y plato del día con aviso a quienes te siguen.",
+    lockBody: "Platos con precio en dólares, bolívares o pesos, plato del día con aviso a quienes te siguen, y tu carta en PDF.",
     render: (r) => <MenuEditor restaurant={r} />,
   },
   hours: {
@@ -59,8 +59,8 @@ const SECTIONS: Record<string, Def> = {
     render: (r) => <PaymentsSection restaurant={r} />,
   },
   photos: {
-    title: "Fotos y menú en PDF",
-    lockBody: "Portada, logo y tu carta en PDF: lo primero que ve el comensal.",
+    title: "Fotos",
+    lockBody: "Portada y logo: lo primero que ve el comensal.",
     render: (r) => <PhotosSection restaurant={r} />,
   },
 };

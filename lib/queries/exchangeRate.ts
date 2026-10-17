@@ -63,21 +63,45 @@ export function useCopRate() {
 
 export type Rates = { bs: number | null; cop: number | null };
 
+type Cur = "usd" | "bs" | "cop";
+
+/** Tasas efectivas del local: las propias si las puso, y si no la BCV y la automática del día. */
+export function useEffectiveRates(own: { bsRate: number | null; copRate: number | null }) {
+  const bcv = useBcvRate();
+  const cop = useCopRate();
+  const rates: Rates = { bs: own.bsRate ?? bcv.data ?? null, cop: own.copRate ?? cop.data ?? null };
+  return { rates, bsLocal: own.bsRate != null, copLocal: own.copRate != null, loading: bcv.isLoading || cop.isLoading };
+}
+
+/** Convierte un monto entre monedas pasando por dólares; null si falta la tasa. */
+export function convertAmount(amount: number, from: Cur, to: Cur, rates: Rates): number | null {
+  if (from === to) return amount;
+  const perUsd = (c: Cur) => (c === "usd" ? 1 : c === "bs" ? rates.bs : rates.cop);
+  const rf = perUsd(from);
+  const rt = perUsd(to);
+  if (!rf || !rt) return null;
+  return (amount / rf) * rt;
+}
+
+/** Texto de un monto en una moneda. `exact` = lo escribió el dueño, no se redondea. */
+export function formatMoney(value: number, c: Cur, exact = false): string {
+  if (c === "usd") return "$" + value.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (c === "bs") return "Bs " + value.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // Pesos: el dueño escribe el número tal cual; lo calculado se redondea a la cincuentena.
+  const v = exact ? value : Math.round(value / 50) * 50;
+  return "COP " + v.toLocaleString("es-VE", { maximumFractionDigits: 0 });
+}
+
 /**
- * Un precio en USD como textos por moneda, en el orden pedido (solo las monedas
- * pedidas y con tasa disponible). Siempre devuelve al menos el precio en USD.
+ * Un precio guardado en la moneda base como textos por moneda, con la base
+ * primero. Las monedas sin tasa disponible se omiten; la base siempre sale.
  */
-export function priceLines(usd: number, currencies: ("usd" | "bs" | "cop")[], rates: Rates): string[] {
-  const out: string[] = [];
+export function priceLines(amount: number, base: Cur, currencies: Cur[], rates: Rates): string[] {
+  const out: string[] = [formatMoney(amount, base, true)];
   for (const c of currencies) {
-    if (c === "usd") {
-      out.push("$" + usd.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-    } else if (c === "bs" && rates.bs) {
-      out.push("Bs " + (usd * rates.bs).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-    } else if (c === "cop" && rates.cop) {
-      // Pesos: se redondea a la cincuentena, así se leen y se pagan en la práctica.
-      out.push("COP " + (Math.round((usd * rates.cop) / 50) * 50).toLocaleString("es-VE", { maximumFractionDigits: 0 }));
-    }
+    if (c === base) continue;
+    const v = convertAmount(amount, base, c, rates);
+    if (v != null) out.push(formatMoney(v, c));
   }
-  return out.length ? out : ["$" + usd.toFixed(2).replace(".", ",")];
+  return out;
 }

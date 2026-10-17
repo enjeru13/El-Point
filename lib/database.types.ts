@@ -129,7 +129,7 @@ export type Database = {
           is_daily_special: boolean
           name: string
           position: number
-          price_usd: number
+          price: number
           restaurant_id: string
           section: string
           special_date: string | null
@@ -144,7 +144,7 @@ export type Database = {
           is_daily_special?: boolean
           name: string
           position?: number
-          price_usd: number
+          price: number
           restaurant_id: string
           section?: string
           special_date?: string | null
@@ -159,7 +159,7 @@ export type Database = {
           is_daily_special?: boolean
           name?: string
           position?: number
-          price_usd?: number
+          price?: number
           restaurant_id?: string
           section?: string
           special_date?: string | null
@@ -610,6 +610,9 @@ export type Database = {
           verification_photo_path: string | null
           whatsapp: string | null
           accepts_orders: boolean
+          menu_base_currency: string
+          menu_bs_rate: number | null
+          menu_cop_rate: number | null
           menu_currencies: string[]
           order_greeting: string | null
           zone_label: string | null
@@ -652,6 +655,9 @@ export type Database = {
           verification_photo_path?: string | null
           whatsapp?: string | null
           accepts_orders?: boolean
+          menu_base_currency?: string
+          menu_bs_rate?: number | null
+          menu_cop_rate?: number | null
           menu_currencies?: string[]
           order_greeting?: string | null
           zone_label?: string | null
@@ -694,6 +700,9 @@ export type Database = {
           verification_photo_path?: string | null
           whatsapp?: string | null
           accepts_orders?: boolean
+          menu_base_currency?: string
+          menu_bs_rate?: number | null
+          menu_cop_rate?: number | null
           menu_currencies?: string[]
           order_greeting?: string | null
           zone_label?: string | null

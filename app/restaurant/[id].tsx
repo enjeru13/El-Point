@@ -36,7 +36,7 @@ import { ReportSheet, type ReportSheetHandle } from "@/components/ui/ReportSheet
 import { whatsappUrl, instagramUrl, instagramHandle, orderMessage } from "@/lib/contact";
 import { useMyProfile } from "@/lib/queries/me";
 import { usePaymentMethods } from "@/lib/queries/paymentMethods";
-import { useMenu } from "@/lib/queries/menu";
+import { menuSettings, useMenu } from "@/lib/queries/menu";
 import { MenuSection } from "@/components/restaurant/MenuSection";
 import { useFavoriteIds, useToggleFavorite } from "@/lib/queries/feed";
 import { useToast } from "@/lib/toast";
@@ -1337,7 +1337,7 @@ export default function RestaurantProfileScreen() {
 
           {/* ── Menú con precios ── */}
           {restaurant.has_plan && (menuQ.data?.length ?? 0) > 0 && (
-            <MenuSection items={menuQ.data!} currenciesRaw={restaurant.menu_currencies} />
+            <MenuSection items={menuQ.data!} settings={menuSettings(restaurant)} />
           )}
 
           {/* ── Menú PDF ── */}

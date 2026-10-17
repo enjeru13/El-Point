@@ -13,10 +13,9 @@ import {
   type OwnerRestaurant,
 } from "@/lib/queries/owner";
 import { usePaymentMethods } from "@/lib/queries/paymentMethods";
-import { uploadRestaurantImage, uploadRestaurantMenu } from "@/lib/storage";
+import { uploadRestaurantImage } from "@/lib/storage";
 import { useTheme } from "@/lib/ThemeContext";
 import { useToast } from "@/lib/toast";
-import * as DocumentPicker from "expo-document-picker";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useRef, useState } from "react";
@@ -436,7 +435,7 @@ export function PhotosSection({ restaurant }: { restaurant: OwnerRestaurant }) {
   const { C } = useTheme();
   const toast = useToast();
   const updateMut = useUpdateMyRestaurant(restaurant.id);
-  const [uploading, setUploading] = useState<"logo" | "cover" | "menu" | null>(null);
+  const [uploading, setUploading] = useState<"logo" | "cover" | null>(null);
 
   async function pickPhoto(kind: "logo" | "cover") {
     const uri = await pickImageSource(
@@ -455,22 +454,8 @@ export function PhotosSection({ restaurant }: { restaurant: OwnerRestaurant }) {
     }
   }
 
-  async function pickMenu() {
-    const r = await DocumentPicker.getDocumentAsync({ type: "application/pdf" });
-    if (r.canceled) return;
-    setUploading("menu");
-    try {
-      const url = await uploadRestaurantMenu(restaurant.id, r.assets[0].uri);
-      updateMut.mutate({ menu_pdf_url: url });
-    } catch (e: any) {
-      toast.error(e?.message ?? "No se pudo subir el menú");
-    } finally {
-      setUploading(null);
-    }
-  }
-
   return (
-    <SectionCard title="Fotos y menú en PDF">
+    <SectionCard title="Fotos">
       {/* Portada */}
       <View style={{ padding: 18, gap: 8, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
         <AppText variant="overline" color={C.outline}>FOTO DE PORTADA</AppText>
@@ -517,7 +502,7 @@ export function PhotosSection({ restaurant }: { restaurant: OwnerRestaurant }) {
       <Pressable
         onPress={() => pickPhoto("logo")}
         disabled={uploading !== null}
-        style={{ flexDirection: "row", alignItems: "center", gap: 14, padding: 18, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}
+        style={{ flexDirection: "row", alignItems: "center", gap: 14, padding: 18 }}
       >
         <View
           style={{
@@ -548,35 +533,6 @@ export function PhotosSection({ restaurant }: { restaurant: OwnerRestaurant }) {
           <AppText variant="bodyStrong">Logo del local</AppText>
           <AppText variant="caption" color={C.outline} style={{ fontSize: 12, marginTop: 1 }}>
             {restaurant.logo_url ? "Toca para cambiarlo" : "Aparece junto a tu nombre"}
-          </AppText>
-        </View>
-        <Icon name="chevron-right" size={18} color={C.outline} />
-      </Pressable>
-
-      {/* Menú PDF */}
-      <Pressable onPress={pickMenu} disabled={uploading !== null} style={{ flexDirection: "row", alignItems: "center", gap: 14, padding: 18 }}>
-        <View
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: 16,
-            backgroundColor: restaurant.menu_pdf_url ? C.primary : C.primaryFixed,
-            alignItems: "center",
-            justifyContent: "center",
-            borderWidth: 1,
-            borderColor: C.border,
-          }}
-        >
-          {uploading === "menu" ? (
-            <ActivityIndicator size="small" color={restaurant.menu_pdf_url ? "#fff" : C.primary} />
-          ) : (
-            <Icon name={restaurant.menu_pdf_url ? "file-check" : "file-pdf-box"} size={24} color={restaurant.menu_pdf_url ? "#fff" : C.primary} />
-          )}
-        </View>
-        <View style={{ flex: 1 }}>
-          <AppText variant="bodyStrong">Menú (PDF)</AppText>
-          <AppText variant="caption" color={C.outline} style={{ fontSize: 12, marginTop: 1 }}>
-            {restaurant.menu_pdf_url ? "Cargado · toca para reemplazar" : "Sube tu carta para los clientes"}
           </AppText>
         </View>
         <Icon name="chevron-right" size={18} color={C.outline} />

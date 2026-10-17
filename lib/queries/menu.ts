@@ -23,7 +23,8 @@ export type MenuItem = {
   section: string;
   name: string;
   description: string | null;
-  price_usd: number;
+  /** Precio en la moneda base del local (menu_base_currency). */
+  price: number;
   available: boolean;
   is_daily_special: boolean;
   special_keep: boolean;
@@ -35,7 +36,7 @@ export type MenuItemInput = {
   section: string;
   name: string;
   description: string | null;
-  price_usd: number;
+  price: number;
   available: boolean;
   is_daily_special: boolean;
   special_keep: boolean;
@@ -58,12 +59,12 @@ export function menuKey(restaurantId: string) {
 async function fetchMenu(restaurantId: string): Promise<MenuItem[]> {
   const { data, error } = await supabase
     .from("menu_items")
-    .select("id, restaurant_id, section, name, description, price_usd, available, is_daily_special, special_keep, special_date, position")
+    .select("id, restaurant_id, section, name, description, price, available, is_daily_special, special_keep, special_date, position")
     .eq("restaurant_id", restaurantId)
     .order("position", { ascending: true })
     .order("created_at", { ascending: true });
   if (error) throw error;
-  return (data ?? []).map((r) => ({ ...r, price_usd: Number(r.price_usd) })) as MenuItem[];
+  return (data ?? []).map((r) => ({ ...r, price: Number(r.price) })) as MenuItem[];
 }
 
 export function useMenu(restaurantId: string | undefined, enabled = true) {
@@ -139,4 +140,53 @@ export function normalizeCurrencies(raw: string[] | null | undefined): Currency[
   const set = new Set((raw ?? []).filter((c): c is Currency => c === "usd" || c === "bs" || c === "cop"));
   const out = CURRENCY_ORDER.filter((c) => set.has(c));
   return out.length ? out : ["usd"];
+}
+
+/** Cómo muestra el menú un local: en qué moneda escribe, cuáles enseña y con qué tasas. */
+export type MenuSettings = {
+  base: Currency;
+  /** Monedas que se muestran, con la base siempre primera. */
+  currencies: Currency[];
+  /** Bs por dólar propios; null = BCV del día. */
+  bsRate: number | null;
+  /** COP por dólar propios; null = tasa automática del día. */
+  copRate: number | null;
+};
+
+export function menuSettings(r: {
+  menu_base_currency?: string | null;
+  menu_currencies?: string[] | null;
+  menu_bs_rate?: number | string | null;
+  menu_cop_rate?: number | string | null;
+}): MenuSettings {
+  const base: Currency = r.menu_base_currency === "bs" || r.menu_base_currency === "cop" ? r.menu_base_currency : "usd";
+  const shown = normalizeCurrencies(r.menu_currencies);
+  const currencies = CURRENCY_ORDER.filter((c) => c === base || shown.includes(c));
+  const sorted = [base, ...currencies.filter((c) => c !== base)];
+  const num = (v: unknown) => (v == null || v === "" || !Number.isFinite(Number(v)) || Number(v) <= 0 ? null : Number(v));
+  return { base, currencies: sorted, bsRate: num(r.menu_bs_rate), copRate: num(r.menu_cop_rate) };
+}
+
+export function currencySymbol(c: Currency): string {
+  return c === "usd" ? "$" : c === "bs" ? "Bs " : "COP ";
+}
+
+/** Reescribe el precio de varios platos (al cambiar la moneda base y convertir). */
+export function useConvertMenuPrices(restaurantId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (updates: { id: string; price: number }[]) => {
+      for (let i = 0; i < updates.length; i += 10) {
+        const chunk = updates.slice(i, i + 10);
+        const results = await Promise.all(chunk.map((u) => supabase.from("menu_items").update({ price: u.price }).eq("id", u.id)));
+        const failed = results.find((r) => r.error);
+        if (failed?.error) throw menuError(failed.error);
+      }
+    },
+    onSuccess: () => {
+      if (!restaurantId) return;
+      qc.invalidateQueries({ queryKey: menuKey(restaurantId) });
+      qc.invalidateQueries({ queryKey: restaurantKeys(restaurantId) });
+    },
+  });
 }
