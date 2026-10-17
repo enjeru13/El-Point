@@ -12,14 +12,12 @@ import { NestedReorderableList, reorderItems, useIsActive, useReorderableDrag } 
 LogBox.ignoreLogs(["VirtualizedLists should never be nested inside plain ScrollViews"]);
 
 const ROW_H = 58;
-const RADIUS = 19;
 
-function Row({ item, index, count, base }: { item: MenuItem; index: number; count: number; base: Currency }) {
+function Row({ item, index, base }: { item: MenuItem; index: number; base: Currency }) {
   const { C } = useTheme();
   const drag = useReorderableDrag();
   const active = useIsActive();
   const first = index === 0;
-  const last = index === count - 1;
 
   return (
     <View
@@ -28,20 +26,12 @@ function Row({ item, index, count, base }: { item: MenuItem; index: number; coun
         flexDirection: "row",
         alignItems: "center",
         paddingLeft: 16,
-        // Arrastrando, la fila es una tarjeta con todas las esquinas redondeadas.
-        // En reposo, las esquinas las llevan la primera y la última (la lista no recorta,
-        // así la fila que se arrastra puede salirse del bloque).
+        // En reposo la fila es plana y la caja redondeada la recorta; arrastrando es una tarjeta
+        // con todas las esquinas redondeadas.
         backgroundColor: active ? C.surfaceContainerHighest : C.surface,
-        borderTopWidth: first || active ? (active ? 1 : 0) : 1,
+        borderTopWidth: first && !active ? 0 : 1,
         borderTopColor: active ? C.border : C.outlineVariant,
-        ...(active
-          ? { borderWidth: 1, borderColor: C.border, borderRadius: 16 }
-          : {
-              borderTopLeftRadius: first ? RADIUS : 0,
-              borderTopRightRadius: first ? RADIUS : 0,
-              borderBottomLeftRadius: last ? RADIUS : 0,
-              borderBottomRightRadius: last ? RADIUS : 0,
-            }),
+        ...(active ? { borderWidth: 1, borderColor: C.border, borderRadius: 16 } : null),
       }}
     >
       <AppText variant="bodyStrong" numberOfLines={1} style={{ flex: 1 }}>{item.name}</AppText>
@@ -80,7 +70,8 @@ export function ReorderSection({
   return (
     <View style={{ gap: 8 }}>
       <AppText variant="overline" color={C.outline} style={{ paddingHorizontal: 4 }}>{title.toUpperCase()}</AppText>
-      <View style={{ borderRadius: 20, borderWidth: 1, borderColor: C.border, backgroundColor: C.surface }}>
+      {/* overflow hidden: al moverse rápido, las filas que pasan por las esquinas quedan recortadas por la caja redondeada. */}
+      <View style={{ borderRadius: 20, borderWidth: 1, borderColor: C.border, backgroundColor: C.surface, overflow: "hidden", minHeight: order.length * ROW_H + 2 }}>
         <NestedReorderableList
           data={order}
           keyExtractor={(i) => i.id}
@@ -92,7 +83,7 @@ export function ReorderSection({
             setOrder(next);
             onCommit(next);
           }}
-          renderItem={({ item, index }) => <Row item={item} index={index} count={order.length} base={base} />}
+          renderItem={({ item, index }) => <Row item={item} index={index} base={base} />}
         />
       </View>
     </View>
