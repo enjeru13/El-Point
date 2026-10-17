@@ -3,44 +3,51 @@ import { Icon } from "@/components/ui/Icon";
 import { formatMoney } from "@/lib/queries/exchangeRate";
 import type { Currency, MenuItem } from "@/lib/queries/menu";
 import { useTheme } from "@/lib/ThemeContext";
-import { useEffect, useRef, useState } from "react";
-import { Animated, PanResponder, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, View } from "react-native";
+import { NestedReorderableList, reorderItems, useReorderableDrag } from "react-native-reorderable-list";
 
 const ROW_H = 58;
+const RADIUS = 19;
 
-type Handlers = {
-  start: (i: number) => void;
-  move: (i: number, dy: number) => void;
-  end: (i: number, dy: number) => void;
-};
-
-/** Agarradera: arrastrar desde aquí mueve el plato. Reclama el gesto para que la pantalla no haga scroll. */
-function Grip({ index, handlers }: { index: number; handlers: React.MutableRefObject<Handlers> }) {
+function Row({ item, index, count, base }: { item: MenuItem; index: number; count: number; base: Currency }) {
   const { C } = useTheme();
-  const pan = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderTerminationRequest: () => false,
-      onShouldBlockNativeResponder: () => true,
-      onPanResponderGrant: () => handlers.current.start(index),
-      onPanResponderMove: (_, g) => handlers.current.move(index, g.dy),
-      onPanResponderRelease: (_, g) => handlers.current.end(index, g.dy),
-      onPanResponderTerminate: (_, g) => handlers.current.end(index, g.dy),
-    }),
-  ).current;
+  const drag = useReorderableDrag();
+  const first = index === 0;
+  const last = index === count - 1;
 
   return (
-    <View {...pan.panHandlers} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} style={{ width: 40, height: ROW_H, alignItems: "center", justifyContent: "center" }}>
-      <Icon name="drag-vertical" size={24} color={C.outline} />
+    <View
+      style={{
+        height: ROW_H,
+        flexDirection: "row",
+        alignItems: "center",
+        paddingLeft: 16,
+        backgroundColor: C.surface,
+        borderTopWidth: first ? 0 : 1,
+        borderTopColor: C.outlineVariant,
+        // Las esquinas redondeadas las llevan la primera y la última fila: la lista no recorta,
+        // así la fila que se arrastra puede salirse del bloque.
+        borderTopLeftRadius: first ? RADIUS : 0,
+        borderTopRightRadius: first ? RADIUS : 0,
+        borderBottomLeftRadius: last ? RADIUS : 0,
+        borderBottomRightRadius: last ? RADIUS : 0,
+      }}
+    >
+      <AppText variant="bodyStrong" numberOfLines={1} style={{ flex: 1 }}>{item.name}</AppText>
+      <AppText variant="bodyStrong" color={C.primary}>{formatMoney(item.price, base, true)}</AppText>
+      {/* Agarradera a la derecha, como en las listas del sistema. */}
+      <Pressable onPressIn={drag} hitSlop={{ top: 8, bottom: 8, left: 8, right: 4 }} style={{ width: 52, height: ROW_H, alignItems: "center", justifyContent: "center" }}>
+        <Icon name="drag-vertical" size={24} color={C.onSurfaceVariant} />
+      </Pressable>
     </View>
   );
 }
 
 /**
- * Los platos de una sección para reordenar arrastrando. Las filas tienen alto
- * fijo: al arrastrar, las demás se corren de lugar y, al soltar, se guarda el
- * nuevo orden con onCommit.
+ * Los platos de una sección para reordenar arrastrando la agarradera. La lista
+ * vive dentro del ScrollViewContainer de la pantalla, así hace scroll solo
+ * mientras se arrastra cerca de los bordes. Al soltar se guarda el nuevo orden.
  */
 export function ReorderSection({
   title,
@@ -55,102 +62,27 @@ export function ReorderSection({
 }) {
   const { C } = useTheme();
   const [order, setOrder] = useState(items);
-  const [active, setActive] = useState<{ from: number; to: number } | null>(null);
-  const dy = useRef(new Animated.Value(0)).current;
-  const shifts = useRef<Map<string, Animated.Value>>(new Map()).current;
-  const orderRef = useRef(order);
-  orderRef.current = order;
-  const activeRef = useRef(active);
-  activeRef.current = active;
 
-  // Si cambia la lista de fuera (otro guardado), se refleja salvo en pleno arrastre.
   useEffect(() => {
-    if (!activeRef.current) setOrder(items);
+    setOrder(items);
   }, [items]);
-
-  function shiftValue(id: string): Animated.Value {
-    let v = shifts.get(id);
-    if (!v) {
-      v = new Animated.Value(0);
-      shifts.set(id, v);
-    }
-    return v;
-  }
-
-  function applyShifts(from: number, to: number) {
-    orderRef.current.forEach((item, j) => {
-      let target = 0;
-      if (from < to && j > from && j <= to) target = -ROW_H;
-      else if (from > to && j >= to && j < from) target = ROW_H;
-      Animated.timing(shiftValue(item.id), { toValue: target, duration: 120, useNativeDriver: true }).start();
-    });
-  }
-
-  const handlers = useRef<Handlers>({ start: () => {}, move: () => {}, end: () => {} });
-  handlers.current = {
-    start: (i) => {
-      dy.setValue(0);
-      setActive({ from: i, to: i });
-    },
-    move: (i, d) => {
-      dy.setValue(d);
-      const n = orderRef.current.length;
-      const to = Math.max(0, Math.min(n - 1, Math.round(i + d / ROW_H)));
-      const cur = activeRef.current;
-      if (cur && cur.to !== to) {
-        setActive({ from: i, to });
-        applyShifts(i, to);
-      }
-    },
-    end: (i, d) => {
-      const n = orderRef.current.length;
-      const to = Math.max(0, Math.min(n - 1, Math.round(i + d / ROW_H)));
-      const next = [...orderRef.current];
-      const [moved] = next.splice(i, 1);
-      next.splice(to, 0, moved);
-      shifts.forEach((v) => v.setValue(0));
-      dy.setValue(0);
-      setActive(null);
-      if (to !== i) {
-        setOrder(next);
-        onCommit(next);
-      }
-    },
-  };
 
   return (
     <View style={{ gap: 8 }}>
       <AppText variant="overline" color={C.outline} style={{ paddingHorizontal: 4 }}>{title.toUpperCase()}</AppText>
-      <View style={{ borderRadius: 20, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border }}>
-        {order.map((i, idx) => {
-          const dragging = active?.from === idx;
-          return (
-            <Animated.View
-              key={i.id}
-              style={{
-                height: ROW_H,
-                flexDirection: "row",
-                alignItems: "center",
-                paddingRight: 16,
-                backgroundColor: dragging ? C.surfaceContainerHighest : C.surface,
-                borderTopWidth: idx === 0 ? 0 : 1,
-                borderTopColor: C.outlineVariant,
-                borderRadius: dragging ? 14 : 0,
-                zIndex: dragging ? 10 : 0,
-                elevation: dragging ? 6 : 0,
-                shadowColor: "#000",
-                shadowOpacity: dragging ? 0.25 : 0,
-                shadowRadius: 8,
-                shadowOffset: { width: 0, height: 4 },
-                transform: [{ translateY: dragging ? dy : shiftValue(i.id) }],
-              }}
-            >
-              <Grip index={idx} handlers={handlers} />
-              <AppText variant="bodyStrong" numberOfLines={1} style={{ flex: 1 }}>{i.name}</AppText>
-              <AppText variant="bodyStrong" color={C.primary}>{formatMoney(i.price, base, true)}</AppText>
-            </Animated.View>
-          );
-        })}
+      <View style={{ borderRadius: 20, borderWidth: 1, borderColor: C.border, backgroundColor: C.surface }}>
+        <NestedReorderableList
+          data={order}
+          keyExtractor={(i) => i.id}
+          scrollable={false}
+          onReorder={({ from, to }) => {
+            if (from === to) return;
+            const next = reorderItems(order, from, to);
+            setOrder(next);
+            onCommit(next);
+          }}
+          renderItem={({ item, index }) => <Row item={item} index={index} count={order.length} base={base} />}
+        />
       </View>
     </View>
   );

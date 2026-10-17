@@ -5,7 +5,8 @@ import { capWidth, useIsTablet } from "@/lib/responsive";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
 import type { ReactNode } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, View } from "react-native";
+import { ScrollViewContainer } from "react-native-reorderable-list";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 /** Pantalla de una sección de "Mi local": encabezado con volver y cuerpo con scroll. */
@@ -55,13 +56,13 @@ export function SectionShell({ title, subtitle, children }: { title: string; sub
         </View>
       </View>
 
-      <ScrollView
+      <ScrollViewContainer
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 20, gap: 18, paddingBottom: insets.bottom + 60, ...capWidth(isTablet) }}
       >
         {children}
-      </ScrollView>
+      </ScrollViewContainer>
     </KeyboardAvoidingView>
   );
 }
