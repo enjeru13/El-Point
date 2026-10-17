@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { DEFAULT_HOURS, caracasToday, formatRange } from "@/lib/hours";
 import { hasPlan } from "@/lib/plan";
 import { activePromo, promoEndLabel } from "@/lib/promo";
+import { GALLERY_LIMIT, useGallery } from "@/lib/queries/gallery";
 import { isSpecialActive, useMenu } from "@/lib/queries/menu";
 import { useMyRestaurant } from "@/lib/queries/owner";
 import { capWidth, useIsTablet } from "@/lib/responsive";
@@ -33,12 +34,13 @@ export default function MyLocalScreen() {
   const r = restaurantQ.data ?? null;
   const plan = !!r && hasPlan(r);
   const menuQ = useMenu(r?.id, plan);
+  const galleryQ = useGallery(r?.id, plan);
   const [refreshing, setRefreshing] = useState(false);
 
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await Promise.all([restaurantQ.refetch(), menuQ.refetch()]);
+      await Promise.all([restaurantQ.refetch(), menuQ.refetch(), galleryQ.refetch()]);
     } finally {
       setRefreshing(false);
     }
@@ -140,8 +142,8 @@ export default function MyLocalScreen() {
       icon: "camera-plus-outline",
       title: "Fotos",
       summary: !plan
-        ? "Portada y logo de tu local"
-        : [r.cover_url ? "Portada ✓" : "Sin portada", r.logo_url ? "Logo ✓" : "Sin logo"].join(" · "),
+        ? "Galería, portada y logo de tu local"
+        : [`${galleryQ.data?.length ?? 0}/${GALLERY_LIMIT} fotos`, r.cover_url ? "Portada ✓" : "Sin portada", r.logo_url ? "Logo ✓" : "Sin logo"].join(" · "),
       locked: !plan,
     },
   ];

@@ -60,7 +60,7 @@ const SECTIONS: Record<string, Def> = {
   },
   photos: {
     title: "Fotos",
-    lockBody: "Portada y logo: lo primero que ve el comensal.",
+    lockBody: "Una galería de hasta 8 fotos de tus platos y tu local, más portada y logo: lo primero que ve el comensal.",
     render: (r) => <PhotosSection restaurant={r} />,
   },
 };

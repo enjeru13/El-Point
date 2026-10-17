@@ -529,6 +529,41 @@ export type Database = {
           },
         ]
       }
+      restaurant_photos: {
+        Row: {
+          created_at: string
+          id: string
+          position: number
+          restaurant_id: string
+          storage_path: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          position?: number
+          restaurant_id: string
+          storage_path: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          position?: number
+          restaurant_id?: string
+          storage_path?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_photos_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurant_reports: {
         Row: {
           created_at: string

@@ -38,6 +38,8 @@ import { useMyProfile } from "@/lib/queries/me";
 import { usePaymentMethods } from "@/lib/queries/paymentMethods";
 import { menuSettings, useMenu } from "@/lib/queries/menu";
 import { MenuSection } from "@/components/restaurant/MenuSection";
+import { GalleryStrip } from "@/components/restaurant/GalleryStrip";
+import { useGallery } from "@/lib/queries/gallery";
 import { useFavoriteIds, useToggleFavorite } from "@/lib/queries/feed";
 import { useToast } from "@/lib/toast";
 import { impact } from "@/lib/haptics";
@@ -458,6 +460,7 @@ export default function RestaurantProfileScreen() {
   const paymentCatalogQ = usePaymentMethods();
   // Menú con precios: solo se pide si el local tiene plan (sin plan el servidor tampoco lo entrega).
   const menuQ = useMenu(id, !!restaurantQ.data?.has_plan);
+  const galleryQ = useGallery(id, !!restaurantQ.data?.has_plan);
 
   // Una visita por apertura del local (el servidor descarta al dueño y repeticiones).
   const viewedId = restaurantQ.data?.id;
@@ -1046,6 +1049,9 @@ export default function RestaurantProfileScreen() {
               </View>
             </View>
           )}
+
+          {/* ── Fotos ── */}
+          {restaurant.has_plan && (galleryQ.data?.length ?? 0) > 0 && <GalleryStrip photos={galleryQ.data!} />}
 
           {/* ── Info ── */}
           <View

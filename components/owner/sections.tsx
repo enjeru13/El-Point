@@ -1,3 +1,4 @@
+import { GallerySection } from "@/components/owner/GallerySection";
 import { EditBar, SectionCard } from "@/components/owner/SectionShell";
 import { AppText } from "@/components/ui/AppText";
 import { AppTextInput } from "@/components/ui/AppTextInput";
@@ -655,7 +656,9 @@ export function PhotosSection({ restaurant }: { restaurant: OwnerRestaurant }) {
   }
 
   return (
-    <SectionCard title="Fotos">
+    <>
+    <GallerySection restaurant={restaurant} />
+    <SectionCard title="Portada y logo">
       {/* Portada */}
       <View style={{ padding: 18, gap: 8, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
         <AppText variant="overline" color={C.outline}>FOTO DE PORTADA</AppText>
@@ -738,5 +741,6 @@ export function PhotosSection({ restaurant }: { restaurant: OwnerRestaurant }) {
         <Icon name="chevron-right" size={18} color={C.outline} />
       </Pressable>
     </SectionCard>
+    </>
   );
 }

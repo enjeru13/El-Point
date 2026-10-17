@@ -3,6 +3,7 @@ import { Icon } from "@/components/ui/Icon";
 import { hasPlan } from "@/lib/plan";
 import { activePromo } from "@/lib/promo";
 import { useRestaurantStats } from "@/lib/queries/analytics";
+import { useGallery } from "@/lib/queries/gallery";
 import { useMenu } from "@/lib/queries/menu";
 import type { OwnerRestaurant } from "@/lib/queries/owner";
 import { isBoosted, isFounder } from "@/lib/queries/restaurants";
@@ -267,10 +268,12 @@ export function ProfileChecklist({ restaurant: r }: { restaurant: OwnerRestauran
   const router = useRouter();
   const plan = hasPlan(r);
   const menuQ = useMenu(r.id, plan);
+  const galleryQ = useGallery(r.id, plan);
 
   if (!plan) return null;
 
   const steps: Step[] = [
+    { key: "gallery", label: "Sube 3 fotos de tus platos", done: (galleryQ.data?.length ?? 0) >= 3, to: "/local/photos" },
     { key: "cover", label: "Agrega tu foto de portada", done: !!r.cover_url, to: "/local/photos" },
     { key: "logo", label: "Sube tu logo", done: !!r.logo_url, to: "/local/photos" },
     { key: "hours", label: "Indica tu horario", done: !!r.hours, to: "/local/hours" },
@@ -280,7 +283,7 @@ export function ProfileChecklist({ restaurant: r }: { restaurant: OwnerRestauran
   ];
   const done = steps.filter((s) => s.done).length;
   // Mientras carga el menú no se muestra para que no parpadee un paso que sí está hecho.
-  if (menuQ.isLoading || done === steps.length) return null;
+  if (menuQ.isLoading || galleryQ.isLoading || done === steps.length) return null;
 
   return (
     <View style={{ borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: "hidden", ...shadow.sm }}>
