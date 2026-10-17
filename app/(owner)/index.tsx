@@ -9,6 +9,7 @@ import { useTheme } from '@/lib/ThemeContext';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews, type Review } from '@/lib/queries/reviews';
 import { isFounder } from '@/lib/queries/restaurants';
+import { activePromo } from '@/lib/promo';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { Avatar } from '@/components/ui/Avatar';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -261,7 +262,7 @@ export default function OwnerHomeScreen() {
         </View>
 
         {/* Promo activa */}
-        {restaurant.promo_text && (
+        {activePromo(restaurant) && (
           <View style={{
             padding: 14, borderRadius: 16, gap: 4,
             backgroundColor: C.primary + '1f',
@@ -273,7 +274,7 @@ export default function OwnerHomeScreen() {
               <AppText variant="overline" color={C.primary}>PROMO ACTIVA</AppText>
             </View>
             <AppText variant="bodyStrong" style={{ fontSize: 15 }} numberOfLines={2}>
-              {restaurant.promo_text}
+              {activePromo(restaurant)}
             </AppText>
           </View>
         )}

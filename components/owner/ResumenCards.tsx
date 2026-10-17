@@ -1,6 +1,7 @@
 import { AppText } from "@/components/ui/AppText";
 import { Icon } from "@/components/ui/Icon";
 import { hasPlan } from "@/lib/plan";
+import { activePromo } from "@/lib/promo";
 import { useRestaurantStats } from "@/lib/queries/analytics";
 import { useMenu } from "@/lib/queries/menu";
 import type { OwnerRestaurant } from "@/lib/queries/owner";
@@ -274,7 +275,7 @@ export function ProfileChecklist({ restaurant: r }: { restaurant: OwnerRestauran
     { key: "logo", label: "Sube tu logo", done: !!r.logo_url, to: "/local/photos" },
     { key: "hours", label: "Indica tu horario", done: !!r.hours, to: "/local/hours" },
     { key: "menu", label: "Arma tu menú con platos", done: (menuQ.data?.length ?? 0) > 0, to: "/local/menu" },
-    { key: "promo", label: "Publica una promoción", done: !!r.promo_text, to: "/local/promo" },
+    { key: "promo", label: "Publica una promoción", done: !!activePromo(r), to: "/local/promo" },
     { key: "amenities", label: "Marca tus comodidades", done: r.amenities.length > 0, to: "/local/amenities" },
   ];
   const done = steps.filter((s) => s.done).length;

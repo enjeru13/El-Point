@@ -5,6 +5,7 @@ import { Chip } from "@/components/ui/Chip";
 import { Icon } from "@/components/ui/Icon";
 import { TimePickerSheet, type TimePickerHandle } from "@/components/ui/TimePickerSheet";
 import { DAY_LABELS, DAY_LABELS_LONG, DEFAULT_HOURS, formatRange, to12h, type Hours } from "@/lib/hours";
+import { activePromo, PROMO_DURATIONS, promoEndLabel, promoEndsAt, type PromoDuration } from "@/lib/promo";
 import { useAmenities } from "@/lib/queries/amenities";
 import {
   useUpdateMyRestaurant,
@@ -121,52 +122,167 @@ export function HoursSection({ restaurant }: { restaurant: OwnerRestaurant }) {
 // ─── Promoción ───────────────────────────────────────────────────────────────
 
 export function PromoSection({ restaurant }: { restaurant: OwnerRestaurant }) {
-  const { C } = useTheme();
+  const { C, shadow } = useTheme();
   const toast = useToast();
   const updateMut = useUpdateMyRestaurant(restaurant.id);
+  const active = activePromo(restaurant);
   const [editing, setEditing] = useState(false);
-  const [promo, setPromo] = useState(restaurant.promo_text ?? "");
+  const [promo, setPromo] = useState("");
+  const [duration, setDuration] = useState<PromoDuration | "keep">("7d");
 
-  useEffect(() => {
-    if (!editing) setPromo(restaurant.promo_text ?? "");
-  }, [restaurant.promo_text, editing]);
+  function startEdit() {
+    setPromo(active ?? "");
+    // Una promo vigente se deja como está salvo que el dueño elija otra fecha; una nueva dura 1 semana.
+    setDuration(active ? "keep" : "7d");
+    setEditing(true);
+  }
 
   function save() {
-    updateMut.mutate(
-      { promo_text: promo.trim() || null },
-      {
-        onSuccess: () => {
-          setEditing(false);
-          toast.success(promo.trim() ? "Promoción publicada" : "Promoción quitada");
-        },
-        onError: (e: any) => toast.error(e?.message ?? "No se pudo guardar"),
+    const text = promo.trim();
+    const patch: { promo_text: string | null; promo_ends_at?: string | null } = { promo_text: text || null };
+    if (!text) patch.promo_ends_at = null;
+    else if (duration !== "keep") patch.promo_ends_at = promoEndsAt(duration);
+    updateMut.mutate(patch, {
+      onSuccess: () => {
+        setEditing(false);
+        toast.success(text ? "Promoción publicada" : "Promoción quitada");
       },
-    );
+      onError: (e: any) => toast.error(e?.message ?? "No se pudo guardar"),
+    });
   }
+
+  function remove() {
+    Alert.alert("Quitar la promoción", "Dejará de verse ya. No avisamos a nadie por quitarla.", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Quitar",
+        style: "destructive",
+        onPress: () =>
+          updateMut.mutate(
+            { promo_text: null, promo_ends_at: null },
+            { onSuccess: () => toast.success("Promoción quitada"), onError: (e: any) => toast.error(e?.message ?? "No se pudo quitar") },
+          ),
+      },
+    ]);
+  }
+
+  const shownText = editing ? promo.trim() : active;
+  const endLabel = editing ? (duration === "keep" ? promoEndLabel(restaurant.promo_ends_at) : promoEndLabel(promoEndsAt(duration))) : promoEndLabel(restaurant.promo_ends_at);
+  const changed = promo.trim() !== (active ?? "");
+
+  const options: { key: PromoDuration | "keep"; label: string; sub?: string }[] = [
+    ...(active ? [{ key: "keep" as const, label: "Dejar como está", sub: promoEndLabel(restaurant.promo_ends_at) }] : []),
+    ...PROMO_DURATIONS.map((d) => ({ key: d.key, label: d.key === "7d" ? "1 semana" : d.label })),
+  ];
+
+  const IDEAS = ["2x1 en …", "10 % de descuento en …", "Combo familiar por …"];
 
   return (
     <>
-      <SectionCard title="Oferta / promoción">
-        <View style={{ padding: 18, gap: 6 }}>
-          {editing ? (
-            <>
-              <AppTextInput value={promo} onChangeText={setPromo} placeholder="Ej. 2x1 en hamburguesas los martes" maxLength={80} style={{ fontSize: 14 }} />
-              <AppText variant="caption" color={C.outline} align="right" style={{ fontSize: 12 }}>{promo.length}/80</AppText>
-            </>
-          ) : restaurant.promo_text ? (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <Icon name="tag" size={16} color={C.primary} />
-              <AppText variant="bodyStrong" style={{ flex: 1, fontSize: 14 }}>{restaurant.promo_text}</AppText>
+      {/* Cómo se ve */}
+      <View style={{ gap: 8 }}>
+        <AppText variant="overline" color={C.outline} style={{ paddingHorizontal: 4 }}>{editing ? "ASÍ SE VERÁ" : "TU PROMOCIÓN"}</AppText>
+        {shownText ? (
+          <View
+            style={{
+              padding: 14,
+              borderRadius: 16,
+              gap: 4,
+              backgroundColor: C.primary + "1f",
+              borderWidth: 1,
+              borderColor: C.primary + "40",
+              borderLeftWidth: 6,
+              borderLeftColor: C.primary,
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <Icon name="tag" size={14} color={C.primary} />
+              <AppText variant="overline" color={C.primary}>PROMOS</AppText>
             </View>
-          ) : (
-            <AppText variant="bodySm" color={C.outline}>Sin promoción activa. Toca “Editar” para publicar una.</AppText>
+            <AppText variant="bodyStrong">{shownText}</AppText>
+            <AppText variant="caption" color={C.onSurfaceVariant}>{endLabel}</AppText>
+          </View>
+        ) : (
+          <View style={{ padding: 18, borderRadius: 16, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, gap: 4 }}>
+            <AppText variant="bodyStrong">Sin promoción activa</AppText>
+            <AppText variant="bodySm" color={C.onSurfaceVariant}>
+              Una promo sale en tu perfil, en el Inicio y en Buscar, y avisamos a quienes te tienen en favoritos.
+            </AppText>
+          </View>
+        )}
+      </View>
+
+      {editing && (
+        <>
+          <SectionCard title="Texto de la promoción">
+            <View style={{ padding: 18, gap: 6 }}>
+              <AppTextInput value={promo} onChangeText={(t) => setPromo(t.slice(0, 80))} placeholder="Ej. 2x1 en hamburguesas los martes" maxLength={80} style={{ fontSize: 14 }} />
+              <AppText variant="caption" color={C.outline} align="right" style={{ fontSize: 12 }}>{promo.length}/80</AppText>
+            </View>
+          </SectionCard>
+
+          <View style={{ gap: 8 }}>
+            <AppText variant="overline" color={C.outline} style={{ paddingHorizontal: 4 }}>IDEAS PARA EMPEZAR</AppText>
+            <View style={{ borderRadius: 16, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: "hidden" }}>
+              {IDEAS.map((idea, idx) => (
+                <Pressable
+                  key={idea}
+                  onPress={() => setPromo(idea)}
+                  android_ripple={{ color: C.outlineVariant }}
+                  style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 13, borderTopWidth: idx === 0 ? 0 : 1, borderTopColor: C.outlineVariant }}
+                >
+                  <Icon name="lightbulb-outline" size={18} color={C.primary} />
+                  <AppText variant="body" style={{ flex: 1 }}>{idea}</AppText>
+                  <Icon name="plus" size={16} color={C.outline} />
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          <View style={{ gap: 8 }}>
+            <AppText variant="overline" color={C.outline} style={{ paddingHorizontal: 4 }}>¿HASTA CUÁNDO?</AppText>
+            <View style={{ borderRadius: 16, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: "hidden", ...shadow.sm }}>
+              {options.map((o, idx) => {
+                const on = duration === o.key;
+                return (
+                  <Pressable
+                    key={o.key}
+                    onPress={() => setDuration(o.key)}
+                    android_ripple={{ color: C.outlineVariant }}
+                    style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 13, borderTopWidth: idx === 0 ? 0 : 1, borderTopColor: C.outlineVariant }}
+                  >
+                    <View style={{ width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: on ? C.primary : C.outline, alignItems: "center", justifyContent: "center" }}>
+                      {on && <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: C.primary }} />}
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <AppText variant={on ? "bodyStrong" : "body"}>{o.label}</AppText>
+                      {!!o.sub && <AppText variant="caption" color={C.outline}>{o.sub}</AppText>}
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <AppText variant="caption" color={C.outline}>
+              Al llegar la fecha, la promo desaparece sola. Con “Sin fecha” se queda hasta que la quites.
+            </AppText>
+          </View>
+
+          {(!active || changed) && !!promo.trim() && (
+            <AppText variant="caption" color={C.onSurfaceVariant}>
+              Al guardar avisamos a las personas que tienen tu local en favoritos.
+            </AppText>
           )}
-        </View>
-      </SectionCard>
-      <AppText variant="caption" color={C.outline}>
-        Al publicar o cambiar la promo avisamos a quienes tienen tu local en favoritos.
-      </AppText>
-      <EditBar editing={editing} saving={updateMut.isPending} onEdit={() => setEditing(true)} onCancel={() => setEditing(false)} onSave={save} />
+        </>
+      )}
+
+      <EditBar editing={editing} saving={updateMut.isPending} onEdit={startEdit} onCancel={() => setEditing(false)} onSave={save} />
+
+      {!editing && !!active && (
+        <Pressable onPress={remove} style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 8 }}>
+          <Icon name="delete-outline" size={18} color={C.error} />
+          <AppText variant="label" color={C.error}>Quitar la promoción</AppText>
+        </Pressable>
+      )}
     </>
   );
 }

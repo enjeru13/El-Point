@@ -4,6 +4,7 @@ import { Icon } from "@/components/ui/Icon";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { DEFAULT_HOURS, formatRange } from "@/lib/hours";
 import { hasPlan } from "@/lib/plan";
+import { activePromo, promoEndLabel } from "@/lib/promo";
 import { isSpecialActive, useMenu } from "@/lib/queries/menu";
 import { useMyRestaurant } from "@/lib/queries/owner";
 import { capWidth, useIsTablet } from "@/lib/responsive";
@@ -98,7 +99,7 @@ export default function MyLocalScreen() {
       group: "carta",
       icon: "tag-outline",
       title: "Promoción",
-      summary: !plan ? "Una oferta con aviso a tus seguidores" : r.promo_text || "Sin promoción activa",
+      summary: !plan ? "Una oferta con aviso a tus seguidores" : activePromo(r) ? `${activePromo(r)} · ${promoEndLabel(r.promo_ends_at)}` : "Sin promoción activa",
       locked: !plan,
     },
     {

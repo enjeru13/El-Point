@@ -1,5 +1,6 @@
 import { parseHours, type Hours } from "@/lib/hours";
 import { hasPlan } from "@/lib/plan";
+import { activePromo } from "@/lib/promo";
 import type { PaymentMethod } from "@/lib/queries/paymentMethods";
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -82,7 +83,7 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
     .from("restaurants")
     .select(
       `id, owner_id, name, description, address,
-       price_level, logo_url, cover_url, promo_text, hours, is_active,
+       price_level, logo_url, cover_url, promo_text, promo_ends_at, hours, is_active,
        status, status_reason, rating_avg, rating_count, boost_until, founder_rank, paid_until,
        ghost_kitchen, zone_label, accepts_orders, order_greeting, menu_currencies, menu_base_currency, menu_bs_rate, menu_cop_rate,
        restaurant_categories ( categories ( slug, label, icon ) ),
@@ -127,7 +128,7 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
     description: plan ? row.description : null,
     logo_url: plan ? row.logo_url : null,
     cover_url: plan ? row.cover_url : null,
-    promo_text: plan ? row.promo_text : null,
+    promo_text: plan ? activePromo(row) : null,
     boost_until: plan ? row.boost_until : null,
     hours: plan ? parseHours(hours) : null,
     categories,

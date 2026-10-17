@@ -1,4 +1,5 @@
 import { hasPlan } from "@/lib/plan";
+import { activePromo } from "@/lib/promo";
 import type { RestaurantAmenity, RestaurantCategory } from "@/lib/queries/restaurants";
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -50,7 +51,7 @@ function num(v: any): number | null {
 }
 
 const RESTAURANT_EMBED = `restaurant:restaurants (
-  id, name, address, rating_avg, rating_count, price_level, promo_text, cover_url, latitude, longitude, boost_until, founder_rank, paid_until, ghost_kitchen, zone_label,
+  id, name, address, rating_avg, rating_count, price_level, promo_text, promo_ends_at, cover_url, latitude, longitude, boost_until, founder_rank, paid_until, ghost_kitchen, zone_label,
   restaurant_categories ( categories ( slug, label, icon ) ),
   restaurant_amenities ( amenities ( id, slug, label, icon ) )
 )`;
@@ -84,7 +85,7 @@ async function fetchFeed(): Promise<FeedItem[]> {
         rating_avg: r.restaurant.rating_avg,
         rating_count: r.restaurant.rating_count,
         price_level: num(r.restaurant.price_level),
-        promo_text: hasPlan(r.restaurant) ? (r.restaurant.promo_text ?? null) : null,
+        promo_text: hasPlan(r.restaurant) ? activePromo(r.restaurant) : null,
         cover_url: hasPlan(r.restaurant) ? (r.restaurant.cover_url ?? null) : null,
         lat: num(r.restaurant.latitude),
         lng: num(r.restaurant.longitude),
@@ -132,7 +133,7 @@ async function fetchFavorites(): Promise<FavoriteRestaurant[]> {
       rating_avg: f.restaurant.rating_avg,
       rating_count: f.restaurant.rating_count,
       price_level: num(f.restaurant.price_level),
-      promo_text: hasPlan(f.restaurant) ? (f.restaurant.promo_text ?? null) : null,
+      promo_text: hasPlan(f.restaurant) ? activePromo(f.restaurant) : null,
       cover_url: hasPlan(f.restaurant) ? (f.restaurant.cover_url ?? null) : null,
       lat: num(f.restaurant.latitude),
       lng: num(f.restaurant.longitude),
