@@ -4,10 +4,17 @@ import { Icon } from "@/components/ui/Icon";
 import { capWidth, useIsTablet } from "@/lib/responsive";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
-import type { ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, View } from "react-native";
 import { ScrollViewContainer } from "react-native-reorderable-list";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const ScrollLockContext = createContext<(locked: boolean) => void>(() => {});
+
+/** Permite a un hijo (por ejemplo, una cuadrícula que se arrastra) bloquear el scroll de la pantalla mientras dura el gesto. */
+export function useScrollLock() {
+  return useContext(ScrollLockContext);
+}
 
 /** Pantalla de una sección de "Mi local": encabezado con volver y cuerpo con scroll. */
 export function SectionShell({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
@@ -15,6 +22,7 @@ export function SectionShell({ title, subtitle, children }: { title: string; sub
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const isTablet = useIsTablet();
+  const [locked, setLocked] = useState(false);
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1, backgroundColor: C.background }}>
@@ -57,11 +65,12 @@ export function SectionShell({ title, subtitle, children }: { title: string; sub
       </View>
 
       <ScrollViewContainer
+        scrollEnabled={!locked}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 20, gap: 18, paddingBottom: insets.bottom + 60, ...capWidth(isTablet) }}
       >
-        {children}
+        <ScrollLockContext.Provider value={setLocked}>{children}</ScrollLockContext.Provider>
       </ScrollViewContainer>
     </KeyboardAvoidingView>
   );

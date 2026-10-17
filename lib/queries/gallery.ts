@@ -3,7 +3,7 @@ import { removeGalleryFile, uploadGalleryPhoto } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const GALLERY_LIMIT = 8;
+export const GALLERY_LIMIT = 9;
 
 export type GalleryPhoto = {
   id: string;
