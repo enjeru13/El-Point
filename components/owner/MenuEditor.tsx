@@ -92,6 +92,79 @@ function inputStyle(C: ReturnType<typeof useTheme>["C"]) {
 
 const SHORT: Record<Currency, string> = { usd: "$", bs: "Bs", cop: "COP" };
 
+function RateBlock({
+  c,
+  base,
+  shown,
+  custom,
+  setCustom,
+  text,
+  setText,
+  autoLabel,
+  autoValue,
+  unit,
+}: {
+  c: Currency;
+  base: Currency;
+  shown: Set<Currency>;
+  custom: boolean;
+  setCustom: (v: boolean) => void;
+  text: string;
+  setText: (v: string) => void;
+  autoLabel: string;
+  autoValue: number | null | undefined;
+  unit: string;
+}) {
+  const { C } = useTheme();
+  if (c !== base && !shown.has(c)) return null;
+  return (
+    <View style={{ gap: 8, padding: 14, borderRadius: 16, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border }}>
+      <AppText variant="bodyStrong">Tasa en {CURRENCY_LABEL[c].toLowerCase()}</AppText>
+      <View style={{ flexDirection: "row", gap: 8 }}>
+        <Chip label={autoLabel} active={!custom} onPress={() => setCustom(false)} />
+        <Chip label="Mi tasa" active={custom} onPress={() => setCustom(true)} />
+      </View>
+      {custom ? (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <AppTextInput
+            value={text}
+            onChangeText={(v) => setText(v.replace(/[^0-9.,]/g, "").slice(0, 12))}
+            placeholder="950"
+            keyboardType="decimal-pad"
+            style={{ ...inputStyle(C), flex: 1 }}
+          />
+          <AppText variant="bodySm" color={C.onSurfaceVariant}>{unit}</AppText>
+        </View>
+      ) : (
+        <AppText variant="caption" color={C.outline}>
+          {autoValue ? `Hoy: ${autoValue.toLocaleString("es-VE", { maximumFractionDigits: 2 })} ${unit}. Se actualiza sola.` : "Cargando la tasa del día…"}
+        </AppText>
+      )}
+    </View>
+  );
+}
+
+/** Selector de una opción entre pocas, todas del mismo ancho. */
+function Segmented<T extends string>({ value, onChange, options }: { value: T; onChange: (v: T) => void; options: { key: T; label: string }[] }) {
+  const { C } = useTheme();
+  return (
+    <View style={{ flexDirection: "row", padding: 4, borderRadius: 16, backgroundColor: C.surfaceContainerLow, borderWidth: 1, borderColor: C.border }}>
+      {options.map((o) => {
+        const on = o.key === value;
+        return (
+          <Pressable
+            key={o.key}
+            onPress={() => onChange(o.key)}
+            style={{ flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: "center", backgroundColor: on ? C.primary : "transparent" }}
+          >
+            <AppText variant="label" color={on ? "#fff" : C.onSurfaceVariant}>{o.label}</AppText>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 // ─── Hoja de monedas y tasas ────────────────────────────────────────────────
 
 function CurrencySheet({
@@ -202,54 +275,6 @@ function CurrencySheet({
     persist(false);
   }
 
-  const RateBlock = ({
-    c,
-    custom,
-    setCustom,
-    text,
-    setText,
-    autoLabel,
-    autoValue,
-    unit,
-  }: {
-    c: Currency;
-    custom: boolean;
-    setCustom: (v: boolean) => void;
-    text: string;
-    setText: (v: string) => void;
-    autoLabel: string;
-    autoValue: number | null | undefined;
-    unit: string;
-  }) => {
-    const needed = c === base || shown.has(c);
-    if (!needed) return null;
-    return (
-      <View style={{ gap: 8, padding: 14, borderRadius: 16, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border }}>
-        <AppText variant="bodyStrong">Tasa en {CURRENCY_LABEL[c].toLowerCase()}</AppText>
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          <Chip label={autoLabel} active={!custom} onPress={() => setCustom(false)} />
-          <Chip label="Mi tasa" active={custom} onPress={() => setCustom(true)} />
-        </View>
-        {custom ? (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <AppTextInput
-              value={text}
-              onChangeText={(t) => setText(t.replace(/[^0-9.,]/g, "").slice(0, 12))}
-              placeholder="950"
-              keyboardType="decimal-pad"
-              style={{ ...inputStyle(C), flex: 1 }}
-            />
-            <AppText variant="bodySm" color={C.onSurfaceVariant}>{unit}</AppText>
-          </View>
-        ) : (
-          <AppText variant="caption" color={C.outline}>
-            {autoValue ? `Hoy: ${autoValue.toLocaleString("es-VE", { maximumFractionDigits: 2 })} ${unit}. Se actualiza sola.` : "Cargando la tasa del día…"}
-          </AppText>
-        )}
-      </View>
-    );
-  };
-
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1, backgroundColor: C.background }}>
@@ -263,11 +288,15 @@ function CurrencySheet({
         <ScrollView contentContainerStyle={{ padding: 18, paddingTop: 4, gap: 18, paddingBottom: insets.bottom + 100 }} keyboardShouldPersistTaps="handled">
           <View style={{ gap: 8 }}>
             <AppText variant="overline" color={C.outline}>MIS PRECIOS ESTÁN EN</AppText>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-              {CURRENCY_ORDER.map((c) => (
-                <Chip key={c} label={CURRENCY_LABEL[c]} active={base === c} onPress={() => setBase(c)} />
-              ))}
-            </View>
+            <Segmented
+              value={base}
+              onChange={setBase}
+              options={[
+                { key: "usd", label: "Dólares" },
+                { key: "bs", label: "Bolívares" },
+                { key: "cop", label: "Pesos" },
+              ]}
+            />
             <AppText variant="caption" color={C.outline}>
               Es la moneda en la que escribes cada precio. Las demás se calculan a partir de ella.
             </AppText>
@@ -304,8 +333,8 @@ function CurrencySheet({
           {(base === "bs" || shown.has("bs") || base === "cop" || shown.has("cop")) && (
             <View style={{ gap: 8 }}>
               <AppText variant="overline" color={C.outline}>TASAS</AppText>
-              <RateBlock c="bs" custom={bsCustom} setCustom={setBsCustom} text={bsText} setText={setBsText} autoLabel="Tasa BCV" autoValue={rates.bs} unit="Bs por dólar" />
-              <RateBlock c="cop" custom={copCustom} setCustom={setCopCustom} text={copText} setText={setCopText} autoLabel="Tasa del día" autoValue={rates.cop} unit="COP por dólar" />
+              <RateBlock c="bs" base={base} shown={shown} custom={bsCustom} setCustom={setBsCustom} text={bsText} setText={setBsText} autoLabel="Tasa BCV" autoValue={rates.bs} unit="Bs por dólar" />
+              <RateBlock c="cop" base={base} shown={shown} custom={copCustom} setCustom={setCopCustom} text={copText} setText={setCopText} autoLabel="Tasa del día" autoValue={rates.cop} unit="COP por dólar" />
               <AppText variant="caption" color={C.outline}>
                 Si pones tu tasa, tus clientes ven “tasa del local”. Cuando cambie, entra aquí y actualiza solo ese número.
               </AppText>
@@ -357,6 +386,7 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
 
   const [draft, setDraft] = useState<Draft | null>(null);
   const [currencyOpen, setCurrencyOpen] = useState(false);
+  const [reorder, setReorder] = useState(false);
   const saving = add.isPending || update.isPending;
 
   const summary = [
@@ -460,19 +490,13 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
     ]);
   }
 
-  /** Sube o baja el plato dentro de su sección. */
-  function move(dir: -1 | 1) {
-    if (!draft?.id) return;
-    const sec = sections.find((s) => s.items.some((i) => i.id === draft.id));
-    if (!sec) return;
-    const idx = sec.items.findIndex((i) => i.id === draft.id);
-    const other = sec.items[idx + dir];
+  /** Sube o baja un plato dentro de su sección; la lista se reordena a la vista. */
+  function moveInSection(list: MenuItem[], idx: number, dir: -1 | 1) {
+    const other = list[idx + dir];
     if (!other) return;
-    swap.mutate({ a: sec.items[idx], b: other }, { onError: (e) => toast.error((e as Error).message) });
+    swap.mutate({ a: list[idx], b: other }, { onError: (e) => toast.error((e as Error).message) });
   }
 
-  const editingSection = draft?.id ? sections.find((s) => s.items.some((i) => i.id === draft.id)) : null;
-  const editingIdx = editingSection ? editingSection.items.findIndex((i) => i.id === draft!.id) : -1;
   const sectionChoices = Array.from(new Set([...sections.map((s) => s.name), ...DEFAULT_SECTIONS]));
 
   return (
@@ -490,6 +514,16 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
         </View>
         <Icon name="chevron-right" size={18} color={C.outline} />
       </Pressable>
+
+      {items.length > 1 && (
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 4, marginBottom: -6 }}>
+          <AppText variant="overline" color={C.outline}>{reorder ? "ORDENA CON LAS FLECHAS" : "TU MENÚ"}</AppText>
+          <Pressable onPress={() => setReorder((v) => !v)} hitSlop={10} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <Icon name={reorder ? "check" : "swap-vertical"} size={16} color={C.primary} />
+            <AppText variant="label" color={C.primary}>{reorder ? "Listo" : "Ordenar"}</AppText>
+          </Pressable>
+        </View>
+      )}
 
       {menuQ.isLoading ? (
         <ActivityIndicator color={C.primary} />
@@ -510,7 +544,7 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
                 return (
                   <Pressable
                     key={i.id}
-                    onPress={() => openEdit(i)}
+                    onPress={() => (reorder ? undefined : openEdit(i))}
                     android_ripple={{ color: C.outlineVariant }}
                     style={{
                       flexDirection: "row",
@@ -541,7 +575,18 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
                       )}
                     </View>
                     <AppText variant="bodyStrong" color={C.primary}>{formatMoney(i.price, settings.base, true)}</AppText>
-                    <Icon name="chevron-right" size={16} color={C.outline} />
+                    {reorder ? (
+                      <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <Pressable hitSlop={6} onPress={() => moveInSection(s.items, idx, -1)} disabled={idx === 0 || swap.isPending} style={{ padding: 6, opacity: idx === 0 ? 0.25 : 1 }}>
+                          <Icon name="chevron-up" size={24} color={C.onSurface} />
+                        </Pressable>
+                        <Pressable hitSlop={6} onPress={() => moveInSection(s.items, idx, 1)} disabled={idx === s.items.length - 1 || swap.isPending} style={{ padding: 6, opacity: idx === s.items.length - 1 ? 0.25 : 1 }}>
+                          <Icon name="chevron-down" size={24} color={C.onSurface} />
+                        </Pressable>
+                      </View>
+                    ) : (
+                      <Icon name="chevron-right" size={16} color={C.outline} />
+                    )}
                   </Pressable>
                 );
               })}
@@ -637,11 +682,23 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
 
               <View style={{ gap: 8 }}>
                 <AppText variant="overline" color={C.outline}>SECCIÓN</AppText>
-                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-                  {sectionChoices.map((n) => (
-                    <Chip key={n} label={n} active={draft.section === n} onPress={() => setDraft({ ...draft, section: n })} />
-                  ))}
-                  <Chip label="Otra…" active={draft.section === OTHER} onPress={() => setDraft({ ...draft, section: OTHER })} />
+                <View style={{ borderRadius: 16, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: "hidden" }}>
+                  {[...sectionChoices, OTHER].map((n, idx) => {
+                    const on = draft.section === n;
+                    return (
+                      <Pressable
+                        key={n}
+                        onPress={() => setDraft({ ...draft, section: n })}
+                        android_ripple={{ color: C.outlineVariant }}
+                        style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 13, borderTopWidth: idx === 0 ? 0 : 1, borderTopColor: C.outlineVariant }}
+                      >
+                        <View style={{ width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: on ? C.primary : C.outline, alignItems: "center", justifyContent: "center" }}>
+                          {on && <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: C.primary }} />}
+                        </View>
+                        <AppText variant={on ? "bodyStrong" : "body"} style={{ flex: 1 }}>{n === OTHER ? "Otra sección…" : n}</AppText>
+                      </Pressable>
+                    );
+                  })}
                 </View>
                 {draft.section === OTHER && (
                   <AppTextInput value={draft.customSection} onChangeText={(t) => setDraft({ ...draft, customSection: t.slice(0, 40) })} placeholder="Nombre de la sección" style={inputStyle(C)} />
@@ -681,31 +738,10 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
               </View>
 
               {draft.id && (
-                <View style={{ gap: 10 }}>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                    <AppText variant="bodyStrong" style={{ flex: 1 }}>Orden en {editingSection?.name ?? "la sección"}</AppText>
-                    <Pressable
-                      onPress={() => move(-1)}
-                      disabled={editingIdx <= 0 || swap.isPending}
-                      style={{ flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 99, borderWidth: 1, borderColor: C.border, backgroundColor: C.surface, opacity: editingIdx <= 0 ? 0.35 : 1 }}
-                    >
-                      <Icon name="chevron-up" size={16} color={C.onSurface} />
-                      <AppText variant="label">Subir</AppText>
-                    </Pressable>
-                    <Pressable
-                      onPress={() => move(1)}
-                      disabled={!editingSection || editingIdx >= editingSection.items.length - 1 || swap.isPending}
-                      style={{ flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 99, borderWidth: 1, borderColor: C.border, backgroundColor: C.surface, opacity: !editingSection || editingIdx >= editingSection.items.length - 1 ? 0.35 : 1 }}
-                    >
-                      <Icon name="chevron-down" size={16} color={C.onSurface} />
-                      <AppText variant="label">Bajar</AppText>
-                    </Pressable>
-                  </View>
-                  <Pressable onPress={confirmDelete} style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 12 }}>
-                    <Icon name="delete-outline" size={18} color={C.error} />
-                    <AppText variant="label" color={C.error}>Eliminar plato</AppText>
-                  </Pressable>
-                </View>
+                <Pressable onPress={confirmDelete} style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 12 }}>
+                  <Icon name="delete-outline" size={18} color={C.error} />
+                  <AppText variant="label" color={C.error}>Eliminar plato</AppText>
+                </Pressable>
               )}
             </ScrollView>
           )}
