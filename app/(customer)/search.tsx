@@ -466,7 +466,7 @@ export default function SearchScreen() {
   const tourFilterRef = useRef<View>(null);
   const tourChipsRef  = useRef<View>(null);
   const tourSteps: TourStep[] = [
-    { ref: tourSearchRef, icon: 'magnify', title: 'Busca por nombre o plato', text: 'Escribe y filtra en tiempo real entre todos los locales registrados.' },
+    { ref: tourSearchRef, icon: 'magnify', title: 'Busca por nombre o zona', text: 'Escribe un local, una categoría o un sector y filtra en tiempo real entre todos los locales.' },
     { ref: tourFilterRef, icon: 'tune-variant', title: 'Filtros a fondo', text: 'Precio, comodidades, si está abierto ahora o el más cercano a ti.' },
     { ref: tourChipsRef, icon: 'silverware-fork-knife', title: 'O navega por categoría', text: 'Toca un chip para saltar directo a esa comida.' },
   ];

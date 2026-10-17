@@ -17,7 +17,7 @@ export default function PrivacyScreen() {
 
       <LegalSection n={2} title="Qué datos recogemos">
         <LegalBullet>
-          Cuenta: nombre de usuario, nombre (opcional), correo, contraseña cifrada. Si entras con Google: tu nombre, correo y foto de perfil.
+          Cuenta: nombre de usuario, nombre (opcional), correo, contraseña cifrada. Si entras con Google: tu nombre, correo y foto de perfil. Si entras con Apple: tu nombre y tu correo (o el correo privado que Apple te asigne).
         </LegalBullet>
         <LegalBullet>
           Ubicación aproximada: solo si la activas, para ordenar lugares por cercanía y mostrar distancias. No guardamos un historial de ubicaciones.
@@ -29,7 +29,10 @@ export default function PrivacyScreen() {
           Datos de negocio (dueños): nombre del local, dirección o zona, teléfono, redes, RIF y una foto de verificación (fachada o cocina, según el tipo de local). El RIF y la foto de verificación no se muestran públicamente.
         </LegalBullet>
         <LegalBullet>
-          Interacciones con locales: cuando abres un local o tocas WhatsApp, llamar, cómo llegar, Instagram o el menú, se cuenta para mostrarle al dueño cuántas personas lo ven y le escriben. El dueño recibe solo totales, nunca quién fue.
+          Interacciones con locales: cuando abres un local o tocas WhatsApp, llamar, cómo llegar, Instagram, el menú o pedir, se cuenta para mostrarle al dueño cuántas personas lo ven y le escriben. El dueño recibe solo totales, nunca quién fue.
+        </LegalBullet>
+        <LegalBullet>
+          Mensajes a soporte: lo que nos escribes desde la app, junto con tu usuario, tu rol y la versión de la app, para poder ayudarte.
         </LegalBullet>
         <LegalBullet>
           Token de notificaciones push del dispositivo, para enviarte avisos.
@@ -55,6 +58,7 @@ export default function PrivacyScreen() {
         </LegalP>
         <LegalBullet>Supabase — base de datos, autenticación y almacenamiento.</LegalBullet>
         <LegalBullet>Google — inicio de sesión con Google y mapas.</LegalBullet>
+        <LegalBullet>Apple — inicio de sesión con Apple.</LegalBullet>
         <LegalBullet>Expo — servicio de notificaciones push y compilación.</LegalBullet>
         <LegalBullet>Resend — envío de correos (recuperación de contraseña).</LegalBullet>
         <LegalP>

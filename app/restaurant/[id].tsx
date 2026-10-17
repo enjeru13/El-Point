@@ -569,7 +569,7 @@ export default function RestaurantProfileScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await Promise.all([restaurantQ.refetch(), reviewsQ.refetch()]);
+      await Promise.all([restaurantQ.refetch(), reviewsQ.refetch(), menuQ.refetch(), galleryQ.refetch()]);
     } finally {
       setRefreshing(false);
     }
@@ -960,15 +960,15 @@ export default function RestaurantProfileScreen() {
                             : "Sin ranks aún"}
                         </AppText>
                       </View>
-                      {(restaurant.address || priceStr) && (
+                      {!!priceStr && (
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                           <Icon
-                            name="map-marker"
+                            name="tag-outline"
                             size={16}
                             color="rgba(255,255,255,0.7)"
                           />
                           <AppText variant="body" color="rgba(255,255,255,0.85)">
-                            {[priceStr].filter(Boolean).join(" • ") || "Ver ubicación"}
+                            {priceStr}
                           </AppText>
                         </View>
                       )}

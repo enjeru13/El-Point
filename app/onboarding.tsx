@@ -282,7 +282,7 @@ const SLIDES = [
     Hero: HeroFavorites,
     kicker: "No te lo pierdas",
     title: "Guarda tus sitios,\nagarra las promos",
-    body: "Marca tus locales favoritos y recibe un aviso al toque cuando publiquen una promo. El plan de hoy se decide solo.",
+    body: "Marca tus locales favoritos y te avisamos al toque cuando publiquen una promo o el plato del día. El plan de hoy se decide solo.",
   },
 ];
 
