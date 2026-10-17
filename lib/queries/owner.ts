@@ -213,6 +213,25 @@ export function useUpdateRestaurantAmenities(restaurantId: string | undefined) {
   });
 }
 
+/** Reemplaza las categorías del local (RPC atómico, entre 1 y 3). */
+export function useUpdateRestaurantCategories(restaurantId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (categoryIds: number[]) => {
+      if (!restaurantId) throw new Error("Sin restaurante");
+      const { error } = await supabase.rpc("set_restaurant_categories", {
+        p_restaurant_id: restaurantId,
+        p_category_ids: categoryIds,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ownerRestaurantKey });
+      qc.invalidateQueries({ queryKey: ["restaurants"] });
+    },
+  });
+}
+
 /** Reemplaza el conjunto completo de métodos de pago (RPC atómico). */
 export function useUpdateRestaurantPaymentMethods(restaurantId: string | undefined) {
   const qc = useQueryClient();

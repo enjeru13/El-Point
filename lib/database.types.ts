@@ -1622,6 +1622,10 @@ export type Database = {
         Args: { p_amenity_ids: number[]; p_restaurant_id: string }
         Returns: undefined
       }
+      set_restaurant_categories: {
+        Args: { p_category_ids: number[]; p_restaurant_id: string }
+        Returns: undefined
+      }
       set_restaurant_payment_methods: {
         Args: { p_method_ids: number[]; p_restaurant_id: string }
         Returns: undefined
