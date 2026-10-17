@@ -9,7 +9,7 @@ import { useMyRestaurant } from "@/lib/queries/owner";
 import { capWidth, useIsTablet } from "@/lib/responsive";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
-import { Pressable, RefreshControl, ScrollView, View } from "react-native";
+import { Linking, Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useState } from "react";
 
@@ -113,6 +113,13 @@ export default function MyLocalScreen() {
       locked: !plan,
     },
     {
+      key: "qr",
+      icon: "qrcode",
+      title: "Cartel QR “Rankéanos”",
+      summary: plan ? "Imprímelo para tu caja o tus mesas y recibe más reseñas" : "Un cartel para que tus clientes te rankeen",
+      locked: !plan,
+    },
+    {
       key: "photos",
       icon: "camera-plus-outline",
       title: "Fotos y menú en PDF",
@@ -166,7 +173,11 @@ export default function MyLocalScreen() {
         {rows.map((row) => (
           <Pressable
             key={row.key}
-            onPress={() => router.push(`/local/${row.key}` as any)}
+            onPress={() => {
+              if (row.key !== "qr") return router.push(`/local/${row.key}` as any);
+              if (!plan) return router.push("/subscription" as any);
+              Linking.openURL(`https://elpoint-app.netlify.app/qr/?id=${r.id}&n=${encodeURIComponent(r.name)}`);
+            }}
             style={{
               flexDirection: "row",
               alignItems: "center",

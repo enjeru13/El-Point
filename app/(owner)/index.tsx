@@ -1,15 +1,14 @@
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Linking, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { Skeleton, SkeletonList } from '@/components/ui/Skeleton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews, type Review } from '@/lib/queries/reviews';
-import { isBoosted, isFounder } from '@/lib/queries/restaurants';
-import { hasPlan } from '@/lib/plan';
+import { isFounder } from '@/lib/queries/restaurants';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { Avatar } from '@/components/ui/Avatar';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -17,7 +16,7 @@ import { FounderWelcomeModal } from '@/components/ui/FounderWelcomeModal';
 import { hasSeenFounderWelcome, markFounderWelcomeSeen } from '@/lib/founderWelcome';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 import { capWidth, useIsTablet } from '@/lib/responsive';
-import { PAYMENTS_IN_APP } from '@/lib/billing';
+import { ProfileChecklist, StatusCard, WeekStats } from '@/components/owner/ResumenCards';
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -34,24 +33,6 @@ function timeAgo(iso: string): string {
 
 function authorLabel(a: Review['author']): string {
   return a?.username ? `@${a.username}` : a?.full_name ?? 'Anónimo';
-}
-
-function StatCard({ icon, label, value, color }: { icon: string; label: string; value: string; color: string }) {
-  const { C, shadow } = useTheme();
-  return (
-    <View style={{
-      flex: 1, padding: 16, borderRadius: 20,
-      backgroundColor: C.surface,
-      borderWidth: 1, borderColor: C.border,
-      gap: 6, ...shadow.sm,
-    }}>
-      <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: color + '22', alignItems: 'center', justifyContent: 'center' }}>
-        <Icon name={icon} size={18} color={color} />
-      </View>
-      <AppText variant="title" style={{ fontSize: 22, lineHeight: 27 }}>{value}</AppText>
-      <AppText variant="caption" color={C.onSurfaceVariant} style={{ fontSize: 12 }}>{label}</AppText>
-    </View>
-  );
 }
 
 function ReviewRow({ review, onPress }: { review: Review; onPress: () => void }) {
@@ -99,11 +80,6 @@ export default function OwnerHomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showFounderWelcome, setShowFounderWelcome] = useState(false);
 
-  // Perfil básico: el local sigue visible en el mapa, pero sin contacto, menú,
-  // fotos ni respuestas. Pasa cuando la prueba o el plan vencen. Los
-  // Originales nunca caen aquí.
-  const subscriptionExpired = !!restaurant && restaurant.status === 'approved' && !hasPlan(restaurant);
-
   useEffect(() => {
     if (!restaurant || !isFounder(restaurant)) return;
     let alive = true;
@@ -126,8 +102,8 @@ export default function OwnerHomeScreen() {
   const scrollRef      = useRef<ScrollView>(null);
   const scrollY        = useRef(0);
   const tourSteps: TourStep[] = [
-    { ref: tourStatusRef, icon: 'store-outline', title: 'Estado de tu local', text: 'Aquí ves si está en revisión, visible o pausado, y tu racha de Destacado.' },
-    { ref: tourStatsRef, icon: 'chart-box-outline', title: 'Tu resumen', text: 'Calificación, reseñas de hoy y el total acumulado, de un vistazo.' },
+    { ref: tourStatusRef, icon: 'store-outline', title: 'Estado de tu local', text: 'Si te encuentran, hasta cuándo tienes el perfil completo y cuántos días de Destacado te quedan.' },
+    { ref: tourStatsRef, icon: 'chart-box-outline', title: 'Tu resumen', text: 'Visitas, contactos y pedidos de los últimos 7 días.' },
     { ref: tourReviewsRef, icon: 'comment-text-outline', title: 'Reseñas recientes', text: 'Tócalas para responder. Responder todas suma días de Destacado gratis.' },
     { ref: tourBellRef, icon: 'bell-outline', title: 'Notificaciones', text: 'Aquí llegan las nuevas reseñas y avisos de tu local.' },
   ];
@@ -140,9 +116,6 @@ export default function OwnerHomeScreen() {
       setRefreshing(false);
     }
   }
-
-  const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
-  const reviewsToday = reviews.filter(r => new Date(r.created_at) >= startOfToday).length;
 
   if (restaurantQ.isLoading) {
     return (
@@ -283,150 +256,9 @@ export default function OwnerHomeScreen() {
           );
         })()}
 
-        {/* Banner estado (solo si el local ya está aprobado) */}
-        {restaurant.status === 'approved' && (
-        <View style={{
-          borderRadius: 22,
-          backgroundColor: subscriptionExpired ? C.error + '1a' : restaurant.is_active ? C.primaryFixed : C.surfaceContainerHighest,
-          borderWidth: 1, borderColor: subscriptionExpired ? C.error + '55' : C.border,
-          overflow: 'hidden',
-          ...shadow.sm,
-        }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16 }}>
-            <View style={{
-              width: 48, height: 48, borderRadius: 14,
-              backgroundColor: subscriptionExpired ? C.error : restaurant.is_active ? C.primary : C.outline,
-              alignItems: 'center', justifyContent: 'center',
-              borderWidth: 1, borderColor: C.border,
-            }}>
-              <Icon name={subscriptionExpired ? 'calendar-remove-outline' : restaurant.is_active ? 'store-outline' : 'eye-off-outline'} size={24} color="#fff" />
-            </View>
-
-            <View style={{ flex: 1, gap: 2 }}>
-              <AppText variant="bodyStrong">
-                {subscriptionExpired ? 'Perfil básico' : restaurant.is_active ? 'Local visible' : 'Local oculto'}
-              </AppText>
-              <AppText variant="bodySm" color={C.onSurfaceVariant}>
-                {subscriptionExpired
-                  ? 'Tu local sigue en el mapa, pero sin contacto, menú, fotos ni respuestas a reseñas. Activa un plan para mostrarlos.'
-                  : restaurant.is_active
-                    ? 'Visible en mapa y búsquedas'
-                    : 'No aparece para los comensales'}
-              </AppText>
-            </View>
-
-            <View style={{
-              paddingHorizontal: 9, paddingVertical: 3, borderRadius: 99,
-              backgroundColor: subscriptionExpired ? C.error : restaurant.is_active ? C.secondaryContainer : C.surface,
-              borderWidth: 1, borderColor: C.border,
-            }}>
-              <AppText variant="caption" color={subscriptionExpired ? '#fff' : restaurant.is_active ? C.onSurface : C.outline}>
-                {subscriptionExpired ? 'BÁSICO' : restaurant.is_active ? 'ACTIVO' : 'PAUSADO'}
-              </AppText>
-            </View>
-          </View>
-
-          {subscriptionExpired && (
-            <Pressable
-              onPress={() => router.push('/subscription' as any)}
-              android_ripple={{ color: C.outlineVariant }}
-              style={{
-                flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-                gap: 6, paddingVertical: 12, borderTopWidth: 2, borderTopColor: C.border,
-              }}
-            >
-              <Icon name={PAYMENTS_IN_APP ? "credit-card-outline" : "calendar-remove-outline"} size={16} color={C.error} />
-              <AppText variant="label" color={C.error}>{PAYMENTS_IN_APP ? "Actualizar mi suscripción" : "Ver mi plan"}</AppText>
-            </Pressable>
-          )}
-          {isBoosted(restaurant) && (
-            <View style={{
-              flexDirection: 'row', alignItems: 'center', gap: 8,
-              paddingHorizontal: 16, paddingVertical: 10,
-              borderTopWidth: 1, borderTopColor: C.border,
-              backgroundColor: C.primary + '14',
-            }}>
-              <Icon name="fire" size={15} color={C.primary} />
-              <AppText variant="caption" color={C.primary} style={{ flex: 1 }}>
-                Local destacado hasta el {new Date(restaurant.boost_until!).toLocaleDateString('es-VE', { day: 'numeric', month: 'long' })}
-              </AppText>
-            </View>
-          )}
-          {restaurant.host_streak_weeks > 0 && (
-            <View style={{
-              flexDirection: 'row', alignItems: 'center', gap: 8,
-              paddingHorizontal: 16, paddingVertical: 10,
-              borderTopWidth: 1, borderTopColor: C.border,
-            }}>
-              <Icon name="reply" size={15} color={C.secondary} />
-              <AppText variant="caption" color={C.onSurfaceVariant} style={{ flex: 1 }}>
-                Racha de buen anfitrión: {restaurant.host_streak_weeks} {restaurant.host_streak_weeks === 1 ? 'semana' : 'semanas'}. Responde todas las reseñas para sumar días de Destacado.
-              </AppText>
-            </View>
-          )}
-          <Pressable
-            onPress={() => router.push('/boost-info')}
-            android_ripple={{ color: C.outlineVariant }}
-            style={{
-              flexDirection: 'row', alignItems: 'center', gap: 8,
-              paddingHorizontal: 16, paddingVertical: 10,
-              borderTopWidth: 1, borderTopColor: C.border,
-            }}
-          >
-            <Icon name="information-outline" size={15} color={C.primary} />
-            <AppText variant="caption" color={C.primary} style={{ flex: 1 }}>
-              ¿Cómo consigo más días de Destacado?
-            </AppText>
-            <Icon name="chevron-right" size={14} color={C.primary} />
-          </Pressable>
-          <Pressable
-            onPress={() => router.push('/(owner)/profile')}
-            android_ripple={{ color: C.outlineVariant }}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-              paddingVertical: 12,
-              borderTopWidth: 2,
-              borderTopColor: C.border,
-            }}
-          >
-            <Icon name="cog-outline" size={16} color={C.onSurface} />
-            <AppText variant="label">
-              {restaurant.is_active ? 'Pausar o editar en Perfil' : 'Activar en Perfil'}
-            </AppText>
-          </Pressable>
+        {/* Estado: visibilidad, plan y Destacado */}
+        {restaurant.status === 'approved' && <StatusCard restaurant={restaurant} />}
         </View>
-        )}
-        </View>
-
-        {/* Cartel QR "Rankéanos" (con plan) */}
-        {restaurant.status === 'approved' && (
-          <Pressable
-            onPress={() => {
-              if (!hasPlan(restaurant)) { router.push('/subscription' as any); return; }
-              Linking.openURL(`https://elpoint-app.netlify.app/qr/?id=${restaurant.id}&n=${encodeURIComponent(restaurant.name)}`);
-            }}
-            style={{
-              flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16,
-              borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, ...shadow.sm,
-            }}
-          >
-            <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name={hasPlan(restaurant) ? 'qrcode' : 'lock-outline'} size={22} color={C.primary} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <AppText variant="bodyStrong">Cartel QR “Rankéanos”</AppText>
-              <AppText variant="bodySm" color={C.onSurfaceVariant}>
-                {hasPlan(restaurant)
-                  ? 'Imprímelo para tu caja o tus mesas y recibe más reseñas'
-                  : 'Con el plan: un cartel con QR para que tus clientes te rankeen'}
-              </AppText>
-            </View>
-            <Icon name={hasPlan(restaurant) ? 'open-in-new' : 'chevron-right'} size={18} color={C.outline} />
-          </Pressable>
-        )}
 
         {/* Promo activa */}
         {restaurant.promo_text && (
@@ -446,15 +278,15 @@ export default function OwnerHomeScreen() {
           </View>
         )}
 
-        {/* Stats */}
-        <View ref={tourStatsRef} collapsable={false} style={{ gap: 8 }}>
-          <AppText variant="heading" style={{ fontSize: 17 }}>Resumen</AppText>
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <StatCard icon="star"         label="Calificación"   value={restaurant.rating_count > 0 ? restaurant.rating_avg.toFixed(1) : '–'} color={C.primary} />
-            <StatCard icon="comment-text" label="Reseñas hoy"    value={String(reviewsToday)} color={C.secondary} />
-            <StatCard icon="trophy-outline" label="Total reseñas" value={String(restaurant.rating_count)} color={C.tertiary} />
+        {/* Esta semana */}
+        {restaurant.status === 'approved' && (
+          <View ref={tourStatsRef} collapsable={false}>
+            <WeekStats restaurant={restaurant} />
           </View>
-        </View>
+        )}
+
+        {/* Completa tu perfil */}
+        {restaurant.status === 'approved' && <ProfileChecklist restaurant={restaurant} />}
 
         {/* Reseñas recientes */}
         <View ref={tourReviewsRef} collapsable={false} style={{ gap: 12 }}>
