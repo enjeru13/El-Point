@@ -18,6 +18,7 @@ export type OwnerRestaurant = {
   menu_pdf_url: string | null;
   promo_text: string | null;
   promo_ends_at: string | null;
+  closed_today_date: string | null;
   hours: Hours | null;
   is_active: boolean;
   status: "pending" | "approved" | "rejected" | "suspended";
@@ -60,7 +61,7 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
     .from("restaurants")
     .select(
       `id, name, description, address, price_level,
-       logo_url, cover_url, promo_text, promo_ends_at, hours, is_active,
+       logo_url, cover_url, promo_text, promo_ends_at, closed_today_date, hours, is_active,
        status, status_reason, submitted_at,
        rating_avg, rating_count, boost_until, founder_rank, paid_until, plan_period_start, plan_kind, host_streak_weeks, created_at,
        ghost_kitchen, zone_label, accepts_orders, order_greeting, menu_currencies, menu_base_currency, menu_bs_rate, menu_cop_rate, latitude, longitude,
@@ -137,6 +138,7 @@ export type OwnerRestaurantPatch = Partial<{
   price_level: number | null;
   promo_text: string | null;
   promo_ends_at: string | null;
+  closed_today_date: string | null;
   is_active: boolean;
   logo_url: string | null;
   cover_url: string | null;

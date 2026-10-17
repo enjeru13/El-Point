@@ -1,4 +1,4 @@
-import { parseHours, type Hours } from "@/lib/hours";
+import { parseHours, withClosedToday, type Hours } from "@/lib/hours";
 import { hasPlan } from "@/lib/plan";
 import type { PaymentMethod } from "@/lib/queries/paymentMethods";
 import type { RestaurantAmenity, RestaurantCategory } from "@/lib/queries/restaurants";
@@ -30,7 +30,7 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
   const { data, error } = await supabase
     .from("restaurants")
     .select(
-      `id, name, address, price_level, rating_avg, rating_count, cover_url, hours,
+      `id, name, address, price_level, rating_avg, rating_count, cover_url, hours, closed_today_date,
        latitude, longitude, boost_until, founder_rank, paid_until, ghost_kitchen, zone_label,
        restaurant_categories ( categories ( slug, label, icon ) ),
        restaurant_amenities ( amenities ( id, slug, label, icon ) ),
@@ -53,7 +53,7 @@ async function fetchActiveRestaurants(): Promise<SearchResult[]> {
     rating_avg: r.rating_avg,
     rating_count: r.rating_count,
     cover_url: plan ? (r.cover_url ?? null) : null,
-    hours: plan ? parseHours(r.hours) : null,
+    hours: plan ? withClosedToday(parseHours(r.hours), r.closed_today_date) : null,
     lat: typeof r.latitude === "number" ? r.latitude : null,
     lng: typeof r.longitude === "number" ? r.longitude : null,
     boost_until: plan ? (r.boost_until ?? null) : null,

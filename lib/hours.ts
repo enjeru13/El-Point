@@ -2,7 +2,8 @@
 // One interval per day. `close` < `open` means it runs past midnight.
 
 export type DayHours = { closed: boolean; open: string; close: string };
-export type Hours = { days: DayHours[] };
+/** `closedToday`: cierre puntual de hoy; se calcula al leer, no se guarda dentro del horario. */
+export type Hours = { days: DayHours[]; closedToday?: boolean };
 
 export const DAY_LABELS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 export const DAY_LABELS_LONG = [
@@ -37,7 +38,48 @@ export function parseHours(raw: unknown): Hours | null {
       open: typeof d?.open === "string" ? d.open : "12:00",
       close: typeof d?.close === "string" ? d.close : "22:00",
     })),
+    closedToday: !!(raw as any).closedToday,
   };
+}
+
+/** Fecha de hoy en Caracas (YYYY-MM-DD). */
+export function caracasToday(): string {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "America/Caracas" });
+}
+
+/** Si el local marcó "hoy no abrimos" para hoy, el día de hoy queda cerrado. */
+export function withClosedToday(hours: Hours | null, date: string | null | undefined): Hours | null {
+  if (!hours || !date || date !== caracasToday()) return hours;
+  const dow = new Date().getDay();
+  return { days: hours.days.map((d, i) => (i === dow ? { ...d, closed: true } : d)), closedToday: true };
+}
+
+/** Abierto las 24 horas: de 00:00 a 23:59. */
+export function is24h(d: DayHours): boolean {
+  return !d.closed && d.open === "00:00" && (d.close === "23:59" || d.close === "24:00");
+}
+
+export const OPEN_24H = { open: "00:00", close: "23:59" } as const;
+
+const GROUP_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+/**
+ * La semana agrupada: los días seguidos con el mismo horario van juntos.
+ * Ej.: "Lun–Vie · 12:00 p. m. – 10:00 p. m.", "Dom · Cerrado".
+ */
+export function groupDays(hours: Hours): { label: string; range: string; days: number[] }[] {
+  const same = (a: DayHours, b: DayHours) => a.closed === b.closed && (a.closed || (a.open === b.open && a.close === b.close));
+  const groups: { days: number[] }[] = [];
+  for (const dow of GROUP_ORDER) {
+    const last = groups[groups.length - 1];
+    if (last && same(hours.days[last.days[0]], hours.days[dow])) last.days.push(dow);
+    else groups.push({ days: [dow] });
+  }
+  return groups.map((g) => ({
+    days: g.days,
+    label: g.days.length === 1 ? DAY_LABELS[g.days[0]] : `${DAY_LABELS[g.days[0]]}–${DAY_LABELS[g.days[g.days.length - 1]]}`,
+    range: formatRange(hours.days[g.days[0]]),
+  }));
 }
 
 const toMin = (hhmm: string) => {
@@ -93,17 +135,20 @@ export function isOpenNow(raw: unknown, now = new Date()): OpenState {
   }
 
   // Find the next day that opens.
+  const closedWord = hours.closedToday ? "Cerrado hoy" : "Cerrado";
   for (let i = 1; i <= 7; i++) {
     const d = hours.days[(dow + i) % 7];
     if (!d.closed) {
       const when =
         i === 1 ? "mañana" : DAY_LABELS_LONG[(dow + i) % 7].toLowerCase();
-      return { open: false, label: `Cerrado · abre ${when} ${to12h(d.open)}` };
+      return { open: false, label: `${closedWord} · abre ${when} ${to12h(d.open)}` };
     }
   }
-  return { open: false, label: "Cerrado" };
+  return { open: false, label: closedWord };
 }
 
 export function formatRange(d: DayHours): string {
-  return d.closed ? "Cerrado" : `${to12h(d.open)} – ${to12h(d.close)}`;
+  if (d.closed) return "Cerrado";
+  if (is24h(d)) return "Abierto las 24 horas";
+  return `${to12h(d.open)} – ${to12h(d.close)}`;
 }

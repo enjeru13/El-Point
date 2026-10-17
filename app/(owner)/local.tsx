@@ -2,7 +2,7 @@ import { AppText } from "@/components/ui/AppText";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Icon } from "@/components/ui/Icon";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { DEFAULT_HOURS, formatRange } from "@/lib/hours";
+import { DEFAULT_HOURS, caracasToday, formatRange } from "@/lib/hours";
 import { hasPlan } from "@/lib/plan";
 import { activePromo, promoEndLabel } from "@/lib/promo";
 import { isSpecialActive, useMenu } from "@/lib/queries/menu";
@@ -91,7 +91,7 @@ export default function MyLocalScreen() {
       group: "info",
       icon: "clock-outline",
       title: "Horario",
-      summary: !plan ? "Tus horas y “abierto ahora”" : r.hours ? `Hoy: ${formatRange(today)}` : "Sin configurar",
+      summary: !plan ? "Tus horas y “abierto ahora”" : r.closed_today_date === caracasToday() ? "Hoy cerrado · se reactiva mañana" : r.hours ? `Hoy: ${formatRange(today)}` : "Sin configurar",
       locked: !plan,
     },
     {

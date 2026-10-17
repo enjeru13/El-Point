@@ -598,6 +598,7 @@ export type Database = {
           plan_period_start: string | null
           phone: string | null
           price_level: number | null
+          closed_today_date: string | null
           promo_ends_at: string | null
           promo_text: string | null
           rating_avg: number
@@ -644,6 +645,7 @@ export type Database = {
           plan_period_start?: string | null
           phone?: string | null
           price_level?: number | null
+          closed_today_date?: string | null
           promo_ends_at?: string | null
           promo_text?: string | null
           rating_avg?: number
@@ -690,6 +692,7 @@ export type Database = {
           plan_period_start?: string | null
           phone?: string | null
           price_level?: number | null
+          closed_today_date?: string | null
           promo_ends_at?: string | null
           promo_text?: string | null
           rating_avg?: number

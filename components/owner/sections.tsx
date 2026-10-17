@@ -4,7 +4,7 @@ import { AppTextInput } from "@/components/ui/AppTextInput";
 import { Chip } from "@/components/ui/Chip";
 import { Icon } from "@/components/ui/Icon";
 import { TimePickerSheet, type TimePickerHandle } from "@/components/ui/TimePickerSheet";
-import { DAY_LABELS, DAY_LABELS_LONG, DEFAULT_HOURS, formatRange, to12h, type Hours } from "@/lib/hours";
+import { DAY_LABELS, DAY_LABELS_LONG, DEFAULT_HOURS, OPEN_24H, caracasToday, groupDays, is24h, to12h, type Hours } from "@/lib/hours";
 import { activePromo, PROMO_DURATIONS, promoEndLabel, promoEndsAt, type PromoDuration } from "@/lib/promo";
 import { useAmenities } from "@/lib/queries/amenities";
 import {
@@ -31,6 +31,7 @@ export function HoursSection({ restaurant }: { restaurant: OwnerRestaurant }) {
   const [editing, setEditing] = useState(false);
   const [hours, setHours] = useState<Hours>(restaurant.hours ?? DEFAULT_HOURS);
   const timePickerRef = useRef<TimePickerHandle>(null);
+  const closedToday = restaurant.closed_today_date === caracasToday();
 
   useEffect(() => {
     if (!editing) setHours(restaurant.hours ?? DEFAULT_HOURS);
@@ -38,6 +39,14 @@ export function HoursSection({ restaurant }: { restaurant: OwnerRestaurant }) {
 
   function setDay(dow: number, patch: Partial<Hours["days"][number]>) {
     setHours((h) => ({ days: h.days.map((d, i) => (i === dow ? { ...d, ...patch } : d)) }));
+  }
+
+  /** Copia el horario del lunes a otros días, para no tocar 14 horas una por una. */
+  function copyMonday(target: number[]) {
+    setHours((h) => {
+      const mon = h.days[1];
+      return { days: h.days.map((d, i) => (target.includes(i) ? { ...mon } : d)) };
+    });
   }
 
   function openTimePicker(dow: number, which: "open" | "close") {
@@ -64,19 +73,80 @@ export function HoursSection({ restaurant }: { restaurant: OwnerRestaurant }) {
     );
   }
 
+  function toggleClosedToday(v: boolean) {
+    updateMut.mutate(
+      { closed_today_date: v ? caracasToday() : null },
+      {
+        onSuccess: () => toast.success(v ? "Hoy aparece como cerrado" : "Hoy vuelve a aparecer abierto"),
+        onError: (e: any) => toast.error(e?.message ?? "No se pudo guardar"),
+      },
+    );
+  }
+
+  const groups = groupDays(hours);
+
   return (
     <>
-      <SectionCard title="Horario">
-        <View style={{ padding: 14, gap: 8 }}>
-          {[1, 2, 3, 4, 5, 6, 0].map((dow) => {
-            const d = hours.days[dow];
-            return (
-              <View key={dow} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <AppText variant="label" style={{ width: 40, fontFamily: "PlusJakartaSans_700Bold" }}>
-                  {DAY_LABELS[dow]}
-                </AppText>
-                {editing ? (
-                  <>
+      {/* Hoy no abrimos */}
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 20, backgroundColor: closedToday ? C.error + "14" : C.surface, borderWidth: 1, borderColor: closedToday ? C.error + "55" : C.border }}>
+        <Icon name={closedToday ? "store-off-outline" : "store-clock-outline"} size={22} color={closedToday ? C.error : C.primary} />
+        <View style={{ flex: 1, gap: 1 }}>
+          <AppText variant="bodyStrong">Hoy no abrimos</AppText>
+          <AppText variant="bodySm" color={C.onSurfaceVariant}>
+            {closedToday ? "Hoy aparece como cerrado. Mañana vuelve a su horario solo." : "Para un imprevisto o un feriado. Se desactiva solo a medianoche."}
+          </AppText>
+        </View>
+        <Switch
+          value={closedToday}
+          onValueChange={toggleClosedToday}
+          disabled={updateMut.isPending}
+          trackColor={{ false: C.surfaceContainerHighest, true: C.error + "88" }}
+          thumbColor={closedToday ? C.error : C.outline}
+        />
+      </View>
+
+      {/* Semana */}
+      {!editing ? (
+        <SectionCard title="Horario semanal">
+          <View style={{ paddingHorizontal: 18, paddingVertical: 8 }}>
+            {groups.map((g, idx) => (
+              <View key={g.label} style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 11, borderTopWidth: idx === 0 ? 0 : 1, borderTopColor: C.outlineVariant }}>
+                <AppText variant="bodyStrong" style={{ width: 72 }}>{g.label}</AppText>
+                <AppText variant="body" color={g.range === "Cerrado" ? C.outline : C.onSurface} style={{ flex: 1, textAlign: "right" }}>{g.range}</AppText>
+              </View>
+            ))}
+          </View>
+        </SectionCard>
+      ) : (
+        <>
+          <View style={{ gap: 8 }}>
+            <AppText variant="overline" color={C.outline} style={{ paddingHorizontal: 4 }}>COPIAR EL HORARIO DEL LUNES</AppText>
+            <View style={{ borderRadius: 16, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: "hidden" }}>
+              {[
+                { label: "A lunes–viernes", days: [2, 3, 4, 5] },
+                { label: "A toda la semana", days: [0, 2, 3, 4, 5, 6] },
+              ].map((a, idx) => (
+                <Pressable
+                  key={a.label}
+                  onPress={() => copyMonday(a.days)}
+                  android_ripple={{ color: C.outlineVariant }}
+                  style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 13, borderTopWidth: idx === 0 ? 0 : 1, borderTopColor: C.outlineVariant }}
+                >
+                  <Icon name="content-copy" size={18} color={C.primary} />
+                  <AppText variant="body" style={{ flex: 1 }}>{a.label}</AppText>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          <SectionCard title="Horario semanal">
+            <View style={{ padding: 14, gap: 10 }}>
+              {[1, 2, 3, 4, 5, 6, 0].map((dow) => {
+                const d = hours.days[dow];
+                const all = is24h(d);
+                return (
+                  <View key={dow} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                    <AppText variant="label" style={{ width: 38, fontFamily: "PlusJakartaSans_700Bold" }}>{DAY_LABELS[dow]}</AppText>
                     <Switch
                       value={!d.closed}
                       onValueChange={(v) => setDay(dow, { closed: !v })}
@@ -85,6 +155,8 @@ export function HoursSection({ restaurant }: { restaurant: OwnerRestaurant }) {
                     />
                     {d.closed ? (
                       <AppText variant="bodySm" color={C.outline} style={{ flex: 1 }}>Cerrado</AppText>
+                    ) : all ? (
+                      <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ flex: 1 }}>Las 24 horas</AppText>
                     ) : (
                       <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 6 }}>
                         <Pressable
@@ -102,17 +174,29 @@ export function HoursSection({ restaurant }: { restaurant: OwnerRestaurant }) {
                         </Pressable>
                       </View>
                     )}
-                  </>
-                ) : (
-                  <AppText variant="label" color={d.closed ? C.outline : C.onSurfaceVariant} style={{ flex: 1 }}>
-                    {formatRange(d)}
-                  </AppText>
-                )}
-              </View>
-            );
-          })}
-        </View>
-      </SectionCard>
+                    {!d.closed && (
+                      <Pressable
+                        onPress={() => setDay(dow, all ? { open: "12:00", close: "22:00" } : { ...OPEN_24H })}
+                        style={{
+                          paddingHorizontal: 10,
+                          paddingVertical: 7,
+                          borderRadius: 99,
+                          borderWidth: 1,
+                          borderColor: all ? C.primary : C.outlineVariant,
+                          backgroundColor: all ? C.primary : C.surface,
+                        }}
+                      >
+                        <AppText variant="caption" color={all ? "#fff" : C.onSurfaceVariant} style={{ fontSize: 12 }}>24 h</AppText>
+                      </Pressable>
+                    )}
+                  </View>
+                );
+              })}
+            </View>
+          </SectionCard>
+        </>
+      )}
+
       <EditBar editing={editing} saving={updateMut.isPending} onEdit={() => setEditing(true)} onCancel={() => setEditing(false)} onSave={save} />
       <TimePickerSheet ref={timePickerRef} />
     </>

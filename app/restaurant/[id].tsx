@@ -41,7 +41,7 @@ import { MenuSection } from "@/components/restaurant/MenuSection";
 import { useFavoriteIds, useToggleFavorite } from "@/lib/queries/feed";
 import { useToast } from "@/lib/toast";
 import { impact } from "@/lib/haptics";
-import { isOpenNow, formatRange, DAY_LABELS_LONG } from "@/lib/hours";
+import { isOpenNow, groupDays } from "@/lib/hours";
 import { useTheme } from "@/lib/ThemeContext";
 import { capWidth, CONTENT_MAX_W, useResponsive } from "@/lib/responsive";
 import { trackRestaurantEvent, type RestaurantEventType } from "@/lib/queries/analytics";
@@ -1085,16 +1085,15 @@ export default function RestaurantProfileScreen() {
                   </Pressable>
                   {hoursOpen && restaurant.hours && (
                     <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 4 }}>
-                      {[1, 2, 3, 4, 5, 6, 0].map((dow) => {
-                        const d = restaurant.hours!.days[dow];
-                        const today = new Date().getDay() === dow;
+                      {groupDays(restaurant.hours).map((g) => {
+                        const today = g.days.includes(new Date().getDay());
                         return (
-                          <View key={dow} style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                          <View key={g.label} style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
                             <AppText variant={today ? "label" : "bodySm"} color={today ? C.primary : C.onSurfaceVariant} style={today ? { fontFamily: "PlusJakartaSans_700Bold" } : undefined}>
-                              {DAY_LABELS_LONG[dow]}
+                              {g.label}
                             </AppText>
-                            <AppText variant="bodySm" color={today ? C.primary : C.onSurfaceVariant} style={today ? { fontFamily: "PlusJakartaSans_700Bold" } : undefined}>
-                              {formatRange(d)}
+                            <AppText variant="bodySm" color={today ? C.primary : C.onSurfaceVariant} style={[{ flexShrink: 1, textAlign: "right" }, today ? { fontFamily: "PlusJakartaSans_700Bold" } : null]}>
+                              {g.range}
                             </AppText>
                           </View>
                         );
