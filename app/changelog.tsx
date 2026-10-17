@@ -82,16 +82,29 @@ export default function ChangelogScreen() {
                 {r.date}
               </AppText>
             </View>
-            <View style={{ gap: 8 }}>
-              {r.notes.map((n, j) => (
-                <View key={j} style={{ flexDirection: "row", gap: 8 }}>
-                  <Icon name="check" size={15} color={C.primary} style={{ marginTop: 2 }} />
-                  <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ flex: 1, lineHeight: 20 }}>
-                    {n}
+            {r.headline ? (
+              <AppText variant="bodyStrong" style={{ lineHeight: 22 }}>
+                {r.headline}
+              </AppText>
+            ) : null}
+            {r.sections.map((sec) => (
+              <View key={sec.title} style={{ gap: 8 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 }}>
+                  <Icon name={sec.icon} size={16} color={C.primary} />
+                  <AppText variant="overline" color={C.outline}>
+                    {sec.title.toUpperCase()}
                   </AppText>
                 </View>
-              ))}
-            </View>
+                {sec.notes.map((n, j) => (
+                  <View key={j} style={{ flexDirection: "row", gap: 8 }}>
+                    <Icon name="check" size={15} color={C.primary} style={{ marginTop: 2 }} />
+                    <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ flex: 1, lineHeight: 20 }}>
+                      {n}
+                    </AppText>
+                  </View>
+                ))}
+              </View>
+            ))}
           </View>
         ))}
       </ScrollView>
