@@ -817,13 +817,10 @@ export default function OwnerProfileScreen() {
                   <Icon name={restaurant.categories[0]?.icon ?? 'store-outline'} size={30} color="#fff" />
                 )}
               </View>
-              {founder && (
-                <View style={{ position: 'absolute', top: -4, right: -4 }}>
-                  <FounderBadge rank={restaurant.founder_rank!} size="md" />
-                </View>
-              )}
             </View>
 
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View style={{ flex: 1 }}>
             <AppText variant="title" style={{ fontSize: 22, lineHeight: 27 }}>{restaurant.name}</AppText>
 
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
@@ -836,12 +833,9 @@ export default function OwnerProfileScreen() {
                 {restaurant.rating_count > 0 ? `${restaurant.rating_avg.toFixed(1)} · ${restaurant.rating_count} reseñas` : 'Sin reseñas aún'}
               </AppText>
             </View>
-
-            {founder && (
-              <View style={{ marginTop: 8 }}>
-                <FounderBadge rank={restaurant.founder_rank!} size="md" />
               </View>
-            )}
+              {founder && <FounderBadge rank={restaurant.founder_rank!} size="md" />}
+            </View>
           </View>
         </Pressable>
 
