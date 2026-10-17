@@ -93,7 +93,7 @@ export default function TermsScreen() {
           métodos de pago, respuestas a reseñas, métricas y días de Destacado.
         </LegalBullet>
         <LegalBullet>
-          Los primeros 3 meses desde la aprobación tienen el perfil completo sin
+          Los primeros 3 meses desde el registro tienen el perfil completo sin
           costo. Al terminar, el local sigue visible con el perfil básico hasta
           que active un plan. No se borra ningún dato del local.
         </LegalBullet>

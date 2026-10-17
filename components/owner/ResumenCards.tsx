@@ -21,8 +21,26 @@ function longDate(iso: string): string {
   return new Date(iso).toLocaleDateString("es-VE", { day: "numeric", month: "long" });
 }
 
-/** El periodo pagado más cercano por encima de los días que quedan: 30, 90 o 365. Es aproximado. */
-function periodFor(left: number): number {
+/** Nombre corto del tipo de plan vigente. */
+const KIND_LABEL: Record<string, string> = {
+  trial: "Prueba gratis",
+  monthly: "Plan mensual",
+  quarterly: "Plan trimestral",
+  annual: "Plan anual",
+  courtesy: "Cortesía",
+  manual: "Plan activo",
+};
+
+/**
+ * Días totales del periodo vigente: del inicio de la cobertura hasta el
+ * vencimiento. Si el local aún no tiene el inicio guardado (datos anteriores),
+ * se aproxima con el periodo estándar más cercano.
+ */
+function periodDays(r: OwnerRestaurant, left: number): number {
+  if (r.plan_period_start && r.paid_until) {
+    const total = Math.ceil((new Date(r.paid_until).getTime() - new Date(r.plan_period_start).getTime()) / DAY);
+    if (total >= left && total > 0) return total;
+  }
   return [30, 90, 365].find((p) => left <= p) ?? left;
 }
 
@@ -108,14 +126,14 @@ export function StatusCard({ restaurant: r }: { restaurant: OwnerRestaurant }) {
         ) : plan && left !== null ? (
           <>
             <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between" }}>
-              <AppText variant="bodyStrong">Plan activo</AppText>
+              <AppText variant="bodyStrong">{(r.plan_kind && KIND_LABEL[r.plan_kind]) || "Plan activo"}</AppText>
               <AppText variant="title" color={planColor} style={{ fontSize: 20 }}>
                 {plural(Math.max(left, 0), "día", "días")}
               </AppText>
             </View>
-            <Bar pct={left / periodFor(left)} color={planColor} />
+            <Bar pct={left / periodDays(r, left)} color={planColor} />
             <AppText variant="caption" color={C.onSurfaceVariant}>
-              {ending ? "Vence pronto · " : ""}vence el {longDate(r.paid_until!)}. La barra es aproximada.
+              {ending ? "Vence pronto · " : ""}vence el {longDate(r.paid_until!)}.
             </AppText>
           </>
         ) : (

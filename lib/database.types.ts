@@ -594,6 +594,8 @@ export type Database = {
           name: string
           owner_id: string | null
           paid_until: string | null
+          plan_kind: string | null
+          plan_period_start: string | null
           phone: string | null
           price_level: number | null
           promo_text: string | null
@@ -634,6 +636,8 @@ export type Database = {
           name: string
           owner_id?: string | null
           paid_until?: string | null
+          plan_kind?: string | null
+          plan_period_start?: string | null
           phone?: string | null
           price_level?: number | null
           promo_text?: string | null
@@ -674,6 +678,8 @@ export type Database = {
           name?: string
           owner_id?: string | null
           paid_until?: string | null
+          plan_kind?: string | null
+          plan_period_start?: string | null
           phone?: string | null
           price_level?: number | null
           promo_text?: string | null
