@@ -1,3 +1,4 @@
+import type { DailyRow } from "@/lib/metrics";
 import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 
@@ -29,6 +30,26 @@ export function trackRestaurantEvent(restaurantId: string, type: RestaurantEvent
 export type RestaurantStats = Record<RestaurantEventType, number>;
 
 const EMPTY: RestaurantStats = { view: 0, whatsapp: 0, call: 0, directions: 0, instagram: 0, menu: 0, blocked: 0, order: 0 };
+
+/**
+ * Interacciones por día y tipo. Trae el doble de días para poder comparar el
+ * periodo actual con el anterior.
+ */
+export function useRestaurantDaily(restaurantId: string | undefined, days: number) {
+  return useQuery({
+    queryKey: ["restaurant-daily", restaurantId, days],
+    enabled: !!restaurantId,
+    staleTime: 60_000,
+    queryFn: async (): Promise<DailyRow[]> => {
+      const { data, error } = await supabase.rpc("get_restaurant_stats", {
+        p_restaurant_id: restaurantId!,
+        p_days: Math.min(days * 2, 400),
+      });
+      if (error) throw error;
+      return ((data ?? []) as DailyRow[]).map((r) => ({ event_type: r.event_type, day: String(r.day).slice(0, 10), total: Number(r.total) }));
+    },
+  });
+}
 
 /** Totales por tipo de interacción en los últimos `days` días (dueño o admin). */
 export function useRestaurantStats(restaurantId: string | undefined, days: number) {

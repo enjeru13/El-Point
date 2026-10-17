@@ -657,7 +657,6 @@ export function PhotosSection({ restaurant }: { restaurant: OwnerRestaurant }) {
 
   return (
     <>
-    <GallerySection restaurant={restaurant} />
     <SectionCard title="Portada y logo">
       {/* Portada */}
       <View style={{ padding: 18, gap: 8, borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
@@ -741,6 +740,7 @@ export function PhotosSection({ restaurant }: { restaurant: OwnerRestaurant }) {
         <Icon name="chevron-right" size={18} color={C.outline} />
       </Pressable>
     </SectionCard>
+    <GallerySection restaurant={restaurant} />
     </>
   );
 }
