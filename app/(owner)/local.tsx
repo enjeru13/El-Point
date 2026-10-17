@@ -13,11 +13,18 @@ import { Linking, Pressable, RefreshControl, ScrollView, View } from "react-nati
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useState } from "react";
 
-type Row = { key: string; icon: string; title: string; summary: string; locked?: boolean };
+type Group = "carta" | "info" | "difusion";
+type Row = { key: string; group: Group; icon: string; title: string; summary: string; locked?: boolean };
+
+const GROUPS: { key: Group; title: string }[] = [
+  { key: "carta", title: "TU CARTA" },
+  { key: "info", title: "INFORMACIÓN" },
+  { key: "difusion", title: "DIFUSIÓN" },
+];
 
 /** Pestaña "Mi local": lo que el dueño toca a diario, cada sección en su propia pantalla. */
 export default function MyLocalScreen() {
-  const { C, shadow } = useTheme();
+  const { C } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const isTablet = useIsTablet();
@@ -68,6 +75,7 @@ export default function MyLocalScreen() {
   const rows: Row[] = [
     {
       key: "menu",
+      group: "carta",
       icon: "silverware-fork-knife",
       title: "Menú",
       summary: !plan
@@ -79,6 +87,7 @@ export default function MyLocalScreen() {
     },
     {
       key: "hours",
+      group: "info",
       icon: "clock-outline",
       title: "Horario",
       summary: !plan ? "Tus horas y “abierto ahora”" : r.hours ? `Hoy: ${formatRange(today)}` : "Sin configurar",
@@ -86,6 +95,7 @@ export default function MyLocalScreen() {
     },
     {
       key: "promo",
+      group: "carta",
       icon: "tag-outline",
       title: "Promoción",
       summary: !plan ? "Una oferta con aviso a tus seguidores" : r.promo_text || "Sin promoción activa",
@@ -93,6 +103,7 @@ export default function MyLocalScreen() {
     },
     {
       key: "orders",
+      group: "carta",
       icon: "whatsapp",
       title: "Pedidos por WhatsApp",
       summary: r.ghost_kitchen ? "Siempre activo" : !plan ? "Botón “Pedir” con mensaje listo" : r.accepts_orders ? "Activados" : "Desactivados",
@@ -100,6 +111,7 @@ export default function MyLocalScreen() {
     },
     {
       key: "amenities",
+      group: "info",
       icon: "check-circle",
       title: "Comodidades",
       summary: !plan ? "Wifi, estacionamiento, aire y más" : r.amenities.length ? `${r.amenities.length} marcadas` : "Ninguna marcada",
@@ -107,6 +119,7 @@ export default function MyLocalScreen() {
     },
     {
       key: "payments",
+      group: "info",
       icon: "wallet-outline",
       title: "Métodos de pago",
       summary: !plan ? "Cómo te pueden pagar" : r.payment_methods.length ? `${r.payment_methods.length} aceptados` : "Sin indicar",
@@ -114,6 +127,7 @@ export default function MyLocalScreen() {
     },
     {
       key: "qr",
+      group: "difusion",
       icon: "qrcode",
       title: "Cartel QR “Rankéanos”",
       summary: plan ? "Imprímelo para tu caja o tus mesas y recibe más reseñas" : "Un cartel para que tus clientes te rankeen",
@@ -121,6 +135,7 @@ export default function MyLocalScreen() {
     },
     {
       key: "photos",
+      group: "info",
       icon: "camera-plus-outline",
       title: "Fotos y menú en PDF",
       summary: !plan
@@ -142,7 +157,7 @@ export default function MyLocalScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 110, gap: 10, ...capWidth(isTablet) }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 110, gap: 20, ...capWidth(isTablet) }}
       >
         {!plan && (
           <Pressable
@@ -170,47 +185,55 @@ export default function MyLocalScreen() {
           </Pressable>
         )}
 
-        {rows.map((row) => (
-          <Pressable
-            key={row.key}
-            onPress={() => {
-              if (row.key !== "qr") return router.push(`/local/${row.key}` as any);
-              if (!plan) return router.push("/subscription" as any);
-              Linking.openURL(`https://elpoint-app.netlify.app/qr/?id=${r.id}&n=${encodeURIComponent(r.name)}`);
-            }}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 14,
-              padding: 16,
-              borderRadius: 20,
-              backgroundColor: C.surface,
-              borderWidth: 1,
-              borderColor: C.border,
-              ...shadow.sm,
-            }}
-          >
-            <View
-              style={{
-                width: 42,
-                height: 42,
-                borderRadius: 13,
-                backgroundColor: row.locked ? C.surfaceContainerHighest : C.primaryFixed,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Icon name={row.icon} size={20} color={row.locked ? C.outline : C.primary} />
-            </View>
-            <View style={{ flex: 1, gap: 1 }}>
-              <AppText variant="bodyStrong">{row.title}</AppText>
-              <AppText variant="bodySm" color={C.onSurfaceVariant} numberOfLines={1}>
-                {row.summary}
+        {GROUPS.map((g) => {
+          const items = rows.filter((row) => row.group === g.key);
+          const order = g.key === "carta" ? ["menu", "promo", "orders"] : g.key === "info" ? ["hours", "amenities", "payments", "photos"] : ["qr"];
+          items.sort((x, y) => order.indexOf(x.key) - order.indexOf(y.key));
+          return (
+            <View key={g.key} style={{ gap: 8 }}>
+              <AppText variant="overline" color={C.outline} style={{ paddingHorizontal: 4 }}>
+                {g.title}
               </AppText>
+              <View style={{ borderRadius: 20, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: "hidden" }}>
+                {items.map((row, idx) => (
+                  <Pressable
+                    key={row.key}
+                    onPress={() => {
+                      if (row.key !== "qr") return router.push(`/local/${row.key}` as any);
+                      if (!plan) return router.push("/subscription" as any);
+                      Linking.openURL(`https://elpoint-app.netlify.app/qr/?id=${r.id}&n=${encodeURIComponent(r.name)}`);
+                    }}
+                    android_ripple={{ color: C.outlineVariant }}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 14,
+                      paddingHorizontal: 16,
+                      paddingVertical: 13,
+                      borderTopWidth: idx === 0 ? 0 : 1,
+                      borderTopColor: C.outlineVariant,
+                    }}
+                  >
+                    <Icon name={row.icon} size={21} color={row.locked ? C.outline : C.primary} />
+                    <View style={{ flex: 1, gap: 1 }}>
+                      <AppText variant="bodyStrong" color={row.locked ? C.onSurfaceVariant : C.onSurface}>
+                        {row.title}
+                      </AppText>
+                      <AppText variant="bodySm" color={C.onSurfaceVariant} numberOfLines={1}>
+                        {row.summary}
+                      </AppText>
+                    </View>
+                    <Icon
+                      name={row.locked ? "lock-outline" : row.key === "qr" ? "open-in-new" : "chevron-right"}
+                      size={row.locked ? 16 : 18}
+                      color={C.outline}
+                    />
+                  </Pressable>
+                ))}
+              </View>
             </View>
-            <Icon name={row.locked ? "lock-outline" : "chevron-right"} size={row.locked ? 16 : 18} color={C.outline} />
-          </Pressable>
-        ))}
+          );
+        })}
       </ScrollView>
     </View>
   );
