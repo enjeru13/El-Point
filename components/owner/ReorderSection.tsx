@@ -4,8 +4,12 @@ import { formatMoney } from "@/lib/queries/exchangeRate";
 import type { Currency, MenuItem } from "@/lib/queries/menu";
 import { useTheme } from "@/lib/ThemeContext";
 import { useEffect, useState } from "react";
-import { Pressable, View } from "react-native";
-import { NestedReorderableList, reorderItems, useReorderableDrag } from "react-native-reorderable-list";
+import { LogBox, Pressable, View } from "react-native";
+import { NestedReorderableList, reorderItems, useIsActive, useReorderableDrag } from "react-native-reorderable-list";
+
+// La librería anida la lista dentro de su propio ScrollViewContainer a propósito; React Native
+// lo avisa en desarrollo aunque funciona bien. Solo se silencia ese aviso.
+LogBox.ignoreLogs(["VirtualizedLists should never be nested inside plain ScrollViews"]);
 
 const ROW_H = 58;
 const RADIUS = 19;
@@ -13,6 +17,7 @@ const RADIUS = 19;
 function Row({ item, index, count, base }: { item: MenuItem; index: number; count: number; base: Currency }) {
   const { C } = useTheme();
   const drag = useReorderableDrag();
+  const active = useIsActive();
   const first = index === 0;
   const last = index === count - 1;
 
@@ -23,15 +28,20 @@ function Row({ item, index, count, base }: { item: MenuItem; index: number; coun
         flexDirection: "row",
         alignItems: "center",
         paddingLeft: 16,
-        backgroundColor: C.surface,
-        borderTopWidth: first ? 0 : 1,
-        borderTopColor: C.outlineVariant,
-        // Las esquinas redondeadas las llevan la primera y la última fila: la lista no recorta,
-        // así la fila que se arrastra puede salirse del bloque.
-        borderTopLeftRadius: first ? RADIUS : 0,
-        borderTopRightRadius: first ? RADIUS : 0,
-        borderBottomLeftRadius: last ? RADIUS : 0,
-        borderBottomRightRadius: last ? RADIUS : 0,
+        // Arrastrando, la fila es una tarjeta con todas las esquinas redondeadas.
+        // En reposo, las esquinas las llevan la primera y la última (la lista no recorta,
+        // así la fila que se arrastra puede salirse del bloque).
+        backgroundColor: active ? C.surfaceContainerHighest : C.surface,
+        borderTopWidth: first || active ? (active ? 1 : 0) : 1,
+        borderTopColor: active ? C.border : C.outlineVariant,
+        ...(active
+          ? { borderWidth: 1, borderColor: C.border, borderRadius: 16 }
+          : {
+              borderTopLeftRadius: first ? RADIUS : 0,
+              borderTopRightRadius: first ? RADIUS : 0,
+              borderBottomLeftRadius: last ? RADIUS : 0,
+              borderBottomRightRadius: last ? RADIUS : 0,
+            }),
       }}
     >
       <AppText variant="bodyStrong" numberOfLines={1} style={{ flex: 1 }}>{item.name}</AppText>
@@ -75,6 +85,7 @@ export function ReorderSection({
           data={order}
           keyExtractor={(i) => i.id}
           scrollable={false}
+          shouldUpdateActiveItem
           onReorder={({ from, to }) => {
             if (from === to) return;
             const next = reorderItems(order, from, to);
