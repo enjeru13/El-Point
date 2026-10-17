@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const SUPPORT_KEY = ["admin-support"] as const;
+const MY_KEY = ["my-support"] as const;
 
 export type SupportMessage = {
   id: string;
@@ -65,8 +66,53 @@ export function useResolveSupportMessage() {
   });
 }
 
+/** Número de soporte de El Point (WhatsApp), en formato internacional. */
+export const SUPPORT_WHATSAPP = "584149797876";
+
+export type MyTicket = {
+  id: string;
+  subject: string;
+  status: "open" | "closed";
+  created_at: string;
+};
+
+/** Mensajes que el usuario ha enviado a soporte, del más reciente al más viejo. */
+export function useMyTickets() {
+  return useQuery({
+    queryKey: MY_KEY,
+    staleTime: 30_000,
+    queryFn: async (): Promise<MyTicket[]> => {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) return [];
+      const { data, error } = await supabase
+        .from("support_messages")
+        .select("id, subject, status, created_at")
+        .eq("user_id", uid)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return (data ?? []) as MyTicket[];
+    },
+  });
+}
+
+/** Correo de la cuenta, para decir a dónde llega la respuesta. */
+export function useAccountEmail() {
+  return useQuery({
+    queryKey: ["account-email"],
+    staleTime: 10 * 60_000,
+    queryFn: async (): Promise<string | null> => {
+      const { data } = await supabase.auth.getUser();
+      return data.user?.email ?? null;
+    },
+  });
+}
+
 export function useSendSupportMessage() {
+  const qc = useQueryClient();
   return useMutation({
+    onSuccess: () => qc.invalidateQueries({ queryKey: MY_KEY }),
     mutationFn: async ({
       subject,
       body,

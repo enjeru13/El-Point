@@ -269,7 +269,7 @@ export default function SettingsScreen() {
                 <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
                   <Icon name="comment-text" size={20} color={C.primary} />
                 </View>
-                <AppText variant="bodyStrong" style={{ flex: 1 }}>Contacto y soporte</AppText>
+                <AppText variant="bodyStrong" style={{ flex: 1 }}>Ayuda y soporte</AppText>
                 <Icon name="chevron-right" size={20} color={C.outline} />
               </Pressable>
 

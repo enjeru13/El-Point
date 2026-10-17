@@ -281,7 +281,7 @@ export default function SubscriptionScreen() {
             <View style={{ gap: 10 }}>
               <Button
                 label={plan ? "Hablar con soporte sobre tu plan" : "Hablar con soporte sobre tu plan"}
-                onPress={() => router.push("/support" as any)}
+                onPress={() => router.push("/support?topic=plan" as any)}
                 icon="lifebuoy"
               />
               <AppText variant="caption" color={C.outline} align="center">
@@ -292,7 +292,7 @@ export default function SubscriptionScreen() {
 
           {!founder && !PAYMENTS_IN_APP && plan && !ending && (
             <Pressable
-              onPress={() => router.push("/support" as any)}
+              onPress={() => router.push("/support?topic=plan" as any)}
               style={{
                 flexDirection: "row", alignItems: "center", gap: 12,
                 padding: 14, borderRadius: 16,
