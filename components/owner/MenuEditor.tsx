@@ -3,6 +3,7 @@ import { AppTextInput } from "@/components/ui/AppTextInput";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { Icon } from "@/components/ui/Icon";
+import { ReorderSection } from "@/components/owner/ReorderSection";
 import { convertAmount, formatMoney, priceLines, useEffectiveRates } from "@/lib/queries/exchangeRate";
 import { useUpdateMyRestaurant, type OwnerRestaurant } from "@/lib/queries/owner";
 import {
@@ -16,6 +17,7 @@ import {
   useConvertMenuPrices,
   useMenu,
   useMenuMutations,
+  useReorderMenu,
   type Currency,
   type MenuItem,
 } from "@/lib/queries/menu";
@@ -364,7 +366,8 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
   const insets = useSafeAreaInsets();
   const toast = useToast();
   const menuQ = useMenu(restaurant.id);
-  const { add, update, remove, swap } = useMenuMutations(restaurant.id);
+  const { add, update, remove } = useMenuMutations(restaurant.id);
+  const reorderMut = useReorderMenu(restaurant.id);
   const settings = menuSettings(restaurant);
   const { bsLocal, copLocal } = useEffectiveRates(settings);
   const updateRestaurant = useUpdateMyRestaurant(restaurant.id);
@@ -490,13 +493,6 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
     ]);
   }
 
-  /** Sube o baja un plato dentro de su sección; la lista se reordena a la vista. */
-  function moveInSection(list: MenuItem[], idx: number, dir: -1 | 1) {
-    const other = list[idx + dir];
-    if (!other) return;
-    swap.mutate({ a: list[idx], b: other }, { onError: (e) => toast.error((e as Error).message) });
-  }
-
   const sectionChoices = Array.from(new Set([...sections.map((s) => s.name), ...DEFAULT_SECTIONS]));
 
   return (
@@ -517,7 +513,7 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
 
       {items.length > 1 && (
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 4, marginBottom: -6 }}>
-          <AppText variant="overline" color={C.outline}>{reorder ? "ORDENA CON LAS FLECHAS" : "TU MENÚ"}</AppText>
+          <AppText variant="overline" color={C.outline}>{reorder ? "MANTÉN PRESIONADO ⋮ Y ARRASTRA" : "TU MENÚ"}</AppText>
           <Pressable onPress={() => setReorder((v) => !v)} hitSlop={10} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
             <Icon name={reorder ? "check" : "swap-vertical"} size={16} color={C.primary} />
             <AppText variant="label" color={C.primary}>{reorder ? "Listo" : "Ordenar"}</AppText>
@@ -535,7 +531,16 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
           </AppText>
         </View>
       ) : (
-        sections.map((s) => (
+        sections.map((s) =>
+          reorder ? (
+            <ReorderSection
+              key={s.name}
+              title={s.name}
+              items={s.items}
+              base={settings.base}
+              onCommit={(ordered) => reorderMut.mutate(ordered, { onError: (e) => toast.error((e as Error).message) })}
+            />
+          ) : (
           <View key={s.name} style={{ gap: 8 }}>
             <AppText variant="overline" color={C.outline} style={{ paddingHorizontal: 4 }}>{s.name.toUpperCase()}</AppText>
             <View style={{ borderRadius: 20, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, overflow: "hidden" }}>
@@ -544,7 +549,7 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
                 return (
                   <Pressable
                     key={i.id}
-                    onPress={() => (reorder ? undefined : openEdit(i))}
+                    onPress={() => openEdit(i)}
                     android_ripple={{ color: C.outlineVariant }}
                     style={{
                       flexDirection: "row",
@@ -575,24 +580,14 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
                       )}
                     </View>
                     <AppText variant="bodyStrong" color={C.primary}>{formatMoney(i.price, settings.base, true)}</AppText>
-                    {reorder ? (
-                      <View style={{ flexDirection: "row", alignItems: "center" }}>
-                        <Pressable hitSlop={6} onPress={() => moveInSection(s.items, idx, -1)} disabled={idx === 0 || swap.isPending} style={{ padding: 6, opacity: idx === 0 ? 0.25 : 1 }}>
-                          <Icon name="chevron-up" size={24} color={C.onSurface} />
-                        </Pressable>
-                        <Pressable hitSlop={6} onPress={() => moveInSection(s.items, idx, 1)} disabled={idx === s.items.length - 1 || swap.isPending} style={{ padding: 6, opacity: idx === s.items.length - 1 ? 0.25 : 1 }}>
-                          <Icon name="chevron-down" size={24} color={C.onSurface} />
-                        </Pressable>
-                      </View>
-                    ) : (
-                      <Icon name="chevron-right" size={16} color={C.outline} />
-                    )}
+                    <Icon name="chevron-right" size={16} color={C.outline} />
                   </Pressable>
                 );
               })}
             </View>
           </View>
-        ))
+          ),
+        )
       )}
 
       <Button label="Agregar plato" onPress={openNew} icon="plus" variant="secondary" />

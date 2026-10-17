@@ -190,3 +190,31 @@ export function useConvertMenuPrices(restaurantId: string | undefined) {
     },
   });
 }
+
+/**
+ * Guarda el nuevo orden de los platos de UNA sección. Reparte entre ellos las
+ * mismas posiciones que ya tenían, así la sección no cambia de lugar respecto
+ * a las demás.
+ */
+export function useReorderMenu(restaurantId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (ordered: MenuItem[]) => {
+      const slots = ordered.map((i) => i.position).sort((a, b) => a - b);
+      // Posiciones repetidas no sirven para ordenar: se fuerza una secuencia creciente.
+      for (let k = 1; k < slots.length; k++) if (slots[k] <= slots[k - 1]) slots[k] = slots[k - 1] + 1;
+      const updates = ordered.map((item, k) => ({ id: item.id, position: slots[k], changed: item.position !== slots[k] })).filter((u) => u.changed);
+      for (let i = 0; i < updates.length; i += 10) {
+        const chunk = updates.slice(i, i + 10);
+        const results = await Promise.all(chunk.map((u) => supabase.from("menu_items").update({ position: u.position }).eq("id", u.id)));
+        const failed = results.find((r) => r.error);
+        if (failed?.error) throw menuError(failed.error);
+      }
+    },
+    onSettled: () => {
+      if (!restaurantId) return;
+      qc.invalidateQueries({ queryKey: menuKey(restaurantId) });
+      qc.invalidateQueries({ queryKey: restaurantKeys(restaurantId) });
+    },
+  });
+}
