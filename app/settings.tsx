@@ -196,7 +196,7 @@ export default function SettingsScreen() {
                     <Icon name="calendar-check-outline" size={20} color={C.primary} />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <AppText variant="bodyStrong">Suscripción</AppText>
+                    <AppText variant="bodyStrong">Mi plan</AppText>
                     <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 1 }}>{PAYMENTS_IN_APP ? 'Tu plan y cómo pagar' : 'Estado de tu plan'}</AppText>
                   </View>
                   <Icon name="chevron-right" size={20} color={C.outline} />

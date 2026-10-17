@@ -26,13 +26,24 @@ export const FREE_TIER_BLANKS = {
   boost_until: null,
 } as const;
 
-/** Qué incluye el plan, para mostrarlo al dueño (pantallas de plan y candados). */
+/** Lo que todo local aprobado tiene, con o sin plan. */
+export const FREE_PERKS: { icon: string; label: string }[] = [
+  { icon: "map-marker-outline", label: "Tu local en el mapa y en las búsquedas" },
+  { icon: "text-box-outline", label: "Nombre, categorías, descripción y dirección" },
+  { icon: "star-outline", label: "Ver las reseñas que recibes" },
+];
+
+/** Qué incluye el plan, para mostrarlo al dueño (pantalla del plan y candados). */
 export const PLAN_PERKS: { icon: string; label: string }[] = [
-  { icon: "whatsapp", label: "WhatsApp, llamada e Instagram" },
-  { icon: "file-document-outline", label: "Menú y fotos" },
+  { icon: "whatsapp", label: "WhatsApp, llamada e Instagram visibles" },
+  { icon: "silverware-fork-knife", label: "Menú con precios, plato del día y PDF" },
+  { icon: "image-multiple-outline", label: "Galería de hasta 9 fotos, portada y logo" },
   { icon: "clock-outline", label: "Horario y “abierto ahora”" },
   { icon: "tag-outline", label: "Promos con aviso a tus seguidores" },
+  { icon: "cart-outline", label: "Pedidos por WhatsApp con mensaje listo" },
+  { icon: "check-circle-outline", label: "Comodidades y métodos de pago" },
   { icon: "message-reply-text-outline", label: "Responder reseñas" },
-  { icon: "chart-line", label: "Métricas de quién te ve" },
+  { icon: "chart-line", label: "Métricas: visitas, contactos y mejores días" },
+  { icon: "qrcode", label: "Cartel QR para conseguir más reseñas" },
   { icon: "fire", label: "Días de Destacado" },
 ];

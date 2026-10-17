@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/lib/ThemeContext";
 import { useToast } from "@/lib/toast";
@@ -22,7 +22,11 @@ import {
 import { capWidth, useIsTablet } from "@/lib/responsive";
 import { PaymentMethodPicker } from "@/components/ui/PaymentMethodPicker";
 import { PAYMENTS_IN_APP } from "@/lib/billing";
-import { PLAN_PERKS } from "@/lib/plan";
+import { FREE_PERKS, PLAN_PERKS, hasPlan } from "@/lib/plan";
+import { Bar, KIND_LABEL, periodDays } from "@/components/owner/ResumenCards";
+import { useRestaurantStats } from "@/lib/queries/analytics";
+
+const GOLD = "#f0c260";
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "En revisión",
@@ -30,6 +34,37 @@ const STATUS_LABEL: Record<string, string> = {
   rejected: "Rechazado",
   voided: "Anulado",
 };
+
+function longDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("es-VE", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function Bignum({ value, label, tone }: { value: number; label: string; tone?: string }) {
+  const { C } = useTheme();
+  return (
+    <View style={{ flex: 1, gap: 2 }}>
+      <AppText variant="title" color={tone ?? C.onSurface} style={{ fontSize: 30, lineHeight: 34 }}>{value}</AppText>
+      <AppText variant="bodySm" color={C.onSurfaceVariant}>{label}</AppText>
+    </View>
+  );
+}
+
+function PerkRow({ icon, label, state }: { icon: string; label: string; state: "included" | "locked" | "always" }) {
+  const { C } = useTheme();
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 9 }}>
+      <View style={{ width: 30, height: 30, borderRadius: 9, backgroundColor: state === "locked" ? C.surfaceContainerHighest : C.primaryFixed, alignItems: "center", justifyContent: "center" }}>
+        <Icon name={icon} size={16} color={state === "locked" ? C.outline : C.primary} />
+      </View>
+      <AppText variant="bodySm" color={state === "locked" ? C.onSurfaceVariant : C.onSurface} style={{ flex: 1 }}>{label}</AppText>
+      <Icon
+        name={state === "locked" ? "lock-outline" : "check-circle"}
+        size={16}
+        color={state === "locked" ? C.outline : state === "included" ? C.secondary : C.outline}
+      />
+    </View>
+  );
+}
 
 export default function SubscriptionScreen() {
   const { C, shadow } = useTheme();
@@ -40,7 +75,9 @@ export default function SubscriptionScreen() {
 
   const restaurantQ = useMyRestaurant();
   const r = restaurantQ.data ?? null;
+  const statsQ = useRestaurantStats(r?.id, 30);
   const paymentsQ = useMyPayments(r?.id);
+  const [refreshing, setRefreshing] = useState(false);
   const submit = useSubmitPayment(r?.id);
 
   const [method, setMethod] = useState<PaymentMethod>("bs_bcv");
@@ -51,6 +88,20 @@ export default function SubscriptionScreen() {
   const founder = isFounder(r);
   const left = r ? daysUntil(r.paid_until) : null;
   const expired = left !== null && left < 0;
+  const plan = hasPlan(r);
+  const ending = plan && !founder && left !== null && left <= 7;
+  const planColor = founder ? GOLD : !plan ? C.error : ending ? "#d99a1c" : C.secondary;
+  const stats = statsQ.data;
+  const contacts = stats ? stats.whatsapp + stats.call + stats.instagram + stats.order : 0;
+
+  async function onRefresh() {
+    setRefreshing(true);
+    try {
+      await Promise.all([restaurantQ.refetch(), statsQ.refetch()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   function pickPhoto() {
     Alert.alert("Agregar foto", undefined, [
@@ -118,7 +169,7 @@ export default function SubscriptionScreen() {
         >
           <Icon name="arrow-left" size={20} color={C.onSurface} />
         </Pressable>
-        <AppText variant="title" style={{ flex: 1 }}>Suscripción</AppText>
+        <AppText variant="title" style={{ flex: 1 }}>Mi plan</AppText>
       </View>
 
       {restaurantQ.isLoading ? (
@@ -138,90 +189,108 @@ export default function SubscriptionScreen() {
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />}
           contentContainerStyle={{ padding: 20, gap: 18, paddingBottom: insets.bottom + 40, ...capWidth(isTablet, 640) }}
         >
           {/* Estado */}
-          {founder ? (
-            <View
-              style={{
-                flexDirection: "row", alignItems: "center", gap: 14,
-                padding: 16, borderRadius: 20,
-                backgroundColor: "#f0c26022", borderWidth: 1, borderColor: "#f0c26066",
-              }}
-            >
-              <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: "#f0c260", alignItems: "center", justifyContent: "center" }}>
-                <Icon name="crown" size={22} color="#3a2a05" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <AppText variant="bodyStrong">Eres uno de los Originales</AppText>
-                <AppText variant="bodySm" color={C.onSurfaceVariant}>
-                  Tu local entró entre los primeros 100 de la app.
-                </AppText>
-              </View>
-            </View>
-          ) : (
-            <View
-              style={{
-                flexDirection: "row", alignItems: "center", gap: 14,
-                padding: 16, borderRadius: 20,
-                backgroundColor: expired ? C.error + "1f" : C.surface,
-                borderWidth: 1, borderColor: expired ? C.error + "55" : C.border,
-                ...shadow.sm,
-              }}
-            >
-              <View style={{
-                width: 44, height: 44, borderRadius: 14,
-                backgroundColor: expired ? C.error : C.primaryFixed,
-                alignItems: "center", justifyContent: "center",
-              }}>
-                <Icon name={expired ? "alert-circle-outline" : "calendar-check-outline"} size={22} color={expired ? "#fff" : C.primary} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <AppText variant="bodyStrong">
-                  {left === null
-                    ? "Perfil básico"
-                    : expired
-                      ? "Tu plan venció"
-                      : `${left} ${left === 1 ? "día" : "días"} restantes`}
-                </AppText>
-                <AppText variant="bodySm" color={C.onSurfaceVariant}>
-                  {PAYMENTS_IN_APP
-                    ? expired
-                      ? "Sube tu comprobante de pago para reactivar tu local."
-                      : "Al vencerse necesitas pagar la suscripción anual (10 USD) para seguir activo."
-                    : expired
-                      ? "Tu local sigue en el mapa, pero con perfil básico: sin contacto, menú ni fotos. Renueva para recuperarlos."
-                      : r.paid_until
-                        ? `Tu plan está activo hasta el ${new Date(r.paid_until).toLocaleDateString("es-VE", { day: "numeric", month: "long", year: "numeric" })}.`
-                        : "Tu local está activo."}
-                </AppText>
-              </View>
-            </View>
-          )}
-
-          {!founder && (
-            <View
-              style={{
-                padding: 16, borderRadius: 20, gap: 12,
-                backgroundColor: C.surface, borderWidth: 1, borderColor: C.border,
-              }}
-            >
-              <AppText variant="bodyStrong">Qué incluye el plan</AppText>
-              <AppText variant="bodySm" color={C.onSurfaceVariant}>
-                Tu local siempre aparece en el mapa. Con el plan, además, los comensales ven esto:
-              </AppText>
-              {PLAN_PERKS.map((p) => (
-                <View key={p.label} style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                  <View style={{ width: 30, height: 30, borderRadius: 9, backgroundColor: C.primaryFixed, alignItems: "center", justifyContent: "center" }}>
-                    <Icon name={p.icon} size={16} color={C.primary} />
-                  </View>
-                  <AppText variant="bodySm" style={{ flex: 1 }}>{p.label}</AppText>
+          <View style={{ padding: 18, gap: 12, borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: plan ? C.border : C.error + "55", ...shadow.sm }}>
+            {founder ? (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: GOLD, alignItems: "center", justifyContent: "center" }}>
+                  <Icon name="crown" size={22} color="#3a2a05" />
                 </View>
-              ))}
+                <View style={{ flex: 1 }}>
+                  <AppText variant="bodyStrong">Original #{r.founder_rank}</AppText>
+                  <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                    Entraste entre los primeros 100 locales. Tu perfil completo es gratis para siempre.
+                  </AppText>
+                </View>
+              </View>
+            ) : plan && left !== null ? (
+              <>
+                <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between" }}>
+                  <AppText variant="bodyStrong">{(r.plan_kind && KIND_LABEL[r.plan_kind]) || "Plan activo"}</AppText>
+                  <AppText variant="title" color={planColor} style={{ fontSize: 22 }}>
+                    {Math.max(left, 0)} {left === 1 ? "día" : "días"}
+                  </AppText>
+                </View>
+                <Bar pct={left / periodDays(r, left)} color={planColor} />
+                <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                  {ending ? "Vence pronto · " : ""}Activo hasta el {longDate(r.paid_until!)}.
+                  {r.plan_kind === "trial" ? " Al terminar la prueba, tu perfil pasa a básico." : ""}
+                </AppText>
+              </>
+            ) : (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: C.error, alignItems: "center", justifyContent: "center" }}>
+                  <Icon name={expired ? "alert-circle-outline" : "lock-outline"} size={22} color="#fff" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <AppText variant="bodyStrong">{expired ? "Tu plan venció" : "Perfil básico"}</AppText>
+                  <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                    {PAYMENTS_IN_APP
+                      ? "Sube tu comprobante de pago para reactivar tu local."
+                      : "Tu local sigue en el mapa, pero sin contacto, menú ni fotos para los comensales."}
+                  </AppText>
+                </View>
+              </View>
+            )}
+          </View>
+
+          {/* Lo que has conseguido */}
+          {stats && (stats.view > 0 || stats.blocked > 0 || contacts > 0) && (
+            <View style={{ padding: 18, gap: 12, borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, ...shadow.sm }}>
+              <AppText variant="heading" style={{ fontSize: 17 }}>Lo que has conseguido</AppText>
+              <AppText variant="caption" color={C.outline} style={{ marginTop: -8 }}>Últimos 30 días</AppText>
+              <View style={{ flexDirection: "row", gap: 12 }}>
+                <Bignum value={stats.view} label={stats.view === 1 ? "persona vio tu local" : "personas vieron tu local"} />
+                {plan ? (
+                  <Bignum value={contacts} label={contacts === 1 ? "te contactó" : "te contactaron"} tone={C.primary} />
+                ) : (
+                  <Bignum value={stats.blocked} label={stats.blocked === 1 ? "quiso contactarte y no pudo" : "quisieron contactarte y no pudieron"} tone={C.error} />
+                )}
+              </View>
+              {!plan && stats.blocked > 0 && (
+                <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                  Con el plan, tu WhatsApp, tu teléfono y tu Instagram quedan visibles y esas personas llegan hasta ti.
+                </AppText>
+              )}
+              {plan && (
+                <AppText variant="caption" color={C.outline}>El detalle por día y por canal está en Métricas.</AppText>
+              )}
             </View>
           )}
 
-          {!founder && !PAYMENTS_IN_APP && (
+          {/* Qué incluye */}
+          <View style={{ paddingHorizontal: 18, paddingVertical: 14, borderRadius: 22, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, ...shadow.sm }}>
+            <AppText variant="heading" style={{ fontSize: 17 }}>{plan ? "Lo que incluye tu plan" : "Lo que te falta"}</AppText>
+            <AppText variant="caption" color={C.outline} style={{ marginTop: 2, marginBottom: 6 }}>
+              {plan ? "Todo esto lo ven tus comensales." : "Con el plan, tus comensales ven todo esto."}
+            </AppText>
+            {PLAN_PERKS.map((p) => (
+              <PerkRow key={p.label} icon={p.icon} label={p.label} state={plan ? "included" : "locked"} />
+            ))}
+            <View style={{ height: 1, backgroundColor: C.outlineVariant, marginVertical: 8 }} />
+            <AppText variant="overline" color={C.outline} style={{ marginBottom: 2 }}>SIEMPRE, CON O SIN PLAN</AppText>
+            {FREE_PERKS.map((p) => (
+              <PerkRow key={p.label} icon={p.icon} label={p.label} state="always" />
+            ))}
+          </View>
+
+          {!founder && !PAYMENTS_IN_APP && (!plan || ending) && (
+            <View style={{ gap: 10 }}>
+              <Button
+                label={plan ? "Hablar con soporte sobre tu plan" : "Hablar con soporte sobre tu plan"}
+                onPress={() => router.push("/support" as any)}
+                icon="lifebuoy"
+              />
+              <AppText variant="caption" color={C.outline} align="center">
+                Escríbenos desde Soporte y te ayudamos con tu plan.
+              </AppText>
+            </View>
+          )}
+
+          {!founder && !PAYMENTS_IN_APP && plan && !ending && (
             <Pressable
               onPress={() => router.push("/support" as any)}
               style={{

@@ -24,7 +24,7 @@ function longDate(iso: string): string {
 }
 
 /** Nombre corto del tipo de plan vigente. */
-const KIND_LABEL: Record<string, string> = {
+export const KIND_LABEL: Record<string, string> = {
   trial: "Prueba gratis",
   monthly: "Plan mensual",
   quarterly: "Plan trimestral",
@@ -38,7 +38,7 @@ const KIND_LABEL: Record<string, string> = {
  * vencimiento. Si el local aún no tiene el inicio guardado (datos anteriores),
  * se aproxima con el periodo estándar más cercano.
  */
-function periodDays(r: OwnerRestaurant, left: number): number {
+export function periodDays(r: OwnerRestaurant, left: number): number {
   if (r.plan_period_start && r.paid_until) {
     const total = Math.ceil((new Date(r.paid_until).getTime() - new Date(r.plan_period_start).getTime()) / DAY);
     if (total >= left && total > 0) return total;
@@ -50,7 +50,7 @@ function plural(n: number, one: string, many: string): string {
   return `${n} ${n === 1 ? one : many}`;
 }
 
-function Bar({ pct, color }: { pct: number; color: string }) {
+export function Bar({ pct, color }: { pct: number; color: string }) {
   const { C } = useTheme();
   return (
     <View style={{ height: 8, borderRadius: 4, backgroundColor: C.outlineVariant, overflow: "hidden" }}>
