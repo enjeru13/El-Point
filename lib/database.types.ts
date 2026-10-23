@@ -1521,6 +1521,17 @@ export type Database = {
           whatsapp: string
         }[]
       }
+      get_category_benchmark: {
+        Args: { p_days?: number; p_restaurant_id: string }
+        Returns: {
+          median_contacts: number | null
+          median_views: number | null
+          my_contacts: number
+          my_views: number
+          peer_count: number
+          pct_below_views: number | null
+        }[]
+      }
       get_restaurant_stats: {
         Args: { p_days?: number; p_restaurant_id: string }
         Returns: {

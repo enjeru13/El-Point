@@ -51,6 +51,44 @@ export function useRestaurantDaily(restaurantId: string | undefined, days: numbe
   });
 }
 
+export type CategoryBenchmark = {
+  /** Locales de tu categoría con visitas en el período. */
+  peers: number;
+  myViews: number;
+  myContacts: number;
+  /** Solo hay cifras si se comparan al menos 5 locales. */
+  medianViews: number | null;
+  medianContacts: number | null;
+  /** Porcentaje de locales de la categoría con menos visitas que tú. */
+  pctBelowViews: number | null;
+};
+
+/** Cómo vas frente a los locales de tu categoría (solo agregados; mínimo 5 locales). */
+export function useCategoryBenchmark(restaurantId: string | undefined, days: number, enabled = true) {
+  return useQuery({
+    queryKey: ["category-benchmark", restaurantId, days],
+    enabled: !!restaurantId && enabled,
+    staleTime: 5 * 60_000,
+    queryFn: async (): Promise<CategoryBenchmark | null> => {
+      const { data, error } = await supabase.rpc("get_category_benchmark", {
+        p_restaurant_id: restaurantId!,
+        p_days: days,
+      });
+      if (error) throw error;
+      const row = (data ?? [])[0];
+      if (!row) return null;
+      return {
+        peers: Number(row.peer_count),
+        myViews: Number(row.my_views),
+        myContacts: Number(row.my_contacts),
+        medianViews: row.median_views == null ? null : Number(row.median_views),
+        medianContacts: row.median_contacts == null ? null : Number(row.median_contacts),
+        pctBelowViews: row.pct_below_views == null ? null : Number(row.pct_below_views),
+      };
+    },
+  });
+}
+
 /** Totales por tipo de interacción en los últimos `days` días (dueño o admin). */
 export function useRestaurantStats(restaurantId: string | undefined, days: number) {
   return useQuery({

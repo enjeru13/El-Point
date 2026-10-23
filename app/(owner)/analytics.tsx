@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useMyRestaurant } from '@/lib/queries/owner';
 import { useReviews } from '@/lib/queries/reviews';
-import { useRestaurantDaily } from '@/lib/queries/analytics';
+import { useCategoryBenchmark, useRestaurantDaily } from '@/lib/queries/analytics';
 import { hasPlan } from '@/lib/plan';
 import { PlanLock } from '@/components/ui/PlanLock';
 import { useRouter } from 'expo-router';
@@ -16,7 +16,7 @@ import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 import { capWidth, useIsTablet } from '@/lib/responsive';
 import {
   CHANNELS, CONTACT_KEYS, PERIODS, bestWeekdays, caracasDay, insightText, lastDays,
-  pctChange, summarize, sumKeys, toBars, type Bar,
+  benchmarkVerdict, pctChange, summarize, sumKeys, toBars, type Bar,
 } from '@/lib/metrics';
 
 /** Variación contra el periodo anterior. Sin base de comparación no se muestra nada. */
@@ -114,11 +114,12 @@ export default function AnalyticsScreen() {
   const reviewsQ = useReviews(restaurant?.id ?? '');
   const reviews = useMemo(() => reviewsQ.data ?? [], [reviewsQ.data]);
   const dailyQ = useRestaurantDaily(restaurant?.id, days);
+  const benchQ = useCategoryBenchmark(restaurant?.id, days, !!restaurant && hasPlan(restaurant));
 
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await Promise.all([restaurantQ.refetch(), reviewsQ.refetch(), dailyQ.refetch()]);
+      await Promise.all([restaurantQ.refetch(), reviewsQ.refetch(), dailyQ.refetch(), benchQ.refetch()]);
     } finally {
       setRefreshing(false);
     }
@@ -313,6 +314,51 @@ export default function AnalyticsScreen() {
                 Se cuenta desde que se activó esta función.
               </AppText>
             </Card>
+
+            {/* Frente a tu categoría */}
+            {benchQ.data && (
+              <Card
+                title="Frente a tu categoría"
+                subtitle={benchQ.data.medianViews != null ? `${benchQ.data.peers} locales como el tuyo · ${periodText}` : undefined}
+              >
+                {benchQ.data.medianViews != null && benchQ.data.pctBelowViews != null ? (
+                  (() => {
+                    const b = benchQ.data!;
+                    const verdict = benchmarkVerdict(b.pctBelowViews!, b.myViews, b.medianViews!);
+                    const max = Math.max(1, b.myViews, b.medianViews!);
+                    const rows = [
+                      { label: 'Tú', value: b.myViews, strong: true },
+                      { label: 'Típico', value: Math.round(b.medianViews!), strong: false },
+                    ];
+                    return (
+                      <View style={{ gap: 14, marginTop: 12 }}>
+                        <AppText variant="body" color={verdict.tone === 'down' ? C.onSurfaceVariant : C.onSurface}>{verdict.text}</AppText>
+                        <View style={{ gap: 10 }}>
+                          {rows.map(r => (
+                            <View key={r.label} style={{ gap: 5 }}>
+                              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <AppText variant="bodySm" color={C.onSurfaceVariant}>{r.label}</AppText>
+                                <AppText variant="bodyStrong">{r.value} {r.value === 1 ? 'visita' : 'visitas'}</AppText>
+                              </View>
+                              <View style={{ height: 8, borderRadius: 99, overflow: 'hidden', backgroundColor: C.surfaceContainerHighest }}>
+                                <View style={{ height: '100%', width: `${Math.max(3, Math.round((r.value / max) * 100))}%`, borderRadius: 99, backgroundColor: r.strong ? C.primary : C.primaryFixedDim }} />
+                              </View>
+                            </View>
+                          ))}
+                        </View>
+                        <AppText variant="caption" color={C.outline}>
+                          Se compara con locales de tu categoría que tuvieron visitas. Nunca mostramos las cifras de un local en particular.
+                        </AppText>
+                      </View>
+                    );
+                  })()
+                ) : (
+                  <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ marginTop: 10 }}>
+                    La comparativa aparece cuando haya al menos 5 locales de tu categoría con visitas. Mientras más locales se sumen, más útil será.
+                  </AppText>
+                )}
+              </Card>
+            )}
           </>
         )}
 

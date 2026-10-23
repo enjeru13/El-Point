@@ -128,6 +128,14 @@ export function bestWeekdays(perDay: { day: string; value: number }[]): string[]
   return out;
 }
 
+/** Lectura corta de dónde estás frente a tu categoría, según el porcentaje de locales con menos visitas que tú. */
+export function benchmarkVerdict(pctBelow: number, myViews: number, medianViews: number): { tone: "up" | "even" | "down"; text: string } {
+  if (myViews === 0 && medianViews === 0) return { tone: "even", text: "Aún no hay visitas para comparar." };
+  if (pctBelow >= 60) return { tone: "up", text: `Vas por delante del ${pctBelow}% de los locales de tu categoría.` };
+  if (pctBelow >= 40) return { tone: "even", text: "Vas parejo con los locales de tu categoría." };
+  return { tone: "down", text: "Hoy te ven menos que a la mayoría de tu categoría. Prueba una promo o el plato del día para atraer visitas." };
+}
+
 export function periodLabel(days: number): string {
   return days === 7 ? "Esta semana" : days === 30 ? "En los últimos 30 días" : "En los últimos 90 días";
 }
