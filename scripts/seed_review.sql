@@ -146,7 +146,7 @@ where r.id::text like 'a0de0000-%'
 on conflict do nothing;
 
 -- ─── 5. Menú con precios (solo si el local aún no tiene platos) ──────────
-insert into public.menu_items (restaurant_id, section, name, description, price_usd, position)
+insert into public.menu_items (restaurant_id, section, name, description, price, position)
 select v.rid::uuid, v.section, v.name, v.descr, v.price, v.pos
 from (values
   ('a0de0000-0000-4000-8000-000000000001', 'Arepas', 'Reina pepiada', 'Pollo, aguacate y mayonesa', 3.50, 1),
