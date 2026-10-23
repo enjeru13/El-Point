@@ -111,13 +111,11 @@ function Step({ icon, label, xp, tone }: { icon: string; label: string; xp?: str
   );
 }
 
-export default function WelcomeScreen() {
+function WelcomeContent({ isOwner }: { isOwner: boolean }) {
   const { C, shadow } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const isTablet = useIsTablet();
-  const { role } = useLocalSearchParams<{ role?: string }>();
-  const isOwner = role === "owner";
   const profileQ = useMyProfile();
   const username = profileQ.data?.username;
   const greet = username ? `@${username}` : isOwner ? "Socio" : "Comensal";
@@ -359,4 +357,31 @@ export default function WelcomeScreen() {
       </ScrollView>
     </View>
   );
+}
+
+/**
+ * Decide la variante (comensal o dueño) ANTES de pintar nada: primero por el
+ * parámetro de la ruta y, si no viene, por el rol real del perfil. Mientras no
+ * se sepa, se muestra el fondo vacío en vez de adivinar la pantalla de comensal.
+ */
+export default function WelcomeScreen() {
+  const { C } = useTheme();
+  const { role } = useLocalSearchParams<{ role?: string }>();
+  const profileQ = useMyProfile();
+
+  const variant: "owner" | "customer" | null =
+    role === "owner"
+      ? "owner"
+      : role === "customer"
+        ? "customer"
+        : profileQ.data
+          ? profileQ.data.role === "restaurant_owner"
+            ? "owner"
+            : "customer"
+          : profileQ.isError
+            ? "customer"
+            : null;
+
+  if (!variant) return <View style={{ flex: 1, backgroundColor: C.background }} />;
+  return <WelcomeContent key={variant} isOwner={variant === "owner"} />;
 }

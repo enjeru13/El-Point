@@ -30,6 +30,7 @@ import { useNotificationsRealtime } from '@/lib/queries/notifications';
 import { ToastProvider } from '@/lib/toast';
 import { AppThemeProvider, useTheme } from '@/lib/ThemeContext';
 import { hasSeenOnboarding, markOnboardingSeen } from '@/lib/onboarding';
+import { isAuthFlowActive } from '@/lib/authFlow';
 import { SettingsBridge } from '@/components/SettingsBridge';
 import { PushBridge } from '@/components/PushBridge';
 import { SplashScreenView } from '@/components/ui/SplashScreenView';
@@ -189,7 +190,9 @@ export default function RootLayout() {
     // Leave stack routes like /restaurant/[id] alone. The post-signup
     // welcome screen lives under (auth) but drives its own CTA — don't bounce.
     const onWelcome = inAuth && (segments as string[])[1] === 'welcome';
-    if (inAuth && !onWelcome) {
+    if (isAuthFlowActive()) {
+      // Registro en curso: él mismo termina en la pantalla de bienvenida.
+    } else if (inAuth && !onWelcome) {
       router.replace(role === 'restaurant_owner' ? '/(owner)' : '/(customer)');
     } else if (!onWelcome && role === 'restaurant_owner' && inCustomer) {
       router.replace('/(owner)');

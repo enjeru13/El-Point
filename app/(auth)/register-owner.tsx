@@ -34,6 +34,7 @@ const SAN_CRISTOBAL = { latitude: 7.7669, longitude: -72.2251 };
 import { AppText } from "@/components/ui/AppText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
+import { beginAuthFlow, endAuthFlow } from "@/lib/authFlow";
 
 const STEPS = 4;
 
@@ -192,6 +193,7 @@ export default function RegisterOwnerScreen() {
 
   async function handleRegister() {
     setLoading(true);
+    beginAuthFlow();
 
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
@@ -200,12 +202,14 @@ export default function RegisterOwnerScreen() {
     });
 
     if (error) {
+      endAuthFlow();
       setLoading(false);
       toast.error(authErrorEs(error.message));
       return;
     }
 
     if (!data.session) {
+      endAuthFlow();
       setLoading(false);
       Alert.alert(
         "Confirma tu correo",
@@ -240,10 +244,12 @@ export default function RegisterOwnerScreen() {
     ) as any;
 
     if (rpcError || !newId) {
+      endAuthFlow();
       setLoading(false);
       toast.error(
         "Cuenta creada, pero no pudimos registrar el local. Hazlo desde tu panel.",
       );
+      router.replace("/(owner)");
       return;
     }
 
@@ -287,6 +293,7 @@ export default function RegisterOwnerScreen() {
     setLoading(false);
     // Pantalla de bienvenida para dueños; su CTA entra a /(owner).
     router.replace("/(auth)/welcome?role=owner");
+    endAuthFlow();
   }
 
   return (

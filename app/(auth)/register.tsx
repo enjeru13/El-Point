@@ -25,6 +25,7 @@ import { useCategories } from '@/lib/queries/categories';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { capWidth, FORM_MAX_W, useIsTablet } from '@/lib/responsive';
+import { beginAuthFlow, endAuthFlow } from '@/lib/authFlow';
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
 
@@ -116,6 +117,7 @@ export default function RegisterScreen() {
 
   async function handleSignUp() {
     setLoading(true);
+    beginAuthFlow();
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
@@ -129,6 +131,7 @@ export default function RegisterScreen() {
     });
 
     if (error) {
+      endAuthFlow();
       setLoading(false);
       toast.error(authErrorEs(error.message));
       return;
@@ -136,6 +139,7 @@ export default function RegisterScreen() {
 
     // Confirmación de email activada → todavía sin sesión
     if (!data.session) {
+      endAuthFlow();
       setLoading(false);
       Alert.alert('Casi listo', 'Te enviamos un correo para confirmar tu cuenta.');
       router.replace('/(auth)/login');
@@ -157,7 +161,8 @@ export default function RegisterScreen() {
       toast.error('Cuenta creada, pero no pudimos guardar tus preferencias. Ajústalas en tu perfil.');
     }
     // Pantalla de bienvenida; su CTA entra a /(customer).
-    router.replace('/(auth)/welcome');
+    router.replace('/(auth)/welcome?role=customer');
+    endAuthFlow();
   }
 
   function handleContinue() {
