@@ -34,9 +34,9 @@ import { distanceKm } from '@/lib/geo';
 // San Cristobal, Tachira, Venezuela
 const DEFAULT_ORIGIN = { latitude: 7.7669, longitude: -72.2251 };
 const RADIUS_KM = 8;
-// Si estás a más de esto del centro de San Cristóbal, el mapa muestra la ciudad
+// Si estás a más de esto (km) del centro de San Cristóbal, el mapa muestra la ciudad
 // (con un radio amplio) en vez de quedarse vacío alrededor de tu ubicación.
-const SERVICE_AREA_KM = 40;
+const SERVICE_AREA_KM = 15;
 const CITY_RADIUS_KM = 25;
 
 type Restaurant = NearbyRestaurant & { icon: string; categoryLabel: string | null; distanceLabel: string; amenities: NearbyAmenity[] };
