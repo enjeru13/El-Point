@@ -275,6 +275,18 @@ export default function SettingsScreen() {
 
               <Divider />
               <Pressable
+                onPress={() => router.push('/blocked-users' as any)}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
+              >
+                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
+                  <Icon name="account-cancel-outline" size={20} color={C.primary} />
+                </View>
+                <AppText variant="bodyStrong" style={{ flex: 1 }}>Usuarios bloqueados</AppText>
+                <Icon name="chevron-right" size={20} color={C.outline} />
+              </Pressable>
+
+              <Divider />
+              <Pressable
                 onPress={async () => { await resetAllTours(); router.back(); }}
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
               >

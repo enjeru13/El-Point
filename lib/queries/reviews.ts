@@ -1,4 +1,5 @@
 import { restaurantKeys } from "@/lib/queries/restaurants";
+import { fetchBlockedIds } from "@/lib/queries/blocks";
 import { reviewPhotoUrl, uploadReviewPhoto } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -67,7 +68,9 @@ async function fetchReviews(restaurantId: string): Promise<Review[]> {
   const { data: userData } = await supabase.auth.getUser();
   const viewerId = userData.user?.id ?? null;
 
-  const { data, error } = await supabase
+  const blockedIds = viewerId ? await fetchBlockedIds(viewerId) : new Set<string>();
+
+  const { data: allReviews, error } = await supabase
     .from("reviews")
     .select(
       `id, restaurant_id, rating, body, helpful_count, created_at, updated_at, moderation,
@@ -79,6 +82,9 @@ async function fetchReviews(restaurantId: string): Promise<Review[]> {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
+
+  // Las reseñas de personas que bloqueaste no se muestran.
+  const data = (allReviews ?? []).filter((r: any) => !(r.author?.id && blockedIds.has(r.author.id)));
 
   let markedIds = new Set<string>();
   if (viewerId && data.length > 0) {

@@ -3,6 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Icon } from "@/components/ui/Icon";
 import { StarRow } from "@/components/ui/StarRow";
 import { Avatar } from "@/components/ui/Avatar";
+import { useBlockUser } from "@/lib/queries/blocks";
 import { AppText } from "@/components/ui/AppText";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Button } from "@/components/ui/Button";
@@ -456,6 +457,7 @@ export default function RestaurantProfileScreen() {
   const reportRestaurant = useReportRestaurant(id);
   const toggleHelpful = useToggleHelpful(id);
   const replyMut = useReplyToReview(id);
+  const blockUser = useBlockUser();
   const myProfileQ = useMyProfile();
   const paymentCatalogQ = usePaymentMethods();
   // Menú con precios: solo se pide si el local tiene plan (sin plan el servidor tampoco lo entrega).
@@ -751,6 +753,25 @@ export default function RestaurantProfileScreen() {
         onError: (e: any) =>
           toast.error(e?.message ?? "No se pudo enviar el reporte."),
       },
+    );
+  }
+
+  function confirmBlock(author: NonNullable<Review["author"]>) {
+    Alert.alert(
+      `Bloquear a ${authorName(author)}`,
+      "No verás más sus reseñas. Puedes desbloquearlo cuando quieras en Ajustes, Usuarios bloqueados.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Bloquear",
+          style: "destructive",
+          onPress: () =>
+            blockUser.mutate(author.id, {
+              onSuccess: () => toast.success("Usuario bloqueado"),
+              onError: (e: any) => toast.error(e?.message ?? "No se pudo bloquear"),
+            }),
+        },
+      ],
     );
   }
 
@@ -1986,16 +2007,30 @@ export default function RestaurantProfileScreen() {
                     )}
 
                     {!isMine && !!myProfileQ.data && (
-                      <Pressable
-                        onPress={() => reportSheetRef.current?.present(r.id)}
-                        hitSlop={8}
-                        style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
-                      >
-                        <Icon name="flag-outline" size={13} color={C.outline} />
-                        <AppText variant="caption" color={C.outline}>
-                          Reportar
-                        </AppText>
-                      </Pressable>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+                        {!!r.author?.id && (
+                          <Pressable
+                            onPress={() => confirmBlock(r.author!)}
+                            hitSlop={8}
+                            style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+                          >
+                            <Icon name="account-cancel-outline" size={13} color={C.outline} />
+                            <AppText variant="caption" color={C.outline}>
+                              Bloquear
+                            </AppText>
+                          </Pressable>
+                        )}
+                        <Pressable
+                          onPress={() => reportSheetRef.current?.present(r.id)}
+                          hitSlop={8}
+                          style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+                        >
+                          <Icon name="flag-outline" size={13} color={C.outline} />
+                          <AppText variant="caption" color={C.outline}>
+                            Reportar
+                          </AppText>
+                        </Pressable>
+                      </View>
                     )}
                   </View>
                   )}

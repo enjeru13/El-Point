@@ -116,7 +116,7 @@ Inicio de sesión: correo y contraseña, Google y Apple.
 
 La app no vende nada dentro de ella y no muestra precios de planes. Las funciones del perfil completo de un local las activa nuestro equipo desde un panel administrativo.
 
-Contenido de usuarios: las reseñas se pueden reportar (botón "Reportar" en cada reseña) y los locales también ("Reportar este local"). Un equipo de moderación las revisa. Contacto de soporte: atencion.elpoint@gmail.com y desde la app, en Ajustes, "Ayuda y soporte".
+Contenido de usuarios: las reseñas se pueden reportar (botón "Reportar" en cada reseña) y los locales también ("Reportar este local"). Cada reseña ajena tiene un botón "Bloquear" para dejar de ver a esa persona; los bloqueados se gestionan en Ajustes, "Usuarios bloqueados". Un equipo de moderación revisa los reportes. Contacto de soporte: atencion.elpoint@gmail.com y desde la app, en Ajustes, "Ayuda y soporte".
 
 Para eliminar la cuenta: Ajustes, "Eliminar cuenta".
 
@@ -143,7 +143,7 @@ Las imágenes de `landing/shots` son para la web, no cumplen estas medidas.
 - [ ] Capturas de iPhone y iPad subidas.
 - [ ] Formulario de privacidad completo.
 - [ ] Países: Venezuela y Colombia. Si no eliges la Unión Europea evitas el formulario de comerciante (DSA).
-- [ ] Bloquear usuarios: Apple (guía 1.2) pide poder reportar **y bloquear** a usuarios abusivos en apps con contenido de usuarios. Reportar ya existe; bloquear no. Conviene agregarlo antes de enviar.
+- [x] Bloquear usuarios: hecho (botón "Bloquear" en cada reseña y lista en Ajustes). Requiere `npx supabase db push` con la migración `20261003000000_user_blocks.sql`.
 - [ ] Build de producción subido (sección siguiente).
 
 ## 9. Subir el build a TestFlight y a la App Store
