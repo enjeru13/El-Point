@@ -27,12 +27,17 @@ import { useCategories } from '@/lib/queries/categories';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 import { capWidth, useResponsive } from '@/lib/responsive';
 import { ChipRow } from '@/components/ui/ChipRow';
+import { distanceKm } from '@/lib/geo';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 // San Cristobal, Tachira, Venezuela
 const DEFAULT_ORIGIN = { latitude: 7.7669, longitude: -72.2251 };
 const RADIUS_KM = 8;
+// Si estás a más de esto del centro de San Cristóbal, el mapa muestra la ciudad
+// (con un radio amplio) en vez de quedarse vacío alrededor de tu ubicación.
+const SERVICE_AREA_KM = 40;
+const CITY_RADIUS_KM = 25;
 
 type Restaurant = NearbyRestaurant & { icon: string; categoryLabel: string | null; distanceLabel: string; amenities: NearbyAmenity[] };
 
@@ -333,8 +338,10 @@ export default function MapScreen() {
     { ref: tourGpsRef, icon: 'crosshairs-gps', title: 'Céntrate en tu ubicación', text: 'Un toque y el mapa se mueve a donde estás.' },
   ];
 
-  const origin = userLocation ?? DEFAULT_ORIGIN;
-  const nearbyQ = useNearby(origin, RADIUS_KM, activeCategory === 'all' ? null : activeCategory);
+  const outsideArea =
+    !!userLocation && distanceKm(DEFAULT_ORIGIN, userLocation.latitude, userLocation.longitude) > SERVICE_AREA_KM;
+  const origin = userLocation && !outsideArea ? userLocation : DEFAULT_ORIGIN;
+  const nearbyQ = useNearby(origin, userLocation && !outsideArea ? RADIUS_KM : CITY_RADIUS_KM, activeCategory === 'all' ? null : activeCategory);
   const iconsQ = useRestaurantIcons();
   const amenitiesMapQ = useRestaurantAmenitiesMap();
 
@@ -555,6 +562,11 @@ export default function MapScreen() {
           <View style={{ alignSelf: 'center', marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, ...shadow.sm }}>
             <ActivityIndicator size="small" color={C.primary} />
             <AppText variant="caption" color={C.onSurfaceVariant}>Buscando lugares...</AppText>
+          </View>
+        ) : outsideArea && filtered.length > 0 ? (
+          <View style={{ alignSelf: 'center', marginTop: 4, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, ...shadow.sm }}>
+            <Icon name="map-marker-outline" size={13} color={C.outline} />
+            <AppText variant="caption" color={C.onSurfaceVariant}>Estás lejos de San Cristóbal: te mostramos la ciudad</AppText>
           </View>
         ) : filtered.length === 0 ? (
           <Pressable

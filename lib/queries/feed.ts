@@ -26,6 +26,8 @@ export type FeedRestaurant = {
 
 export type FeedItem = {
   id: string;
+  /** Local aún sin reseñas: sale en el Inicio como "Nuevo en El Point". */
+  isNew?: boolean;
   rating: number;
   body: string;
   created_at: string;
@@ -101,11 +103,60 @@ async function fetchFeed(): Promise<FeedItem[]> {
 
   // Una card por local: el rank más reciente (data ya viene ordenada desc).
   const seen = new Set<string>();
-  return mapped.filter((item) => {
+  const withReviews = mapped.filter((item) => {
     if (seen.has(item.restaurant.id)) return false;
     seen.add(item.restaurant.id);
     return true;
   });
+
+  // Los locales sin reseñas también salen en el Inicio, como "Nuevo en El Point":
+  // si no, un local recién registrado sería invisible hasta que alguien lo rankee.
+  const { data: fresh } = await supabase
+    .from("restaurants")
+    .select(
+      `id, name, address, rating_avg, rating_count, price_level, promo_text, promo_ends_at, cover_url, latitude, longitude, boost_until, founder_rank, paid_until, ghost_kitchen, zone_label, created_at,
+       restaurant_categories ( categories ( slug, label, icon ) ),
+       restaurant_amenities ( amenities ( id, slug, label, icon ) )`,
+    )
+    .eq("status", "approved")
+    .eq("is_active", true)
+    .eq("rating_count", 0)
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  const newItems: FeedItem[] = (fresh ?? [])
+    .filter((r: any) => !seen.has(r.id))
+    .map((r: any) => ({
+      id: `new-${r.id}`,
+      isNew: true,
+      rating: 0,
+      body: "",
+      created_at: r.created_at,
+      author: null,
+      restaurant: {
+        id: r.id,
+        name: r.name,
+        address: r.address,
+        rating_avg: r.rating_avg,
+        rating_count: r.rating_count,
+        price_level: num(r.price_level),
+        promo_text: hasPlan(r) ? activePromo(r) : null,
+        cover_url: hasPlan(r) ? (r.cover_url ?? null) : null,
+        lat: num(r.latitude),
+        lng: num(r.longitude),
+        boost_until: hasPlan(r) ? (r.boost_until ?? null) : null,
+        founder_rank: r.founder_rank ?? null,
+        has_plan: hasPlan(r),
+        ghost_kitchen: !!r.ghost_kitchen,
+        zone_label: r.zone_label ?? null,
+        categories: mapCategories(r.restaurant_categories),
+        amenities: hasPlan(r) ? mapAmenities(r.restaurant_amenities) : [],
+      },
+    }));
+
+  return [...withReviews, ...newItems].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
 }
 
 export function useHomeFeed() {

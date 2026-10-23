@@ -318,8 +318,25 @@ function ReviewCard({
           </View>
         )}
 
+        {/* Local nuevo: invita a ser el primero en rankearlo */}
+        {!compact && item.isNew && (
+          <View
+            style={{
+              padding: 12,
+              borderRadius: 12,
+              backgroundColor: C.surfaceContainerLow,
+              borderLeftWidth: 3,
+              borderLeftColor: C.primary,
+            }}
+          >
+            <AppText variant="body" color={C.onSurfaceVariant} style={{ lineHeight: 22 }}>
+              Aún sin ranks. Sé el primero en contar cómo te fue.
+            </AppText>
+          </View>
+        )}
+
         {/* Quote */}
-        {!compact && (
+        {!compact && !item.isNew && (
           <View
             style={{
               padding: 12,
@@ -351,25 +368,50 @@ function ReviewCard({
             borderTopColor: C.outlineVariant,
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <Avatar uri={item.author?.avatar_url} size={36} />
-            <View>
-              <AppText variant="bodyStrong">{authorLabel(item.author)}</AppText>
+          {item.isNew ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
               <View
                 style={{
-                  flexDirection: "row",
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
                   alignItems: "center",
-                  gap: 6,
-                  marginTop: 3,
+                  justifyContent: "center",
+                  backgroundColor: C.primaryFixed,
+                  borderWidth: 1,
+                  borderColor: C.border,
                 }}
               >
-                <RankBadge level={item.author?.level ?? 1} />
-                <AppText variant="caption" color={C.outline}>
+                <Icon name="creation" size={18} color={C.primary} />
+              </View>
+              <View>
+                <AppText variant="bodyStrong">Nuevo en El Point</AppText>
+                <AppText variant="caption" color={C.outline} style={{ marginTop: 3 }}>
                   {timeAgo(item.created_at)}
                 </AppText>
               </View>
             </View>
-          </View>
+          ) : (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <Avatar uri={item.author?.avatar_url} size={36} />
+              <View>
+                <AppText variant="bodyStrong">{authorLabel(item.author)}</AppText>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 6,
+                    marginTop: 3,
+                  }}
+                >
+                  <RankBadge level={item.author?.level ?? 1} />
+                  <AppText variant="caption" color={C.outline}>
+                    {timeAgo(item.created_at)}
+                  </AppText>
+                </View>
+              </View>
+            </View>
+          )}
 
           <Pressable
             onPress={onToggleFavorite}
