@@ -105,7 +105,7 @@ export default function OwnerHomeScreen() {
   const tourSteps: TourStep[] = [
     { ref: tourStatusRef, icon: 'store-outline', title: 'Estado de tu local', text: 'Si te encuentran, hasta cuándo tienes el perfil completo y cuántos días de Destacado te quedan.' },
     { ref: tourStatsRef, icon: 'chart-box-outline', title: 'Tu resumen', text: 'Visitas, contactos y pedidos de los últimos 7 días.' },
-    { ref: tourReviewsRef, icon: 'comment-text-outline', title: 'Reseñas recientes', text: 'Tócalas para responder. Responder todas suma días de Destacado gratis.' },
+    { ref: tourReviewsRef, icon: 'comment-text-outline', title: 'Reseñas recientes', text: 'Tócalas para responder (con plan). Responder tus reseñas suma días de Destacado gratis.' },
     { ref: tourBellRef, icon: 'bell-outline', title: 'Notificaciones', text: 'Aquí llegan las nuevas reseñas y avisos de tu local.' },
   ];
 

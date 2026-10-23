@@ -13,7 +13,8 @@ import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
 import { Linking, Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { TourGuide, type TourStep } from "@/components/tour/TourGuide";
 
 type Group = "carta" | "info" | "difusion";
 type Row = { key: string; group: Group; icon: string; title: string; summary: string; locked?: boolean };
@@ -36,6 +37,24 @@ export default function MyLocalScreen() {
   const menuQ = useMenu(r?.id, plan);
   const galleryQ = useGallery(r?.id, plan);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Coach-mark targets for the first-use tour.
+  const tourBannerRef = useRef<View>(null);
+  const tourGroupRefs = {
+    carta: useRef<View>(null),
+    info: useRef<View>(null),
+    difusion: useRef<View>(null),
+  };
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollY = useRef(0);
+  const tourSteps: TourStep[] = [
+    ...(plan
+      ? []
+      : [{ ref: tourBannerRef, icon: "lock-outline", title: "Tu perfil es básico", text: "Las secciones con candado se activan con un plan. Toca este aviso para ver qué incluye." }]),
+    { ref: tourGroupRefs.carta, icon: "silverware-fork-knife", title: "Tu carta", text: "Menú con precios y plato del día, promociones y pedidos por WhatsApp. Cada fila se abre en su propia pantalla." },
+    { ref: tourGroupRefs.info, icon: "clock-outline", title: "Información del local", text: "Horario, comodidades, métodos de pago y fotos: lo que el comensal ve en tu perfil." },
+    { ref: tourGroupRefs.difusion, icon: "qrcode", title: "Difusión", text: "Imprime tu cartel QR “Rankéanos” y consigue más reseñas." },
+  ];
 
   async function onRefresh() {
     setRefreshing(true);
@@ -158,12 +177,17 @@ export default function MyLocalScreen() {
       </View>
 
       <ScrollView
+        ref={scrollRef}
+        onScroll={(e) => { scrollY.current = e.nativeEvent.contentOffset.y; }}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 110, gap: 20, ...capWidth(isTablet) }}
       >
         {!plan && (
           <Pressable
+            ref={tourBannerRef}
+            collapsable={false}
             onPress={() => router.push("/subscription" as any)}
             style={{
               flexDirection: "row",
@@ -193,7 +217,7 @@ export default function MyLocalScreen() {
           const order = g.key === "carta" ? ["menu", "promo", "orders"] : g.key === "info" ? ["hours", "amenities", "payments", "photos"] : ["qr"];
           items.sort((x, y) => order.indexOf(x.key) - order.indexOf(y.key));
           return (
-            <View key={g.key} style={{ gap: 8 }}>
+            <View key={g.key} ref={tourGroupRefs[g.key]} collapsable={false} style={{ gap: 8 }}>
               <AppText variant="overline" color={C.outline} style={{ paddingHorizontal: 4 }}>
                 {g.title}
               </AppText>
@@ -238,6 +262,8 @@ export default function MyLocalScreen() {
           );
         })}
       </ScrollView>
+
+      <TourGuide tourKey="owner_local" steps={tourSteps} scrollRef={scrollRef} scrollOffset={scrollY} />
     </View>
   );
 }
