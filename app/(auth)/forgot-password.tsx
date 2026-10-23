@@ -149,6 +149,10 @@ export default function ForgotPasswordScreen() {
                 placeholder="tucorreo@ejemplo.com"
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoCorrect={false}
+                spellCheck={false}
+                autoComplete="email"
+                textContentType="emailAddress"
                 value={email}
                 onChangeText={setEmail}
               />

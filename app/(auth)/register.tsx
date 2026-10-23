@@ -259,8 +259,13 @@ export default function RegisterScreen() {
                   placeholder="mateo@ejemplo.com"
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  autoCorrect={false}
+                  spellCheck={false}
+                  autoComplete="email"
+                  textContentType="emailAddress"
                   value={email}
                   onChangeText={setEmail}
+                  error={email.trim().length > 0 && !emailValid ? 'Usa solo letras sin tildes ni ñ (ej. nombre@gmail.com).' : null}
                 />
               </View>
 

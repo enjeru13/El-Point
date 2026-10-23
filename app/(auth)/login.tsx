@@ -125,6 +125,10 @@ export default function LoginScreen() {
               placeholder="hambriento@elpoint.app"
               keyboardType="email-address"
               autoCapitalize="none"
+              autoCorrect={false}
+              spellCheck={false}
+              autoComplete="email"
+              textContentType="emailAddress"
               value={email}
               onChangeText={setEmail}
             />
