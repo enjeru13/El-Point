@@ -1,6 +1,7 @@
 import { Icon } from '@/components/ui/Icon';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import {
@@ -71,6 +72,7 @@ export default function ProfileScreen() {
   const missionsQ = useMyMissions();
 
   const updateMut = useUpdateMyProfile();
+  const qc = useQueryClient();
   const toast = useToast();
 
   const profile = profileQ.data ?? null;
@@ -90,11 +92,13 @@ export default function ProfileScreen() {
   const [favCats, setFavCats] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    if (!profile) return;
+    // Mientras editas no se pisan tus cambios (subir la foto refresca el perfil).
+    if (!profile || editing) return;
     setUsername(profile.username ?? '');
     setFullName(profile.full_name ?? '');
     setBio(profile.bio ?? '');
     setFavCats(new Set(profile.favorite_categories));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
 
   // Orden estable mientras se edita: las ya elegidas (al entrar a editar)
@@ -175,6 +179,8 @@ export default function ProfileScreen() {
     setAvatarUploading(true);
     try {
       const url = await uploadAvatar(profile.id, uri);
+      // La foto se ve al instante, sin esperar a que el perfil se vuelva a leer.
+      qc.setQueryData(['my-profile'], { ...profile, avatar_url: url });
       updateMut.mutate({ avatar_url: url });
     } catch (e: any) {
       toast.error(e?.message ?? 'No se pudo subir el avatar');

@@ -29,7 +29,7 @@ import { queryClient } from '@/lib/query';
 import { useNotificationsRealtime } from '@/lib/queries/notifications';
 import { ToastProvider } from '@/lib/toast';
 import { AppThemeProvider, useTheme } from '@/lib/ThemeContext';
-import { hasSeenOnboarding } from '@/lib/onboarding';
+import { hasSeenOnboarding, markOnboardingSeen } from '@/lib/onboarding';
 import { SettingsBridge } from '@/components/SettingsBridge';
 import { PushBridge } from '@/components/PushBridge';
 import { SplashScreenView } from '@/components/ui/SplashScreenView';
@@ -69,6 +69,16 @@ export default function RootLayout() {
   useEffect(() => {
     hasSeenOnboarding().then(setOnboardingSeen);
   }, []);
+
+  // Quien ya inició sesión ya pasó por el onboarding. Sin esto, la marca solo
+  // se leía al abrir la app: al cerrar sesión en la misma sesión de uso volvía
+  // a mostrarse el onboarding (hasta reiniciar la app).
+  useEffect(() => {
+    if (session && onboardingSeen === false) {
+      markOnboardingSeen();
+      setOnboardingSeen(true);
+    }
+  }, [session, onboardingSeen]);
 
   // Orientation: unlocked at the native level (app.config.ts) — phones lock
   // to portrait here, tablets stay free to rotate. This native module isn't
