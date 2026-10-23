@@ -1,14 +1,22 @@
-import { Image } from "expo-image";
-import { impact } from "@/lib/haptics";
+import { TourGuide, type TourStep } from "@/components/tour/TourGuide";
 import { AppLogo } from "@/components/ui/AppLogo";
+import { AppText } from "@/components/ui/AppText";
 import { Avatar } from "@/components/ui/Avatar";
-import { Icon } from "@/components/ui/Icon";
-import { RankBadge } from "@/components/ui/RankBadge";
 import { Chip } from "@/components/ui/Chip";
+import { ChipRow } from "@/components/ui/ChipRow";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Icon } from "@/components/ui/Icon";
 import { NotificationBell } from "@/components/ui/NotificationBell";
+import { QuickPickModal } from "@/components/ui/QuickPickModal";
+import { RankBadge } from "@/components/ui/RankBadge";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { SearchBar } from "@/components/ui/SearchBar";
+import { SkeletonList } from "@/components/ui/Skeleton";
 import { StarBadge } from "@/components/ui/StarBadge";
+import { distanceKm, fmtKm, type LatLng } from "@/lib/geo";
+import { impact } from "@/lib/haptics";
+import { isOpenNow } from "@/lib/hours";
+import { useCategories } from "@/lib/queries/categories";
 import {
   useFavoriteIds,
   useFavorites,
@@ -16,32 +24,19 @@ import {
   useToggleFavorite,
   type FeedItem,
 } from "@/lib/queries/feed";
-import { useCategories } from "@/lib/queries/categories";
+import { useMyProfile } from "@/lib/queries/me";
 import { isBoosted, isFounder } from "@/lib/queries/restaurants";
 import { useRestaurantSearch, type SearchResult } from "@/lib/queries/search";
-import { QuickPickModal } from "@/components/ui/QuickPickModal";
-import { isOpenNow } from "@/lib/hours";
-import { useMyProfile } from "@/lib/queries/me";
+import { capWidth, useIsTablet } from "@/lib/responsive";
 import { useSettings } from "@/lib/settings";
-import { useToast } from "@/lib/toast";
-import { distanceKm, fmtKm, type LatLng } from "@/lib/geo";
 import { useTheme } from "@/lib/ThemeContext";
+import { useToast } from "@/lib/toast";
+import { Image } from "expo-image";
+import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { TourGuide, type TourStep } from "@/components/tour/TourGuide";
-import { capWidth, useIsTablet } from "@/lib/responsive";
-import { ChipRow } from "@/components/ui/ChipRow";
-import * as Location from "expo-location";
-import {
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  View,
-} from "react-native";
+import { Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AppText } from "@/components/ui/AppText";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { SkeletonList } from "@/components/ui/Skeleton";
 
 // ─── Filtros fijos; el resto sale de la DB (useCategories) ───────────────────
 
@@ -166,7 +161,9 @@ function ReviewCard({
             }}
           >
             <Icon name="tag" size={13} color={C.onPrimary} />
-            <AppText variant="caption" color={C.onPrimary}>PROMO</AppText>
+            <AppText variant="caption" color={C.onPrimary}>
+              PROMO
+            </AppText>
           </View>
         )}
       </View>
@@ -180,40 +177,77 @@ function ReviewCard({
           const founder = isFounder(item.restaurant);
           const boosted = isBoosted(item.restaurant);
           const founderBadge = founder && (
-            <View key="founder" style={{
-              width: 20, height: 20, borderRadius: 10,
-              alignItems: "center", justifyContent: "center",
-              backgroundColor: "#f0c26022", borderWidth: 1, borderColor: "#f0c26066",
-            }}>
+            <View
+              key="founder"
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#f0c26022",
+                borderWidth: 1,
+                borderColor: "#f0c26066",
+              }}
+            >
               <Icon name="crown" size={11} color="#b8860b" />
             </View>
           );
           const boostedBadge = boosted && (
-            <View key="boosted" style={{
-              flexDirection: "row", alignItems: "center", gap: 3,
-              paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99,
-              backgroundColor: C.primary + "22", borderWidth: 1, borderColor: C.primary + "55",
-            }}>
+            <View
+              key="boosted"
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 3,
+                paddingHorizontal: 8,
+                paddingVertical: 2,
+                borderRadius: 99,
+                backgroundColor: C.primary + "22",
+                borderWidth: 1,
+                borderColor: C.primary + "55",
+              }}
+            >
               <Icon name="fire" size={11} color={C.primary} />
-              <AppText variant="caption" color={C.primary} style={{ fontSize: 10 }}>Destacado</AppText>
+              <AppText
+                variant="caption"
+                color={C.primary}
+                style={{ fontSize: 10 }}
+              >
+                Destacado
+              </AppText>
             </View>
           );
           const ghostBadge = r.ghost_kitchen && (
-            <View key="ghost" style={{
-              width: 20, height: 20, borderRadius: 10,
-              alignItems: "center", justifyContent: "center",
-              backgroundColor: C.surfaceContainerHighest, borderWidth: 1, borderColor: C.outlineVariant,
-            }}>
+            <View
+              key="ghost"
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: C.surfaceContainerHighest,
+                borderWidth: 1,
+                borderColor: C.outlineVariant,
+              }}
+            >
               <Icon name="mdi:ghost" size={11} color={C.onSurfaceVariant} />
             </View>
           );
 
           return (
             <>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+              >
                 <AppText
                   variant="heading"
-                  style={{ fontSize: compact ? 17 : 20, lineHeight: compact ? 21 : 25, flex: 1 }}
+                  style={{
+                    fontSize: compact ? 17 : 20,
+                    lineHeight: compact ? 21 : 25,
+                    flex: 1,
+                  }}
                   numberOfLines={1}
                 >
                   {item.restaurant.name}
@@ -224,7 +258,9 @@ function ReviewCard({
               </View>
 
               {!!meta && (
-                <AppText variant="caption" color={C.outline}>{meta}</AppText>
+                <AppText variant="caption" color={C.outline}>
+                  {meta}
+                </AppText>
               )}
             </>
           );
@@ -236,8 +272,11 @@ function ReviewCard({
               <View
                 key={a.slug}
                 style={{
-                  width: 26, height: 26, borderRadius: 8,
-                  alignItems: "center", justifyContent: "center",
+                  width: 26,
+                  height: 26,
+                  borderRadius: 8,
+                  alignItems: "center",
+                  justifyContent: "center",
                   backgroundColor: C.surfaceContainerLow,
                 }}
               >
@@ -245,7 +284,11 @@ function ReviewCard({
               </View>
             ))}
             {r.amenities.length > 4 && (
-              <AppText variant="caption" color={C.outline} style={{ fontSize: 11 }}>
+              <AppText
+                variant="caption"
+                color={C.outline}
+                style={{ fontSize: 11 }}
+              >
                 +{r.amenities.length - 4}
               </AppText>
             )}
@@ -312,7 +355,14 @@ function ReviewCard({
             <Avatar uri={item.author?.avatar_url} size={36} />
             <View>
               <AppText variant="bodyStrong">{authorLabel(item.author)}</AppText>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 3 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 6,
+                  marginTop: 3,
+                }}
+              >
                 <RankBadge level={item.author?.level ?? 1} />
                 <AppText variant="caption" color={C.outline}>
                   {timeAgo(item.created_at)}
@@ -341,7 +391,10 @@ function ReviewCard({
               size={14}
               color={favorited ? "#fff" : C.primary}
             />
-            <AppText variant="bodyStrong" color={favorited ? "#fff" : C.primary}>
+            <AppText
+              variant="bodyStrong"
+              color={favorited ? "#fff" : C.primary}
+            >
               Favorito
             </AppText>
           </Pressable>
@@ -412,7 +465,12 @@ function FavoriteRow({
         }}
       >
         {cover ? (
-          <Image source={{ uri: cover }} style={{ width: "100%", height: "100%" }} contentFit="cover" transition={150} />
+          <Image
+            source={{ uri: cover }}
+            style={{ width: "100%", height: "100%" }}
+            contentFit="cover"
+            transition={150}
+          />
         ) : (
           <Icon name={icon} size={24} color={C.primary} />
         )}
@@ -421,18 +479,36 @@ function FavoriteRow({
         <AppText variant="bodyStrong" numberOfLines={1}>
           {name}
         </AppText>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 1 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 6,
+            marginTop: 1,
+          }}
+        >
           {dist && (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 3 }}
+            >
               <Icon name="map-marker-distance" size={11} color={C.primary} />
-              <AppText variant="caption" color={C.primary}>{dist}</AppText>
+              <AppText variant="caption" color={C.primary}>
+                {dist}
+              </AppText>
             </View>
           )}
           {dist && address && (
-            <AppText variant="caption" color={C.outlineVariant}>·</AppText>
+            <AppText variant="caption" color={C.outlineVariant}>
+              ·
+            </AppText>
           )}
           {address && (
-            <AppText variant="caption" color={C.outline} numberOfLines={1} style={{ flex: 1 }}>
+            <AppText
+              variant="caption"
+              color={C.outline}
+              numberOfLines={1}
+              style={{ flex: 1 }}
+            >
               {address}
             </AppText>
           )}
@@ -504,7 +580,9 @@ export default function HomeScreen() {
   function openQuickPick() {
     if ((searchQ.data ?? []).length === 0) {
       toast.error(
-        searchQ.isLoading ? "Un momento, cargando locales…" : "No encontramos locales todavía",
+        searchQ.isLoading
+          ? "Un momento, cargando locales…"
+          : "No encontramos locales todavía",
       );
       return;
     }
@@ -519,10 +597,30 @@ export default function HomeScreen() {
   const tourTabsRef = useRef<View>(null);
   const tourBellRef = useRef<View>(null);
   const tourSteps: TourStep[] = [
-    { ref: tourSearchRef, icon: "magnify", title: "Busca lo que se te antoje", text: "Escribe un plato, un tipo de comida o el nombre del local y aparece al toque." },
-    { ref: tourChipsRef, icon: "silverware-fork-knife", title: "Filtra por categoría", text: "Toca cualquier chip para ver solo esa categoría, o \"Promos\" para las ofertas activas." },
-    { ref: tourTabsRef, icon: "star-outline", title: "Últimos ranks o tus favoritos", text: "Cambia entre lo que la gente está calificando ahora y los locales que ya guardaste." },
-    { ref: tourBellRef, icon: "bell-outline", title: "Tus notificaciones", text: "Aquí llegan tus subidas de nivel, respuestas a tus reseñas y promos cerca de ti." },
+    {
+      ref: tourSearchRef,
+      icon: "magnify",
+      title: "Busca lo que se te antoje",
+      text: "Escribe un plato, un tipo de comida o el nombre del local y aparece al toque.",
+    },
+    {
+      ref: tourChipsRef,
+      icon: "silverware-fork-knife",
+      title: "Filtra por categoría",
+      text: 'Toca cualquier chip para ver solo esa categoría, o "Promos" para las ofertas activas.',
+    },
+    {
+      ref: tourTabsRef,
+      icon: "star-outline",
+      title: "Últimos ranks o tus favoritos",
+      text: "Cambia entre lo que la gente está calificando ahora y los locales que ya guardaste.",
+    },
+    {
+      ref: tourBellRef,
+      icon: "bell-outline",
+      title: "Tus notificaciones",
+      text: "Aquí llegan tus subidas de nivel, respuestas a tus reseñas y promos cerca de ti.",
+    },
   ];
 
   const firstName = profileQ.data?.full_name?.trim().split(/\s+/)[0];
@@ -532,7 +630,10 @@ export default function HomeScreen() {
 
   // Distance is opt-in; never prompt from the feed — only use a grant made elsewhere.
   useEffect(() => {
-    if (!showDistance) { setUserLoc(null); return; }
+    if (!showDistance) {
+      setUserLoc(null);
+      return;
+    }
     let cancelled = false;
     (async () => {
       try {
@@ -540,13 +641,20 @@ export default function HomeScreen() {
         if (!perm.granted) return;
         const pos =
           (await Location.getLastKnownPositionAsync()) ??
-          (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low }));
+          (await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Low,
+          }));
         if (!cancelled && pos) {
-          setUserLoc({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+          setUserLoc({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          });
         }
       } catch {}
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [showDistance]);
 
   async function onRefresh() {
@@ -569,7 +677,9 @@ export default function HomeScreen() {
   // Categorías favoritas del usuario (ids -> slugs) para ordenar el feed.
   const prefIds = new Set(profileQ.data?.favorite_categories ?? []);
   const prefSlugs = new Set(
-    (categoriesQ.data ?? []).filter((c) => prefIds.has(c.id)).map((c) => c.slug),
+    (categoriesQ.data ?? [])
+      .filter((c) => prefIds.has(c.id))
+      .map((c) => c.slug),
   );
 
   const q = query.trim().toLowerCase();
@@ -588,13 +698,18 @@ export default function HomeScreen() {
     })
     .sort((a, b) => {
       // Destacados primero siempre, en cualquier categoría.
-      const boostDiff = (isBoosted(b.restaurant) ? 1 : 0) - (isBoosted(a.restaurant) ? 1 : 0);
+      const boostDiff =
+        (isBoosted(b.restaurant) ? 1 : 0) - (isBoosted(a.restaurant) ? 1 : 0);
       if (boostDiff !== 0) return boostDiff;
       // El resto del orden (preferencias) solo aplica en "Todo"; respeta
       // recencia dentro de cada grupo.
       if (activeCategory !== "all" || prefSlugs.size === 0) return 0;
-      const am = a.restaurant.categories.some((c) => prefSlugs.has(c.slug)) ? 0 : 1;
-      const bm = b.restaurant.categories.some((c) => prefSlugs.has(c.slug)) ? 0 : 1;
+      const am = a.restaurant.categories.some((c) => prefSlugs.has(c.slug))
+        ? 0
+        : 1;
+      const bm = b.restaurant.categories.some((c) => prefSlugs.has(c.slug))
+        ? 0
+        : 1;
       return am - bm;
     });
 
@@ -612,7 +727,10 @@ export default function HomeScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 96, ...capWidth(isTablet) }}
+        contentContainerStyle={{
+          paddingBottom: insets.bottom + 96,
+          ...capWidth(isTablet),
+        }}
         stickyHeaderIndices={[1]}
         refreshControl={
           <RefreshControl
@@ -665,9 +783,12 @@ export default function HomeScreen() {
           >
             <View
               style={{
-                width: 32, height: 32, borderRadius: 10,
+                width: 32,
+                height: 32,
+                borderRadius: 10,
                 backgroundColor: C.primary,
-                alignItems: "center", justifyContent: "center",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               <Icon name="dice-5-outline" size={18} color="#fff" />
@@ -740,11 +861,12 @@ export default function HomeScreen() {
           {activeTab === "favorites" ? (
             favoritesQ.isLoading ? (
               <SkeletonList count={4} kind="row" />
-            ) : (favoritesQ.data ?? []).filter((f) =>
-                !q ||
-                f.name.toLowerCase().includes(q) ||
-                f.categories.some((c) => c.label.toLowerCase().includes(q)) ||
-                (f.address ?? "").toLowerCase().includes(q),
+            ) : (favoritesQ.data ?? []).filter(
+                (f) =>
+                  !q ||
+                  f.name.toLowerCase().includes(q) ||
+                  f.categories.some((c) => c.label.toLowerCase().includes(q)) ||
+                  (f.address ?? "").toLowerCase().includes(q),
               ).length === 0 ? (
               <EmptyState
                 icon="heart-outline"
@@ -759,27 +881,30 @@ export default function HomeScreen() {
               />
             ) : (
               (favoritesQ.data ?? [])
-                .filter((f) =>
-                  !q ||
-                  f.name.toLowerCase().includes(q) ||
-                  f.categories.some((c) => c.label.toLowerCase().includes(q)) ||
-                  (f.address ?? "").toLowerCase().includes(q),
+                .filter(
+                  (f) =>
+                    !q ||
+                    f.name.toLowerCase().includes(q) ||
+                    f.categories.some((c) =>
+                      c.label.toLowerCase().includes(q),
+                    ) ||
+                    (f.address ?? "").toLowerCase().includes(q),
                 )
                 .map((f) => (
-                <FavoriteRow
-                  key={f.id}
-                  id={f.id}
-                  name={f.name}
-                  address={f.address}
-                  rating={f.rating_avg}
-                  ratingCount={f.rating_count}
-                  icon={f.categories[0]?.icon ?? "silverware-fork-knife"}
-                  cover={f.cover_url}
-                  lat={f.lat}
-                  lng={f.lng}
-                  userLoc={userLoc}
-                />
-              ))
+                  <FavoriteRow
+                    key={f.id}
+                    id={f.id}
+                    name={f.name}
+                    address={f.address}
+                    rating={f.rating_avg}
+                    ratingCount={f.rating_count}
+                    icon={f.categories[0]?.icon ?? "silverware-fork-knife"}
+                    cover={f.cover_url}
+                    lat={f.lat}
+                    lng={f.lng}
+                    userLoc={userLoc}
+                  />
+                ))
             )
           ) : feedQ.isLoading ? (
             <SkeletonList count={3} kind="card" />
