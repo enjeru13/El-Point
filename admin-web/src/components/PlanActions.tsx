@@ -65,7 +65,7 @@ export function PlanActions({ id, plan, boosted }: { id: string; plan: PlanState
       </div>
 
       {panel && (
-        <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface-2 p-3">
+        <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface-2 p-3">
           {panel === "days" && (
             <>
               <label className="flex flex-col gap-1 text-xs font-semibold text-text-soft">

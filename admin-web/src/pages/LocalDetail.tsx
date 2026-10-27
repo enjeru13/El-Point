@@ -49,7 +49,7 @@ function Section({ title, icon: Icon, children, aside }: { title: string; icon?:
   return (
     <Card className="flex flex-col gap-4 p-5">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 font-display text-base font-bold text-text">
+        <h2 className="flex items-center gap-2 text-base font-semibold text-text">
           {Icon && <Icon className="h-4 w-4 text-text-soft" strokeWidth={2} />}
           {title}
         </h2>
@@ -63,7 +63,7 @@ function Section({ title, icon: Icon, children, aside }: { title: string; icon?:
 function Fact({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="min-w-0">
-      <dt className="text-[11px] font-bold uppercase tracking-wide text-text-soft">{label}</dt>
+      <dt className="text-[11px] font-semibold uppercase tracking-wide text-text-soft">{label}</dt>
       <dd className="mt-0.5 break-words text-sm text-text">{children}</dd>
     </div>
   );
@@ -97,7 +97,7 @@ function StatusCard({ id, status, reason, name }: { id: string; status: LocalSta
       )}
 
       {status === "approved" && open && (
-        <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface-2 p-3">
+        <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface-2 p-3">
           <p className="text-sm text-text-soft">
             <strong className="text-text">{name}</strong> dejará de aparecer en el mapa, la búsqueda y el inicio. Su plan y sus datos no se tocan.
           </p>
@@ -168,7 +168,7 @@ function PaymentRow({ p }: { p: LocalPayment }) {
         )}
       </div>
       {open && (
-        <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface-2 p-3">
+        <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface-2 p-3">
           <p className="text-sm text-text-soft">Se le resta al local lo que este pago sumó (tiempo de plan y Destacado). El pago queda como anulado.</p>
           <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Motivo (opcional)" className={INPUT} />
           {voidMut.isError && <p className="text-sm text-danger">{(voidMut.error as Error).message}</p>}
@@ -218,7 +218,7 @@ export function LocalDetail() {
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
-            <h1 className="font-display text-3xl font-extrabold tracking-tight text-text">{l.name}</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-text">{l.name}</h1>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <Badge tone={STATUS_TONE[l.status]}>{STATUS_LABEL[l.status]}</Badge>
               <Badge tone={PLAN_TONE[l.plan]}>{l.plan === "founder" ? `Original #${l.founder_rank}` : PLAN_LABEL[l.plan]}</Badge>

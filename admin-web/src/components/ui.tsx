@@ -1,18 +1,12 @@
-import { Inbox, Loader2, type LucideIcon } from "lucide-react";
+import { Loader2, type LucideIcon } from "lucide-react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
+/** Contenedor plano: un borde fino, sin sombra. Úsalo solo cuando agrupar ayude. */
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return (
-    <div
-      className={`rounded-2xl border border-border bg-surface shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_20px_rgba(0,0,0,0.04)] ${className}`}
-    >
-      {children}
-    </div>
-  );
+  return <div className={`rounded-lg border border-border bg-surface ${className}`}>{children}</div>;
 }
 
-/** Card variant for queue/report rows: a colored left stripe encodes state
- *  (severity, status) instead of stacking badges — same info, one glance. */
+/** Igual que Card, para filas de cola/reporte. El estado grave se marca con el borde, no con franjas. */
 export function StripeCard({
   tone = "neutral",
   children,
@@ -22,18 +16,8 @@ export function StripeCard({
   children: ReactNode;
   className?: string;
 }) {
-  const stripe: Record<string, string> = {
-    neutral: "before:bg-border",
-    brand: "before:bg-brand",
-    danger: "before:bg-danger",
-  };
-  return (
-    <div
-      className={`relative overflow-hidden rounded-2xl border border-border bg-surface pl-5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_20px_rgba(0,0,0,0.04)] before:absolute before:inset-y-0 before:left-0 before:w-1.5 ${stripe[tone]} ${className}`}
-    >
-      {children}
-    </div>
-  );
+  const border = tone === "danger" ? "border-danger/50" : "border-border";
+  return <div className={`rounded-lg border ${border} bg-surface pl-5 ${className}`}>{children}</div>;
 }
 
 type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
@@ -47,19 +31,15 @@ export function Button({
   ...rest
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; loading?: boolean }) {
   const base =
-    "inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex items-center justify-center gap-1.5 rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50";
   const styles: Record<ButtonVariant, string> = {
-    primary: "bg-brand text-white hover:brightness-110",
-    secondary: "bg-surface-2 text-text border border-border hover:brightness-95",
+    primary: "bg-brand text-white hover:bg-brand-2",
+    secondary: "border border-border text-text hover:bg-surface-2",
     danger: "bg-danger text-white hover:brightness-110",
     ghost: "text-text-soft hover:text-text",
   };
   return (
-    <button
-      className={`${base} ${styles[variant]} ${className}`}
-      disabled={disabled || loading}
-      {...rest}
-    >
+    <button className={`${base} ${styles[variant]} ${className}`} disabled={disabled || loading} {...rest}>
       {loading ? <Spinner /> : children}
     </button>
   );
@@ -71,23 +51,23 @@ export function Spinner({ className = "" }: { className?: string }) {
 
 type BadgeTone = "neutral" | "brand" | "danger" | "good" | "warn";
 
+/** Estado en una palabra: texto con un tinte suave, sin borde. */
 export function Badge({ tone = "neutral", children }: { tone?: BadgeTone; children: ReactNode }) {
   const styles: Record<BadgeTone, string> = {
-    neutral: "bg-surface-2 text-text-soft border-border",
-    brand: "bg-brand/10 text-brand border-brand/30",
-    danger: "bg-danger/10 text-danger border-danger/30",
-    good: "bg-good/10 text-good border-good/30",
-    warn: "bg-gold/10 text-gold border-gold/30",
+    neutral: "bg-surface-2 text-text-soft",
+    brand: "bg-brand/10 text-brand",
+    danger: "bg-danger/10 text-danger",
+    good: "bg-good/10 text-good",
+    warn: "bg-gold/15 text-gold",
   };
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${styles[tone]}`}>
+    <span className={`inline-flex items-center whitespace-nowrap rounded-md px-1.5 py-0.5 text-xs font-medium ${styles[tone]}`}>
       {children}
     </span>
   );
 }
 
 export function EmptyState({
-  icon: Icon = Inbox,
   title,
   body,
 }: {
@@ -96,28 +76,18 @@ export function EmptyState({
   body?: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border py-16 text-center">
-      <Icon className="mb-1 h-8 w-8 text-text-soft" strokeWidth={1.5} aria-hidden />
-      <p className="font-display text-base font-bold text-text">{title}</p>
+    <div className="flex flex-col items-center gap-1 py-16 text-center">
+      <p className="text-sm font-semibold text-text">{title}</p>
       {body && <p className="max-w-xs text-sm text-text-soft">{body}</p>}
     </div>
   );
 }
 
-export function PageHeader({
-  eyebrow,
-  title,
-  body,
-}: {
-  eyebrow: string;
-  title: string;
-  body?: string;
-}) {
+export function PageHeader({ title, body }: { eyebrow?: string; title: string; body?: string }) {
   return (
     <div>
-      <p className="text-xs font-bold uppercase tracking-wider text-brand">{eyebrow}</p>
-      <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-text">{title}</h1>
-      {body && <p className="mt-1.5 text-text-soft">{body}</p>}
+      <h1 className="text-2xl font-semibold tracking-tight text-text">{title}</h1>
+      {body && <p className="mt-1 text-sm text-text-soft">{body}</p>}
     </div>
   );
 }
@@ -125,7 +95,7 @@ export function PageHeader({
 export function PageLoading() {
   return (
     <div className="flex items-center justify-center py-24 text-text-soft">
-      <Spinner className="h-6 w-6" />
+      <Spinner className="h-5 w-5" />
     </div>
   );
 }
@@ -140,7 +110,7 @@ export function timeAgo(iso: string): string {
   return `hace ${Math.floor(d / 30)} mes`;
 }
 
-/** Pestañas en píldora, con contador opcional. */
+/** Pestañas subrayadas, con contador opcional. */
 export function Tabs<T extends string>({
   value,
   onChange,
@@ -151,62 +121,83 @@ export function Tabs<T extends string>({
   options: { value: T; label: string; badge?: number }[];
 }) {
   return (
-    <div className="inline-flex w-fit max-w-full overflow-x-auto rounded-full border border-border bg-surface-2 p-1">
+    <div className="flex w-full gap-6 overflow-x-auto border-b border-border" role="tablist">
+      {options.map((o) => {
+        const on = o.value === value;
+        return (
+          <button
+            key={o.value}
+            role="tab"
+            aria-selected={on}
+            onClick={() => onChange(o.value)}
+            className={`-mb-px flex items-center gap-1.5 whitespace-nowrap border-b-2 pb-2.5 text-sm font-medium transition-colors ${
+              on ? "border-brand text-text" : "border-transparent text-text-soft hover:text-text"
+            }`}
+          >
+            {o.label}
+            {!!o.badge && <span className="text-xs font-semibold tabular-nums text-brand">{o.badge}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Opciones en línea para filtrar o cambiar de periodo: texto, el activo con fondo suave. */
+export function Segmented<T extends string | number>({
+  value,
+  onChange,
+  options,
+  label,
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  options: { value: T; label: string }[];
+  label?: string;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1" role="group" aria-label={label}>
       {options.map((o) => (
         <button
-          key={o.value}
+          key={String(o.value)}
           onClick={() => onChange(o.value)}
-          className={`flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-bold transition ${
-            o.value === value ? "bg-brand text-white shadow-sm" : "text-text-soft hover:text-text"
+          aria-pressed={o.value === value}
+          className={`rounded-md px-2.5 py-1 text-sm font-medium transition-colors ${
+            o.value === value ? "bg-surface-2 text-text" : "text-text-soft hover:text-text"
           }`}
         >
           {o.label}
-          {!!o.badge && (
-            <span className={`rounded-full px-1.5 text-[11px] leading-5 ${o.value === value ? "bg-white/25" : "bg-brand text-white"}`}>{o.badge}</span>
-          )}
         </button>
       ))}
     </div>
   );
 }
 
-/** Número grande con título y una línea de contexto; para franjas de indicadores. */
+/** Un indicador: etiqueta pequeña, número y una línea de contexto. Sin íconos ni cajas. */
 export function StatTile({
-  icon: Icon,
   label,
   value,
   hint,
   tone = "neutral",
 }: {
-  icon: LucideIcon;
+  icon?: LucideIcon;
   label: string;
   value: ReactNode;
   hint?: string;
   tone?: "brand" | "good" | "danger" | "neutral";
 }) {
-  const toneClass = {
-    brand: "bg-brand/12 text-brand",
-    good: "bg-good/12 text-good",
-    danger: "bg-danger/12 text-danger",
-    neutral: "bg-surface-2 text-text-soft",
-  }[tone];
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3.5">
-      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${toneClass}`}>
-        <Icon className="h-5 w-5" strokeWidth={2} />
-      </span>
-      <div className="min-w-0">
-        <p className="font-display text-2xl font-extrabold leading-none tabular-nums text-text">{value}</p>
-        <p className="mt-1 truncate text-xs font-semibold uppercase tracking-wide text-text-soft">{label}</p>
-        {hint && <p className="truncate text-xs text-text-soft">{hint}</p>}
-      </div>
+    <div className="min-w-0 border-t border-border pt-3">
+      <p className="truncate text-xs font-medium text-text-soft">{label}</p>
+      <p className={`mt-1 text-2xl font-semibold tabular-nums ${tone === "danger" && value ? "text-danger" : "text-text"}`}>{value}</p>
+      {hint && <p className="mt-0.5 truncate text-xs text-text-soft">{hint}</p>}
     </div>
   );
 }
 
 export const INPUT =
-  "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus:border-brand";
+  "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text outline-none transition-colors placeholder:text-text-soft focus:border-brand";
 
 /** Igual que INPUT pero sin ancho fijo: para selects y campos cortos en una fila. */
 export const INPUT_AUTO =
-  "rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus:border-brand";
+  "rounded-md border border-border bg-surface px-3 py-2 text-sm text-text outline-none transition-colors focus:border-brand";

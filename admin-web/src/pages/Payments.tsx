@@ -78,7 +78,7 @@ function RegisterPayment({ initialLocal = "" }: { initialLocal?: string }) {
   return (
     <Card className="flex flex-col gap-4 p-5">
       <div>
-        <h2 className="font-display text-lg font-bold text-text">Registrar un pago</h2>
+        <h2 className="text-lg font-semibold text-text">Registrar un pago</h2>
         <p className="text-sm text-text-soft">
           Para pagos que llegan por WhatsApp. Confirma la referencia en el banco o en Binance antes de registrarlo.
         </p>
@@ -166,7 +166,7 @@ function Row({ p }: { p: PendingPayment }) {
   return (
     <StripeCard tone="brand" className="flex flex-col gap-4 py-5 pr-5">
       <div className="flex items-start gap-4">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-surface-2">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-2">
           {p.proof_url ? (
             <a href={p.proof_url} target="_blank" rel="noreferrer">
               <img src={p.proof_url} alt="Comprobante" className="h-14 w-14 object-cover" />
@@ -177,7 +177,7 @@ function Row({ p }: { p: PendingPayment }) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="font-display text-base font-bold text-text">{p.restaurant_name}</p>
+            <p className="text-base font-semibold text-text">{p.restaurant_name}</p>
             <Badge>{p.owner_name}</Badge>
             <Badge tone="brand">{METHOD_LABEL[p.method]}</Badge>
             {p.plan && <Badge>{PLAN_LABEL[p.plan]}</Badge>}
@@ -191,7 +191,7 @@ function Row({ p }: { p: PendingPayment }) {
       </div>
 
       {rejecting ? (
-        <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface-2 p-3">
+        <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface-2 p-3">
           <textarea
             autoFocus
             value={note}
@@ -241,12 +241,12 @@ function HistoryRow({ p }: { p: RecentPayment }) {
   return (
     <div className="flex flex-col gap-3 px-5 py-4">
       <div className="flex items-center gap-4">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-2 text-text-soft">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-text-soft">
           <Icon className="h-5 w-5" strokeWidth={1.8} />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className={`font-display text-base font-bold ${voided ? "text-text-soft line-through" : "text-text"}`}>{p.restaurant_name}</p>
+            <p className={`text-base font-semibold ${voided ? "text-text-soft line-through" : "text-text"}`}>{p.restaurant_name}</p>
             {p.plan && <Badge>{PLAN_LABEL[p.plan].split(" · ")[0]}</Badge>}
             <Badge tone={tone}>{label}</Badge>
           </div>
@@ -264,7 +264,7 @@ function HistoryRow({ p }: { p: RecentPayment }) {
       </div>
 
       {voiding && (
-        <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface-2 p-3">
+        <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface-2 p-3">
           <p className="text-sm text-text-soft">
             Se le resta al local lo que este pago sumó ({PLAN_EFFECT[p.plan ?? "annual"]}). El pago queda en el historial como anulado.
           </p>
@@ -403,7 +403,7 @@ function Renewals({ onRegister }: { onRegister: (id: string) => void }) {
             <div key={l.id} className="flex flex-wrap items-center gap-3 px-5 py-4">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Link to={`/locales/${l.id}`} className="font-display text-base font-bold text-text hover:underline">
+                  <Link to={`/locales/${l.id}`} className="text-base font-semibold text-text hover:underline">
                     {l.name}
                   </Link>
                   <Badge tone={d >= 0 ? "warn" : "danger"}>{d >= 0 ? `Vence en ${d} d` : `Venció hace ${Math.abs(d)} d`}</Badge>
@@ -453,7 +453,6 @@ export function Payments() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Negocio"
         title="Pagos"
         body="Registra los pagos que llegan por WhatsApp, recuerda las renovaciones y revisa el historial."
       />

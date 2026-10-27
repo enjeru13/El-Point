@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-brand: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-body: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --color-brand: var(--brand);
   --color-brand-2: var(--brand-2);
@@ -19,12 +20,12 @@
 :root {
   --brand: #c8451f;
   --brand-2: #e0632f;
-  --bg: #fdf8f6;
+  --bg: #fcfaf8;
   --surface: #ffffff;
-  --surface-2: #f6ede8;
+  --surface-2: #f4efec;
   --text: #241a16;
   --text-soft: #6b5b52;
-  --border: #e6d8d0;
+  --border: #e9e1db;
   --danger: #c53030;
   --good: #2f855a;
   --gold: #e0a53f;
@@ -34,12 +35,12 @@
   :root {
     --brand: #ff7043;
     --brand-2: #ff8a5c;
-    --bg: #0b0b0d;
-    --surface: #141417;
-    --surface-2: #1b1b1f;
+    --bg: #0e0e10;
+    --surface: #121214;
+    --surface-2: #1a1a1d;
     --text: #f4f4f5;
     --text-soft: #a9a9b0;
-    --border: #34343b;
+    --border: #26262b;
     --danger: #f56565;
     --good: #68d391;
     --gold: #f0c260;
@@ -51,3 +52,11 @@ body {
   color: var(--text);
   font-family: var(--font-body);
 }
+
+::selection { background: color-mix(in oklab, var(--brand) 28%, transparent); }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+input:focus-visible, select:focus-visible { outline: none; }
+html { color-scheme: light dark; scrollbar-color: var(--border) transparent; }
+body { -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.5; }
+select { color-scheme: light dark; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

@@ -11,7 +11,7 @@ function Row({ r }: { r: PendingRestaurant }) {
   return (
     <StripeCard tone="brand" className="flex flex-col gap-4 py-5 pr-5">
       <div className="flex items-start gap-4">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-surface-2">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-2">
           {r.photo_url ? (
             <img src={r.photo_url} alt="" className="h-full w-full object-cover" />
           ) : r.ghost_kitchen ? (
@@ -23,7 +23,7 @@ function Row({ r }: { r: PendingRestaurant }) {
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="font-display text-base font-bold text-text">{r.name}</p>
+            <p className="text-base font-semibold text-text">{r.name}</p>
             <Badge>{r.owner_name}</Badge>
             {r.ghost_kitchen && (
               <Badge tone="brand">
@@ -65,7 +65,7 @@ function Row({ r }: { r: PendingRestaurant }) {
       </div>
 
       {rejecting ? (
-        <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface-2 p-3">
+        <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface-2 p-3">
           <textarea
             autoFocus
             value={reason}
@@ -112,7 +112,6 @@ export function PendingRestaurants() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Verificación"
         title="Locales pendientes"
         body="Revisa y aprueba antes de que aparezcan en la app."
       />

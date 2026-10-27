@@ -22,21 +22,24 @@ export function Brand({
   return (
     <span className="inline-flex items-center gap-[6px]" style={{ transform: `scale(${scale})`, transformOrigin: align === "center" ? "center" : "left center" }}>
       <span
-        className="rounded-[6px] px-[6px] py-[2px] font-display text-[13px] font-bold leading-[13px]"
+        className="rounded-[6px] px-[6px] py-[2px] font-brand text-[13px] font-bold leading-[13px]"
         style={{ border: `1px solid ${borderColor}`, color: subColor }}
       >
         el
       </span>
-      <span className="font-display text-[26px] font-extrabold leading-[26px] tracking-[-0.5px]" style={{ color: textColor }}>
+      <span className="font-brand text-[26px] font-extrabold leading-[26px] tracking-[-0.5px]" style={{ color: textColor }}>
         Point
       </span>
-      <img
-        src={dark ? "/assets/logo-pin-dark.png" : "/assets/logo-pin.png"}
-        alt=""
-        width={pinW}
-        height={pinH}
-        style={{ marginBottom: -1 }}
-      />
+      <picture>
+        {!dark && <source media="(prefers-color-scheme: dark)" srcSet="/assets/logo-pin-dark.png" />}
+        <img
+          src={dark ? "/assets/logo-pin-dark.png" : "/assets/logo-pin.png"}
+          alt=""
+          width={pinW}
+          height={pinH}
+          style={{ marginBottom: -1 }}
+        />
+      </picture>
     </span>
   );
 }

@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { LifeBuoy, Mail } from "lucide-react";
 import { useResolveSupportMessage, useSupportMessages, type SupportMessage } from "../lib/queries/support";
-import { Badge, Button, EmptyState, PageHeader, PageLoading, StripeCard, timeAgo } from "../components/ui";
+import { Badge, Button, EmptyState, PageHeader, PageLoading, Segmented, StripeCard, timeAgo } from "../components/ui";
 
 function Row({ m, isOpen }: { m: SupportMessage; isOpen: boolean }) {
   const resolve = useResolveSupportMessage();
@@ -9,16 +8,13 @@ function Row({ m, isOpen }: { m: SupportMessage; isOpen: boolean }) {
   return (
     <StripeCard tone={isOpen ? "brand" : "neutral"} className="flex flex-col gap-3 py-5 pr-5">
       <div className="flex flex-wrap items-center gap-2">
-        <p className="font-display text-base font-bold text-text">{m.subject}</p>
+        <p className="text-base font-semibold text-text">{m.subject}</p>
         <Badge>{m.author_name}</Badge>
         <span className="text-xs text-text-soft">{timeAgo(m.created_at)}</span>
       </div>
       <p className="text-sm text-text-soft">{m.body}</p>
       {m.email && (
-        <p className="inline-flex items-center gap-1.5 text-xs text-text-soft">
-          <Mail className="h-3.5 w-3.5" strokeWidth={2} />
-          Responder a: {m.email}
-        </p>
+        <p className="text-xs text-text-soft">Responder a: {m.email}</p>
       )}
 
       <div className="flex justify-end">
@@ -46,26 +42,21 @@ export function Support() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader eyebrow="Contacto" title="Soporte" body="Mensajes que los usuarios mandan desde la app." />
+      <PageHeader title="Soporte" body="Mensajes que los usuarios mandan desde la app." />
 
-      <div className="flex gap-1 self-start rounded-full border border-border bg-surface-2 p-1">
-        {(["open", "closed"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${
-              tab === t ? "bg-brand text-white" : "text-text-soft hover:text-text"
-            }`}
-          >
-            {t === "open" ? "Abiertos" : "Resueltos"}
-          </button>
-        ))}
-      </div>
+      <Segmented
+        value={tab}
+        onChange={setTab}
+        options={[
+          { value: "open", label: "Abiertos" },
+          { value: "closed", label: "Resueltos" },
+        ]}
+      />
 
       {q.isLoading ? (
         <PageLoading />
       ) : (q.data ?? []).length === 0 ? (
-        <EmptyState icon={LifeBuoy} title={tab === "open" ? "Sin mensajes abiertos" : "Sin mensajes resueltos"} />
+        <EmptyState title={tab === "open" ? "Sin mensajes abiertos" : "Sin mensajes resueltos"} />
       ) : (
         <div className="flex flex-col gap-4">
           {q.data!.map((m) => (

@@ -41,14 +41,6 @@ const NAV: {
   { to: "/soporte", label: "Soporte", icon: LifeBuoy, key: "support" },
 ];
 
-function AdminBadge() {
-  return (
-    <span className="rounded-md border border-white/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/50">
-      Admin
-    </span>
-  );
-}
-
 /** Contenido del menú lateral; sirve igual para la barra fija (escritorio) y el cajón (móvil). */
 function SidebarContent({ onClose, onSearch }: { onClose?: () => void; onSearch: () => void }) {
   const { profile, signOut } = useAuth();
@@ -57,28 +49,26 @@ function SidebarContent({ onClose, onSearch }: { onClose?: () => void; onSearch:
 
   return (
     <>
-      <div className="mb-8 flex items-center justify-between px-2">
-        <Brand dark />
-        {onClose ? (
+      <div className="mb-6 flex items-center justify-between px-2">
+        <Brand />
+        {onClose && (
           <button
             onClick={onClose}
             aria-label="Cerrar menú"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-white/60 transition hover:bg-white/10 hover:text-white"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-text-soft transition-colors hover:bg-surface-2 hover:text-text"
           >
-            <X className="h-5 w-5" strokeWidth={2} />
+            <X className="h-4 w-4" strokeWidth={1.75} />
           </button>
-        ) : (
-          <AdminBadge />
         )}
       </div>
 
       <button
         onClick={onSearch}
-        className="mb-2 flex items-center gap-3 rounded-xl border border-white/10 px-3 py-2 text-sm text-white/45 transition hover:border-white/20 hover:text-white/75"
+        className="mb-4 flex items-center gap-2 rounded-md border border-border px-2.5 py-1.5 text-sm text-text-soft transition-colors hover:text-text"
       >
-        <Search className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
-        <span className="flex-1 text-left">Buscar…</span>
-        <kbd className="rounded border border-white/15 px-1.5 text-[11px] font-semibold text-white/40">Ctrl K</kbd>
+        <Search className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
+        <span className="flex-1 text-left">Buscar</span>
+        <kbd className="text-[11px] font-medium text-text-soft">Ctrl K</kbd>
       </button>
 
       <nav className="flex flex-1 flex-col gap-0.5">
@@ -86,57 +76,34 @@ function SidebarContent({ onClose, onSearch }: { onClose?: () => void; onSearch:
           const count = key ? counts?.[key] : undefined;
           return (
             <div key={to} className="flex flex-col">
-              {section && (
-                <p className="mb-1 mt-5 px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-white/30">{section}</p>
-              )}
-            <NavLink
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
-                  isActive ? "bg-white/10 text-white" : "text-white/55 hover:bg-white/5 hover:text-white/85"
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <Icon
-                    className="h-[18px] w-[18px] shrink-0"
-                    strokeWidth={2}
-                    style={{ color: isActive ? "var(--brand)" : undefined }}
-                  />
-                  <span className="flex-1 truncate">{label}</span>
-                  {!!count && (
-                    <span
-                      className={`min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[11px] font-bold leading-none ${
-                        isActive ? "bg-brand text-white" : "bg-white/10 text-white/70"
-                      }`}
-                    >
-                      {count}
-                    </span>
-                  )}
-                </>
-              )}
-            </NavLink>
+              {section && <p className="mb-1 mt-5 px-2.5 text-xs font-medium text-text-soft/70">{section}</p>}
+              <NavLink
+                to={to}
+                end={end}
+                className={({ isActive }) =>
+                  `flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors ${
+                    isActive ? "bg-surface-2 text-text" : "text-text-soft hover:bg-surface-2/60 hover:text-text"
+                  }`
+                }
+              >
+                <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+                <span className="flex-1 truncate">{label}</span>
+                {!!count && <span className="text-xs font-semibold tabular-nums text-brand">{count}</span>}
+              </NavLink>
             </div>
           );
         })}
       </nav>
 
-      <div className="mt-4 flex items-center gap-2 border-t border-white/10 pt-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-white">
-          {(profile?.full_name ?? "A").trim().charAt(0).toUpperCase()}
-        </div>
-        <p className="min-w-0 flex-1 truncate text-sm font-semibold text-white/85">
-          {profile?.full_name ?? "Admin"}
-        </p>
+      <div className="mt-4 flex items-center gap-2 border-t border-border px-2.5 pt-4">
+        <p className="min-w-0 flex-1 truncate text-sm font-medium text-text">{profile?.full_name ?? "Admin"}</p>
         <button
           onClick={() => signOut()}
           title="Cerrar sesión"
           aria-label="Cerrar sesión"
-          className="flex h-8 w-8 items-center justify-center rounded-full text-white/45 transition hover:bg-white/10 hover:text-white"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-text-soft transition-colors hover:bg-surface-2 hover:text-text"
         >
-          <LogOut className="h-4 w-4" strokeWidth={2} />
+          <LogOut className="h-4 w-4" strokeWidth={1.75} />
         </button>
       </div>
     </>
@@ -180,30 +147,32 @@ export function Layout() {
   return (
     <div className="min-h-screen lg:flex">
       {/* Escritorio: barra lateral fija */}
-      <aside className="hidden w-64 shrink-0 flex-col overflow-y-auto bg-[#161210] px-4 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen">
+      <aside className="hidden w-60 shrink-0 flex-col overflow-y-auto border-r border-border bg-bg px-3 py-5 lg:sticky lg:top-0 lg:flex lg:h-screen">
         <SidebarContent onSearch={() => setSearching(true)} />
       </aside>
 
       {/* Móvil / tablet: barra superior + cajón */}
-      <header className="sticky top-0 z-30 flex items-center gap-3 bg-[#161210] px-4 py-3 lg:hidden">
+      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-bg px-4 py-2.5 lg:hidden">
         <button
           onClick={() => setOpen(true)}
           aria-label="Abrir menú"
-          className="relative flex h-10 w-10 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10"
+          className="relative flex h-9 w-9 items-center justify-center rounded-md text-text transition-colors hover:bg-surface-2"
         >
-          <Menu className="h-5 w-5" strokeWidth={2} />
+          <Menu className="h-5 w-5" strokeWidth={1.75} />
           {pending > 0 && <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-brand" />}
         </button>
         <div className="flex flex-1 justify-center">
-          <Brand dark size="sm" align="center" />
+          <Brand size="sm" align="center" />
         </div>
-        <AdminBadge />
+        <button onClick={() => setSearching(true)} aria-label="Buscar" className="flex h-9 w-9 items-center justify-center rounded-md text-text transition-colors hover:bg-surface-2">
+          <Search className="h-5 w-5" strokeWidth={1.75} />
+        </button>
       </header>
 
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col overflow-y-auto bg-[#161210] px-4 py-6 shadow-2xl">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
+          <aside className="absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col overflow-y-auto border-r border-border bg-bg px-3 py-5">
             <SidebarContent
               onClose={() => setOpen(false)}
               onSearch={() => {
@@ -218,7 +187,7 @@ export function Layout() {
       <CommandPalette open={searching} onClose={() => setSearching(false)} />
 
       <main className="min-w-0 flex-1 bg-bg">
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
+        <div className="mx-auto max-w-5xl px-4 py-6 sm:px-8 sm:py-10">
           <Outlet />
         </div>
       </main>

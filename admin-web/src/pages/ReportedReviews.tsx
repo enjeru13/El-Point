@@ -26,7 +26,7 @@ function Row({ item }: { item: ModerationItem }) {
     <StripeCard tone={item.moderation === "hidden" ? "danger" : "neutral"} className="flex flex-col gap-4 py-5 pr-5">
       <div>
         <div className="flex flex-wrap items-center gap-2">
-          <p className="font-display text-base font-bold text-text">{item.restaurant_name}</p>
+          <p className="text-base font-semibold text-text">{item.restaurant_name}</p>
           <Badge>{item.author_name}</Badge>
           <Stars n={item.rating} />
           {item.moderation === "hidden" && <Badge tone="danger">Auto-oculta</Badge>}
@@ -35,7 +35,7 @@ function Row({ item }: { item: ModerationItem }) {
         <p className="mt-2 text-sm text-text-soft">{item.body}</p>
       </div>
 
-      <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface-2 p-3">
+      <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface-2 p-3">
         {item.reports.map((rep, i) => (
           <div key={i} className="text-sm">
             <span className="font-semibold text-text">{reasonLabel(REVIEW_REPORT_REASONS, rep.reason)}</span>
@@ -66,7 +66,7 @@ export function ReportedReviews() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader eyebrow="Moderación" title="Reseñas reportadas" body="Ordenadas por cantidad de reportes." />
+      <PageHeader title="Reseñas reportadas" body="Ordenadas por cantidad de reportes." />
 
       {q.isLoading ? (
         <PageLoading />

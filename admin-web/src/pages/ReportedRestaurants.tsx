@@ -11,7 +11,7 @@ function Row({ r }: { r: ReportedRestaurant }) {
     <StripeCard tone="danger" className="flex flex-col gap-4 py-5 pr-5">
       <div>
         <div className="flex flex-wrap items-center gap-2">
-          <p className="font-display text-base font-bold text-text">{r.name}</p>
+          <p className="text-base font-semibold text-text">{r.name}</p>
           <Badge>{r.owner_name}</Badge>
           <Badge tone="danger">
             {r.reports.length > 0 ? `${r.reports.length} ${r.reports.length === 1 ? "reporte" : "reportes"}` : "Suspendido por el equipo"}
@@ -34,7 +34,7 @@ function Row({ r }: { r: ReportedRestaurant }) {
       </div>
 
       {r.reports.length > 0 && (
-      <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface-2 p-3">
+      <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface-2 p-3">
         {r.reports.map((rep, i) => (
           <div key={i} className="text-sm">
             <span className="font-semibold text-text">{reasonLabel(RESTAURANT_REPORT_REASONS, rep.reason)}</span>
@@ -70,7 +70,6 @@ export function ReportedRestaurants() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Moderación"
         title="Locales suspendidos"
         body="Suspendidos por reportes de comensales o por el equipo. Reactiva los que estén bien o retira los que no."
       />
