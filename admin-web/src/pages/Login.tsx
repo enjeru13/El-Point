@@ -1,8 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useAuth } from "../lib/auth";
-import { Button, Card } from "../components/ui";
+import { Button, INPUT } from "../components/ui";
 import { Brand } from "../components/Brand";
-import { FoodPattern } from "../components/FoodPattern";
 
 function GoogleIcon() {
   return (
@@ -45,64 +44,61 @@ export function Login() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-bg px-4">
-      <FoodPattern />
-
-      <Card className="relative w-full max-w-sm p-8">
-        <div className="mb-7 flex flex-col items-center gap-3 text-center">
+    <div className="flex min-h-screen items-center justify-center bg-bg px-4">
+      <div className="w-full max-w-sm">
+        <div className="mb-8 flex flex-col items-center gap-3 text-center">
           <Brand size="lg" align="center" />
-          <p className="text-sm text-text-soft">Panel de moderación · entra con tu cuenta de admin.</p>
+          <p className="text-sm text-text-soft">Panel de administración. Entra con tu cuenta de admin.</p>
         </div>
 
-        <Button
-          type="button"
-          variant="secondary"
-          loading={googleLoading}
-          onClick={onGoogle}
-          className="w-full"
-        >
+        <Button type="button" variant="secondary" loading={googleLoading} onClick={onGoogle} className="w-full">
           {!googleLoading && <GoogleIcon />}
           Continuar con Google
         </Button>
 
         <div className="my-5 flex items-center gap-3">
           <div className="h-px flex-1 bg-border" />
-          <span className="text-xs font-semibold uppercase tracking-wide text-text-soft">o con contraseña</span>
+          <span className="text-xs text-text-soft">o con contraseña</span>
           <div className="h-px flex-1 bg-border" />
         </div>
 
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold uppercase tracking-wide text-text-soft">Correo</span>
+            <span className="text-xs font-medium text-text-soft">Correo</span>
             <input
               type="email"
               required
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="rounded-lg border border-border bg-surface-2 px-3.5 py-2.5 text-sm text-text outline-none focus:border-brand"
+              className={INPUT}
               placeholder="admin@elpoint.app"
             />
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold uppercase tracking-wide text-text-soft">Contraseña</span>
+            <span className="text-xs font-medium text-text-soft">Contraseña</span>
             <input
               type="password"
               required
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="rounded-lg border border-border bg-surface-2 px-3.5 py-2.5 text-sm text-text outline-none focus:border-brand"
-              placeholder="••••••••"
+              className={INPUT}
             />
           </label>
 
-          {error && <p className="text-sm font-medium text-danger">{error}</p>}
+          {error && (
+            <p className="text-sm text-danger" role="alert">
+              {error}
+            </p>
+          )}
 
           <Button type="submit" loading={loading} className="w-full">
             Ingresar
           </Button>
         </form>
-      </Card>
+      </div>
     </div>
   );
 }

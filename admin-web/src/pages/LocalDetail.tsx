@@ -1,20 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
-import {
-  ArrowLeft,
-  Ban,
-  Banknote,
-  CircleCheck,
-  Eye,
-  Ghost,
-  History,
-  MessageCircle,
-  PauseCircle,
-  Phone,
-  ShoppingBag,
-  Star,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowLeft, Ghost, MessageCircle } from "lucide-react";
 import {
   PLAN_LABEL,
   STATUS_LABEL,
@@ -29,7 +15,7 @@ import {
 import { METHOD_LABEL, PLAN_LABEL as PAY_PLAN_LABEL, useVoidPayment, type PaymentMethod, type PaymentPlan } from "../lib/queries/payments";
 import { fmtDate, fmtMoney, waLink } from "../lib/format";
 import { PlanActions } from "../components/PlanActions";
-import { Badge, Button, Card, EmptyState, INPUT, PageLoading, StatTile, timeAgo } from "../components/ui";
+import { Badge, Button, EmptyState, INPUT, PageLoading, StatTile, timeAgo } from "../components/ui";
 
 const STATUS_TONE: Record<LocalStatus, "good" | "brand" | "danger" | "neutral"> = {
   approved: "good",
@@ -45,25 +31,22 @@ const PLAN_TONE: Record<PlanState, "good" | "brand" | "danger" | "neutral" | "wa
   none: "neutral",
 };
 
-function Section({ title, icon: Icon, children, aside }: { title: string; icon?: LucideIcon; children: ReactNode; aside?: ReactNode }) {
+function Section({ title, children, aside }: { title: string; children: ReactNode; aside?: ReactNode }) {
   return (
-    <Card className="flex flex-col gap-4 p-5">
+    <section className="flex flex-col gap-4 border-t border-border pt-5">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-base font-semibold text-text">
-          {Icon && <Icon className="h-4 w-4 text-text-soft" strokeWidth={2} />}
-          {title}
-        </h2>
+        <h2 className="text-sm font-semibold text-text">{title}</h2>
         {aside}
       </div>
       {children}
-    </Card>
+    </section>
   );
 }
 
 function Fact({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="min-w-0">
-      <dt className="text-[11px] font-semibold uppercase tracking-wide text-text-soft">{label}</dt>
+      <dt className="text-xs font-medium text-text-soft">{label}</dt>
       <dd className="mt-0.5 break-words text-sm text-text">{children}</dd>
     </div>
   );
@@ -79,7 +62,7 @@ function StatusCard({ id, status, reason, name }: { id: string; status: LocalSta
   }
 
   return (
-    <Section title="Estado del local" icon={PauseCircle}>
+    <Section title="Estado del local">
       <div className="flex flex-wrap items-center gap-2">
         <Badge tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Badge>
         {status === "suspended" && reason && <span className="text-sm text-text-soft">{reason}</span>}
@@ -195,10 +178,10 @@ export function LocalDetail() {
   if (q.isError || !q.data) {
     return (
       <div className="flex flex-col gap-4">
-        <Link to="/locales" className="inline-flex items-center gap-1.5 text-sm font-semibold text-text-soft hover:text-text">
-          <ArrowLeft className="h-4 w-4" strokeWidth={2} /> Locales
+        <Link to="/locales" className="inline-flex items-center gap-1.5 text-sm font-medium text-text-soft hover:text-text">
+          <ArrowLeft className="h-4 w-4" strokeWidth={1.75} /> Locales
         </Link>
-        <EmptyState icon={Ban} title="No se encontró el local" body="Puede que se haya eliminado, o que no tengas acceso." />
+        <EmptyState title="No se encontró el local" body="Puede que se haya eliminado, o que no tengas acceso." />
       </div>
     );
   }
@@ -211,14 +194,14 @@ export function LocalDetail() {
   const wa = waLink(contact.whatsapp);
 
   return (
-    <div className="flex max-w-4xl flex-col gap-6">
+    <div className="flex max-w-3xl flex-col gap-8">
       <div className="flex flex-col gap-4">
-        <Link to="/locales" className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-text-soft hover:text-text">
-          <ArrowLeft className="h-4 w-4" strokeWidth={2} /> Locales
+        <Link to="/locales" className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-text-soft hover:text-text">
+          <ArrowLeft className="h-4 w-4" strokeWidth={1.75} /> Locales
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
-            <h1 className="text-3xl font-semibold tracking-tight text-text">{l.name}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-text">{l.name}</h1>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <Badge tone={STATUS_TONE[l.status]}>{STATUS_LABEL[l.status]}</Badge>
               <Badge tone={PLAN_TONE[l.plan]}>{l.plan === "founder" ? `Original #${l.founder_rank}` : PLAN_LABEL[l.plan]}</Badge>
@@ -226,7 +209,7 @@ export function LocalDetail() {
               {l.ghost_kitchen && (
                 <Badge>
                   <span className="inline-flex items-center gap-1">
-                    <Ghost className="h-3 w-3" strokeWidth={2} /> Cocina fantasma
+                    <Ghost className="h-3 w-3" strokeWidth={1.75} /> Cocina fantasma
                   </span>
                 </Badge>
               )}
@@ -236,21 +219,21 @@ export function LocalDetail() {
           {wa && (
             <a href={wa} target="_blank" rel="noreferrer">
               <Button variant="secondary">
-                <MessageCircle className="h-4 w-4" strokeWidth={2} /> Escribir por WhatsApp
+                <MessageCircle className="h-4 w-4" strokeWidth={1.75} /> Escribir por WhatsApp
               </Button>
             </a>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile icon={Star} label="Calificación" value={l.rating_count > 0 ? l.rating_avg.toFixed(1) : "—"} hint={`${l.rating_count} ${l.rating_count === 1 ? "rank" : "ranks"}`} tone="brand" />
-        <StatTile icon={Eye} label="Visitas" value={stats.view ?? 0} hint="últimos 30 días" />
-        <StatTile icon={Phone} label="Contactos" value={contacts} hint="WhatsApp, llamadas, Instagram, pedidos" tone="good" />
-        <StatTile icon={ShoppingBag} label="Intentos sin contacto" value={stats.blocked ?? 0} hint="tocaron un contacto bloqueado" tone={l.plan === "expired" || l.plan === "none" ? "danger" : "neutral"} />
+      <div className="grid grid-cols-2 gap-x-6 gap-y-5 lg:grid-cols-4">
+        <StatTile label="Calificación" value={l.rating_count > 0 ? l.rating_avg.toFixed(1) : "—"} hint={`${l.rating_count} ${l.rating_count === 1 ? "rank" : "ranks"}`} />
+        <StatTile label="Visitas" value={stats.view ?? 0} hint="últimos 30 días" />
+        <StatTile label="Contactos" value={contacts} hint="WhatsApp, llamadas, Instagram, pedidos" />
+        <StatTile label="Intentos sin contacto" value={stats.blocked ?? 0} hint="tocaron un contacto bloqueado" tone={l.plan === "expired" || l.plan === "none" ? "danger" : "neutral"} />
       </div>
 
-      <Section title="Plan" icon={CircleCheck}>
+      <Section title="Plan">
         <dl className="grid grid-cols-2 gap-4">
           <Fact label="Estado">
             <Badge tone={PLAN_TONE[l.plan]}>{PLAN_LABEL[l.plan]}</Badge>
@@ -268,7 +251,6 @@ export function LocalDetail() {
       <StatusCard id={l.id} status={l.status} reason={l.status_reason} name={l.name} />
       <Section
         title="Pagos"
-        icon={Banknote}
         aside={
           l.plan !== "founder" && (
             <Link to={`/pagos?local=${l.id}`}>
@@ -280,7 +262,7 @@ export function LocalDetail() {
         {payments.length === 0 ? (
           <p className="text-sm text-text-soft">Sin pagos registrados.</p>
         ) : (
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-border/60">
             {payments.map((p) => (
               <PaymentRow key={p.id} p={p} />
             ))}
@@ -300,7 +282,7 @@ export function LocalDetail() {
         </dl>
         {l.description && <p className="border-t border-border pt-3 text-sm text-text-soft">{l.description}</p>}
       </Section>
-      <Section title="Historial" icon={History}>
+      <Section title="Historial">
         {timeline.length === 0 ? (
           <p className="text-sm text-text-soft">Aún no hay movimientos.</p>
         ) : (
