@@ -48,3 +48,6 @@ google-services.json
 
 # capturas full-res (solo para Play Store, no van al repo)
 landing/shots/_orig/
+
+# capturas de la tienda (archivos grandes, no van al repositorio)
+marketing/store-screenshots/
