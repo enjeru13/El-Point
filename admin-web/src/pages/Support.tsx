@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useResolveSupportMessage, useSupportMessages, type SupportMessage } from "../lib/queries/support";
-import { Badge, Button, EmptyState, PageHeader, PageLoading, Segmented, StripeCard, timeAgo } from "../components/ui";
+import { Badge, Button, EmptyState, PageHeader, PageLoading, Segmented, timeAgo } from "../components/ui";
 
 function Row({ m, isOpen }: { m: SupportMessage; isOpen: boolean }) {
   const resolve = useResolveSupportMessage();
 
   return (
-    <StripeCard tone={isOpen ? "brand" : "neutral"} className="flex flex-col gap-3 py-5 pr-5">
+    <div className="flex flex-col gap-3 px-1 py-5 sm:px-3">
       <div className="flex flex-wrap items-center gap-2">
-        <p className="text-base font-semibold text-text">{m.subject}</p>
+        <p className="text-sm font-semibold text-text">{m.subject}</p>
         <Badge>{m.author_name}</Badge>
         <span className="text-xs text-text-soft">{timeAgo(m.created_at)}</span>
       </div>
@@ -32,7 +32,7 @@ function Row({ m, isOpen }: { m: SupportMessage; isOpen: boolean }) {
           </Button>
         )}
       </div>
-    </StripeCard>
+    </div>
   );
 }
 
@@ -58,7 +58,7 @@ export function Support() {
       ) : (q.data ?? []).length === 0 ? (
         <EmptyState title={tab === "open" ? "Sin mensajes abiertos" : "Sin mensajes resueltos"} />
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="divide-y divide-border/60 border-y border-border">
           {q.data!.map((m) => (
             <Row key={m.id} m={m} isOpen={tab === "open"} />
           ))}

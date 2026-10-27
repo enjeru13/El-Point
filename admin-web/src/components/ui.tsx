@@ -6,20 +6,6 @@ export function Card({ children, className = "" }: { children: ReactNode; classN
   return <div className={`rounded-lg border border-border bg-surface ${className}`}>{children}</div>;
 }
 
-/** Igual que Card, para filas de cola/reporte. El estado grave se marca con el borde, no con franjas. */
-export function StripeCard({
-  tone = "neutral",
-  children,
-  className = "",
-}: {
-  tone?: "neutral" | "brand" | "danger";
-  children: ReactNode;
-  className?: string;
-}) {
-  const border = tone === "danger" ? "border-danger/50" : "border-border";
-  return <div className={`rounded-lg border ${border} bg-surface pl-5 ${className}`}>{children}</div>;
-}
-
 type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
 
 export function Button({

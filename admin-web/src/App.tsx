@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
-import { ShieldAlert } from "lucide-react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./lib/auth";
 import { Layout } from "./components/Layout";
-import { PageLoading, Card, Button } from "./components/ui";
+import { PageLoading, Button } from "./components/ui";
 import { Login } from "./pages/Login";
 import { Dashboard } from "./pages/Dashboard";
 import { PendingRestaurants } from "./pages/PendingRestaurants";
@@ -25,18 +24,13 @@ function Gate({ children }: { children: ReactNode }) {
   if (!profile?.is_admin) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-bg px-4">
-        <Card className="max-w-sm p-8 text-center">
-          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-danger/10 text-danger">
-            <ShieldAlert className="h-5 w-5" strokeWidth={2} />
-          </div>
-          <p className="mt-4 font-display text-lg font-bold text-text">Sin acceso</p>
-          <p className="mt-2 text-sm text-text-soft">
-            Esta cuenta no tiene permisos de administrador en El Point.
-          </p>
+        <div className="max-w-sm text-center">
+          <p className="text-lg font-semibold text-text">Sin acceso</p>
+          <p className="mt-2 text-sm text-text-soft">Esta cuenta no tiene permisos de administrador en El Point.</p>
           <Button variant="secondary" className="mt-5" onClick={() => signOut()}>
             Cerrar sesión
           </Button>
-        </Card>
+        </div>
       </div>
     );
   }

@@ -1,20 +1,11 @@
-import { MessageSquareWarning, Star } from "lucide-react";
 import { useModerationQueue, useResolveReview, type ModerationItem } from "../lib/queries/moderation";
 import { reasonLabel, REVIEW_REPORT_REASONS } from "../lib/reasons";
-import { Badge, Button, EmptyState, PageHeader, PageLoading, StripeCard, timeAgo } from "../components/ui";
+import { Badge, Button, EmptyState, PageHeader, PageLoading, timeAgo } from "../components/ui";
 
 function Stars({ n }: { n: number }) {
   return (
-    <span className="inline-flex gap-0.5">
-      {Array.from({ length: 5 }, (_, i) => (
-        <Star
-          key={i}
-          className="h-3.5 w-3.5"
-          strokeWidth={1.5}
-          fill={i < n ? "var(--brand)" : "none"}
-          color="var(--brand)"
-        />
-      ))}
+    <span className="text-xs font-medium tabular-nums text-text-soft" aria-label={`${n} de 5 estrellas`}>
+      ★ {n}
     </span>
   );
 }
@@ -23,10 +14,10 @@ function Row({ item }: { item: ModerationItem }) {
   const resolve = useResolveReview();
 
   return (
-    <StripeCard tone={item.moderation === "hidden" ? "danger" : "neutral"} className="flex flex-col gap-4 py-5 pr-5">
+    <div className="flex flex-col gap-4 px-1 py-5 sm:px-3">
       <div>
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-base font-semibold text-text">{item.restaurant_name}</p>
+          <p className="text-sm font-semibold text-text">{item.restaurant_name}</p>
           <Badge>{item.author_name}</Badge>
           <Stars n={item.rating} />
           {item.moderation === "hidden" && <Badge tone="danger">Auto-oculta</Badge>}
@@ -35,29 +26,25 @@ function Row({ item }: { item: ModerationItem }) {
         <p className="mt-2 text-sm text-text-soft">{item.body}</p>
       </div>
 
-      <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface-2 p-3">
+      <ul className="flex flex-col gap-2">
         {item.reports.map((rep, i) => (
-          <div key={i} className="text-sm">
-            <span className="font-semibold text-text">{reasonLabel(REVIEW_REPORT_REASONS, rep.reason)}</span>
+          <li key={i} className="text-sm">
+            <span className="font-medium text-text">{reasonLabel(REVIEW_REPORT_REASONS, rep.reason)}</span>
             <span className="ml-2 text-xs text-text-soft">{timeAgo(rep.created_at)}</span>
             {rep.note && <p className="text-text-soft">{rep.note}</p>}
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
 
       <div className="flex justify-end gap-2">
-        <Button
-          variant="danger"
-          loading={resolve.isPending}
-          onClick={() => resolve.mutate({ reviewId: item.id, action: "remove" })}
-        >
+        <Button variant="danger" loading={resolve.isPending} onClick={() => resolve.mutate({ reviewId: item.id, action: "remove" })}>
           Eliminar reseña
         </Button>
         <Button loading={resolve.isPending} onClick={() => resolve.mutate({ reviewId: item.id, action: "approve" })}>
           Mantener visible
         </Button>
       </div>
-    </StripeCard>
+    </div>
   );
 }
 
@@ -71,9 +58,9 @@ export function ReportedReviews() {
       {q.isLoading ? (
         <PageLoading />
       ) : (q.data ?? []).length === 0 ? (
-        <EmptyState icon={MessageSquareWarning} title="Sin reseñas reportadas" body="No hay nada que moderar por ahora." />
+        <EmptyState title="Sin reseñas reportadas" body="No hay nada que moderar por ahora." />
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="divide-y divide-border/60 border-y border-border">
           {q.data!.map((item) => (
             <Row key={item.id} item={item} />
           ))}
