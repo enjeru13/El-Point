@@ -19,6 +19,10 @@
   to = "/soporte.html"
   status = 200
 [[redirects]]
+  from = "/novedades"
+  to = "/novedades.html"
+  status = 200
+[[redirects]]
   from = "/eliminar-cuenta"
   to = "/eliminar-cuenta.html"
   status = 200

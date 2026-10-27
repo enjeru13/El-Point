@@ -4,19 +4,40 @@
     {
       "name": "expo-web",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["expo", "start", "--web", "--port", "8081"],
+      "runtimeArgs": [
+        "expo",
+        "start",
+        "--web",
+        "--port",
+        "8081"
+      ],
       "port": 8081
     },
     {
       "name": "admin-web",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "admin-web", "run", "dev", "--", "--port", "5183"],
+      "runtimeArgs": [
+        "--prefix",
+        "admin-web",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5183"
+      ],
       "port": 5183
     },
     {
       "name": "landing",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "landing", "-l", "4173"],
+      "runtimeArgs": [
+        "--yes",
+        "live-server",
+        "landing",
+        "--port=4173",
+        "--no-browser",
+        "--wait=200"
+      ],
       "port": 4173
     }
   ]

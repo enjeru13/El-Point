@@ -9,6 +9,14 @@
   <meta property="og:title" content="El Point — Dónde comer en San Cristóbal" />
   <meta property="og:description" content="Descubre, rankea y comparte los mejores lugares para comer en San Cristóbal, Táchira." />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://elpoint-app.netlify.app/" />
+  <meta property="og:site_name" content="El Point" />
+  <meta property="og:locale" content="es_VE" />
+  <meta property="og:image" content="https://elpoint-app.netlify.app/assets/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="canonical" href="https://elpoint-app.netlify.app/" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -54,13 +62,12 @@
   <header class="nav">
     <div class="wrap">
       <a class="brand" href="/" aria-label="El Point"><span class="lg-el">el</span><span class="lg-point">Point</span><picture><source srcset="assets/logo-pin-dark.png" media="(prefers-color-scheme: dark)"><img class="lg-pin" src="assets/logo-pin.png" alt=""></picture></a>
-      <nav class="nav-links">
-        <a href="#como-funciona">Cómo funciona</a>
-        <a href="#logros">Logros</a>
+      <nav class="nav-links" aria-label="Principal">
+        <a class="hide-sm" href="#como-funciona">Cómo funciona</a>
+        <a class="hide-sm" href="#rangos">Rangos</a>
         <a href="#duenos">Para dueños</a>
-        <a href="#planes">Planes</a>
-        <a href="soporte.html">Soporte</a>
-        <a class="btn btn-primary" href="#descargar">Descargar</a>
+        <a class="hide-sm" href="soporte.html">Soporte</a>
+        <a class="btn btn-primary" href="https://wa.me/584149797876?text=Hola%2C%20av%C3%ADsenme%20cuando%20El%20Point%20salga%20en%20App%20Store." target="_blank" rel="noopener">Avísame</a>
       </nav>
     </div>
   </header>
@@ -68,247 +75,155 @@
   <main>
     <!-- Hero -->
     <section class="hero">
-      <div class="food-bg" aria-hidden="true">
-        <svg class="i"><use href="#ic-utensils"/></svg>
-        <svg class="i"><use href="#ic-pizza"/></svg>
-        <svg class="i"><use href="#ic-coffee"/></svg>
-        <svg class="i"><use href="#ic-wine"/></svg>
-        <svg class="i"><use href="#ic-soup"/></svg>
-        <svg class="i"><use href="#ic-ice-cream"/></svg>
-        <svg class="i"><use href="#ic-cookie"/></svg>
-        <svg class="i"><use href="#ic-beef"/></svg>
-        <svg class="i"><use href="#ic-utensils-crossed"/></svg>
-        <svg class="i"><use href="#ic-coffee"/></svg>
-      </div>
+      <svg class="citymap" viewBox="0 0 920 720" aria-hidden="true" focusable="false">
+        <g class="blocks" transform="rotate(-17 460 360)">
+          <path d="M-200 40H1120M-200 108H1120M-200 176H1120M-200 244H1120M-200 312H1120M-200 380H1120M-200 448H1120M-200 516H1120M-200 584H1120M-200 652H1120M-200 720H1120M-200 788H1120"/>
+          <path d="M20 -200V920M88 -200V920M156 -200V920M224 -200V920M292 -200V920M360 -200V920M428 -200V920M496 -200V920M564 -200V920M632 -200V920M700 -200V920M768 -200V920M836 -200V920M904 -200V920"/>
+        </g>
+        <g class="avenues" transform="rotate(-17 460 360)">
+          <path d="M-200 312H1120"/>
+          <path d="M496 -200V920"/>
+        </g>
+        <path class="curve" d="M120 640C260 600 360 520 470 430S700 250 940 230"/>
+        <g class="spots">
+          <circle cx="352" cy="500" r="5"/><circle cx="738" cy="196" r="5"/><circle cx="836" cy="446" r="5"/>
+          <circle cx="330" cy="168" r="5"/><circle cx="574" cy="604" r="5"/>
+        </g>
+        <g class="labels">
+          <text x="366" y="492">Barrio Obrero</text>
+          <text x="752" y="188">Pirineos</text>
+          <text x="720" y="470">La Concordia</text>
+          <text x="344" y="160">Las Lomas</text>
+          <text x="588" y="596">Centro</text>
+        </g>
+      </svg>
       <div class="wrap">
         <div class="hero-copy">
-          <span class="eyebrow"><svg class="i"><use href="#ic-pin"/></svg> San Cristóbal · Táchira</span>
           <h1>Deja de preguntar <span class="hl">¿dónde comemos?</span></h1>
           <p class="lead">
-            En El Point decide la ciudad: ranks reales, fotos reales y cero publicidad.
-            Abres, eliges y a comer.
+            Mira qué está abierto cerca de ti, con su menú y sus precios en bolívares,
+            dólares o pesos. Rankea con foto y escríbele al local por WhatsApp.
           </p>
-          <div class="stores" id="descargar">
-            <a class="store store-main" href="#" aria-disabled="true">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.5 2-3.7 2.1-3.8-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.1 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.3 2.5 1.3-.1 1.8-.8 3.4-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.2 3.2-2.5.6-.9 1-1.8 1.3-2.8-3.4-1.3-3.9-4.8-3.9-4.9ZM14 5.4c.7-.9 1.2-2 1-3.2-1 .1-2.2.7-2.9 1.5-.7.8-1.2 2-1 3.1 1.1.1 2.2-.5 2.9-1.4Z"/></svg>
-              App Store <span class="tag">Pronto</span>
-            </a>
+          <div class="hero-actions">
+            <a class="btn btn-primary btn-lg" href="https://wa.me/584149797876?text=Hola%2C%20av%C3%ADsenme%20cuando%20El%20Point%20salga%20en%20App%20Store." target="_blank" rel="noopener"><svg class="i"><use href="#ic-whatsapp"/></svg> Avísame cuando salga</a>
+            <span class="soon" role="note"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.5 2-3.7 2.1-3.8-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.1 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.3 2.5 1.3-.1 1.8-.8 3.4-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.2 3.2-2.5.6-.9 1-1.8 1.3-2.8-3.4-1.3-3.9-4.8-3.9-4.9ZM14 5.4c.7-.9 1.2-2 1-3.2-1 .1-2.2.7-2.9 1.5-.7.8-1.2 2-1 3.1 1.1.1 2.2-.5 2.9-1.4Z"/></svg> Pronto en App Store, para iPhone y iPad</span>
           </div>
-          <p class="store-note">Primero en iPhone y iPad. Android, después.</p>
-          <div class="cta-row">
-            <a class="btn btn-ghost" href="#duenos">Tengo un local <svg class="i"><use href="#ic-arrow-right"/></svg></a>
-          </div>
+          <p class="hero-note">Sin publicidad. Android, después. <a href="#duenos">¿Tienes un local? &rarr;</a></p>
         </div>
 
         <div class="duo" aria-hidden="true">
-          <div class="glow"></div>
           <figure class="phone phone-a"><picture><source srcset="shots/feed_black.webp" media="(prefers-color-scheme: dark)"><img src="shots/feed.webp" alt="" width="720" height="1558" fetchpriority="high"></picture></figure>
           <figure class="phone phone-b"><picture><source srcset="shots/map_black.webp" media="(prefers-color-scheme: dark)"><img src="shots/map.webp" alt="" width="720" height="1558" fetchpriority="high"></picture></figure>
-          <span class="float f1"><svg class="i"><use href="#ic-star"/></svg> 4,7 · a 600 m</span>
-          <span class="float f2"><svg class="i"><use href="#ic-flame"/></svg> Destacado</span>
-          <span class="float f3">+25 XP</span>
         </div>
+        <p class="demo-note">Mapa ilustrativo de San Cristóbal. Capturas con datos de demostración.</p>
       </div>
     </section>
-
-    <!-- Números -->
-    <section class="stats" aria-label="El Point en números">
-      <div class="wrap">
-        <div class="stat"><b>100</b><span>locales Originales, gratis para siempre</span></div>
-        <div class="stat"><b>3 meses</b><span>para probarlo sin pagar</span></div>
-        <div class="stat"><b>0</b><span>publicidad. Nunca.</span></div>
-        <div class="stat"><b>1 rank</b><span>por local cada semana: notas reales</span></div>
-      </div>
-    </section>
-
-    <!-- Cinta de categorías -->
-    <div class="marquee" aria-hidden="true">
-      <div class="track"><span>Arepas</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Pollo asado / broaster</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Parrilla</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Pizza</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Sushi</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Mariscos</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Hamburguesas</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Pepitos</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Pinchos</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Empanadas</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Almuerzos</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Cafés</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Panadería</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Postres y heladería</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Pasta</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Morcillas</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Arepas</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Pollo asado / broaster</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Parrilla</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Pizza</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Sushi</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Mariscos</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Hamburguesas</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Pepitos</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Pinchos</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Empanadas</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Almuerzos</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Cafés</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Panadería</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Postres y heladería</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Pasta</span><svg class="i dot"><use href="#ic-flame"/></svg><span>Morcillas</span><svg class="i dot"><use href="#ic-flame"/></svg></div>
-    </div>
 
     <!-- Cómo funciona -->
     <section id="como-funciona">
       <div class="wrap">
-        <div class="section-head">
-          <h2>Abres. Eliges. Comes.</h2>
-          <p>Sin cuentas eternas ni menús que nadie actualiza. Todo pasa en la app.</p>
-        </div>
-        <div class="grid-3">
-          <div class="feature">
-            <div class="ico"><svg class="i"><use href="#ic-utensils-crossed"/></svg></div>
-            <h3>Descubre</h3>
-            <p>Mapa y buscador con filtros por categoría, precio, si está abierto y comodidades: A/C, sillas de bebé, cambiador, parque infantil, wifi y más.</p>
-          </div>
-          <div class="feature">
-            <div class="ico"><svg class="i"><use href="#ic-star"/></svg></div>
-            <h3>Rankea y gana</h3>
-            <p>Deja tu rank con foto. Suma XP, sube de nivel y desbloquea logros. Mantén tu racha semanal para ganar puntos extra.</p>
-          </div>
-          <div class="feature">
-            <div class="ico"><svg class="i"><use href="#ic-bell"/></svg></div>
-            <h3>Promos de tus favoritos</h3>
-            <p>Marca un local como favorito y te avisamos cuando publica una promo. Nada de spam: solo lo que sigues.</p>
-          </div>
-        </div>
+        <h2 class="sec-title">Abres. Eliges. Comes.</h2>
+        <ol class="flow">
+          <li>
+            <h3>Abres</h3>
+            <p>Ves qué está abierto ahora y qué te queda cerca, en lista o en el mapa. Filtras por categoría, precio y comodidades: aire acondicionado, wifi, sillas de bebé, estacionamiento.</p>
+          </li>
+          <li>
+            <h3>Eliges</h3>
+            <p>Los locales con perfil completo muestran su menú con precios en dólares, bolívares o pesos, sus fotos y su horario. Y su WhatsApp, a un toque.</p>
+          </li>
+          <li>
+            <h3>Comes y lo cuentas</h3>
+            <p>Dejas tu rank con foto, sumas XP y subes de rango. Marcas tus favoritos y te avisamos de sus promos y del plato del día.</p>
+          </li>
+        </ol>
       </div>
     </section>
 
     <!-- Categorías -->
-    <section class="cats">
+    <section class="cats" aria-labelledby="cats-h">
       <div class="wrap">
-        <span class="eyebrow">Categorías</span>
-        <h2>Todo lo que se come en la ciudad.</h2>
-        <div class="cat-chips">
-          <span>Pollo asado / broaster</span>
-          <span>Parrilla</span>
-          <span>Morcillas</span>
-          <span>Hamburguesas</span>
-          <span>Perros calientes</span>
-          <span>Pepitos</span>
-          <span>Pinchos</span>
-          <span>Shawarma</span>
-          <span>Pizza</span>
-          <span>Pasta</span>
-          <span>Alta cocina</span>
-          <span>Sushi</span>
-          <span>Comida asiática</span>
-          <span>Mariscos</span>
-          <span>Arepas</span>
-          <span>Almuerzos</span>
-          <span>Comida andina</span>
-          <span>Empanadas</span>
-          <span>Panadería</span>
-          <span>Cafés</span>
-          <span>Jugos y batidos</span>
-          <span>Bar / tasca</span>
-          <span>Postres y heladería</span>
-          <span>Vegetariano</span>
-          <span>Comida mexicana</span>
-        </div>
+        <h2 id="cats-h">Todo lo que se come en la ciudad.</h2>
+        <ul class="cat-wall">
+          <li>Pollo asado y broaster</li>
+          <li>Parrilla</li>
+          <li class="local">Morcillas</li>
+          <li>Hamburguesas</li>
+          <li>Perros calientes</li>
+          <li class="local">Pepitos</li>
+          <li class="local">Pinchos</li>
+          <li>Shawarma</li>
+          <li>Pizza</li>
+          <li>Pasta</li>
+          <li>Alta cocina</li>
+          <li>Sushi</li>
+          <li>Comida asiática</li>
+          <li>Mariscos</li>
+          <li>Arepas</li>
+          <li>Almuerzos</li>
+          <li class="local">Comida andina</li>
+          <li>Empanadas</li>
+          <li>Panadería</li>
+          <li>Cafés</li>
+          <li>Jugos y batidos</li>
+          <li>Bar y tasca</li>
+          <li>Postres y heladería</li>
+          <li>Vegetariano</li>
+          <li>Comida mexicana</li>
+        </ul>
       </div>
     </section>
 
-    <!-- Logros / rachas -->
-    <section id="logros" class="rewards band">
+    <!-- Rangos -->
+    <section id="rangos" class="band rangos">
       <div class="wrap">
-        <div>
-          <span class="eyebrow">Gamificación</span>
+        <div class="rangos-head">
           <h2>Rankear tiene premio.</h2>
-          <p>Cada reseña suma XP y te acerca al siguiente rango: de Novato a Leyenda. Completa misiones y mantén tu racha semanal para ganar puntos extra.</p>
-          <div class="streak-pill"><svg class="i"><use href="#ic-flame"/></svg> Racha: 4 semanas rankeando</div>
+          <p>Cada rank suma XP y te sube de rango, de Novato a Leyenda. Con foto suma más. Mantén tu racha semanal y completa misiones para ganar puntos extra.</p>
         </div>
-        <div class="badges">
-          <div class="badge"><div class="b-ico"><svg class="i"><use href="#ic-star"/></svg></div><span>Primera reseña</span><small>+20 XP</small></div>
-          <div class="badge"><div class="b-ico"><svg class="i"><use href="#ic-camera"/></svg></div><span>Reseña con foto</span><small>+25 XP</small></div>
-          <div class="badge"><div class="b-ico"><svg class="i"><use href="#ic-store"/></svg></div><span>5 locales</span><small>+60 XP</small></div>
-          <div class="badge locked"><div class="b-ico"><svg class="i"><use href="#ic-thumbs-up"/></svg></div><span>10 "me sirve"</span><small>+60 XP</small></div>
-          <div class="badge locked"><div class="b-ico"><svg class="i"><use href="#ic-flame"/></svg></div><span>Un mes en racha</span><small>+100 XP</small></div>
-          <div class="badge locked"><div class="b-ico"><svg class="i"><use href="#ic-map"/></svg></div><span>Explorador</span><small>+150 XP</small></div>
-        </div>
-
-        <div class="ranks">
-          <span class="ranks-title">Tu rango sube con cada reseña</span>
-          <ol class="rank-track">
-            <li><span class="dot"></span><b>Novato</b><small>Nivel 1–3</small></li>
-            <li><span class="dot"></span><b>Comensal</b><small>4–8</small></li>
-            <li><span class="dot"></span><b>Explorador</b><small>9–15</small></li>
-            <li><span class="dot"></span><b>Crítico Local</b><small>16–24</small></li>
-            <li><span class="dot"></span><b>Gurú Gastronómico</b><small>25–34</small></li>
-            <li><span class="dot last"></span><b>Leyenda</b><small>35+</small></li>
-          </ol>
-        </div>
+        <ol class="rank-track">
+          <li><span class="dot"></span><b>Novato</b><small>Nivel 1–3</small></li>
+          <li><span class="dot"></span><b>Comensal</b><small>Nivel 4–8</small></li>
+          <li><span class="dot"></span><b>Explorador</b><small>Nivel 9–15</small></li>
+          <li><span class="dot"></span><b>Crítico Local</b><small>Nivel 16–24</small></li>
+          <li><span class="dot"></span><b>Gurú Gastronómico</b><small>Nivel 25–34</small></li>
+          <li><span class="dot last"></span><b>Leyenda</b><small>Nivel 35+</small></li>
+        </ol>
+        <p class="xp-line"><b>+20 XP</b> tu primera reseña · <b>+25 XP</b> una reseña con foto · <b>+60 XP</b> rankear 5 locales</p>
       </div>
     </section>
 
-    <!-- Screenshots -->
+    <!-- Capturas -->
     <section>
       <div class="wrap">
         <div class="section-head">
           <h2>Así se ve.</h2>
-          <p>Feed, búsqueda con filtros, mapa y tu progreso. Modo claro y oscuro.</p>
+          <p>Inicio, búsqueda con filtros, mapa y tu progreso, en modo claro y oscuro. Capturas con datos de demostración.</p>
         </div>
       </div>
       <div class="wrap">
         <div class="shots">
-          <div class="shot"><picture><source srcset="shots/feed_black.webp" media="(prefers-color-scheme: dark)"><img src="shots/feed.webp" alt="Feed de El Point" decoding="async" width="720" height="1558" /></picture></div>
-          <div class="shot"><picture><source srcset="shots/search_black.webp" media="(prefers-color-scheme: dark)"><img src="shots/search.webp" alt="Buscar restaurantes" decoding="async" width="720" height="1558" /></picture></div>
-          <div class="shot"><picture><source srcset="shots/filters_black.webp" media="(prefers-color-scheme: dark)"><img src="shots/filters.webp" alt="Filtros de búsqueda" decoding="async" width="720" height="1558" /></picture></div>
-          <div class="shot"><picture><source srcset="shots/map_black.webp" media="(prefers-color-scheme: dark)"><img src="shots/map.webp" alt="Mapa de locales" decoding="async" width="720" height="1558" /></picture></div>
-          <div class="shot"><picture><source srcset="shots/profile_black.webp" media="(prefers-color-scheme: dark)"><img src="shots/profile.webp" alt="Perfil, XP y logros" decoding="async" width="720" height="1558" /></picture></div>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- Novedades -->
-    <section id="novedades">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="eyebrow">Novedades</span>
-          <h2>Lo nuevo en El Point.</h2>
-          <p>Así está la app hoy, para quien come y para quien cocina.</p>
-        </div>
-
-        <h3 class="news-group">Para comensales</h3>
-        <div class="news">
-          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-ghost"/></svg></div><div><h4>Cocinas fantasma</h4><p>Locales que solo hacen delivery o pickup, con su propio filtro y zona aproximada.</p></div></div>
-          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-wallet"/></svg></div><div><h4>Métodos de pago</h4><p>Cada local indica cómo puedes pagarle, y puedes filtrar por el método que usas.</p></div></div>
-          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-wifi"/></svg></div><div><h4>Más comodidades</h4><p>Planta eléctrica, menú infantil, A/C, wifi y más, para elegir con datos.</p></div></div>
-          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-camera"/></svg></div><div><h4>Foto desde la cámara</h4><p>Toma la foto de tu rank en el momento, sin pasar por la galería.</p></div></div>
-          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-star"/></svg></div><div><h4>Ranks más honestos</h4><p>Un rank por local cada semana, para que las notas reflejen visitas reales.</p></div></div>
-          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-map"/></svg></div><div><h4>Mapa y filtros renovados</h4><p>Categorías simplificadas y filtros que se ven bien también en iPad.</p></div></div>
-        </div>
-
-        <h3 class="news-group">Para dueños</h3>
-        <div class="news">
-          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-chart"/></svg></div><div><h4>Quién te ve</h4><p>Cuántas personas abren tu local y tocan WhatsApp, llamar, cómo llegar, Instagram o menú.</p></div></div>
-          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-flame"/></svg></div><div><h4>Destacado con tu plan</h4><p>Cada plan que pagas suma días de Destacado: 3, 7 o 21.</p></div></div>
-          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-store"/></svg></div><div><h4>Tu perfil completo</h4><p>Fotos, horario, menú en PDF, comodidades y métodos de pago en un solo lugar.</p></div></div>
-          <div class="news-item"><div class="ico"><svg class="i"><use href="#ic-bell"/></svg></div><div><h4>Avisos de tu plan</h4><p>Te avisamos antes de que venza y cuando se activa.</p></div></div>
+          <div class="shot"><picture><source srcset="shots/feed_black.webp" media="(prefers-color-scheme: dark)"><img src="shots/feed.webp" alt="Inicio de El Point con los locales de la ciudad" loading="lazy" decoding="async" width="720" height="1558" /></picture></div>
+          <div class="shot"><picture><source srcset="shots/search_black.webp" media="(prefers-color-scheme: dark)"><img src="shots/search.webp" alt="Buscar restaurantes por nombre" loading="lazy" decoding="async" width="720" height="1558" /></picture></div>
+          <div class="shot"><picture><source srcset="shots/filters_black.webp" media="(prefers-color-scheme: dark)"><img src="shots/filters.webp" alt="Filtros por categoría, precio y comodidades" loading="lazy" decoding="async" width="720" height="1558" /></picture></div>
+          <div class="shot"><picture><source srcset="shots/map_black.webp" media="(prefers-color-scheme: dark)"><img src="shots/map.webp" alt="Mapa con los locales cercanos" loading="lazy" decoding="async" width="720" height="1558" /></picture></div>
+          <div class="shot"><picture><source srcset="shots/profile_black.webp" media="(prefers-color-scheme: dark)"><img src="shots/profile.webp" alt="Perfil con XP, nivel y logros" loading="lazy" decoding="async" width="720" height="1558" /></picture></div>
         </div>
       </div>
     </section>
 
     <!-- Para dueños -->
-    <section id="duenos" class="band">
-      <div class="wrap">
-        <div>
-          <span class="eyebrow">Para dueños</span>
-          <h2>Que te encuentren primero.</h2>
-          <p>Regístralo y pruébalo <strong>3 meses gratis</strong>. El equipo verifica cada local antes de publicarlo.</p>
-          <ul class="checklist">
-            <li><svg class="i"><use href="#ic-check"/></svg><span>Perfil con fotos, menú en PDF, horario, métodos de pago y datos de contacto.</span></li>
-            <li><svg class="i"><use href="#ic-check"/></svg><span>¿Sin local físico? Regístralo como <strong>cocina fantasma</strong>: solo delivery o pickup, con zona aproximada en vez de dirección.</span></li>
-            <li><svg class="i"><use href="#ic-check"/></svg><span>Publica promos que llegan como notificación a quien te sigue.</span></li>
-            <li><svg class="i"><use href="#ic-check"/></svg><span>Responde las reseñas de tus clientes desde la app.</span></li>
-            <li><svg class="i"><use href="#ic-check"/></svg><span>Al aprobarse, tu local sale <strong>Destacado</strong> 14 días: primero en búsquedas y mapa. Sin costo.</span></li>
-            <li><svg class="i"><use href="#ic-check"/></svg><span>Ves cuánta gente abre tu local y te escribe: visitas, WhatsApp, llamadas y más.</span></li>
-          </ul>
-        </div>
-        <div>
-          <div class="feature">
-            <div class="ico"><svg class="i"><use href="#ic-flame"/></svg></div>
-            <h3>Cómo ganar más días Destacado</h3>
-            <p>Además del arranque de 14 días: responde todas tus reseñas cada semana y completa el perfil del local. Cada logro suma días extra, sin pagar.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- Planes -->
-    <section id="planes">
+    <section id="duenos" class="owners">
       <div class="wrap">
         <div class="section-head">
-          <span class="eyebrow">Planes para dueños</span>
-          <h2>3 meses gratis. Luego, tú eliges.</h2>
-          <p>Si ves que te llega clientela, sigues. Si no, no pagas nada. Los primeros 100 locales son <strong>Originales</strong> y entran gratis para siempre.</p>
+          <h2>Que te encuentren primero.</h2>
+          <p>Registra tu local y pruébalo <strong>3 meses gratis</strong>, con el perfil completo. Si ves que te llega clientela, sigues; si no, no pagas nada. Los primeros 100 locales son <strong>Originales</strong>: perfil completo gratis para siempre.</p>
         </div>
 
         <ol class="steps">
-          <li><b>Registra tu local</b><span>Desde la app, con fotos y datos de contacto.</span></li>
+          <li><b>Registra tu local</b><span>Desde la app, con fotos y datos de contacto. ¿Sin local físico? Regístralo como cocina fantasma: solo delivery o pickup.</span></li>
           <li><b>Lo verificamos</b><span>Revisamos cada local antes de publicarlo.</span></li>
-          <li><b>Apareces en el mapa</b><span>Con 3 meses gratis y 14 días de Destacado.</span></li>
+          <li><b>Apareces en el mapa</b><span>Con 3 meses de perfil completo y 14 días de Destacado: primero en búsquedas y mapa.</span></li>
         </ol>
 
         <div class="compare">
@@ -324,33 +239,37 @@
             <h3>Perfil completo <span class="tag">Con plan</span></h3>
             <ul class="checklist">
               <li><svg class="i"><use href="#ic-check"/></svg><span>WhatsApp, llamada e Instagram</span></li>
-              <li><svg class="i"><use href="#ic-check"/></svg><span>Menú, fotos y horario</span></li>
+              <li><svg class="i"><use href="#ic-check"/></svg><span>Menú con precios, fotos y horario</span></li>
               <li><svg class="i"><use href="#ic-check"/></svg><span>Promos con aviso a quienes te siguen</span></li>
-              <li><svg class="i"><use href="#ic-check"/></svg><span>Responder reseñas</span></li>
-              <li><svg class="i"><use href="#ic-check"/></svg><span>Métricas: quién te ve y te escribe</span></li>
+              <li><svg class="i"><use href="#ic-check"/></svg><span>Responder las reseñas de tus clientes</span></li>
+              <li><svg class="i"><use href="#ic-check"/></svg><span>Métricas: cuánta gente te ve y te escribe</span></li>
               <li><svg class="i"><use href="#ic-check"/></svg><span>Días de Destacado con cada plan</span></li>
             </ul>
           </div>
         </div>
+        <p class="extra-note">Más Destacado sin pagar: responde todas tus reseñas cada semana y completa el perfil de tu local; cada logro suma días extra.</p>
 
+        <h3 class="sub">Planes</h3>
         <div class="plans">
           <div class="plan">
             <h3>Mensual</h3>
             <p class="price"><b>US$3</b><span>al mes</span></p>
             <p class="plan-note">Sin compromiso. Cancelas cuando quieras.</p>
+            <p class="plan-extra"><svg class="i"><use href="#ic-flame"/></svg> 3 días de Destacado</p>
             <a class="btn btn-ghost plan-cta" href="https://wa.me/584149797876?text=Hola%2C%20quiero%20el%20plan%20mensual%20de%20El%20Point%20para%20mi%20local.%20Mi%20local%20se%20llama%3A%20" target="_blank" rel="noopener">Quiero este plan</a>
           </div>
           <div class="plan">
             <h3>Trimestral</h3>
             <p class="price"><b>US$7</b><span>cada 3 meses</span></p>
             <p class="plan-note">US$2,33 al mes. Ahorras 22 %.</p>
+            <p class="plan-extra"><svg class="i"><use href="#ic-flame"/></svg> 7 días de Destacado</p>
             <a class="btn btn-ghost plan-cta" href="https://wa.me/584149797876?text=Hola%2C%20quiero%20el%20plan%20trimestral%20de%20El%20Point%20para%20mi%20local.%20Mi%20local%20se%20llama%3A%20" target="_blank" rel="noopener">Quiero este plan</a>
           </div>
           <div class="plan plan-best">
-            <span class="plan-tag">Mejor precio</span>
-            <h3>Anual</h3>
+            <h3>Anual <span class="tag">Mejor precio</span></h3>
             <p class="price"><b>US$18</b><span>al año</span></p>
             <p class="plan-note">US$1,50 al mes. Ahorras la mitad frente al mensual.</p>
+            <p class="plan-extra"><svg class="i"><use href="#ic-flame"/></svg> 21 días de Destacado</p>
             <a class="btn btn-ghost plan-cta" href="https://wa.me/584149797876?text=Hola%2C%20quiero%20el%20plan%20anual%20de%20El%20Point%20para%20mi%20local.%20Mi%20local%20se%20llama%3A%20" target="_blank" rel="noopener">Quiero este plan</a>
           </div>
         </div>
@@ -376,13 +295,21 @@
       <div class="wrap">
         <div class="section-head"><h2>Preguntas rápidas</h2></div>
         <div class="faq">
-          <details open>
+          <details>
             <summary>¿Cuesta algo?</summary>
             <p>Para comensales, no: es gratis y sin publicidad. Para locales, aparecer en el mapa es gratis. Los primeros 3 meses tienen el perfil completo sin pagar y luego hay planes desde US$3 al mes para mantenerlo. Los primeros 100 locales tienen el perfil completo gratis para siempre.</p>
           </details>
           <details>
             <summary>Soy dueño, ¿cómo pago?</summary>
             <p>En bolívares por pago móvil o transferencia, a la tasa BCV del día; en dólares por USDT en Binance; o en pesos colombianos por Bancolombia, Nequi o Davivienda. Escríbenos por <a href="https://wa.me/584149797876?text=Hola%2C%20quiero%20registrar%20mi%20local%20en%20El%20Point" target="_blank" rel="noopener">WhatsApp</a> y te pasamos los datos.</p>
+          </details>
+          <details>
+            <summary>¿Por qué no veo los precios de los planes en la app?</summary>
+            <p>Las tiendas de aplicaciones no permiten cobrar ni mostrar precios de planes dentro de la app. Por eso los planes se ven aquí y se pagan por WhatsApp, y en la app solo ves el estado de tu plan.</p>
+          </details>
+          <details>
+            <summary>¿Cómo cancelo?</summary>
+            <p>No hay nada que cancelar: el plan mensual no tiene compromiso, simplemente no lo renuevas. Tu local sigue en el mapa con perfil básico.</p>
           </details>
           <details>
             <summary>¿Qué pasa cuando termina mi plan?</summary>
@@ -406,25 +333,12 @@
 
     <!-- CTA final -->
     <section class="final">
-      <div class="food-bg" aria-hidden="true">
-        <svg class="i"><use href="#ic-wine"/></svg>
-        <svg class="i"><use href="#ic-beef"/></svg>
-        <svg class="i"><use href="#ic-coffee"/></svg>
-        <svg class="i"><use href="#ic-cookie"/></svg>
-        <svg class="i"><use href="#ic-utensils"/></svg>
-        <svg class="i"><use href="#ic-ice-cream"/></svg>
-        <svg class="i"><use href="#ic-soup"/></svg>
-        <svg class="i"><use href="#ic-pizza"/></svg>
-      </div>
       <div class="wrap">
         <div class="box">
-          <h2>Tu próxima comida ya está en el mapa.</h2>
-          <p>Muy pronto en App Store. La versión de Android viene después.</p>
-          <div class="stores">
-            <a class="store store-main" href="#" aria-disabled="true">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.5 2-3.7 2.1-3.8-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.1 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.3 2.5 1.3-.1 1.8-.8 3.4-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.2 3.2-2.5.6-.9 1-1.8 1.3-2.8-3.4-1.3-3.9-4.8-3.9-4.9ZM14 5.4c.7-.9 1.2-2 1-3.2-1 .1-2.2.7-2.9 1.5-.7.8-1.2 2-1 3.1 1.1.1 2.2-.5 2.9-1.4Z"/></svg>
-              App Store <span class="tag">Pronto</span>
-            </a>
+          <h2>Pronto en tu iPhone.</h2>
+          <p>Escríbenos por WhatsApp y te avisamos el día que El Point salga en App Store. La versión de Android viene después.</p>
+          <div class="cta-row cta-center">
+            <a class="btn btn-primary btn-lg" href="https://wa.me/584149797876?text=Hola%2C%20av%C3%ADsenme%20cuando%20El%20Point%20salga%20en%20App%20Store." target="_blank" rel="noopener"><svg class="i"><use href="#ic-whatsapp"/></svg> Avísame cuando salga</a>
           </div>
         </div>
       </div>
@@ -435,6 +349,7 @@
     <div class="wrap">
       <div>© 2026 El Point · San Cristóbal, Táchira, Venezuela</div>
       <nav>
+        <a href="novedades.html">Novedades</a>
         <a href="terminos.html">Términos</a>
         <a href="privacidad.html">Privacidad</a>
         <a href="soporte.html">Soporte</a>
@@ -447,7 +362,7 @@
 
   <script>
     (function () {
-      var els = document.querySelectorAll(".feature, .news-item, .plan, .steps li, .badge, .stat, .shot");
+      var els = document.querySelectorAll(".flow li, .steps li, .plan, .cmp, .shot");
       if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       document.documentElement.classList.add("js");
       var io = new IntersectionObserver(function (entries) {
