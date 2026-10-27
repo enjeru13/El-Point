@@ -202,20 +202,40 @@
 
     <!-- Rangos -->
     <section id="rangos" class="band rangos">
-      <div class="wrap">
-        <div class="rangos-head">
+      <div class="wrap rangos-grid">
+        <div class="rangos-copy">
           <h2>Rankear tiene premio.</h2>
-          <p>Cada rank suma XP y te sube de rango, de Novato a Leyenda. Con foto suma más. Mantén tu racha semanal y completa misiones para ganar puntos extra.</p>
+          <p>Cada rank suma XP y te sube de nivel y de rango, de Novato a Leyenda. Pruébalo: toca una acción y mira cómo sube.</p>
+          <div class="earn" role="group" aria-label="Acciones que suman XP">
+            <button type="button" class="earn-btn" data-xp="10" data-repeat="1"><b>Dejar un rank</b><span>+10 XP</span></button>
+            <button type="button" class="earn-btn" data-xp="50" data-repeat="1"><b>Invitar a un amigo</b><span>+50 XP</span></button>
+            <button type="button" class="earn-btn" data-xp="20" data-mission="first"><b>Tu primera reseña</b><span>+20 XP · misión</span></button>
+            <button type="button" class="earn-btn" data-xp="25" data-mission="photo"><b>Una reseña con foto</b><span>+25 XP · misión</span></button>
+            <button type="button" class="earn-btn" data-xp="60" data-mission="five"><b>5 locales distintos</b><span>+60 XP · misión</span></button>
+            <button type="button" class="earn-btn" data-xp="100" data-mission="streak"><b>Un mes de racha</b><span>+100 XP · misión</span></button>
+          </div>
+          <p class="fine">Simulación con las reglas reales de la app. Cada misión se gana una sola vez.</p>
         </div>
-        <ol class="rank-track">
-          <li><span class="dot"></span><b>Novato</b><small>Nivel 1–3</small></li>
-          <li><span class="dot"></span><b>Comensal</b><small>Nivel 4–8</small></li>
-          <li><span class="dot"></span><b>Explorador</b><small>Nivel 9–15</small></li>
-          <li><span class="dot"></span><b>Crítico Local</b><small>Nivel 16–24</small></li>
-          <li><span class="dot"></span><b>Gurú Gastronómico</b><small>Nivel 25–34</small></li>
-          <li><span class="dot last"></span><b>Leyenda</b><small>Nivel 35+</small></li>
-        </ol>
-        <p class="xp-line"><b>+20 XP</b> tu primera reseña · <b>+25 XP</b> una reseña con foto · <b>+60 XP</b> rankear 5 locales</p>
+
+        <div class="xp-card">
+          <div class="xp-top">
+            <span class="rank-pill" id="xp-rank">Novato</span>
+            <span class="xp-level" id="xp-level">Nivel 1</span>
+          </div>
+          <p class="xp-num"><b id="xp-xp">0</b> XP</p>
+          <div class="xp-bar" role="progressbar" aria-label="Progreso al siguiente nivel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="xp-fill"></i></div>
+          <p class="xp-next" id="xp-next" aria-live="polite">Faltan 50 XP para el nivel 2</p>
+          <p class="xp-toast" id="xp-toast" role="status"></p>
+          <ol class="rank-track" id="xp-ladder">
+            <li data-r="0" class="on"><span class="dot"></span><b>Novato</b><small>Nivel 1–3</small></li>
+            <li data-r="1"><span class="dot"></span><b>Comensal</b><small>Nivel 4–8</small></li>
+            <li data-r="2"><span class="dot"></span><b>Explorador</b><small>Nivel 9–15</small></li>
+            <li data-r="3"><span class="dot"></span><b>Crítico Local</b><small>Nivel 16–24</small></li>
+            <li data-r="4"><span class="dot"></span><b>Gurú Gastronómico</b><small>Nivel 25–34</small></li>
+            <li data-r="5"><span class="dot"></span><b>Leyenda</b><small>Nivel 35+</small></li>
+          </ol>
+          <button type="button" class="link-btn" id="xp-reset">Empezar de cero</button>
+        </div>
       </div>
     </section>
 
@@ -493,6 +513,54 @@
         if (e.key === "ArrowLeft") load(idx - 1);
         if (e.key === "ArrowRight") load(idx + 1);
       });
+    })();
+
+    /* Rangos: simulador con la misma fórmula de la app (50·(nivel−1)² XP por nivel) */
+    (function () {
+      var card = document.querySelector(".xp-card");
+      if (!card) return;
+      var NAMES = ["Novato", "Comensal", "Explorador", "Crítico Local", "Gurú Gastronómico", "Leyenda"];
+      var xp = 0, done = {};
+      var $ = function (id) { return document.getElementById(id); };
+      var ladder = Array.prototype.slice.call($("xp-ladder").children);
+      var toast = $("xp-toast"), toastTimer = null;
+      var fmtN = function (n) { return n.toLocaleString("es-VE"); };
+      function level(x) { return Math.max(1, Math.floor(Math.sqrt(Math.max(0, x) / 50)) + 1); }
+      function need(l) { return 50 * (l - 1) * (l - 1); }
+      function rankIdx(l) { return l <= 3 ? 0 : l <= 8 ? 1 : l <= 15 ? 2 : l <= 24 ? 3 : l <= 34 ? 4 : 5; }
+      function render() {
+        var l = level(xp), r = rankIdx(l), lo = need(l), hi = need(l + 1);
+        var pct = Math.round(((xp - lo) / (hi - lo)) * 100);
+        $("xp-xp").textContent = fmtN(xp);
+        $("xp-level").textContent = "Nivel " + l;
+        $("xp-rank").textContent = NAMES[r];
+        $("xp-fill").style.width = pct + "%";
+        card.querySelector(".xp-bar").setAttribute("aria-valuenow", pct);
+        $("xp-next").textContent = "Faltan " + fmtN(hi - xp) + " XP para el nivel " + (l + 1);
+        ladder.forEach(function (li, i) { li.className = i < r ? "done" : i === r ? "on" : ""; });
+      }
+      function say(msg) {
+        toast.textContent = msg; toast.classList.add("show");
+        clearTimeout(toastTimer); toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2600);
+      }
+      document.querySelector(".earn").addEventListener("click", function (e) {
+        var b = e.target.closest(".earn-btn");
+        if (!b || b.disabled) return;
+        var before = level(xp), beforeR = rankIdx(before);
+        xp += Number(b.dataset.xp);
+        if (b.dataset.mission) { done[b.dataset.mission] = true; b.disabled = true; b.setAttribute("aria-pressed", "true"); }
+        var after = level(xp), afterR = rankIdx(after);
+        render();
+        if (afterR > beforeR) say("¡Ahora eres " + NAMES[afterR] + "!");
+        else if (after > before) say("¡Subiste al nivel " + after + "!");
+        else say("+" + b.dataset.xp + " XP");
+      });
+      $("xp-reset").addEventListener("click", function () {
+        xp = 0; done = {};
+        document.querySelectorAll(".earn-btn").forEach(function (b) { b.disabled = false; b.removeAttribute("aria-pressed"); });
+        toast.classList.remove("show"); render();
+      });
+      render();
     })();
 
     /* FAQ: abrir y cerrar todas */
