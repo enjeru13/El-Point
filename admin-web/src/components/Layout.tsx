@@ -11,12 +11,15 @@ import {
   LogOut,
   Menu,
   MessageSquareWarning,
+  Search,
+  Users,
   X,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { useAdminCounts } from "../lib/queries/admin";
 import { Brand } from "./Brand";
+import { CommandPalette } from "./CommandPalette";
 
 const NAV: {
   to: string;
@@ -34,6 +37,7 @@ const NAV: {
   { to: "/restaurantes", label: "Locales pendientes", icon: ClipboardCheck, key: "restaurants", section: "Moderación" },
   { to: "/reportados", label: "Suspendidos", icon: Flag, key: "reported" },
   { to: "/resenas", label: "Reseñas reportadas", icon: MessageSquareWarning, key: "reviews" },
+  { to: "/usuarios", label: "Usuarios", icon: Users },
   { to: "/soporte", label: "Soporte", icon: LifeBuoy, key: "support" },
 ];
 
@@ -46,7 +50,7 @@ function AdminBadge() {
 }
 
 /** Contenido del menú lateral; sirve igual para la barra fija (escritorio) y el cajón (móvil). */
-function SidebarContent({ onClose }: { onClose?: () => void }) {
+function SidebarContent({ onClose, onSearch }: { onClose?: () => void; onSearch: () => void }) {
   const { profile, signOut } = useAuth();
   const countsQ = useAdminCounts();
   const counts = countsQ.data;
@@ -67,6 +71,15 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           <AdminBadge />
         )}
       </div>
+
+      <button
+        onClick={onSearch}
+        className="mb-2 flex items-center gap-3 rounded-xl border border-white/10 px-3 py-2 text-sm text-white/45 transition hover:border-white/20 hover:text-white/75"
+      >
+        <Search className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
+        <span className="flex-1 text-left">Buscar…</span>
+        <kbd className="rounded border border-white/15 px-1.5 text-[11px] font-semibold text-white/40">Ctrl K</kbd>
+      </button>
 
       <nav className="flex flex-1 flex-col gap-0.5">
         {NAV.map(({ to, label, icon: Icon, end, key, section }) => {
@@ -132,7 +145,19 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
 export function Layout() {
   const [open, setOpen] = useState(false);
+  const [searching, setSearching] = useState(false);
   const { pathname } = useLocation();
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearching((s) => !s);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const countsQ = useAdminCounts();
   const pending = countsQ.data
     ? countsQ.data.restaurants + countsQ.data.reported + countsQ.data.reviews + countsQ.data.support + countsQ.data.payments
@@ -156,7 +181,7 @@ export function Layout() {
     <div className="min-h-screen lg:flex">
       {/* Escritorio: barra lateral fija */}
       <aside className="hidden w-64 shrink-0 flex-col overflow-y-auto bg-[#161210] px-4 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen">
-        <SidebarContent />
+        <SidebarContent onSearch={() => setSearching(true)} />
       </aside>
 
       {/* Móvil / tablet: barra superior + cajón */}
@@ -179,10 +204,18 @@ export function Layout() {
         <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
           <aside className="absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col overflow-y-auto bg-[#161210] px-4 py-6 shadow-2xl">
-            <SidebarContent onClose={() => setOpen(false)} />
+            <SidebarContent
+              onClose={() => setOpen(false)}
+              onSearch={() => {
+                setOpen(false);
+                setSearching(true);
+              }}
+            />
           </aside>
         </div>
       )}
+
+      <CommandPalette open={searching} onClose={() => setSearching(false)} />
 
       <main className="min-w-0 flex-1 bg-bg">
         <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
