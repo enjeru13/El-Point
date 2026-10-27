@@ -140,6 +140,32 @@
       </div>
     </section>
 
+    <!-- Tu moneda -->
+    <section id="moneda" class="moneda">
+      <div class="wrap moneda-grid">
+        <div class="moneda-copy">
+          <h2>Tu moneda, tu precio.</h2>
+          <p>Cada local pone su menú en dólares, bolívares o pesos, y El Point te lo muestra en la que tú uses, con la tasa BCV del día o la que fije el propio local.</p>
+          <div class="seg" role="radiogroup" aria-label="Elige la moneda">
+            <button type="button" role="radio" aria-checked="true" data-cur="usd">Dólares</button>
+            <button type="button" role="radio" aria-checked="false" data-cur="bs">Bolívares</button>
+            <button type="button" role="radio" aria-checked="false" data-cur="cop">Pesos</button>
+          </div>
+          <p class="fine">Menú y tasas de ejemplo, para que veas cómo funciona.</p>
+        </div>
+        <div class="menu-card" aria-live="polite">
+          <div class="mc-head"><b>Pizzería de ejemplo</b><span class="mc-open">Abierto ahora</span></div>
+          <ul class="mc-list">
+            <li><span>Pizza personal</span><b class="price-n" data-usd="7">US$7</b></li>
+            <li><span>Pasta al horno</span><b class="price-n" data-usd="6.5">US$6,50</b></li>
+            <li><span>Jugo natural</span><b class="price-n" data-usd="2">US$2</b></li>
+            <li><span>Postre del día</span><b class="price-n" data-usd="3">US$3</b></li>
+          </ul>
+          <p class="mc-foot" id="mc-rate">Precios en dólares</p>
+        </div>
+      </div>
+    </section>
+
     <!-- Categorías -->
     <section class="cats" aria-labelledby="cats-h">
       <div class="wrap">
@@ -198,7 +224,11 @@
       <div class="wrap">
         <div class="section-head">
           <h2>Así se ve.</h2>
-          <p>Inicio, búsqueda con filtros, mapa y tu progreso, en modo claro y oscuro. Capturas con datos de demostración.</p>
+          <p>Inicio, búsqueda con filtros, mapa y tu progreso, en modo claro y oscuro. Toca una captura para verla grande. Capturas con datos de demostración.</p>
+        </div>
+        <div class="shots-ctl">
+          <button type="button" class="ctl-btn" data-dir="-1" aria-label="Capturas anteriores">&#8249;</button>
+          <button type="button" class="ctl-btn" data-dir="1" aria-label="Capturas siguientes">&#8250;</button>
         </div>
       </div>
       <div class="wrap">
@@ -293,7 +323,7 @@
     <!-- FAQ -->
     <section class="faq-sec">
       <div class="wrap">
-        <div class="section-head"><h2>Preguntas rápidas</h2></div>
+        <div class="section-head"><h2>Preguntas rápidas</h2><button type="button" class="link-btn" id="faq-all">Abrir todas</button></div>
         <div class="faq">
           <details>
             <summary>¿Cuesta algo?</summary>
@@ -360,15 +390,138 @@
     </div>
   </footer>
 
+  <div class="sticky-cta" id="sticky-cta">
+    <a class="btn btn-primary btn-lg" href="https://wa.me/584149797876?text=Hola%2C%20av%C3%ADsenme%20cuando%20El%20Point%20salga%20en%20App%20Store." target="_blank" rel="noopener"><svg class="i"><use href="#ic-whatsapp"/></svg> Avísame cuando salga</a>
+  </div>
+
+  <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Capturas de la app">
+    <button type="button" class="lb-close" aria-label="Cerrar">&times;</button>
+    <button type="button" class="lb-prev" aria-label="Captura anterior">&#8249;</button>
+    <img alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />
+    <button type="button" class="lb-next" aria-label="Captura siguiente">&#8250;</button>
+    <p class="lb-count" aria-live="polite"></p>
+  </div>
+
   <script>
     (function () {
-      var els = document.querySelectorAll(".flow li, .steps li, .plan, .cmp, .shot");
+      var els = document.querySelectorAll(".flow li, .steps li, .plan, .cmp, .shot, .menu-card");
       if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       document.documentElement.classList.add("js");
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
       }, { rootMargin: "0px 0px -8% 0px" });
       els.forEach(function (el) { el.classList.add("reveal"); io.observe(el); });
+    })();
+
+    /* Moneda: el menú de ejemplo cambia de moneda con tasas de muestra */
+    (function () {
+      var RATES = { usd: 1, bs: 100, cop: 4000 };
+      var seg = document.querySelector(".seg");
+      var prices = document.querySelectorAll(".price-n");
+      var foot = document.getElementById("mc-rate");
+      if (!seg || !prices.length) return;
+      var fmt = { usd: function (n) { return "US$" + n.toLocaleString("es-VE", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); },
+                  bs: function (n) { return "Bs " + n.toLocaleString("es-VE", { maximumFractionDigits: 0 }); },
+                  cop: function (n) { return "$ " + n.toLocaleString("es-VE", { maximumFractionDigits: 0 }) + " COP"; } };
+      var notes = { usd: "Precios en dólares", bs: "Tasa de ejemplo: Bs 100 por US$1", cop: "Tasa de ejemplo: $ 4.000 COP por US$1" };
+      var current = "usd";
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      function show(cur) {
+        prices.forEach(function (el) {
+          var base = parseFloat(el.dataset.usd);
+          var to = base * RATES[cur];
+          var start = typeof el._v === "number" ? el._v : base;
+          if (el._raf) cancelAnimationFrame(el._raf);
+          clearTimeout(el._to);
+          if (reduce) { el._v = to; el.textContent = fmt[cur](to); return; }
+          var t0 = null, dur = 320;
+          function step(ts) {
+            if (t0 === null) t0 = ts;
+            var p = Math.min(1, (ts - t0) / dur);
+            var e = 1 - Math.pow(1 - p, 3);
+            var v = p < 1 ? start + (to - start) * e : to;
+            el._v = v;
+            el.textContent = fmt[cur](cur === "usd" ? Math.round(v * 100) / 100 : Math.round(v));
+            if (p < 1) el._raf = requestAnimationFrame(step);
+          }
+          el._raf = requestAnimationFrame(step);
+          // Red de seguridad: si el navegador pausa las animaciones (pestaña oculta), se fija el valor final.
+          el._to = setTimeout(function () { cancelAnimationFrame(el._raf); el._v = to; el.textContent = fmt[cur](to); }, dur + 80);
+        });
+        foot.textContent = notes[cur];
+        current = cur;
+      }
+      seg.addEventListener("click", function (e) {
+        var b = e.target.closest("button[data-cur]");
+        if (!b || b.dataset.cur === current) return;
+        seg.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-checked", x === b ? "true" : "false"); });
+        show(b.dataset.cur);
+      });
+    })();
+
+    /* Capturas: flechas y visor a pantalla completa */
+    (function () {
+      var rail = document.querySelector(".shots");
+      var shots = Array.prototype.slice.call(document.querySelectorAll(".shot"));
+      var lb = document.getElementById("lb");
+      if (!rail || !lb) return;
+      var img = lb.querySelector("img"), count = lb.querySelector(".lb-count"), idx = 0, opener = null;
+      document.querySelectorAll(".ctl-btn").forEach(function (b) {
+        b.addEventListener("click", function () { rail.scrollBy({ left: Number(b.dataset.dir) * 460, behavior: "smooth" }); });
+      });
+      function load(i) {
+        idx = (i + shots.length) % shots.length;
+        var src = shots[idx].querySelector("img");
+        img.src = src.currentSrc || src.src; img.alt = src.alt;
+        count.textContent = (idx + 1) + " de " + shots.length;
+      }
+      function open(i, el) { opener = el; load(i); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".lb-close").focus(); }
+      function close() { lb.hidden = true; document.body.style.overflow = ""; if (opener) opener.focus(); }
+      shots.forEach(function (s, i) {
+        s.setAttribute("role", "button"); s.setAttribute("tabindex", "0");
+        s.setAttribute("aria-label", "Ver grande: " + s.querySelector("img").alt);
+        s.addEventListener("click", function () { open(i, s); });
+        s.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(i, s); } });
+      });
+      lb.querySelector(".lb-close").addEventListener("click", close);
+      lb.querySelector(".lb-prev").addEventListener("click", function () { load(idx - 1); });
+      lb.querySelector(".lb-next").addEventListener("click", function () { load(idx + 1); });
+      lb.addEventListener("click", function (e) { if (e.target === lb) close(); });
+      document.addEventListener("keydown", function (e) {
+        if (lb.hidden) return;
+        if (e.key === "Escape") close();
+        if (e.key === "ArrowLeft") load(idx - 1);
+        if (e.key === "ArrowRight") load(idx + 1);
+      });
+    })();
+
+    /* FAQ: abrir y cerrar todas */
+    (function () {
+      var btn = document.getElementById("faq-all");
+      var items = document.querySelectorAll(".faq details");
+      if (!btn) return;
+      btn.addEventListener("click", function () {
+        var open = btn.dataset.open !== "1";
+        items.forEach(function (d) { d.open = open; });
+        btn.dataset.open = open ? "1" : "0";
+        btn.textContent = open ? "Cerrar todas" : "Abrir todas";
+      });
+    })();
+
+    /* Barra fija en móvil: aparece al pasar el botón de la portada y se va en el cierre */
+    (function () {
+      var bar = document.getElementById("sticky-cta");
+      var cta = document.querySelector(".hero-actions");
+      var fin = document.querySelector(".final");
+      if (!bar || !cta) return;
+      function update() {
+        var past = cta.getBoundingClientRect().bottom < 0;
+        var atEnd = fin && fin.getBoundingClientRect().top < window.innerHeight - 60;
+        bar.classList.toggle("show", past && !atEnd);
+      }
+      window.addEventListener("scroll", update, { passive: true });
+      window.addEventListener("resize", update);
+      update();
     })();
   </script>
 </body>
