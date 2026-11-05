@@ -115,6 +115,7 @@ select set_config('app.elpoint_privileged', 'off', true);
 -- owner_reply_only_mentions
 create temp table _sin as select pg_temp.post_as((select a from _m), null, (select cat from _m)) as id;
 create temp table _con as select pg_temp.post_as((select a from _m), (select resto from _m)) as id;
+grant select on _sin, _con to authenticated;
 select pg_temp.fails_with(
   format($f$select pg_temp.act_as(%L); insert into public.post_replies (post_id, author_id, as_restaurant_id, body) values (%L, %L, %L, 'hola')$f$,
     (select o from _m), (select id from _sin), (select o from _m), (select resto from _m)),
