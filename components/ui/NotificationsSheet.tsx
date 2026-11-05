@@ -46,6 +46,11 @@ function notifTarget(notif: AppNotification) {
   if (kind === "subscription") {
     return { pathname: "/subscription" as const };
   }
+  // Comunidad: me gusta, respuestas, menciones a tu local y moderación de un post.
+  const postId = notif.data?.post_id;
+  if ((kind === "post" || kind === "post_mention") && typeof postId === "string" && postId) {
+    return { pathname: "/community/[id]" as const, params: { id: postId } };
+  }
   const rid = notif.data?.restaurant_id;
   if (typeof rid === "string" && rid) {
     return { pathname: "/restaurant/[id]" as const, params: { id: rid } };
@@ -148,6 +153,9 @@ function NotifCard({
       bg: C.primaryFixed,
       color: C.primary,
     },
+    post_like: { icon: "heart", bg: C.primaryFixed, color: C.primary },
+    post_reply: { icon: "comment-text", bg: C.secondaryContainer, color: C.secondary },
+    post_mention: { icon: "comment-text-multiple", bg: C.primaryFixed, color: C.primary },
   };
   const cfg = CONFIG[notif.type] ?? CONFIG.like;
 

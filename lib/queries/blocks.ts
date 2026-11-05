@@ -60,6 +60,8 @@ function useInvalidateBlocks() {
   return () => {
     qc.invalidateQueries({ queryKey: BLOCKS_KEY });
     qc.invalidateQueries({ queryKey: ["reviews"] });
+    qc.invalidateQueries({ queryKey: ["community-feed"] });
+    qc.invalidateQueries({ queryKey: ["community-replies"] });
   };
 }
 

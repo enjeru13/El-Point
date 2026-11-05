@@ -16,7 +16,10 @@ export type AppNotification = {
     | "moderation"
     | "sub_expiring"
     | "sub_expired"
-    | "plan_active";
+    | "plan_active"
+    | "post_like"
+    | "post_reply"
+    | "post_mention";
   title: string;
   body: string | null;
   data: Record<string, any> | null;
@@ -35,6 +38,9 @@ const TYPE_SETTING: Partial<Record<AppNotification["type"], SettingKey>> = {
   levelup: "notifLevelup",
   promo: "notifPromos",
   weekly: "notifWeekly",
+  post_like: "notifRanks",
+  post_reply: "notifReplies",
+  post_mention: "notifReviews",
 };
 
 async function fetchNotifications(): Promise<AppNotification[]> {
