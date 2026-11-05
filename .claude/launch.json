@@ -28,6 +28,22 @@
       "port": 5183
     },
     {
+      "name": "admin-mock",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "admin-web",
+        "run",
+        "dev",
+        "--",
+        "--config",
+        "vite.mock.config.ts",
+        "--port",
+        "5184"
+      ],
+      "port": 5184
+    },
+    {
       "name": "landing",
       "runtimeExecutable": "npx",
       "runtimeArgs": [
