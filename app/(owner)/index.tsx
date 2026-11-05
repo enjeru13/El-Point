@@ -259,6 +259,32 @@ export default function OwnerHomeScreen() {
 
         {/* Estado: visibilidad, plan y Destacado */}
         {restaurant.status === 'approved' && <StatusCard restaurant={restaurant} />}
+
+        {/* Comunidad: el mismo feed de los comensales, como pantalla apilada */}
+        {restaurant.status === 'approved' && (
+          <Pressable
+            onPress={() => router.push('/community/feed')}
+            accessibilityRole="button"
+            style={{
+              flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16,
+              borderRadius: 20, borderWidth: 1, borderColor: C.border, backgroundColor: C.surface,
+            }}
+          >
+            <View style={{
+              width: 44, height: 44, borderRadius: 22, backgroundColor: C.primaryFixed,
+              alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Icon name="comment-text-multiple" size={22} color={C.primary} />
+            </View>
+            <View style={{ flex: 1, gap: 2 }}>
+              <AppText variant="bodyStrong">Comunidad</AppText>
+              <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                Lo que la gente comenta de comida en San Cristóbal
+              </AppText>
+            </View>
+            <Icon name="chevron-right" size={18} color={C.outline} />
+          </Pressable>
+        )}
         </View>
 
         {/* Promo activa */}

@@ -7,6 +7,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export type OwnerRestaurant = {
   id: string;
   name: string;
+  /** Si no es null, el local perdió el permiso de publicar en Comunidad. */
+  community_banned_at: string | null;
   description: string | null;
   address: string | null;
   phone: string | null;
@@ -64,7 +66,7 @@ async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
        logo_url, cover_url, promo_text, promo_ends_at, closed_today_date, hours, is_active,
        status, status_reason, submitted_at,
        rating_avg, rating_count, boost_until, founder_rank, paid_until, plan_period_start, plan_kind, host_streak_weeks, created_at,
-       ghost_kitchen, zone_label, accepts_orders, order_greeting, menu_currencies, menu_base_currency, menu_bs_rate, menu_cop_rate, latitude, longitude,
+       community_banned_at, ghost_kitchen, zone_label, accepts_orders, order_greeting, menu_currencies, menu_base_currency, menu_bs_rate, menu_cop_rate, latitude, longitude,
        restaurant_categories ( categories ( slug, label, icon ) ),
        restaurant_amenities ( amenities ( id, slug, label, icon ) ),
        restaurant_payment_methods ( payment_methods ( id, slug, label, icon ) )`,

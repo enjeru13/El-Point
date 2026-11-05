@@ -34,6 +34,7 @@ import {
   type RestaurantReportReason,
 } from "@/lib/queries/restaurants";
 import { ReportSheet, type ReportSheetHandle } from "@/components/ui/ReportSheet";
+import { RestaurantCommunitySection } from "@/components/community/RestaurantCommunitySection";
 import { whatsappUrl, instagramUrl, instagramHandle, orderMessage } from "@/lib/contact";
 import { useMyProfile } from "@/lib/queries/me";
 import { usePaymentMethods } from "@/lib/queries/paymentMethods";
@@ -1503,7 +1504,7 @@ export default function RestaurantProfileScreen() {
             </View>
           )}
 
-          {/* ── Comunidad / Reviews ── */}
+          {/* ── Ranks (reseñas) ── */}
           <View style={{ gap: 12 }}>
             <View
               style={{
@@ -1521,7 +1522,7 @@ export default function RestaurantProfileScreen() {
                   color={C.primary}
                 />
                 <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>
-                  Comunidad
+                  Ranks
                 </AppText>
               </View>
               {!isOwnerHere && (
@@ -2039,6 +2040,9 @@ export default function RestaurantProfileScreen() {
               })
             )}
           </View>
+
+          {/* ── Lo que dicen en Comunidad ── */}
+          <RestaurantCommunitySection restaurantId={restaurant.id} restaurantName={restaurant.name} />
 
           {!isOwnerHere && !!myProfileQ.data && (
             <Pressable

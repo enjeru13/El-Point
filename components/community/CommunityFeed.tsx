@@ -29,11 +29,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
  * `header`: "home" (pestaña, con logo) o un nodo propio (pantalla apilada).
  */
 export function CommunityFeed({
+  restaurantId,
   asRestaurantId,
   canPost = true,
   header = "home",
   bottomInset = 96,
 }: {
+  /** Solo los posts que etiquetan este local (sin filtros de tema/categoría). */
+  restaurantId?: string;
   asRestaurantId?: string | null;
   canPost?: boolean;
   header?: "home" | React.ReactNode;
@@ -55,13 +58,19 @@ export function CommunityFeed({
     return () => clearTimeout(t);
   }, [queryText]);
 
-  const filters = useMemo(() => ({ topic, categoryId, query: query || undefined }), [topic, categoryId, query]);
+  const filters = useMemo(
+    () =>
+      restaurantId
+        ? { restaurantId, query: query || undefined }
+        : { topic, categoryId, query: query || undefined },
+    [restaurantId, topic, categoryId, query],
+  );
   const feed = useCommunityFeed(filters);
   const items = useMemo(() => feed.data?.pages.flat() ?? [], [feed.data]);
   const { data: categories = [] } = useCategories();
   const categoryLabels = useMemo(() => new Map(categories.map((c) => [c.id, c.label])), [categories]);
   const actions = usePostActions();
-  const filtered = !!topic || !!categoryId || !!query;
+  const filtered = !!topic || !!categoryId || !!query || !!restaurantId;
 
   const openComposer = () => {
     impact("light");
@@ -131,9 +140,11 @@ export function CommunityFeed({
         keyExtractor={(it) => `${it.kind}:${it.id}`}
         contentContainerStyle={{ paddingBottom: insets.bottom + bottomInset, ...capWidth(isTablet) }}
         ListHeaderComponent={
-          <View style={{ borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
-            <TopicFilters topic={topic} categoryId={categoryId} onTopic={setTopic} onCategory={setCategoryId} />
-          </View>
+          restaurantId ? null : (
+            <View style={{ borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
+              <TopicFilters topic={topic} categoryId={categoryId} onTopic={setTopic} onCategory={setCategoryId} />
+            </View>
+          )
         }
         renderItem={({ item }: { item: FeedItem }) => (
           <FeedRow
