@@ -153,6 +153,22 @@ export function uploadReviewPhoto(
   return putImage("review-photos", `${reviewId}/${index}`, uri);
 }
 
+// ─── Comunidad: fotos de posts ──────────────────────────────────────────────
+
+/** Ruta "<post_id>/<position>" en el bucket público post-photos. */
+export function uploadPostPhoto(
+  postId: string,
+  position: number,
+  uri: string,
+): Promise<string> {
+  return putImage("post-photos", `${postId}/${position}`, uri);
+}
+
+export function postPhotoUrl(storagePath: string): string {
+  return supabase.storage.from("post-photos").getPublicUrl(storagePath).data
+    .publicUrl;
+}
+
 export function reviewPhotoUrl(storagePath: string): string {
   return supabase.storage.from("review-photos").getPublicUrl(storagePath).data
     .publicUrl;

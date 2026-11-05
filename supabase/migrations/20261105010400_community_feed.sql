@@ -9,6 +9,7 @@
 --   p_restaurant  solo posts que etiquetan ese local (directo o por una
 --                 sugerencia dada de alta); sin reseñas
 --   p_query       texto que aparece en el post/reseña o en el nombre del local
+--   p_post        un solo post (pantalla de detalle); no sale si está oculto
 -- ═══════════════════════════════════════════════════════════════════════════
 
 create or replace function public.community_feed(
@@ -18,7 +19,8 @@ create or replace function public.community_feed(
   p_query text default null,
   p_before_at timestamptz default null,
   p_before_id uuid default null,
-  p_limit int default 20
+  p_limit int default 20,
+  p_post uuid default null
 )
 returns table (
   kind text,
@@ -75,6 +77,7 @@ as $$
     left join public.local_suggestions ls
       on ls.normalized_name = p.suggested_key and ls.status = 'alta'
     where p.moderation = 'visible'
+      and (p_post is null or p.id = p_post)
       and (p_topic is null or (p_topic <> 'resenas' and p.topic = p_topic))
       and (p_category is null or exists (
         select 1 from public.post_categories pc where pc.post_id = p.id and pc.category_id = p_category))
@@ -113,6 +116,7 @@ as $$
     where rv.moderation = 'visible'
       and r.status = 'approved' and r.is_active
       and p_restaurant is null
+      and p_post is null
       and (p_topic is null or p_topic = 'resenas')
       and (p_category is null or exists (
         select 1 from public.restaurant_categories rc
@@ -188,8 +192,8 @@ as $$
   order by pg.created_at desc, pg.id desc;
 $$;
 
-revoke execute on function public.community_feed(text, smallint, uuid, text, timestamptz, uuid, int) from public, anon;
-grant execute on function public.community_feed(text, smallint, uuid, text, timestamptz, uuid, int) to authenticated;
+revoke execute on function public.community_feed(text, smallint, uuid, text, timestamptz, uuid, int, uuid) from public, anon;
+grant execute on function public.community_feed(text, smallint, uuid, text, timestamptz, uuid, int, uuid) to authenticated;
 
 -- Para el cursor de reseñas.
 create index if not exists reviews_feed_idx

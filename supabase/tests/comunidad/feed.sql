@@ -83,6 +83,16 @@ select pg_temp.ok(
   'la sugerencia en alta muestra el local');
 select pg_temp.as_admin_db();
 
+-- p_post: un post visible sale solo; uno oculto no sale.
+select pg_temp.act_as((select v from _f));
+select pg_temp.ok(
+  (select array_agg(f.id) from public.community_feed(p_post => (select p1 from _f))) = (select array[p1] from _f),
+  'p_post devuelve ese post');
+select pg_temp.ok(
+  not exists (select 1 from public.community_feed(p_post => (select ph from _f))),
+  'p_post no devuelve un post oculto');
+select pg_temp.as_admin_db();
+
 -- feed_hides_blocked_authors: Vero bloquea a Ana.
 insert into public.user_blocks (blocker_id, blocked_id) select v, a from _f;
 select pg_temp.ok(pg_temp.feed_ids() = (select array[p2] from _f), 'feed_hides_blocked_authors');
