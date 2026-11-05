@@ -141,9 +141,7 @@ export function CommunityFeed({
         contentContainerStyle={{ paddingBottom: insets.bottom + bottomInset, ...capWidth(isTablet) }}
         ListHeaderComponent={
           restaurantId ? null : (
-            <View style={{ borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
-              <TopicFilters topic={topic} categoryId={categoryId} onTopic={setTopic} onCategory={setCategoryId} />
-            </View>
+            <TopicFilters topic={topic} categoryId={categoryId} onTopic={setTopic} onCategory={setCategoryId} />
           )
         }
         renderItem={({ item }: { item: FeedItem }) => (

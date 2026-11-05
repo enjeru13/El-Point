@@ -20,8 +20,11 @@ export interface CategoryPickerHandle {
 const MAX = 2;
 
 /** Hoja para elegir de 0 a 2 categorías de comida. */
-export const CategoryPickerSheet = forwardRef<CategoryPickerHandle, { onDone: (ids: number[]) => void }>(
-  ({ onDone }, ref) => {
+export const CategoryPickerSheet = forwardRef<
+  CategoryPickerHandle,
+  { onDone: (ids: number[]) => void; max?: number; title?: string; hint?: string }
+>(
+  ({ onDone, max = MAX, title = "Categorías", hint }, ref) => {
     const { C } = useTheme();
     const insets = useSafeAreaInsets();
     const sheetRef = useRef<BottomSheetModal>(null);
@@ -43,7 +46,9 @@ export const CategoryPickerSheet = forwardRef<CategoryPickerHandle, { onDone: (i
     );
 
     const toggle = (id: number) =>
-      setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : p.length >= MAX ? [p[1], id] : [...p, id]));
+      setPicked((p) =>
+        p.includes(id) ? p.filter((x) => x !== id) : max === 1 ? [id] : p.length >= max ? [p[1], id] : [...p, id],
+      );
 
     return (
       <BottomSheetModal
@@ -55,9 +60,9 @@ export const CategoryPickerSheet = forwardRef<CategoryPickerHandle, { onDone: (i
       >
         <BottomSheetScrollView contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 20, gap: 14 }}>
           <View style={{ gap: 4 }}>
-            <AppText variant="heading">Categorías</AppText>
+            <AppText variant="heading">{title}</AppText>
             <AppText variant="bodySm" color={C.onSurfaceVariant}>
-              Elige hasta {MAX}. Ayudan a que lo encuentren quienes buscan esa comida.
+              {hint ?? `Elige hasta ${max}. Ayudan a que lo encuentren quienes buscan esa comida.`}
             </AppText>
           </View>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
