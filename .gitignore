@@ -72,3 +72,7 @@ marketing/store-screenshots/
 # panel admin con datos de mentira, solo para verlo en local
 admin-web/src/mock/
 admin-web/vite.mock.config.ts
+
+# pruebas SQL armadas y registro del plan (temporales)
+supabase/tests/.out/
+.superpowers/

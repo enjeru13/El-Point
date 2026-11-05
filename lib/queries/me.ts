@@ -1,5 +1,6 @@
 import { getSessionUser, supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { xpForLevel } from "@/lib/levels";
 
 export type MyProfile = {
   id: string;
@@ -158,12 +159,8 @@ export function useMyReviews() {
   return useQuery({ queryKey: ["my-reviews"], queryFn: fetchMyReviews });
 }
 
-// Quadratic curve — mirrors the DB functions.
-//   xpForLevel(L) = 50 * (L-1)^2 ;  levelForXp(xp) = floor(sqrt(xp/50)) + 1
-export const xpForLevel = (level: number) =>
-  50 * Math.pow(Math.max(1, level) - 1, 2);
-export const levelForXp = (xp: number) =>
-  Math.max(1, Math.floor(Math.sqrt(Math.max(0, xp) / 50)) + 1);
+// La curva vive en lib/levels.ts (espejo de las funciones de la base de datos).
+export { levelForXp, xpForLevel } from "@/lib/levels";
 
 export function levelProgress(level: number, xp: number) {
   const floor = xpForLevel(level);
