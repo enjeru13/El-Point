@@ -36,15 +36,26 @@ const migrations = readdirSync(migDir)
   .filter((f) => f.endsWith(".sql") && f.slice(0, 14) >= from)
   .sort();
 
-const parts = ["begin;"];
-parts.push(`-- ===== _helpers.sql =====\n${readFileSync("supabase/tests/_helpers.sql", "utf8")}`);
-for (const m of migrations) {
-  parts.push(`-- ===== migración ${m} =====\n${readFileSync(join(migDir, m), "utf8")}`);
-}
+// Cada prueba corre en su propia transacción (con las migraciones otra vez),
+// así los ayudantes y tablas temporales de una no chocan con los de otra.
+const helpers = readFileSync("supabase/tests/_helpers.sql", "utf8");
+const migSql = migrations
+  .map((m) => `-- ===== migración ${m} =====\n${readFileSync(join(migDir, m), "utf8")}`)
+  .join("\n\n");
+const parts = [];
 for (const t of tests) {
-  parts.push(`-- ===== prueba ${t} =====\nselect pg_temp.as_admin_db();\n${readFileSync(t, "utf8")}`);
+  parts.push(
+    [
+      `-- ######## prueba ${t} ########`,
+      "begin;",
+      `-- ===== _helpers.sql =====\n${helpers}`,
+      migSql,
+      `-- ===== prueba ${t} =====\nselect pg_temp.as_admin_db();\n${readFileSync(t, "utf8")}`,
+      "rollback;",
+    ].join("\n\n"),
+  );
 }
-parts.push("select 'TODO OK' as resultado;\nrollback;");
+parts.push(`select 'TODO OK: ${tests.length} archivos de prueba' as resultado;`);
 
 mkdirSync("supabase/tests/.out", { recursive: true });
 const out = "supabase/tests/.out/run.sql";

@@ -44,7 +44,8 @@ as $$
   select (now() at time zone 'America/Caracas')::date;
 $$;
 
--- Paga hasta p_amount respetando el tope de 20 por día. Devuelve lo pagado.
+-- Paga hasta p_amount respetando el tope de 20 por día (salvo el premio
+-- único 'suggestion_alta'). Devuelve lo pagado.
 -- Si la clave ya está usada (fila activa), no paga nada.
 create or replace function public.award_community_xp(
   p_user uuid,
@@ -79,11 +80,17 @@ begin
   -- con dos inserciones simultáneas.
   perform pg_advisory_xact_lock(hashtextextended('community_xp:' || p_user::text, 0));
 
-  select coalesce(sum(amount), 0) into v_today
-  from public.community_xp_log
-  where user_id = p_user and day = v_day and not reverted;
+  -- El +25 de un local sugerido que pasa a alta es un premio único (como una
+  -- misión): no cuenta para el tope ni lo recorta.
+  if p_reason = 'suggestion_alta' then
+    v_grant := p_amount;
+  else
+    select coalesce(sum(amount), 0) into v_today
+    from public.community_xp_log
+    where user_id = p_user and day = v_day and not reverted and reason <> 'suggestion_alta';
 
-  v_grant := greatest(0, least(p_amount, 20 - v_today));
+    v_grant := greatest(0, least(p_amount, 20 - v_today));
+  end if;
 
   insert into public.community_xp_log (user_id, amount, reason, post_id, actor_id, source_key, day)
   values (p_user, v_grant, p_reason, p_post, p_actor, p_source_key, v_day)
