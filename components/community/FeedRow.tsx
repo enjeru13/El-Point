@@ -129,9 +129,9 @@ export const FeedRow = memo(function FeedRow({
           </AppText>
         )}
 
-        <PhotoCarousel urls={photos} />
-
         <PlacePill item={item} onOpenRestaurant={onOpenRestaurant} />
+
+        <PhotoCarousel urls={photos} />
 
         <Actions item={item} pending={pending} onToggleLike={onToggleLike} onOpen={detail ? undefined : onOpen} />
       </View>
@@ -139,51 +139,71 @@ export const FeedRow = memo(function FeedRow({
   );
 });
 
-/** Píldora del local: tocable si está en la app; si es uno sugerido, solo texto. */
+/**
+ * El local etiquetado, justo debajo del texto. Si está en la app es una
+ * tarjeta pequeña que lleva a su perfil (nombre, comida y zona); si es uno
+ * sugerido, una línea discreta que dice que aún no está en El Point.
+ */
 function PlacePill({ item, onOpenRestaurant }: { item: FeedItem; onOpenRestaurant: (id: string) => void }) {
   const { C } = useTheme();
   if (item.restaurantId && item.restaurantName && !item.asRestaurantId) {
+    const meta = [item.restaurantCategory, item.restaurantZone].filter(Boolean).join(" · ");
     return (
       <Pressable
         onPress={() => onOpenRestaurant(item.restaurantId!)}
         accessibilityRole="link"
-        accessibilityLabel={`Ver ${item.restaurantName}`}
-        hitSlop={6}
+        accessibilityLabel={`Ver ${item.restaurantName}${meta ? `, ${meta}` : ""}`}
         style={{
-          alignSelf: "flex-start",
           flexDirection: "row",
           alignItems: "center",
-          gap: 6,
-          marginTop: 10,
-          paddingLeft: 6,
+          gap: 12,
+          marginTop: 12,
+          padding: 10,
           paddingRight: 12,
-          paddingVertical: 5,
-          borderRadius: 99,
+          borderRadius: 16,
           borderWidth: 1,
           borderColor: C.outlineVariant,
-          maxWidth: "100%",
+          backgroundColor: C.surfaceContainerLow,
+          maxWidth: 440,
         }}
       >
         <View
           style={{
-            width: 22,
-            height: 22,
-            borderRadius: 11,
+            width: 40,
+            height: 40,
+            borderRadius: 12,
             backgroundColor: C.primary,
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Icon name="storefront" size={13} color="#fff" />
+          <Icon name="storefront" size={20} color="#fff" />
         </View>
-        <AppText variant="label" numberOfLines={1} style={{ flexShrink: 1 }}>
-          {item.restaurantName}
-        </AppText>
-        {(item.restaurantCategory || item.restaurantZone) && (
-          <AppText variant="caption" color={C.onSurfaceVariant} numberOfLines={1} style={{ flexShrink: 2 }}>
-            · {item.restaurantCategory ?? item.restaurantZone}
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <AppText variant="label" numberOfLines={1}>
+            {item.restaurantName}
           </AppText>
-        )}
+          <AppText variant="caption" color={C.onSurfaceVariant} numberOfLines={1}>
+            {meta || "Ver en El Point"}
+          </AppText>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 2,
+            paddingLeft: 10,
+            paddingRight: 6,
+            paddingVertical: 6,
+            borderRadius: 99,
+            backgroundColor: C.primaryFixed,
+          }}
+        >
+          <AppText variant="caption" color={C.primary}>
+            Ver local
+          </AppText>
+          <Icon name="chevron-right" size={14} color={C.primary} />
+        </View>
       </Pressable>
     );
   }
