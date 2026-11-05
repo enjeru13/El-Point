@@ -7,27 +7,24 @@ import {
 } from "@/components/community/RestaurantPickerSheet";
 import { AppText } from "@/components/ui/AppText";
 import { Avatar } from "@/components/ui/Avatar";
-import { Chip } from "@/components/ui/Chip";
-import { ChipRow } from "@/components/ui/ChipRow";
 import { Icon } from "@/components/ui/Icon";
 import { clearDraft, loadDraft, saveDraft } from "@/lib/community/draft";
-import { CUSTOMER_TOPICS, errorMessage, type TopicKey } from "@/lib/community/topics";
-import { notify } from "@/lib/haptics";
+import { CUSTOMER_TOPICS, errorMessage, topicLabel, type TopicKey } from "@/lib/community/topics";
+import { impact, notify } from "@/lib/haptics";
 import { useCategories } from "@/lib/queries/categories";
 import { errorCode, useCreatePost } from "@/lib/queries/community";
 import { useMyProfile } from "@/lib/queries/me";
 import { useMyRestaurant } from "@/lib/queries/owner";
+import { capWidth, useIsTablet } from "@/lib/responsive";
 import { useTheme } from "@/lib/ThemeContext";
 import { useToast } from "@/lib/toast";
 import * as Crypto from "expo-crypto";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   TextInput,
@@ -38,11 +35,27 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const MAX_BODY = 500;
 const MAX_PHOTOS = 4;
 
+/** Lo que sugiere el campo de texto según el tema. */
+const TOPIC_PROMPTS: Partial<Record<TopicKey, string>> = {
+  recomiendame: "¿Qué estás buscando? Ej.: ¿dónde venden buen mondongo por Barrio Obrero?",
+  locales_nuevos: "¿Qué local descubriste? Cuéntanos qué probaste y dónde queda.",
+  recetas: "Comparte tu receta: ingredientes, pasos y el truco de la casa.",
+  antojos: "¿Qué comiste? ¿Qué se te antoja hoy?",
+};
+
+const TOPIC_META: Partial<Record<TopicKey, { icon: string; hint: string }>> = {
+  recomiendame: { icon: "comment-question-outline", hint: "Pide dónde comer" },
+  locales_nuevos: { icon: "storefront-outline", hint: "Uno que descubriste" },
+  recetas: { icon: "chef-hat", hint: "Para hacer en casa" },
+  antojos: { icon: "food", hint: "Lo que se te antoja" },
+};
+
 export default function NewPostScreen() {
-  const { C } = useTheme();
+  const { C, shadow } = useTheme();
   const router = useRouter();
   const toast = useToast();
   const insets = useSafeAreaInsets();
+  const isTablet = useIsTablet();
   const { asRestaurant } = useLocalSearchParams<{ asRestaurant?: string }>();
   const asRestaurantId = asRestaurant || null;
   const { data: me } = useMyProfile();
@@ -89,15 +102,9 @@ export default function NewPostScreen() {
 
   const hasTag = !!asRestaurantId || !!restaurant || !!suggested || categoryIds.length > 0;
   const canPublish = body.trim().length > 0 && hasTag && !createPost.isPending;
-  const categoryText = useMemo(
-    () =>
-      categoryIds
-        .map((id) => categories.find((c) => c.id === id)?.label)
-        .filter(Boolean)
-        .map((l) => `#${l!.toLowerCase()}`)
-        .join("  "),
-    [categoryIds, categories],
-  );
+  const pickedCategories = categoryIds
+    .map((cid) => categories.find((c) => c.id === cid))
+    .filter((c): c is NonNullable<typeof c> => !!c);
 
   const addPhotos = async () => {
     const r = await ImagePicker.launchImageLibraryAsync({
@@ -146,22 +153,19 @@ export default function NewPostScreen() {
     : createPost.isPending
       ? "Publicando…"
       : "Publicar";
+  const publishOn = canPublish || createPost.isPending;
 
   return (
     <View style={{ flex: 1, backgroundColor: C.background }}>
-      <Stack.Screen options={{ presentation: "modal", gestureEnabled: !createPost.isPending }} />
-
-      {/* Cabecera: Cancelar · Nuevo post · Publicar */}
+      {/* Cabecera: cerrar · título · Publicar. Respeta la barra de estado. */}
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
-          paddingTop: Platform.OS === "ios" ? 14 : insets.top + 10,
-          paddingBottom: 12,
+          paddingTop: insets.top + 8,
+          paddingBottom: 10,
           paddingHorizontal: 16,
-          borderBottomWidth: 1,
-          borderBottomColor: C.outlineVariant,
         }}
       >
         <Pressable
@@ -169,11 +173,18 @@ export default function NewPostScreen() {
           disabled={createPost.isPending}
           hitSlop={8}
           accessibilityRole="button"
-          style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: 4 }}
+          accessibilityLabel="Cancelar"
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            borderWidth: 1,
+            borderColor: C.outlineVariant,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
-          <AppText variant="body" color={C.onSurfaceVariant}>
-            Cancelar
-          </AppText>
+          <Icon name="close" size={20} color={C.onSurface} />
         </Pressable>
         <AppText variant="subtitle">{asRestaurantId ? "Novedad del local" : "Nuevo post"}</AppText>
         <Pressable
@@ -182,47 +193,114 @@ export default function NewPostScreen() {
           accessibilityRole="button"
           accessibilityState={{ disabled: !canPublish, busy: createPost.isPending }}
           style={{
-            minHeight: 40,
-            minWidth: 96,
-            paddingHorizontal: 16,
+            minHeight: 44,
+            minWidth: 104,
+            paddingHorizontal: 18,
             borderRadius: 99,
-            backgroundColor: canPublish || createPost.isPending ? C.primary : C.surfaceContainerHigh,
+            backgroundColor: publishOn ? C.primary : C.surfaceContainerHigh,
             alignItems: "center",
             justifyContent: "center",
             flexDirection: "row",
             gap: 6,
+            ...(canPublish ? shadow.primary : {}),
           }}
         >
           {createPost.isPending && <ActivityIndicator size="small" color="#fff" />}
-          <AppText variant="label" color={canPublish || createPost.isPending ? "#fff" : C.outline}>
+          <AppText variant="label" color={publishOn ? "#fff" : C.outline}>
             {publishLabel}
           </AppText>
         </Pressable>
       </View>
 
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <ScrollView
+      {/* Sin KeyboardAvoidingView: el teclado solo agrega espacio abajo para
+          poder desplazarse; la pantalla no salta hacia arriba al abrirlo. */}
+      <ScrollView
+          style={{ flex: 1 }}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 32, gap: 18 }}
+          keyboardDismissMode="interactive"
+          automaticallyAdjustKeyboardInsets
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            paddingTop: 8,
+            paddingBottom: insets.bottom + 32,
+            gap: 20,
+            ...capWidth(isTablet, 640),
+          }}
         >
-          <View style={{ flexDirection: "row", gap: 12 }}>
-            <Avatar
-              uri={asRestaurantId ? myRestaurant?.logo_url : me?.avatar_url}
-              size={40}
-              icon={asRestaurantId ? "storefront-outline" : "account"}
-              bordered={false}
-            />
-            <View style={{ flex: 1, gap: 2 }}>
-              <AppText variant="label">
-                {asRestaurantId ? (myRestaurant?.name ?? "Tu local") : (me?.full_name ?? me?.username ?? "Tú")}
+          {/* ¿De qué quieres hablar? */}
+          {asRestaurantId ? (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+                padding: 14,
+                borderRadius: 18,
+                backgroundColor: C.primaryFixed,
+              }}
+            >
+              <Icon name="storefront" size={22} color={C.primary} />
+              <AppText variant="bodySm" style={{ flex: 1 }}>
+                Sale como novedad de tu local. Puedes publicar una cada 24 horas.
               </AppText>
+            </View>
+          ) : (
+            <View style={{ gap: 10 }}>
+              <AppText variant="overline" color={C.onSurfaceVariant}>
+                ¿De qué quieres hablar?
+              </AppText>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+                {CUSTOMER_TOPICS.map((t) => (
+                  <TopicTile
+                    key={t.key}
+                    topicKey={t.key}
+                    label={t.label}
+                    active={topic === t.key}
+                    onPress={() => {
+                      impact("light");
+                      setTopic(t.key);
+                    }}
+                  />
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* La tarjeta del post */}
+          <View
+            style={{
+              borderRadius: 24,
+              borderWidth: 1,
+              borderColor: C.outlineVariant,
+              backgroundColor: C.surface,
+              ...shadow.sm,
+            }}
+          >
+            <View style={{ padding: 16, gap: 12 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                <Avatar
+                  uri={asRestaurantId ? myRestaurant?.logo_url : me?.avatar_url}
+                  size={36}
+                  icon={asRestaurantId ? "storefront-outline" : "account"}
+                  bordered={false}
+                />
+                <View style={{ flex: 1 }}>
+                  <AppText variant="label" numberOfLines={1}>
+                    {asRestaurantId ? (myRestaurant?.name ?? "Tu local") : (me?.full_name ?? me?.username ?? "Tú")}
+                  </AppText>
+                  <AppText variant="caption" color={C.onSurfaceVariant}>
+                    {topicLabel(topic)}
+                  </AppText>
+                </View>
+              </View>
+
               <TextInput
                 value={body}
                 onChangeText={(t) => setBody(t.slice(0, MAX_BODY))}
                 placeholder={
                   asRestaurantId
                     ? "Plato del día, una promo, horario especial…"
-                    : "¿Qué comiste? ¿Qué se te antoja? ¿Qué recomiendas?"
+                    : (TOPIC_PROMPTS[topic] ?? "Cuéntanos…")
                 }
                 placeholderTextColor={C.outline}
                 multiline
@@ -230,145 +308,120 @@ export default function NewPostScreen() {
                 scrollEnabled={false}
                 accessibilityLabel="Texto del post"
                 style={{
-                  minHeight: 80,
+                  minHeight: 110,
                   color: C.onSurface,
                   fontFamily: "PlusJakartaSans_500Medium",
-                  fontSize: 16,
-                  lineHeight: 23,
+                  fontSize: 17,
+                  lineHeight: 25,
                   textAlignVertical: "top",
                   padding: 0,
                 }}
               />
+
+              {photos.length > 0 && (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
+                  {photos.map((uri) => (
+                    <View key={uri}>
+                      <Image source={{ uri }} style={{ width: 104, height: 104, borderRadius: 16 }} contentFit="cover" />
+                      <Pressable
+                        onPress={() => setPhotos((p) => p.filter((x) => x !== uri))}
+                        disabled={createPost.isPending}
+                        hitSlop={8}
+                        accessibilityRole="button"
+                        accessibilityLabel="Quitar foto"
+                        style={{
+                          position: "absolute",
+                          top: 6,
+                          right: 6,
+                          width: 26,
+                          height: 26,
+                          borderRadius: 13,
+                          backgroundColor: "rgba(0,0,0,0.6)",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Icon name="close" size={15} color="#fff" />
+                      </Pressable>
+                    </View>
+                  ))}
+                </ScrollView>
+              )}
+
+              {/* Etiquetas puestas */}
+              {(restaurant || suggested || pickedCategories.length > 0) && (
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                  {restaurant && (
+                    <TagPill icon="storefront" label={restaurant.name} strong onRemove={() => setRestaurant(null)} />
+                  )}
+                  {suggested && (
+                    <TagPill
+                      icon="map-marker-outline"
+                      label={`${suggested.name} · no está en El Point`}
+                      onRemove={() => setSuggested(null)}
+                    />
+                  )}
+                  {pickedCategories.map((c) => (
+                    <TagPill
+                      key={c.id}
+                      icon={c.icon}
+                      label={c.label}
+                      onRemove={() => setCategoryIds((ids) => ids.filter((x) => x !== c.id))}
+                    />
+                  ))}
+                </View>
+              )}
+            </View>
+
+            {/* Barra de herramientas */}
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderTopWidth: 1,
+                borderTopColor: C.outlineVariant,
+              }}
+            >
+              <ToolButton
+                icon="image-plus"
+                label={photos.length ? `${photos.length}/${MAX_PHOTOS}` : "Foto"}
+                active={photos.length > 0}
+                disabled={photos.length >= MAX_PHOTOS || createPost.isPending}
+                onPress={addPhotos}
+              />
+              {!asRestaurantId && (
+                <ToolButton
+                  icon="storefront-outline"
+                  label="Local"
+                  active={!!restaurant || !!suggested}
+                  onPress={() => restaurantSheet.current?.present()}
+                />
+              )}
+              <ToolButton
+                icon="silverware-fork-knife"
+                label="Comida"
+                active={categoryIds.length > 0}
+                onPress={() => categorySheet.current?.present(categoryIds)}
+              />
+              <View style={{ flex: 1 }} />
+              <AppText variant="caption" color={body.length > MAX_BODY - 40 ? C.primary : C.outline}>
+                {body.length}/{MAX_BODY}
+              </AppText>
             </View>
           </View>
 
-          {/* Fotos */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingLeft: 52 }}>
-            {photos.map((uri) => (
-              <View key={uri}>
-                <Image source={{ uri }} style={{ width: 96, height: 96, borderRadius: 14 }} contentFit="cover" />
-                <Pressable
-                  onPress={() => setPhotos((p) => p.filter((x) => x !== uri))}
-                  disabled={createPost.isPending}
-                  hitSlop={8}
-                  accessibilityRole="button"
-                  accessibilityLabel="Quitar foto"
-                  style={{
-                    position: "absolute",
-                    top: 6,
-                    right: 6,
-                    width: 26,
-                    height: 26,
-                    borderRadius: 13,
-                    backgroundColor: "rgba(0,0,0,0.6)",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Icon name="close" size={15} color="#fff" />
-                </Pressable>
-              </View>
-            ))}
-            {photos.length < MAX_PHOTOS && (
-              <Pressable
-                onPress={addPhotos}
-                disabled={createPost.isPending}
-                accessibilityRole="button"
-                accessibilityLabel="Agregar fotos"
-                style={{
-                  width: 96,
-                  height: 96,
-                  borderRadius: 14,
-                  borderWidth: 1.5,
-                  borderStyle: "dashed",
-                  borderColor: C.outlineVariant,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Icon name="image-plus" size={26} color={C.onSurfaceVariant} />
-              </Pressable>
-            )}
-          </ScrollView>
-
-          {/* Tema, local y categorías */}
-          <View style={{ borderWidth: 1, borderColor: C.outlineVariant, borderRadius: 18, overflow: "hidden" }}>
-            {!asRestaurantId && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  borderBottomWidth: 1,
-                  borderBottomColor: C.outlineVariant,
-                }}
-              >
-                <AppText variant="body" color={C.onSurfaceVariant} style={{ width: 96, paddingLeft: 16 }}>
-                  Tema
-                </AppText>
-                <View style={{ flex: 1 }}>
-                  <ChipRow padY={10} side={0} contained>
-                    {CUSTOMER_TOPICS.map((t) => (
-                      <Chip key={t.key} label={t.label} active={topic === t.key} onPress={() => setTopic(t.key)} flat />
-                    ))}
-                  </ChipRow>
-                </View>
-              </View>
-            )}
-
-            {!asRestaurantId && (
-              <OptionRow label="Local" onPress={() => restaurantSheet.current?.present()}>
-                {restaurant ? (
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                    <Icon name="storefront" size={16} color={C.primary} />
-                    <AppText variant="label" numberOfLines={1} style={{ flexShrink: 1 }}>
-                      {restaurant.name}
-                    </AppText>
-                  </View>
-                ) : suggested ? (
-                  <AppText variant="label" numberOfLines={1}>
-                    {suggested.name}
-                    <AppText variant="caption" color={C.onSurfaceVariant}>
-                      {"  "}no está en El Point
-                    </AppText>
-                  </AppText>
-                ) : (
-                  <AppText variant="body" color={C.outline}>
-                    Opcional
-                  </AppText>
-                )}
-                {(restaurant || suggested) && (
-                  <Pressable
-                    onPress={() => {
-                      setRestaurant(null);
-                      setSuggested(null);
-                    }}
-                    hitSlop={10}
-                    accessibilityRole="button"
-                    accessibilityLabel="Quitar local"
-                  >
-                    <Icon name="close-circle" size={18} color={C.outline} />
-                  </Pressable>
-                )}
-              </OptionRow>
-            )}
-
-            <OptionRow label="Categoría" last onPress={() => categorySheet.current?.present(categoryIds)}>
-              <AppText variant="label" color={categoryText ? C.onSurface : C.outline} numberOfLines={1}>
-                {categoryText || "Opcional · hasta 2"}
+          {!hasTag && (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 4 }}>
+              <Icon name="tag-outline" size={16} color={C.onSurfaceVariant} />
+              <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ flex: 1 }}>
+                Agrega un local o una comida para que llegue a quien le interesa.
               </AppText>
-            </OptionRow>
-          </View>
-
-          <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
-            <AppText variant="caption" color={hasTag ? C.onSurfaceVariant : C.primary} style={{ flex: 1 }}>
-              {asRestaurantId ? "Sale como novedad de tu local. Un post cada 24 horas." : "Etiqueta un local o una categoría."}
-            </AppText>
-            <AppText variant="caption" color={body.length > MAX_BODY - 40 ? C.primary : C.onSurfaceVariant}>
-              {body.length} / {MAX_BODY}
-            </AppText>
-          </View>
+            </View>
+          )}
         </ScrollView>
-      </KeyboardAvoidingView>
 
       <RestaurantPickerSheet
         ref={restaurantSheet}
@@ -381,42 +434,145 @@ export default function NewPostScreen() {
           setRestaurant(null);
         }}
       />
-      <CategoryPickerSheet ref={categorySheet} onDone={setCategoryIds} />
+      <CategoryPickerSheet
+        ref={categorySheet}
+        title="¿Qué comida?"
+        hint="Elige hasta 2. Así lo encuentra quien busca esa comida."
+        onDone={setCategoryIds}
+      />
     </View>
   );
 }
 
-function OptionRow({
+function TopicTile({
+  topicKey,
   label,
-  last = false,
+  active,
   onPress,
-  children,
 }: {
+  topicKey: TopicKey;
   label: string;
-  last?: boolean;
+  active: boolean;
   onPress: () => void;
-  children: React.ReactNode;
+}) {
+  const { C } = useTheme();
+  const meta = TOPIC_META[topicKey];
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="radio"
+      accessibilityState={{ checked: active }}
+      accessibilityLabel={`${label}: ${meta?.hint ?? ""}`}
+      style={{
+        flexGrow: 1,
+        flexBasis: "45%",
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        padding: 12,
+        borderRadius: 18,
+        borderWidth: active ? 1.5 : 1,
+        borderColor: active ? C.primary : C.outlineVariant,
+        backgroundColor: active ? C.primaryFixed : C.surface,
+      }}
+    >
+      <View
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 12,
+          backgroundColor: active ? C.primary : C.surfaceContainer,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Icon name={meta?.icon ?? "circle"} size={19} color={active ? "#fff" : C.onSurfaceVariant} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <AppText variant="label" color={active ? C.primary : C.onSurface} numberOfLines={1}>
+          {label}
+        </AppText>
+        <AppText variant="caption" color={C.onSurfaceVariant} numberOfLines={1}>
+          {meta?.hint}
+        </AppText>
+      </View>
+    </Pressable>
+  );
+}
+
+function ToolButton({
+  icon,
+  label,
+  active,
+  disabled,
+  onPress,
+}: {
+  icon: string;
+  label: string;
+  active: boolean;
+  disabled?: boolean;
+  onPress: () => void;
 }) {
   const { C } = useTheme();
   return (
     <Pressable
       onPress={onPress}
+      disabled={disabled}
       accessibilityRole="button"
-      accessibilityLabel={`Elegir ${label.toLowerCase()}`}
+      accessibilityLabel={label}
       style={{
         flexDirection: "row",
         alignItems: "center",
-        minHeight: 56,
-        paddingRight: 14,
-        borderBottomWidth: last ? 0 : 1,
-        borderBottomColor: C.outlineVariant,
+        gap: 6,
+        minHeight: 40,
+        paddingHorizontal: 12,
+        borderRadius: 99,
+        backgroundColor: active ? C.primaryFixed : C.surfaceContainerLow,
+        opacity: disabled ? 0.5 : 1,
       }}
     >
-      <AppText variant="body" color={C.onSurfaceVariant} style={{ width: 96, paddingLeft: 16 }}>
+      <Icon name={icon} size={18} color={active ? C.primary : C.onSurfaceVariant} />
+      <AppText variant="label" color={active ? C.primary : C.onSurfaceVariant}>
         {label}
       </AppText>
-      <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>{children}</View>
-      <Icon name="chevron-right" size={18} color={C.outline} />
     </Pressable>
+  );
+}
+
+function TagPill({
+  icon,
+  label,
+  strong = false,
+  onRemove,
+}: {
+  icon: string;
+  label: string;
+  strong?: boolean;
+  onRemove: () => void;
+}) {
+  const { C } = useTheme();
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        paddingLeft: 10,
+        paddingRight: 6,
+        paddingVertical: 6,
+        borderRadius: 99,
+        borderWidth: 1,
+        borderColor: strong ? C.primary : C.outlineVariant,
+        maxWidth: "100%",
+      }}
+    >
+      <Icon name={icon} size={15} color={strong ? C.primary : C.onSurfaceVariant} />
+      <AppText variant="label" numberOfLines={1} style={{ flexShrink: 1 }}>
+        {label}
+      </AppText>
+      <Pressable onPress={onRemove} hitSlop={10} accessibilityRole="button" accessibilityLabel={`Quitar ${label}`}>
+        <Icon name="close-circle" size={17} color={C.outline} />
+      </Pressable>
+    </View>
   );
 }
