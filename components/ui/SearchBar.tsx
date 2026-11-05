@@ -10,6 +10,7 @@ interface Props {
   onClear?: () => void;
   placeholder?: string;
   variant?: "default" | "floating"; // ambos renderizan igual ahora
+  autoFocus?: boolean;
 }
 
 export const SearchBar = forwardRef<TextInput, Props>(
@@ -21,6 +22,7 @@ export const SearchBar = forwardRef<TextInput, Props>(
       onClear,
       placeholder = "Buscar restaurantes, platos...",
       variant = "default",
+      autoFocus = false,
     },
     ref,
   ) => {
@@ -46,6 +48,7 @@ export const SearchBar = forwardRef<TextInput, Props>(
         <Icon name="magnify" size={20} color={C.outline} />
         <TextInput
           ref={ref}
+          autoFocus={autoFocus}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}

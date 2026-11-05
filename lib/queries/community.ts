@@ -438,10 +438,9 @@ export function useToggleLike() {
         likeCount: Math.max(0, it.likeCount + (liked ? 1 : -1)),
       }));
     },
-    onSettled: () => {
-      if (qc.isMutating({ mutationKey: ["toggle-like"] }) > 1) return;
-      qc.invalidateQueries({ queryKey: ["community-feed"] });
-    },
+    // No se recarga el feed: el cambio optimista ya es el resultado, y
+    // recargar todas las páginas movía la lista y mostraba la ruedita.
+    // Si el servidor falla, onError lo revierte.
   });
 }
 

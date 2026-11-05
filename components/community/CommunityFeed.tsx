@@ -17,7 +17,8 @@ import { capWidth, useIsTablet } from "@/lib/responsive";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { FlatList, Pressable, RefreshControl, View } from "react-native";
+import { Pressable, RefreshControl, View } from "react-native";
+import Animated, { FadeInUp, FadeOutUp, LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 /**
@@ -51,6 +52,8 @@ export function CommunityFeed({
   const [searchOpen, setSearchOpen] = useState(false);
   const [queryText, setQueryText] = useState("");
   const [query, setQuery] = useState("");
+  // La ruedita solo cuando la persona tira hacia abajo, no en recargas de fondo.
+  const [pulling, setPulling] = useState(false);
 
   // Búsqueda con una pausa corta para no consultar en cada letra.
   useEffect(() => {
@@ -125,17 +128,23 @@ export function CommunityFeed({
       )}
 
       {searchOpen && (
-        <View style={{ paddingHorizontal: 20, paddingBottom: 6 }}>
+        <Animated.View
+          entering={FadeInUp.duration(200)}
+          exiting={FadeOutUp.duration(150)}
+          style={{ paddingHorizontal: 20, paddingBottom: 6 }}
+        >
           <SearchBar
             value={queryText}
             onChangeText={setQueryText}
             onClear={() => setQueryText("")}
             placeholder="Buscar en Comunidad: platos, locales…"
+            autoFocus
           />
-        </View>
+        </Animated.View>
       )}
 
-      <FlatList
+      <Animated.FlatList
+        layout={LinearTransition.duration(200)}
         data={items}
         keyExtractor={(it) => `${it.kind}:${it.id}`}
         contentContainerStyle={{ paddingBottom: insets.bottom + bottomInset, ...capWidth(isTablet) }}
@@ -160,8 +169,15 @@ export function CommunityFeed({
         }}
         refreshControl={
           <RefreshControl
-            refreshing={feed.isRefetching && !feed.isFetchingNextPage}
-            onRefresh={() => feed.refetch()}
+            refreshing={pulling}
+            onRefresh={async () => {
+              setPulling(true);
+              try {
+                await feed.refetch();
+              } finally {
+                setPulling(false);
+              }
+            }}
             tintColor={C.primary}
           />
         }
