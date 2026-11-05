@@ -235,7 +235,11 @@ export default function PostDetailScreen() {
                     style={{
                       flex: 1,
                       maxHeight: 120,
-                      paddingVertical: 11,
+                      // iOS agrega relleno arriba en los multilínea: se fija
+                      // arriba y abajo para que el texto quede centrado.
+                      paddingTop: 12,
+                      paddingBottom: 12,
+                      lineHeight: 20,
                       color: C.onSurface,
                       fontFamily: "PlusJakartaSans_500Medium",
                       fontSize: 15,

@@ -43,6 +43,17 @@ const TOPIC_PROMPTS: Partial<Record<TopicKey, string>> = {
   antojos: "¿Qué comiste? ¿Qué se te antoja hoy?",
 };
 
+/**
+ * Estructura que se escribe sola al elegir el tema, si el texto está vacío
+ * (o todavía es la estructura de otro tema). Es texto normal: se puede borrar.
+ */
+const TOPIC_TEMPLATES: Partial<Record<TopicKey, string>> = {
+  recetas: "Ingredientes:\n- \n- \n\nPreparación:\n1. \n2. \n\nEl truco: ",
+  locales_nuevos: "Se llama: \nQueda en: \nProbé: \nVale la pena porque: ",
+};
+const isTemplate = (text: string) =>
+  text.trim() === "" || Object.values(TOPIC_TEMPLATES).some((t) => t === text);
+
 const TOPIC_META: Partial<Record<TopicKey, { icon: string; hint: string }>> = {
   recomiendame: { icon: "comment-question-outline", hint: "Pide dónde comer" },
   locales_nuevos: { icon: "storefront-outline", hint: "Uno que descubriste" },
@@ -259,6 +270,7 @@ export default function NewPostScreen() {
                     onPress={() => {
                       impact("light");
                       setTopic(t.key);
+                      if (isTemplate(body)) setBody(TOPIC_TEMPLATES[t.key] ?? "");
                     }}
                   />
                 ))}
