@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 
 export type MissionKey =
@@ -68,7 +68,7 @@ export function useMyMissions() {
   return useQuery({
     queryKey: ["my-missions"],
     queryFn: async (): Promise<Set<string>> => {
-      const { data: userData } = await supabase.auth.getUser();
+      const { data: userData } = await getSessionUser();
       const uid = userData.user?.id;
       if (!uid) return new Set();
       const { data, error } = await supabase

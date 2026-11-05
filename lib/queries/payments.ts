@@ -1,5 +1,5 @@
 import { paymentProofUrl, uploadPaymentProof } from "@/lib/storage";
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type PaymentMethod = "bs_bcv" | "binance" | "bancolombia";
@@ -109,7 +109,7 @@ export function useSubmitPayment(restaurantId: string | undefined) {
       photoUri: string;
     }) => {
       if (!restaurantId) throw new Error("Sin local");
-      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      const { data: userData, error: userErr } = await getSessionUser();
       if (userErr || !userData.user) throw userErr ?? new Error("Sesión expirada");
 
       const proofPath = await uploadPaymentProof(userData.user.id, restaurantId, photoUri);

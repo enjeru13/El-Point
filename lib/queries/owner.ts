@@ -1,7 +1,7 @@
 import { parseHours, type Hours } from "@/lib/hours";
 import type { PaymentMethod } from "@/lib/queries/paymentMethods";
 import type { RestaurantAmenity, RestaurantCategory } from "@/lib/queries/restaurants";
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type OwnerRestaurant = {
@@ -53,7 +53,7 @@ export type OwnerRestaurant = {
 export const ownerRestaurantKey = ["owner-restaurant"] as const;
 
 async function fetchMyRestaurant(): Promise<OwnerRestaurant | null> {
-  const { data: userData } = await supabase.auth.getUser();
+  const { data: userData } = await getSessionUser();
   const uid = userData.user?.id;
   if (!uid) return null;
 

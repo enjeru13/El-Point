@@ -38,7 +38,7 @@ import {
   uploadRestaurantVerification,
   verificationPhotoUrl,
 } from '@/lib/storage';
-import { supabase } from '@/lib/supabase';
+import { getSessionUser } from '@/lib/supabase';
 import { instagramHandle } from '@/lib/contact';
 import { TourGuide, type TourStep } from '@/components/tour/TourGuide';
 import { capWidth, useIsTablet } from '@/lib/responsive';
@@ -153,16 +153,17 @@ function BusinessBlock({ restaurant }: { restaurant: OwnerRestaurant }) {
     try {
       const before = restaurant.categories.map(c => c.slug).sort().join(',');
       const after = Array.from(catSlugs).sort().join(',');
-      if (before !== after) {
-        const ids = (categoriesQ.data ?? []).filter(c => catSlugs.has(c.slug)).map(c => c.id);
-        await catsMut.mutateAsync(ids);
-      }
-      await updateMut.mutateAsync({
-        name: name.trim(),
-        description: description.trim() || null,
-        address: address.trim() || null,
-        price_level: priceLevel,
-      });
+      const ids = (categoriesQ.data ?? []).filter(c => catSlugs.has(c.slug)).map(c => c.id);
+      // Categorías y datos son independientes: se guardan a la vez, no uno tras otro.
+      await Promise.all([
+        before !== after ? catsMut.mutateAsync(ids) : null,
+        updateMut.mutateAsync({
+          name: name.trim(),
+          description: description.trim() || null,
+          address: address.trim() || null,
+          price_level: priceLevel,
+        }),
+      ]);
       setEditing(false);
       toast.success('Cambios guardados');
     } catch (e: any) {
@@ -587,7 +588,7 @@ export default function OwnerProfileScreen() {
     if (!uri) return;
     setVerifUploading(true);
     try {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await getSessionUser();
       if (!u.user) throw new Error('Sesión expirada');
       const path = await uploadRestaurantVerification(u.user.id, restaurant.id, uri);
       updateMut.mutate({ verification_photo_path: path });

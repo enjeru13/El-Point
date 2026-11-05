@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 import { Platform } from "react-native";
 import { requireOptionalNativeModule } from "expo-modules-core";
 
@@ -64,7 +64,7 @@ export async function signInWithApple(): Promise<void> {
   const { givenName, familyName } = credential.fullName ?? {};
   const fullName = [givenName, familyName].filter(Boolean).join(" ").trim();
   if (fullName) {
-    const { data } = await supabase.auth.getUser();
+    const { data } = await getSessionUser();
     if (data.user) {
       await supabase.from("profiles").update({ full_name: fullName }).eq("id", data.user.id);
     }

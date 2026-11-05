@@ -2,7 +2,7 @@ import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 
 // Foreground: still show a banner + play sound (default is silent).
 Notifications.setNotificationHandler({
@@ -48,7 +48,7 @@ export async function registerForPush(): Promise<void> {
     return;
   }
 
-  const { data: userData } = await supabase.auth.getUser();
+  const { data: userData } = await getSessionUser();
   const uid = userData.user?.id;
   if (!uid || !token) return;
 

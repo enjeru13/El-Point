@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSettings, type SettingKey } from "@/lib/settings";
@@ -38,7 +38,7 @@ const TYPE_SETTING: Partial<Record<AppNotification["type"], SettingKey>> = {
 };
 
 async function fetchNotifications(): Promise<AppNotification[]> {
-  const { data: userData } = await supabase.auth.getUser();
+  const { data: userData } = await getSessionUser();
   if (!userData.user) return [];
 
   const { data, error } = await supabase
@@ -142,7 +142,7 @@ export function useMarkAllNotificationsRead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      const { data: userData } = await supabase.auth.getUser();
+      const { data: userData } = await getSessionUser();
       if (!userData.user) return;
       const { error } = await supabase
         .from("notifications")

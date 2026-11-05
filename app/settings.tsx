@@ -1,11 +1,12 @@
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, ScrollView, Switch, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QA_MODE } from '@/lib/qa';
 import { PAYMENTS_IN_APP } from '@/lib/billing';
 import Constants from 'expo-constants';
-import { supabase } from '@/lib/supabase';
+import { getSessionUser, supabase } from '@/lib/supabase';
 import { unregisterPush } from '@/lib/push';
 import { useTheme } from '@/lib/ThemeContext';
 import { THEME_MODE_META } from '@/lib/themes';
@@ -62,6 +63,20 @@ export default function SettingsScreen() {
   const { C, shadow, mode, setMode } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
+
+  // Quitar el token de notificaciones y cerrar la sesión van a la vez, no uno
+  // tras otro: así cuesta un solo viaje al servidor. La petición del token sale
+  // con la sesión aún válida, antes de que signOut la borre del teléfono.
+  async function onSignOut() {
+    setSigningOut(true);
+    const { data } = await getSessionUser();
+    await Promise.allSettled([
+      data.user ? unregisterPush(data.user.id) : Promise.resolve(),
+      supabase.auth.signOut(),
+    ]);
+    setSigningOut(false);
+  }
   const isTablet = useIsTablet();
 
   const profileQ = useMyProfile();
@@ -341,11 +356,8 @@ export default function SettingsScreen() {
 
           <Button
             label="Cerrar sesión"
-            onPress={async () => {
-              const { data } = await supabase.auth.getUser();
-              if (data.user) await unregisterPush(data.user.id);
-              await supabase.auth.signOut();
-            }}
+            onPress={onSignOut}
+            loading={signingOut}
             variant="danger"
             icon="logout"
           />

@@ -1,7 +1,7 @@
 import { hasPlan } from "@/lib/plan";
 import { activePromo } from "@/lib/promo";
 import type { RestaurantAmenity, RestaurantCategory } from "@/lib/queries/restaurants";
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type FeedRestaurant = {
@@ -219,6 +219,9 @@ export function useFavoriteIds() {
 export function useToggleFavorite() {
   const qc = useQueryClient();
   return useMutation({
+    mutationKey: ["toggle-favorite"],
+    // En fila: dos toques rápidos llegan al servidor en el orden en que se dieron.
+    scope: { id: "toggle-favorite" },
     mutationFn: async ({
       restaurantId,
       favorited,
@@ -226,7 +229,7 @@ export function useToggleFavorite() {
       restaurantId: string;
       favorited: boolean;
     }) => {
-      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      const { data: userData, error: userErr } = await getSessionUser();
       if (userErr || !userData.user)
         throw userErr ?? new Error("No autenticado");
       const userId = userData.user.id;
@@ -245,7 +248,22 @@ export function useToggleFavorite() {
         if (error) throw error;
       }
     },
-    onSuccess: () => {
+    // El corazón cambia al tocar; si el servidor falla, vuelve a como estaba.
+    onMutate: async ({ restaurantId, favorited }) => {
+      await qc.cancelQueries({ queryKey: ["favorite-ids"] });
+      const prev = qc.getQueryData<Set<string>>(["favorite-ids"]);
+      const next = new Set(prev);
+      if (favorited) next.delete(restaurantId);
+      else next.add(restaurantId);
+      qc.setQueryData(["favorite-ids"], next);
+      return { prev };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["favorite-ids"], ctx.prev);
+    },
+    onSettled: () => {
+      // Se refresca solo cuando termina el último toque, para no pisar los optimistas.
+      if (qc.isMutating({ mutationKey: ["toggle-favorite"] }) > 1) return;
       qc.invalidateQueries({ queryKey: ["favorite-ids"] });
       qc.invalidateQueries({ queryKey: ["favorites"] });
     },

@@ -1,7 +1,7 @@
 import { restaurantKeys } from "@/lib/queries/restaurants";
 import { fetchBlockedIds } from "@/lib/queries/blocks";
 import { reviewPhotoUrl, uploadReviewPhoto } from "@/lib/storage";
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type ReviewAuthor = {
@@ -65,7 +65,7 @@ export function reviewKeys(restaurantId: string) {
 }
 
 async function fetchReviews(restaurantId: string): Promise<Review[]> {
-  const { data: userData } = await supabase.auth.getUser();
+  const { data: userData } = await getSessionUser();
   const viewerId = userData.user?.id ?? null;
 
   const blockedIds = viewerId ? await fetchBlockedIds(viewerId) : new Set<string>();
@@ -140,7 +140,7 @@ export function useSubmitReview(restaurantId: string) {
       body: string;
       photoUris?: string[];
     }) => {
-      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      const { data: userData, error: userErr } = await getSessionUser();
       if (userErr || !userData.user)
         throw userErr ?? new Error("No autenticado");
 
@@ -213,7 +213,7 @@ export function useUpdateReview(restaurantId: string) {
       rating: number;
       body: string;
     }) => {
-      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      const { data: userData, error: userErr } = await getSessionUser();
       if (userErr || !userData.user)
         throw userErr ?? new Error("No autenticado");
       const { error } = await supabase
@@ -231,7 +231,7 @@ export function useDeleteReview(restaurantId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (reviewId: string) => {
-      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      const { data: userData, error: userErr } = await getSessionUser();
       if (userErr || !userData.user)
         throw userErr ?? new Error("No autenticado");
       const { error } = await supabase
@@ -257,7 +257,7 @@ export function useReportReview(restaurantId: string) {
       reason: ReportReason;
       note?: string;
     }) => {
-      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      const { data: userData, error: userErr } = await getSessionUser();
       if (userErr || !userData.user)
         throw userErr ?? new Error("No autenticado");
       const { error } = await supabase.from("review_reports").insert({
@@ -283,7 +283,7 @@ export function useDeleteReply(restaurantId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (reviewId: string) => {
-      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      const { data: userData, error: userErr } = await getSessionUser();
       if (userErr || !userData.user)
         throw userErr ?? new Error("No autenticado");
       const { error } = await supabase
@@ -309,7 +309,7 @@ export function useReplyToReview(restaurantId: string) {
       reviewId: string;
       body: string;
     }) => {
-      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      const { data: userData, error: userErr } = await getSessionUser();
       if (userErr || !userData.user)
         throw userErr ?? new Error("No autenticado");
       const { error } = await supabase.from("review_replies").upsert(
@@ -331,7 +331,11 @@ export function useReplyToReview(restaurantId: string) {
 
 export function useToggleHelpful(restaurantId: string) {
   const qc = useQueryClient();
+  const key = reviewKeys(restaurantId);
   return useMutation({
+    mutationKey: ["toggle-helpful", restaurantId],
+    // En fila: dos toques rápidos llegan al servidor en el orden en que se dieron.
+    scope: { id: `toggle-helpful-${restaurantId}` },
     mutationFn: async ({
       reviewId,
       marked,
@@ -339,7 +343,7 @@ export function useToggleHelpful(restaurantId: string) {
       reviewId: string;
       marked: boolean;
     }) => {
-      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      const { data: userData, error: userErr } = await getSessionUser();
       if (userErr || !userData.user)
         throw userErr ?? new Error("No autenticado");
       const userId = userData.user.id;
@@ -358,8 +362,31 @@ export function useToggleHelpful(restaurantId: string) {
         if (error) throw error;
       }
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: reviewKeys(restaurantId) });
+    // "Útil" y su número cambian al tocar; si el servidor falla, vuelven a como estaban.
+    onMutate: async ({ reviewId, marked }) => {
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<Review[]>(key);
+      if (prev)
+        qc.setQueryData<Review[]>(
+          key,
+          prev.map((r) =>
+            r.id === reviewId
+              ? {
+                  ...r,
+                  viewer_marked_helpful: !marked,
+                  helpful_count: Math.max(0, r.helpful_count + (marked ? -1 : 1)),
+                }
+              : r,
+          ),
+        );
+      return { prev };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(key, ctx.prev);
+    },
+    onSettled: () => {
+      if (qc.isMutating({ mutationKey: ["toggle-helpful", restaurantId] }) > 1) return;
+      qc.invalidateQueries({ queryKey: key });
     },
   });
 }

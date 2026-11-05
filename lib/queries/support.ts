@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const SUPPORT_KEY = ["admin-support"] as const;
@@ -82,7 +82,7 @@ export function useMyTickets() {
     queryKey: MY_KEY,
     staleTime: 30_000,
     queryFn: async (): Promise<MyTicket[]> => {
-      const { data: userData } = await supabase.auth.getUser();
+      const { data: userData } = await getSessionUser();
       const uid = userData.user?.id;
       if (!uid) return [];
       const { data, error } = await supabase
@@ -103,7 +103,7 @@ export function useAccountEmail() {
     queryKey: ["account-email"],
     staleTime: 10 * 60_000,
     queryFn: async (): Promise<string | null> => {
-      const { data } = await supabase.auth.getUser();
+      const { data } = await getSessionUser();
       return data.user?.email ?? null;
     },
   });
@@ -122,7 +122,7 @@ export function useSendSupportMessage() {
       body: string;
       email?: string;
     }) => {
-      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      const { data: userData, error: userErr } = await getSessionUser();
       if (userErr || !userData.user) throw userErr ?? new Error("No autenticado");
       const { error } = await supabase.from("support_messages").insert({
         user_id: userData.user.id,

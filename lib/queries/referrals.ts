@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 
 export type MyReferralInfo = {
@@ -10,7 +10,7 @@ export function useMyReferralInfo() {
   return useQuery({
     queryKey: ["my-referral-info"],
     queryFn: async (): Promise<MyReferralInfo> => {
-      const { data: userData } = await supabase.auth.getUser();
+      const { data: userData } = await getSessionUser();
       const uid = userData.user?.id;
       if (!uid) return { code: null, count: 0 };
 

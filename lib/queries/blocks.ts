@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type BlockedUser = {
@@ -33,7 +33,7 @@ export function useMyBlocks() {
   return useQuery({
     queryKey: BLOCKS_KEY,
     queryFn: async (): Promise<BlockedUser[]> => {
-      const { data: userData } = await supabase.auth.getUser();
+      const { data: userData } = await getSessionUser();
       const uid = userData.user?.id;
       if (!uid) return [];
       const { data, error } = await supabase
@@ -67,7 +67,7 @@ export function useBlockUser() {
   const refresh = useInvalidateBlocks();
   return useMutation({
     mutationFn: async (blockedId: string) => {
-      const { data: userData } = await supabase.auth.getUser();
+      const { data: userData } = await getSessionUser();
       const uid = userData.user?.id;
       if (!uid) throw new Error("Inicia sesión para bloquear");
       const { error } = await supabase
@@ -83,7 +83,7 @@ export function useUnblockUser() {
   const refresh = useInvalidateBlocks();
   return useMutation({
     mutationFn: async (blockedId: string) => {
-      const { data: userData } = await supabase.auth.getUser();
+      const { data: userData } = await getSessionUser();
       const uid = userData.user?.id;
       if (!uid) throw new Error("Inicia sesión");
       const { error } = await supabase

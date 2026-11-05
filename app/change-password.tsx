@@ -2,7 +2,7 @@ import { AppText } from "@/components/ui/AppText";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 import { useTheme } from "@/lib/ThemeContext";
 import { useToast } from "@/lib/toast";
 import { useRouter } from "expo-router";
@@ -41,7 +41,7 @@ export default function ChangePasswordScreen() {
     if (!canSubmit) return;
     setLoading(true);
 
-    const { data: userData } = await supabase.auth.getUser();
+    const { data: userData } = await getSessionUser();
     const email = userData.user?.email;
     if (!email) {
       setLoading(false);

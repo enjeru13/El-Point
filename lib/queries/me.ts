@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type MyProfile = {
@@ -22,7 +22,7 @@ export type MyProfile = {
 };
 
 async function fetchMyProfile(): Promise<MyProfile | null> {
-  const { data: userData } = await supabase.auth.getUser();
+  const { data: userData } = await getSessionUser();
   const uid = userData.user?.id;
   if (!uid) return null;
 
@@ -52,7 +52,7 @@ export function useUpdateSettings() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (patch: Record<string, boolean>) => {
-      const { data: userData } = await supabase.auth.getUser();
+      const { data: userData } = await getSessionUser();
       if (!userData.user) throw new Error("No autenticado");
       const current =
         qc.getQueryData<MyProfile | null>(["my-profile"])?.settings ?? {};
@@ -93,7 +93,7 @@ export function useUpdateMyProfile() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (patch: MyProfilePatch) => {
-      const { data: userData } = await supabase.auth.getUser();
+      const { data: userData } = await getSessionUser();
       if (!userData.user) throw new Error("No autenticado");
       const { error } = await supabase
         .from("profiles")
@@ -120,7 +120,7 @@ export type MyReview = {
 };
 
 async function fetchMyReviews(): Promise<MyReview[]> {
-  const { data: userData } = await supabase.auth.getUser();
+  const { data: userData } = await getSessionUser();
   const uid = userData.user?.id;
   if (!uid) return [];
 

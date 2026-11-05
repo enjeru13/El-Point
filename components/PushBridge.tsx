@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 import { registerForPush, unregisterPush } from "@/lib/push";
 
 /** Where a tapped push takes you (mirror of NotificationsSheet.notifTarget). */
@@ -37,7 +37,7 @@ export function PushBridge() {
         lastUid.current = null;
       }
     });
-    supabase.auth.getUser().then(({ data }) => {
+    getSessionUser().then(({ data }) => {
       if (data.user && data.user.id !== lastUid.current) {
         lastUid.current = data.user.id;
         registerForPush();

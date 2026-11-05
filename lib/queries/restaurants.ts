@@ -2,7 +2,7 @@ import { parseHours, withClosedToday, type Hours } from "@/lib/hours";
 import { hasPlan } from "@/lib/plan";
 import { activePromo } from "@/lib/promo";
 import type { PaymentMethod } from "@/lib/queries/paymentMethods";
-import { supabase } from "@/lib/supabase";
+import { getSessionUser, supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type RestaurantCategory = {
@@ -175,7 +175,7 @@ export function useReportRestaurant(restaurantId: string) {
       reason: RestaurantReportReason;
       note?: string;
     }) => {
-      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      const { data: userData, error: userErr } = await getSessionUser();
       if (userErr || !userData.user)
         throw userErr ?? new Error("No autenticado");
       const { error } = await supabase.from("restaurant_reports").insert({

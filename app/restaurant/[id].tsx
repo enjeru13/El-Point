@@ -2137,7 +2137,6 @@ export default function RestaurantProfileScreen() {
             >
               <Pressable
                 onPress={onToggleSave}
-                disabled={toggleFav.isPending}
                 style={{
                   width: 40,
                   height: 40,
