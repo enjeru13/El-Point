@@ -35,7 +35,7 @@ export function TopicFilters({
 
   return (
     <View style={{ borderBottomWidth: 1, borderBottomColor: C.outlineVariant }}>
-      <ChipRow padY={10} side={20}>
+      <ChipRow padY={10} side={20} contained fade fadeColor={C.background}>
         <Chip label="Todo" active={!topic} onPress={() => onTopic(undefined)} flat />
         {TOPICS.map((t) => (
           <Chip

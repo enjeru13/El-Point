@@ -26,7 +26,8 @@ export function PhotoCarousel({ urls }: { urls: string[] }) {
   const [viewerAt, setViewerAt] = useState<number | null>(null);
 
   if (urls.length === 0) return null;
-  const height = Math.round(width * RATIO);
+  // En iPad la foto no crece más de 520 de alto, para no ocupar toda la pantalla.
+  const height = Math.min(Math.round(width * RATIO), 520);
 
   return (
     <View
