@@ -1,13 +1,7 @@
 import { useMutation, useQuery, useQueryClient, useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSessionUser, supabase } from "@/lib/supabase";
 import { uploadPostPhoto } from "@/lib/storage";
 import type { TopicKey } from "@/lib/community/topics";
-
-// Las tablas y funciones de Comunidad aún no están en lib/database.types.ts
-// (se regeneran tras el `supabase db push`). Mientras tanto se usa el
-// cliente sin tipos de tablas; las formas de datos están tipadas abajo.
-const db = supabase as unknown as SupabaseClient;
 
 export const PAGE_SIZE = 20;
 
@@ -107,13 +101,13 @@ type Cursor = { at: string; id: string } | null;
 export const feedKey = (filters: FeedFilters = {}) => ["community-feed", filters] as const;
 
 async function fetchFeedPage(filters: FeedFilters, cursor: Cursor): Promise<FeedItem[]> {
-  const { data, error } = await db.rpc("community_feed", {
-    p_topic: filters.topic ?? null,
-    p_category: filters.categoryId ?? null,
-    p_restaurant: filters.restaurantId ?? null,
-    p_query: filters.query?.trim() || null,
-    p_before_at: cursor?.at ?? null,
-    p_before_id: cursor?.id ?? null,
+  const { data, error } = await supabase.rpc("community_feed", {
+    p_topic: filters.topic ?? undefined,
+    p_category: filters.categoryId ?? undefined,
+    p_restaurant: filters.restaurantId ?? undefined,
+    p_query: filters.query?.trim() || undefined,
+    p_before_at: cursor?.at ?? undefined,
+    p_before_id: cursor?.id ?? undefined,
     p_limit: PAGE_SIZE,
   });
   if (error) throw error;
@@ -139,7 +133,7 @@ export function usePost(postId: string | undefined) {
     enabled: !!postId && !postId.startsWith("pending-"),
     // null = oculto, retirado, borrado o de alguien que bloqueaste.
     queryFn: async (): Promise<FeedItem | null> => {
-      const { data, error } = await db.rpc("community_feed", { p_post: postId, p_limit: 1 });
+      const { data, error } = await supabase.rpc("community_feed", { p_post: postId, p_limit: 1 });
       if (error) throw error;
       const row = ((data ?? []) as FeedRow[])[0];
       return row ? toFeedItem(row) : null;
@@ -170,7 +164,7 @@ export function usePostReplies(postId: string | undefined, blockedIds?: Set<stri
     queryKey: repliesKey(postId ?? ""),
     enabled: !!postId,
     queryFn: async (): Promise<Reply[]> => {
-      const { data, error } = await db
+      const { data, error } = await supabase
         .from("post_replies")
         .select(
           "id, post_id, author_id, as_restaurant_id, restaurant_id, body, created_at, " +
@@ -220,7 +214,7 @@ export function useAppSettings() {
     queryKey: ["app-settings"],
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await db.from("app_settings").select("owner_posts_enabled").maybeSingle();
+      const { data, error } = await supabase.from("app_settings").select("owner_posts_enabled").maybeSingle();
       if (error) throw error;
       return { ownerPostsEnabled: data?.owner_posts_enabled ?? false };
     },
@@ -263,15 +257,15 @@ export function useCreatePost() {
   return useMutation({
     mutationKey: ["create-post"],
     mutationFn: async (p: NewPost) => {
-      const { data: id, error } = await db.rpc("create_post", {
+      const { data: id, error } = await supabase.rpc("create_post", {
         p_client_id: p.clientId,
         p_topic: p.topic,
         p_body: p.body,
-        p_restaurant_id: p.restaurantId ?? null,
-        p_suggested_name: p.suggestedName ?? null,
-        p_suggested_zone: p.suggestedZone ?? null,
+        p_restaurant_id: p.restaurantId ?? undefined,
+        p_suggested_name: p.suggestedName ?? undefined,
+        p_suggested_zone: p.suggestedZone ?? undefined,
         p_category_ids: p.categoryIds,
-        p_as_restaurant_id: p.asRestaurantId ?? null,
+        p_as_restaurant_id: p.asRestaurantId ?? undefined,
       });
       if (error) throw error;
       const postId = id as string;
@@ -285,7 +279,7 @@ export function useCreatePost() {
             return { post_id: postId, position: i, storage_path: path };
           }),
         );
-        const { error: phErr } = await db.from("post_photos").upsert(rows, { onConflict: "post_id,position" });
+        const { error: phErr } = await supabase.from("post_photos").upsert(rows, { onConflict: "post_id,position" });
         if (phErr) throw phErr;
       }
       return postId;
@@ -357,7 +351,7 @@ export function useCreateReply(postId: string) {
     }) => {
       const { data: u } = await getSessionUser();
       if (!u.user) throw new Error("not_authenticated");
-      const { error } = await db.from("post_replies").insert({
+      const { error } = await supabase.from("post_replies").insert({
         post_id: postId,
         author_id: u.user.id,
         body,
@@ -423,8 +417,8 @@ export function useToggleLike() {
         if (error) throw error;
       } else {
         const q = liked
-          ? db.from("post_likes").delete().eq("user_id", userId).eq("post_id", item.id)
-          : db.from("post_likes").insert({ user_id: userId, post_id: item.id });
+          ? supabase.from("post_likes").delete().eq("user_id", userId).eq("post_id", item.id)
+          : supabase.from("post_likes").insert({ user_id: userId, post_id: item.id });
         const { error } = await q;
         if (error) throw error;
       }
@@ -461,7 +455,7 @@ export function useDeletePost() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (postId: string) => {
-      const { error } = await db.from("posts").delete().eq("id", postId);
+      const { error } = await supabase.from("posts").delete().eq("id", postId);
       if (error) throw error;
     },
     onMutate: (postId) => removeFromFeeds(qc, postId),
@@ -476,7 +470,7 @@ export function useDeleteReply(postId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (replyId: string) => {
-      const { error } = await db.from("post_replies").delete().eq("id", replyId);
+      const { error } = await supabase.from("post_replies").delete().eq("id", replyId);
       if (error) throw error;
     },
     onMutate: async (replyId) => {
@@ -508,7 +502,7 @@ export function useReportPost() {
     }) => {
       const { data: u } = await getSessionUser();
       if (!u.user) throw new Error("not_authenticated");
-      const { error } = await db.from("post_reports").insert({
+      const { error } = await supabase.from("post_reports").insert({
         post_id: postId ?? null,
         reply_id: replyId ?? null,
         reporter_id: u.user.id,
