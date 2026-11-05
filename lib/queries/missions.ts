@@ -7,7 +7,9 @@ export type MissionKey =
   | "five_places"
   | "ten_helpful"
   | "streak_4"
-  | "explorer_15";
+  | "explorer_15"
+  | "first_post"
+  | "brought_local";
 
 export type MissionMeta = {
   key: MissionKey;
@@ -18,7 +20,7 @@ export type MissionMeta = {
 };
 
 // Orden = orden de aparición en el perfil. Debe coincidir con mission_xp /
-// mission_title de la migración 20260908160000.
+// mission_title de las migraciones 20260908160000 y 20261105010200.
 export const MISSIONS: MissionMeta[] = [
   {
     key: "first_review",
@@ -61,6 +63,20 @@ export const MISSIONS: MissionMeta[] = [
     description: "Rankea 15 locales diferentes.",
     icon: "map-marker-distance",
     xp: 150,
+  },
+  {
+    key: "first_post",
+    title: "Tu primer post en Comunidad",
+    description: "Publica tu primer post en Comunidad.",
+    icon: "comment-text-multiple",
+    xp: 20,
+  },
+  {
+    key: "brought_local",
+    title: "Trajiste un local a El Point",
+    description: "Un local que mencionaste en Comunidad se sumó a El Point.",
+    icon: "storefront",
+    xp: 50,
   },
 ];
 
