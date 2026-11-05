@@ -96,7 +96,8 @@ export default function MyLocalScreen() {
   const special = menuItems.find((i) => isSpecialActive(i));
   const today = (r.hours ?? DEFAULT_HOURS).days[new Date().getDay()];
 
-  const canPostCommunity = plan && !r.community_banned_at && !!communitySettings?.ownerPostsEnabled;
+  // Si el local perdió el permiso por moderación, lo avisa el servidor al publicar.
+  const canPostCommunity = plan && !!communitySettings?.ownerPostsEnabled;
 
   const rows: Row[] = [
     {
@@ -166,9 +167,7 @@ export default function MyLocalScreen() {
       title: "Publicar novedad en Comunidad",
       summary: !plan
         ? "Publicar como local es parte del plan activo"
-        : r.community_banned_at
-          ? "Tu local ya no puede publicar. Escríbenos a soporte."
-          : !communitySettings?.ownerPostsEnabled
+        : !communitySettings?.ownerPostsEnabled
             ? "Por ahora los locales no pueden publicar"
             : "Plato del día, promo u horario especial · 1 cada 24 h",
       locked: !plan,

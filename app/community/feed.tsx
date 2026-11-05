@@ -30,8 +30,7 @@ export default function CommunityStackScreen() {
   const ownerCanPost =
     isOwner &&
     !!settings?.ownerPostsEnabled &&
-    hasPlan(myRestaurant!) &&
-    !myRestaurant!.community_banned_at;
+    hasPlan(myRestaurant!);
   const canPost = isOwner ? ownerCanPost : !restaurant;
 
   const header = (
