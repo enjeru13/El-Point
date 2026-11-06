@@ -25,6 +25,7 @@ import {
   useReportPost,
   type Reply,
 } from "@/lib/queries/community";
+import { hasPlan } from "@/lib/plan";
 import { useMyRestaurant } from "@/lib/queries/owner";
 import { REPORT_REASONS } from "@/lib/queries/reviews";
 import { useTheme } from "@/lib/ThemeContext";
@@ -61,7 +62,12 @@ export default function PostDetailScreen() {
   const [tagged, setTagged] = useState<PickedRestaurant | null>(null);
 
   const item = post.data;
-  const ownerCanReply = !isOwner || (item?.restaurantId != null && item.restaurantId === myRestaurant?.id);
+  const ownerMentioned = item?.restaurantId != null && item.restaurantId === myRestaurant?.id;
+  const ownerHasPlan = isOwner && myRestaurant!.status === "approved" && hasPlan(myRestaurant);
+  const ownerCanReply = !isOwner || (ownerMentioned && ownerHasPlan);
+  const ownerNotice = !ownerMentioned
+    ? "Tu local solo puede responder en posts que lo mencionan."
+    : "Responder como local es parte del plan activo de tu local.";
   const canTag = !isOwner && item?.topic === "recomiendame";
 
   const send = () => {
@@ -277,7 +283,7 @@ export default function PostDetailScreen() {
               }}
             >
               <AppText variant="bodySm" color={C.onSurfaceVariant} style={{ textAlign: "center" }}>
-                Tu local solo puede responder en posts que lo mencionan.
+                {ownerNotice}
               </AppText>
             </View>
           ))}

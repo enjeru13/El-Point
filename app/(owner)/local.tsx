@@ -11,6 +11,7 @@ import { isSpecialActive, useMenu } from "@/lib/queries/menu";
 import { useMyRestaurant } from "@/lib/queries/owner";
 import { capWidth, useIsTablet } from "@/lib/responsive";
 import { useTheme } from "@/lib/ThemeContext";
+import { useToast } from "@/lib/toast";
 import { useRouter } from "expo-router";
 import { Linking, Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -31,6 +32,7 @@ export default function MyLocalScreen() {
   const { C } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const toast = useToast();
   const isTablet = useIsTablet();
   const restaurantQ = useMyRestaurant();
   const r = restaurantQ.data ?? null;
@@ -252,7 +254,8 @@ export default function MyLocalScreen() {
                     onPress={() => {
                       if (row.key === "community_new") {
                         if (!plan) return router.push("/subscription" as any);
-                        if (!canPostCommunity) return;
+                        if (!canPostCommunity)
+                          return toast.info("Por ahora los locales no pueden publicar en Comunidad. Te avisaremos cuando vuelva.");
                         return router.push({ pathname: "/community/new", params: { asRestaurant: r.id } });
                       }
                       if (row.key === "community_mentions")

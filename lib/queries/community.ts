@@ -338,9 +338,9 @@ export function useCreatePost() {
       }
       return { prev };
     },
-    onError: (_e, _p, ctx) => {
-      if (ctx?.prev) qc.setQueryData(feedKey({}), ctx.prev);
-    },
+    // Si falla, solo se quita el post pendiente: los me gusta que diste
+    // mientras tanto no se pierden.
+    onError: (_e, p) => removeFromFeeds(qc, `pending-${p.clientId}`),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["community-feed"] });
       qc.invalidateQueries({ queryKey: ["my-profile"] });
@@ -397,10 +397,10 @@ export function useCreateReply(postId: string) {
       };
       qc.setQueryData<Reply[]>(repliesKey(postId), [...(prev ?? []), optimistic]);
       patchFeedItem(qc, postId, (it) => ({ ...it, replyCount: it.replyCount + 1 }));
-      return { prev };
+      return { optimisticId: optimistic.id };
     },
     onError: (_e, _v, ctx) => {
-      qc.setQueryData(repliesKey(postId), ctx?.prev);
+      qc.setQueryData<Reply[]>(repliesKey(postId), (list) => (list ?? []).filter((r) => r.id !== ctx?.optimisticId));
       patchFeedItem(qc, postId, (it) => ({ ...it, replyCount: Math.max(0, it.replyCount - 1) }));
     },
     onSettled: () => {
@@ -428,13 +428,14 @@ export function useToggleLike() {
           ? supabase.from("review_helpful").delete().eq("user_id", userId).eq("review_id", item.id)
           : supabase.from("review_helpful").insert({ user_id: userId, review_id: item.id });
         const { error } = await q;
-        if (error) throw error;
+        if (error && error.code !== "23505") throw error;
       } else {
         const q = liked
           ? supabase.from("post_likes").delete().eq("user_id", userId).eq("post_id", item.id)
           : supabase.from("post_likes").insert({ user_id: userId, post_id: item.id });
         const { error } = await q;
-        if (error) throw error;
+        // 23505: el me gusta ya estaba (doble toque rápido); es lo que se quería.
+        if (error && error.code !== "23505") throw error;
       }
     },
     onMutate: async ({ item, liked }) => {
