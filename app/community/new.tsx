@@ -74,8 +74,10 @@ export default function NewPostScreen() {
   const { data: categories = [] } = useCategories();
   const createPost = useCreatePost();
 
-  // El id del post se fija al abrir: un doble toque o un reintento no duplica.
-  const clientId = useRef(Crypto.randomUUID()).current;
+  // El id del post se fija al abrir y se guarda en el borrador: un doble
+  // toque, un reintento o volver a abrir el borrador no duplica el post.
+  const clientId = useRef(Crypto.randomUUID());
+  const publishing = useRef(false);
   const [loaded, setLoaded] = useState(false);
   const [body, setBody] = useState("");
   const [topic, setTopic] = useState<TopicKey>(asRestaurantId ? "novedades" : "antojos");
@@ -97,6 +99,7 @@ export default function NewPostScreen() {
         setRestaurant(d.restaurant);
         setSuggested(d.suggested);
         setCategoryIds(d.categoryIds);
+        if (d.clientId) clientId.current = d.clientId;
       }
       setLoaded(true);
     });
@@ -105,7 +108,11 @@ export default function NewPostScreen() {
   useEffect(() => {
     if (!loaded) return;
     const t = setTimeout(
-      () => saveDraft({ body, topic, photos, restaurant, suggested, categoryIds }, asRestaurantId),
+      () =>
+        saveDraft(
+          { body, topic, photos, restaurant, suggested, categoryIds, clientId: clientId.current },
+          asRestaurantId,
+        ),
       400,
     );
     return () => clearTimeout(t);
@@ -128,11 +135,12 @@ export default function NewPostScreen() {
   };
 
   const publish = () => {
-    if (!canPublish) return;
+    if (!canPublish || publishing.current) return;
+    publishing.current = true;
     setUploaded(photos.length ? { done: 0, total: photos.length } : null);
     createPost.mutate(
       {
-        clientId,
+        clientId: clientId.current,
         topic,
         body: body.trim(),
         restaurantId: asRestaurantId ? null : restaurant?.id,
@@ -149,6 +157,9 @@ export default function NewPostScreen() {
           notify("success");
           await clearDraft(asRestaurantId);
           router.back();
+        },
+        onSettled: () => {
+          publishing.current = false;
         },
         onError: (e) => {
           setUploaded(null);

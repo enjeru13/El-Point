@@ -8,6 +8,8 @@ export type PostDraft = {
   restaurant: { id: string; name: string; category: string | null } | null;
   suggested: { name: string; zone: string } | null;
   categoryIds: number[];
+  /** Id del post que se va a crear: reabrir el borrador y publicar no duplica. */
+  clientId?: string;
 };
 
 const key = (asRestaurantId?: string | null) =>

@@ -271,16 +271,30 @@ export function useCreatePost() {
       const postId = id as string;
 
       if (p.photos.length > 0) {
-        let done = 0;
+        // En un reintento el post ya existe: solo se suben las fotos que faltan.
+        const { data: existing, error: exErr } = await supabase
+          .from("post_photos")
+          .select("position")
+          .eq("post_id", postId);
+        if (exErr) throw exErr;
+        const have = new Set((existing ?? []).map((r) => r.position));
+        const photos = p.photos.slice(0, 4);
+        let done = have.size;
+        p.onPhotoUploaded?.(done, photos.length);
         const rows = await Promise.all(
-          p.photos.slice(0, 4).map(async (uri, i) => {
-            const path = await uploadPostPhoto(postId, i, uri);
-            p.onPhotoUploaded?.(++done, p.photos.length);
-            return { post_id: postId, position: i, storage_path: path };
-          }),
+          photos
+            .map((uri, i) => ({ uri, i }))
+            .filter(({ i }) => !have.has(i))
+            .map(async ({ uri, i }) => {
+              const path = await uploadPostPhoto(postId, i, uri);
+              p.onPhotoUploaded?.(++done, photos.length);
+              return { post_id: postId, position: i, storage_path: path };
+            }),
         );
-        const { error: phErr } = await supabase.from("post_photos").upsert(rows, { onConflict: "post_id,position" });
-        if (phErr) throw phErr;
+        if (rows.length > 0) {
+          const { error: phErr } = await supabase.from("post_photos").insert(rows);
+          if (phErr) throw phErr;
+        }
       }
       return postId;
     },
