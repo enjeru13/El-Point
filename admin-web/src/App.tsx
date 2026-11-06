@@ -14,6 +14,9 @@ import { Payments } from "./pages/Payments";
 import { Locales } from "./pages/Locales";
 import { LocalDetail } from "./pages/LocalDetail";
 import { Users } from "./pages/Users";
+import { ReportedPosts } from "./pages/ReportedPosts";
+import { LocalSuggestions } from "./pages/LocalSuggestions";
+import { Settings } from "./pages/Settings";
 
 function Gate({ children }: { children: ReactNode }) {
   const { session, profile, loading, signOut } = useAuth();
@@ -61,6 +64,9 @@ function AppRoutes() {
         <Route path="suscripciones" element={<Navigate to="/locales?plan=expired" replace />} />
         <Route path="usuarios" element={<Users />} />
         <Route path="soporte" element={<Support />} />
+        <Route path="comunidad" element={<ReportedPosts />} />
+        <Route path="sugerencias" element={<LocalSuggestions />} />
+        <Route path="ajustes" element={<Settings />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

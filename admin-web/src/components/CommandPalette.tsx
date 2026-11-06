@@ -18,6 +18,9 @@ export const PAGES: { to: string; label: string; words: string }[] = [
   { to: "/usuarios?tab=bloqueos", label: "Bloqueos entre usuarios", words: "bloqueados" },
   { to: "/usuarios?tab=eliminadas", label: "Cuentas eliminadas", words: "borradas bajas" },
   { to: "/soporte", label: "Soporte", words: "mensajes tickets ayuda" },
+  { to: "/comunidad", label: "Comunidad reportada", words: "posts respuestas moderacion reportes" },
+  { to: "/sugerencias", label: "Locales sugeridos", words: "comunidad alta nuevos sugerencias" },
+  { to: "/ajustes", label: "Ajustes", words: "configuracion permisos locales publicar comunidad" },
 ];
 
 const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");

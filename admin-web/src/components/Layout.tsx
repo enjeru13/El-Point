@@ -8,10 +8,13 @@ import {
   Building2,
   LayoutDashboard,
   LifeBuoy,
+  Lightbulb,
   LogOut,
   Menu,
   MessageSquareWarning,
+  MessagesSquare,
   Search,
+  Settings,
   Users,
   X,
   type LucideIcon,
@@ -39,6 +42,9 @@ const NAV: {
   { to: "/resenas", label: "Reseñas reportadas", icon: MessageSquareWarning, key: "reviews" },
   { to: "/usuarios", label: "Usuarios", icon: Users },
   { to: "/soporte", label: "Soporte", icon: LifeBuoy, key: "support" },
+  { to: "/comunidad", label: "Comunidad reportada", icon: MessagesSquare, section: "Comunidad" },
+  { to: "/sugerencias", label: "Locales sugeridos", icon: Lightbulb },
+  { to: "/ajustes", label: "Ajustes", icon: Settings },
 ];
 
 /** Contenido del menú lateral; sirve igual para la barra fija (escritorio) y el cajón (móvil). */
