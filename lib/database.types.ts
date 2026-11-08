@@ -1815,6 +1815,18 @@ export type Database = {
           was_banned: boolean
         }[]
       }
+      app_heartbeat: {
+        Args: { p_install_id: string; p_platform: string; p_version: string }
+        Returns: undefined
+      }
+      admin_app_usage: {
+        Args: { p_days?: number }
+        Returns: Json
+      }
+      public_install_count: {
+        Args: never
+        Returns: number | null
+      }
       admin_growth_stats: {
         Args: { p_weeks?: number }
         Returns: {

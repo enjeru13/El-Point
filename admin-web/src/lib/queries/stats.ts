@@ -51,3 +51,25 @@ export function useTotals() {
     },
   });
 }
+
+export type PlatformCount = { ios: number; android: number };
+
+export type AppUsage = {
+  installs: PlatformCount & { with_account: number };
+  active_7: PlatformCount;
+  active_30: PlatformCount;
+  push_enabled: number;
+  versions: { platform: "ios" | "android"; version: string; installs: number }[];
+  daily: { day: string; new_ios: number; new_android: number; active_ios: number; active_android: number }[];
+};
+
+export function useAppUsage(days = 30) {
+  return useQuery({
+    queryKey: ["admin-app-usage", days],
+    queryFn: async (): Promise<AppUsage> => {
+      const { data, error } = await supabase.rpc("admin_app_usage", { p_days: days });
+      if (error) throw error;
+      return data as AppUsage;
+    },
+  });
+}

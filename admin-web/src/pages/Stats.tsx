@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useGrowthStats, useTotals, type WeekPoint } from "../lib/queries/stats";
 import { PageHeader, PageLoading, Segmented } from "../components/ui";
 import { AreaChart, Delta, type Point } from "../components/charts";
+import { StatsUsage } from "./StatsUsage";
 
 type SeriesKey = "users" | "restaurants" | "reviews";
 
@@ -184,6 +185,10 @@ export function Stats() {
           </div>
         </>
       )}
+
+      <div className="border-t border-border pt-6">
+        <StatsUsage />
+      </div>
     </div>
   );
 }

@@ -31,6 +31,7 @@ import { ToastProvider } from '@/lib/toast';
 import { AppThemeProvider, useTheme } from '@/lib/ThemeContext';
 import { hasSeenOnboarding, markOnboardingSeen } from '@/lib/onboarding';
 import { isAuthFlowActive } from '@/lib/authFlow';
+import { startHeartbeat } from '@/lib/heartbeat';
 import { SettingsBridge } from '@/components/SettingsBridge';
 import { PushBridge } from '@/components/PushBridge';
 import { SplashScreenView } from '@/components/ui/SplashScreenView';
@@ -70,6 +71,8 @@ export default function RootLayout() {
   useEffect(() => {
     hasSeenOnboarding().then(setOnboardingSeen);
   }, []);
+
+  useEffect(() => startHeartbeat(), []);
 
   // Quien ya inició sesión ya pasó por el onboarding. Sin esto, la marca solo
   // se leía al abrir la app: al cerrar sesión en la misma sesión de uso volvía
