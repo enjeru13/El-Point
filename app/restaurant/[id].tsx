@@ -2044,6 +2044,33 @@ export default function RestaurantProfileScreen() {
           {/* ── Lo que dicen en Comunidad ── */}
           <RestaurantCommunitySection restaurantId={restaurant.id} restaurantName={restaurant.name} />
 
+          {!restaurant.owner_id && !!myProfileQ.data && (
+            <Pressable
+              onPress={() => router.push(`/claim/${restaurant.id}`)}
+              accessibilityRole="button"
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+                padding: 14,
+                marginTop: 8,
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: C.border,
+                backgroundColor: C.surfaceContainerLow,
+              }}
+            >
+              <Icon name="storefront-outline" size={22} color={C.primary} />
+              <View style={{ flex: 1 }}>
+                <AppText variant="bodyStrong">¿Es tu local? Reclámalo</AppText>
+                <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                  Agrega tu contacto, fotos y menú.
+                </AppText>
+              </View>
+              <Icon name="chevron-right" size={20} color={C.outline} />
+            </Pressable>
+          )}
+
           {!isOwnerHere && !!myProfileQ.data && (
             <Pressable
               onPress={() => restaurantReportSheetRef.current?.present(restaurant.id)}

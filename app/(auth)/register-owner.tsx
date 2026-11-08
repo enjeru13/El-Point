@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { useCategories } from "@/lib/queries/categories";
 import { useAmenities } from "@/lib/queries/amenities";
+import { findClaimableMatches, submitClaim, type ClaimMatch } from "@/lib/queries/claims";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
@@ -22,6 +23,7 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -71,6 +73,14 @@ export default function RegisterOwnerScreen() {
   const [rif, setRif] = useState("");
 
   const [facadeUri, setFacadeUri] = useState<string | null>(null);
+
+  // Locales sin dueño que se parecen al que está registrando. Si elige uno,
+  // en vez de crear un local nuevo se envía un reclamo de ese.
+  const [matches, setMatches] = useState<ClaimMatch[] | null>(null);
+  const [checkedKey, setCheckedKey] = useState("");
+  const [checking, setChecking] = useState(false);
+  const [claimTarget, setClaimTarget] = useState<ClaimMatch | null>(null);
+  const [fullName, setFullName] = useState("");
   const [logoUri, setLogoUri] = useState<string | null>(null);
   const [coverUri, setCoverUri] = useState<string | null>(null);
   const [menuPdfName, setMenuPdfName] = useState<string | null>(null);
@@ -179,11 +189,26 @@ export default function RegisterOwnerScreen() {
             ? !!zoneLabel.trim()
             : !!(address.trim() && coords)
           : step === 3
-            ? !!facadeUri
+            ? !!facadeUri &&
+              (!claimTarget || (fullName.trim().length >= 2 && whatsapp.replace(/\D/g, "").length >= 7))
             : true;
 
-  function handleContinue() {
-    if (loading) return;
+  async function handleContinue() {
+    if (loading || checking) return;
+    if (step === 2 && !ghostKitchen && coords) {
+      const key = `${name.trim()}|${coords.lat}|${coords.lng}`;
+      if (key !== checkedKey) {
+        setChecking(true);
+        const found = await findClaimableMatches(name.trim(), coords.lat, coords.lng);
+        setChecking(false);
+        setCheckedKey(key);
+        setClaimTarget(null);
+        if (found.length > 0) {
+          setMatches(found);
+          return;
+        }
+      }
+    }
     if (step < STEPS - 1) {
       setStep(step + 1);
       return;
@@ -213,13 +238,34 @@ export default function RegisterOwnerScreen() {
       setLoading(false);
       Alert.alert(
         "Confirma tu correo",
-        "Te enviamos un correo. Al confirmar, inicia sesión y completa el registro de tu local.",
+        claimTarget
+          ? `Te enviamos un correo. Al confirmar, inicia sesión y escríbenos por Soporte para terminar de reclamar ${claimTarget.name}.`
+          : "Te enviamos un correo. Al confirmar, inicia sesión y completa el registro de tu local.",
       );
       router.replace("/(auth)/login");
       return;
     }
 
     const ownerId = data.session.user.id;
+
+    if (claimTarget && facadeUri) {
+      try {
+        await submitClaim({
+          restaurantId: claimTarget.id,
+          fullName,
+          whatsapp,
+          rif,
+          photoUri: facadeUri,
+        });
+        toast.success("Recibimos tu solicitud. Te avisamos cuando la revisemos.");
+      } catch (e: any) {
+        toast.error(e?.message ?? "Cuenta creada, pero no pudimos enviar la solicitud. Escríbenos por Soporte.");
+      }
+      setLoading(false);
+      router.replace("/(owner)");
+      endAuthFlow();
+      return;
+    }
 
     // p_lat/p_lng ahora aceptan null (cocina fantasma) y p_ghost_kitchen/
     // p_zone_label son parámetros nuevos -- database.types.ts todavía tiene
@@ -765,6 +811,20 @@ export default function RegisterOwnerScreen() {
           {/* ════ STEP 3 — Media ════ */}
           {step === 3 && (
             <>
+              {claimTarget ? (
+              <View style={{ marginBottom: 24, gap: 8 }}>
+                <AppText variant="title">Reclama {claimTarget.name}</AppText>
+                <AppText variant="body" color={C.onSurfaceVariant}>
+                  Ya está en El Point. Revisamos tu prueba y, si se confirma, el local pasa a tu cuenta con
+                  todo lo que ya tiene.
+                </AppText>
+                <Pressable onPress={() => setClaimTarget(null)} hitSlop={8}>
+                  <AppText variant="bodySm" color={C.primary} style={{ textDecorationLine: "underline" }}>
+                    No es mi local, registrarlo como nuevo
+                  </AppText>
+                </Pressable>
+              </View>
+              ) : (
               <View style={{ marginBottom: 24 }}>
                 <AppText variant="title" style={{ marginBottom: 8 }}>
                   Verificación y fotos
@@ -779,8 +839,30 @@ export default function RegisterOwnerScreen() {
                   ahora o después desde tu perfil.
                 </AppText>
               </View>
+              )}
 
               <View style={{ gap: 20 }}>
+                {claimTarget && (
+                  <>
+                    <Field
+                      label="Tu nombre completo *"
+                      icon="account-outline"
+                      autoCapitalize="words"
+                      value={fullName}
+                      onChangeText={setFullName}
+                    />
+                    <Field
+                      label="WhatsApp *"
+                      icon="whatsapp"
+                      placeholder="+58 412 000 0000"
+                      keyboardType="phone-pad"
+                      value={whatsapp}
+                      onChangeText={setWhatsapp}
+                      hint="Solo lo usamos para confirmar contigo."
+                    />
+                  </>
+                )}
+
                 {/* Foto de fachada — verificación (o de la cocina, si es
                     cocina fantasma: no hay fachada que fotografiar) */}
                 <View style={{ gap: 8 }}>
@@ -866,6 +948,7 @@ export default function RegisterOwnerScreen() {
                   </Pressable>
                 </View>
 
+                {!claimTarget && (<>
                 {/* Logo */}
                 <View style={{ gap: 8 }}>
                   <AppText variant="bodyStrong" color={C.onSurfaceVariant} style={{ marginLeft: 4 }}>
@@ -1058,11 +1141,73 @@ export default function RegisterOwnerScreen() {
                     </View>
                   </Pressable>
                 </View>
+                </>)}
               </View>
             </>
           )}
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* ── ¿Ya está en El Point? ── */}
+      <Modal visible={!!matches} transparent animationType="fade" onRequestClose={() => setMatches(null)}>
+        <View style={{ flex: 1, backgroundColor: "#0008", justifyContent: "flex-end" }}>
+          <View
+            style={{
+              backgroundColor: C.surface,
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              padding: 20,
+              paddingBottom: insets.bottom + 20,
+              gap: 14,
+            }}
+          >
+            <AppText variant="title">¿Es alguno de estos tu local?</AppText>
+            <AppText variant="body" color={C.onSurfaceVariant}>
+              Ya aparecen en El Point cerca del punto que marcaste. Si es tuyo, reclámalo y conserva lo que ya tiene.
+            </AppText>
+            {(matches ?? []).map((m) => (
+              <Pressable
+                key={m.id}
+                onPress={() => {
+                  setClaimTarget(m);
+                  setMatches(null);
+                  setStep(3);
+                }}
+                accessibilityRole="button"
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: 14,
+                  borderRadius: 16,
+                  borderWidth: 1,
+                  borderColor: C.border,
+                  backgroundColor: C.surfaceContainerLow,
+                }}
+              >
+                <Icon name="storefront-outline" size={22} color={C.primary} />
+                <View style={{ flex: 1 }}>
+                  <AppText variant="bodyStrong">{m.name}</AppText>
+                  <AppText variant="bodySm" color={C.onSurfaceVariant} numberOfLines={2}>
+                    {[m.address, `a ${Math.round(m.distance_m)} m`].filter(Boolean).join(" · ")}
+                  </AppText>
+                </View>
+                <AppText variant="bodySm" color={C.primary}>
+                  Sí, es este
+                </AppText>
+              </Pressable>
+            ))}
+            <Button
+              label="No, el mío es otro"
+              variant="secondary"
+              onPress={() => {
+                setMatches(null);
+                setStep(3);
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
 
       {/* ── Barra fija inferior ── */}
       <View
@@ -1078,10 +1223,18 @@ export default function RegisterOwnerScreen() {
         }}
       >
         <Button
-          label={loading ? "Creando…" : step === STEPS - 1 ? "Registrar mi restaurante" : "Continuar"}
+          label={
+            loading
+              ? "Creando…"
+              : step === STEPS - 1
+                ? claimTarget
+                  ? "Enviar solicitud"
+                  : "Registrar mi restaurante"
+                : "Continuar"
+          }
           onPress={handleContinue}
           disabled={!canContinue}
-          loading={loading}
+          loading={loading || checking}
           iconTrailing={step === STEPS - 1 ? "store-outline" : "arrow-right"}
         />
         {step === STEPS - 1 && (

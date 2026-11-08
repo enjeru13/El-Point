@@ -97,6 +97,14 @@ export async function uploadRestaurantVerification(
   return putImage(VERIFICATION_BUCKET, path, uri);
 }
 
+/**
+ * Foto de prueba de "Reclama tu local". Path: "<userId>/claims/<timestamp>",
+ * así la política del bucket deja que solo esa persona y los admins la lean.
+ */
+export async function uploadClaimPhoto(userId: string, uri: string): Promise<string> {
+  return putImage(VERIFICATION_BUCKET, `${userId}/claims/${Date.now()}`, uri);
+}
+
 /** Short-lived URL so an admin can view a private verification photo. */
 export async function verificationPhotoUrl(
   storagePath: string,

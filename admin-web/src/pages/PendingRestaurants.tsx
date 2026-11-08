@@ -1,6 +1,45 @@
 import { useState } from "react";
-import { useRestaurantQueue, useReviewRestaurant, type PendingRestaurant } from "../lib/queries/admin";
+import { Link } from "react-router-dom";
+import { useMergeDuplicate, useRestaurantQueue, useReviewRestaurant, type PendingRestaurant } from "../lib/queries/admin";
 import { Badge, Button, EmptyState, INPUT, PageHeader, PageLoading, timeAgo } from "../components/ui";
+
+function Duplicates({ r }: { r: PendingRestaurant }) {
+  const merge = useMergeDuplicate();
+  if (r.duplicates.length === 0) return null;
+  return (
+    <div className="flex flex-col gap-2 rounded-lg border border-gold/40 bg-gold/10 p-3">
+      <p className="text-sm font-semibold text-text">Posible duplicado de un local que ya está en la app sin dueño</p>
+      {r.duplicates.map((d) => (
+        <div key={d.id} className="flex flex-wrap items-center justify-between gap-2">
+          <p className="min-w-0 text-sm text-text-soft">
+            <Link to={`/locales/${d.id}`} className="font-semibold text-text hover:underline">
+              {d.name}
+            </Link>
+            {" · "}a {Math.round(d.distance_m)} m{d.address ? ` · ${d.address}` : ""}
+          </p>
+          <Button
+            variant="secondary"
+            loading={merge.isPending && merge.variables?.oldId === d.id}
+            disabled={merge.isPending}
+            onClick={() => {
+              if (
+                confirm(
+                  `¿"${r.name}" y "${d.name}" son el mismo local?
+
+Se aprueba "${r.name}" con los datos del dueño, recibe las reseñas y favoritos de "${d.name}", y "${d.name}" se borra.`,
+                )
+              )
+                merge.mutate({ newId: r.id, oldId: d.id });
+            }}
+          >
+            Es el mismo local
+          </Button>
+        </div>
+      ))}
+      {merge.isError && <p className="text-sm text-danger">{(merge.error as Error).message}</p>}
+    </div>
+  );
+}
 
 function Row({ r }: { r: PendingRestaurant }) {
   const review = useReviewRestaurant();
@@ -34,6 +73,8 @@ function Row({ r }: { r: PendingRestaurant }) {
           <p className="mt-2 text-xs text-text-soft">{details.join(" · ")}</p>
         </div>
       </div>
+
+      <Duplicates r={r} />
 
       {rejecting ? (
         <div className="flex flex-col gap-3">

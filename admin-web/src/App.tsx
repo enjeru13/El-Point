@@ -6,6 +6,7 @@ import { PageLoading, Button } from "./components/ui";
 import { Login } from "./pages/Login";
 import { Dashboard } from "./pages/Dashboard";
 import { PendingRestaurants } from "./pages/PendingRestaurants";
+import { Claims } from "./pages/Claims";
 import { ReportedRestaurants } from "./pages/ReportedRestaurants";
 import { ReportedReviews } from "./pages/ReportedReviews";
 import { Support } from "./pages/Support";
@@ -56,6 +57,7 @@ function AppRoutes() {
         <Route index element={<Dashboard />} />
         <Route path="estadisticas" element={<Stats />} />
         <Route path="restaurantes" element={<PendingRestaurants />} />
+        <Route path="reclamos" element={<Claims />} />
         <Route path="reportados" element={<ReportedRestaurants />} />
         <Route path="resenas" element={<ReportedReviews />} />
         <Route path="pagos" element={<Payments />} />

@@ -11,6 +11,7 @@ type QueueKey = keyof AdminCounts;
 const QUEUES: { to: string; key: QueueKey; title: string; body: string; action: string }[] = [
   { to: "/pagos", key: "payments", title: "Pagos por verificar", body: "Comprobantes esperando que los confirmes.", action: "Verificar" },
   { to: "/restaurantes", key: "restaurants", title: "Locales pendientes", body: "Esperando tu aprobación para salir en la app.", action: "Revisar" },
+  { to: "/reclamos", key: "claims", title: "Reclamos de locales", body: "Personas que dicen ser dueñas de un local sin dueño.", action: "Revisar" },
   { to: "/soporte", key: "support", title: "Soporte abierto", body: "Mensajes de usuarios sin responder.", action: "Responder" },
   { to: "/resenas", key: "reviews", title: "Reseñas reportadas", body: "Alguien las marcó como problemáticas.", action: "Moderar" },
   { to: "/reportados", key: "reported", title: "Locales suspendidos", body: "Suspendidos por reportes o por el equipo.", action: "Revisar" },

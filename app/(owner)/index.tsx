@@ -7,6 +7,7 @@ import { Skeleton, SkeletonList } from '@/components/ui/Skeleton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/ThemeContext';
 import { useMyRestaurant } from '@/lib/queries/owner';
+import { useMyLatestClaim } from '@/lib/queries/claims';
 import { useReviews, type Review } from '@/lib/queries/reviews';
 import { isFounder } from '@/lib/queries/restaurants';
 import { activePromo } from '@/lib/promo';
@@ -75,6 +76,7 @@ export default function OwnerHomeScreen() {
   const isTablet = useIsTablet();
 
   const restaurantQ = useMyRestaurant();
+  const claimQ = useMyLatestClaim(restaurantQ.isFetched && !restaurantQ.data);
   const restaurant = restaurantQ.data ?? null;
   const reviewsQ = useReviews(restaurant?.id ?? '');
   const reviews = reviewsQ.data ?? [];
@@ -140,15 +142,38 @@ export default function OwnerHomeScreen() {
   }
 
   if (!restaurant) {
+    const claim = claimQ.data;
+    const retry = () => {
+      restaurantQ.refetch();
+      claimQ.refetch();
+    };
     return (
       <View style={{ flex: 1, backgroundColor: C.background, justifyContent: 'center' }}>
-        <EmptyState
-          icon="store-outline"
-          title="No encontramos tu local"
-          body="Puede ser un problema de conexión. Vuelve a intentarlo."
-          actionLabel="Reintentar"
-          onAction={() => restaurantQ.refetch()}
-        />
+        {claim?.status === 'pending' ? (
+          <EmptyState
+            icon="clock-outline"
+            title="Tu solicitud está en revisión"
+            body={`Estamos confirmando que ${claim.restaurant_name ?? 'el local'} es tuyo. Te avisamos apenas la revisemos.`}
+            actionLabel="Actualizar"
+            onAction={retry}
+          />
+        ) : claim?.status === 'rejected' ? (
+          <EmptyState
+            icon="store-alert-outline"
+            title="No pudimos aprobar tu solicitud"
+            body={`${claim.reason ?? 'No pudimos confirmar que el local es tuyo.'} Escríbenos por Soporte y lo resolvemos.`}
+            actionLabel="Ir a Soporte"
+            onAction={() => router.push('/support')}
+          />
+        ) : (
+          <EmptyState
+            icon="store-outline"
+            title="No encontramos tu local"
+            body="Puede ser un problema de conexión. Vuelve a intentarlo."
+            actionLabel="Reintentar"
+            onAction={retry}
+          />
+        )}
       </View>
     );
   }

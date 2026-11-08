@@ -26,7 +26,11 @@ export type PendingRestaurant = {
   photo_url: string | null;
   ghost_kitchen: boolean;
   zone_label: string | null;
+  /** Locales sin dueño cerca y con nombre parecido: posible duplicado. */
+  duplicates: DuplicateCandidate[];
 };
+
+export type DuplicateCandidate = { id: string; name: string; address: string | null; distance_m: number };
 
 const QUEUE_KEY = ["admin-restaurant-queue"] as const;
 const REPORTS_KEY = ["admin-restaurant-reports"] as const;
@@ -36,7 +40,7 @@ async function fetchPendingRestaurants(): Promise<PendingRestaurant[]> {
     .from("restaurants")
     .select(
       `id, name, address, status, status_reason,
-       submitted_at, ghost_kitchen, zone_label,
+       submitted_at, ghost_kitchen, zone_label, latitude, longitude,
        owner:profiles!owner_id ( username, full_name ),
        restaurant_categories ( categories ( label ) )`,
     )
@@ -72,8 +76,35 @@ async function fetchPendingRestaurants(): Promise<PendingRestaurant[]> {
         : null,
       ghost_kitchen: !!r.ghost_kitchen,
       zone_label: r.zone_label ?? null,
+      duplicates:
+        r.latitude != null && r.longitude != null
+          ? (((
+              await supabase.rpc("find_claimable_matches", {
+                p_name: r.name,
+                p_lat: r.latitude,
+                p_lng: r.longitude,
+                p_exclude: r.id,
+              })
+            ).data ?? []) as DuplicateCandidate[])
+          : [],
     })),
   );
+}
+
+/** El local nuevo y uno importado son el mismo: se queda el nuevo (aprobado) y se borra el importado. */
+export function useMergeDuplicate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ newId, oldId }: { newId: string; oldId: string }) => {
+      const { error } = await supabase.rpc("admin_merge_duplicate", { p_new: newId, p_old: oldId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: QUEUE_KEY });
+      qc.invalidateQueries({ queryKey: ["admin-counts"] });
+      qc.invalidateQueries({ queryKey: ["admin-locales"] });
+    },
+  });
 }
 
 export function useRestaurantQueue() {
@@ -192,6 +223,7 @@ export function useResolveRestaurantReport() {
 export type AdminCounts = {
   reviews: number;
   restaurants: number;
+  claims: number;
   reported: number;
   support: number;
   payments: number;
@@ -202,7 +234,7 @@ export function useAdminCounts() {
   return useQuery({
     queryKey: ["admin-counts"],
     queryFn: async (): Promise<AdminCounts> => {
-      const [reportedReviewIds, restaurants, reported, support, payments, expiredSubs] = await Promise.all([
+      const [reportedReviewIds, restaurants, reported, support, payments, expiredSubs, claims] = await Promise.all([
         supabase.from("review_reports").select("review_id"),
         supabase.from("restaurants").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("restaurants").select("id", { count: "exact", head: true }).eq("status", "suspended"),
@@ -214,11 +246,13 @@ export function useAdminCounts() {
           .eq("status", "approved")
           .is("founder_rank", null)
           .lt("paid_until", new Date().toISOString()),
+        supabase.from("restaurant_claims").select("id", { count: "exact", head: true }).eq("status", "pending"),
       ]);
       const distinctReviews = new Set((reportedReviewIds.data ?? []).map((r: any) => r.review_id));
       return {
         reviews: distinctReviews.size,
         restaurants: restaurants.count ?? 0,
+        claims: claims.count ?? 0,
         reported: reported.count ?? 0,
         support: support.count ?? 0,
         payments: payments.count ?? 0,

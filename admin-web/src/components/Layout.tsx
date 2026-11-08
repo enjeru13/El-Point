@@ -4,6 +4,7 @@ import {
   BarChart3,
   Banknote,
   ClipboardCheck,
+  KeyRound,
   Flag,
   Building2,
   LayoutDashboard,
@@ -31,13 +32,14 @@ const NAV: {
   end?: boolean;
   /** Título del grupo; se muestra encima de este ítem. */
   section?: string;
-  key?: "restaurants" | "reported" | "reviews" | "support" | "payments" | "expiredSubs";
+  key?: "restaurants" | "claims" | "reported" | "reviews" | "support" | "payments" | "expiredSubs";
 }[] = [
   { to: "/", label: "Resumen", icon: LayoutDashboard, end: true },
   { to: "/estadisticas", label: "Estadísticas", icon: BarChart3 },
   { to: "/locales", label: "Locales", icon: Building2, key: "expiredSubs", section: "Negocio" },
   { to: "/pagos", label: "Pagos", icon: Banknote, key: "payments" },
   { to: "/restaurantes", label: "Locales pendientes", icon: ClipboardCheck, key: "restaurants", section: "Moderación" },
+  { to: "/reclamos", label: "Reclamos", icon: KeyRound, key: "claims" },
   { to: "/reportados", label: "Suspendidos", icon: Flag, key: "reported" },
   { to: "/resenas", label: "Reseñas reportadas", icon: MessageSquareWarning, key: "reviews" },
   { to: "/usuarios", label: "Usuarios", icon: Users },

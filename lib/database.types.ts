@@ -105,6 +105,56 @@ export type Database = {
         }
         Relationships: []
       }
+      app_install_days: {
+        Row: {
+          day: string
+          install_id: string
+        }
+        Insert: {
+          day: string
+          install_id: string
+        }
+        Update: {
+          day?: string
+          install_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_install_days_install_id_fkey"
+            columns: ["install_id"]
+            isOneToOne: false
+            referencedRelation: "app_installs"
+            referencedColumns: ["install_id"]
+          },
+        ]
+      }
+      app_installs: {
+        Row: {
+          app_version: string
+          first_seen_at: string
+          install_id: string
+          last_seen_at: string
+          platform: string
+          user_id: string | null
+        }
+        Insert: {
+          app_version: string
+          first_seen_at?: string
+          install_id: string
+          last_seen_at?: string
+          platform: string
+          user_id?: string | null
+        }
+        Update: {
+          app_version?: string
+          first_seen_at?: string
+          install_id?: string
+          last_seen_at?: string
+          platform?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           id: boolean
@@ -898,6 +948,73 @@ export type Database = {
           },
         ]
       }
+      restaurant_claims: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          photo_path: string
+          reason: string | null
+          restaurant_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          rif: string | null
+          status: string
+          user_id: string
+          whatsapp: string
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id?: string
+          photo_path: string
+          reason?: string | null
+          restaurant_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          rif?: string | null
+          status?: string
+          user_id: string
+          whatsapp: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          photo_path?: string
+          reason?: string | null
+          restaurant_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          rif?: string | null
+          status?: string
+          user_id?: string
+          whatsapp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_claims_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_claims_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_claims_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurant_events: {
         Row: {
           created_at: string
@@ -1160,6 +1277,7 @@ export type Database = {
           menu_pdf_url: string | null
           name: string
           order_greeting: string | null
+          osm_id: string | null
           owner_id: string | null
           paid_until: string | null
           phone: string | null
@@ -1209,6 +1327,7 @@ export type Database = {
           menu_pdf_url?: string | null
           name: string
           order_greeting?: string | null
+          osm_id?: string | null
           owner_id?: string | null
           paid_until?: string | null
           phone?: string | null
@@ -1258,6 +1377,7 @@ export type Database = {
           menu_pdf_url?: string | null
           name?: string
           order_greeting?: string | null
+          osm_id?: string | null
           owner_id?: string | null
           paid_until?: string | null
           phone?: string | null
@@ -1798,6 +1918,16 @@ export type Database = {
             }
             Returns: string
           }
+      admin_app_usage: { Args: { p_days?: number }; Returns: Json }
+      admin_community_banned: {
+        Args: never
+        Returns: {
+          community_banned_at: string
+          community_removals: number
+          name: string
+          restaurant_id: string
+        }[]
+      }
       admin_deleted_accounts: {
         Args: { p_limit?: number }
         Returns: {
@@ -1814,18 +1944,6 @@ export type Database = {
           username: string
           was_banned: boolean
         }[]
-      }
-      app_heartbeat: {
-        Args: { p_install_id: string; p_platform: string; p_version: string }
-        Returns: undefined
-      }
-      admin_app_usage: {
-        Args: { p_days?: number }
-        Returns: Json
-      }
-      public_install_count: {
-        Args: never
-        Returns: number | null
       }
       admin_growth_stats: {
         Args: { p_weeks?: number }
@@ -1849,6 +1967,10 @@ export type Database = {
           status: string
           updated_at: string
         }[]
+      }
+      admin_merge_duplicate: {
+        Args: { p_new: string; p_old: string }
+        Returns: undefined
       }
       admin_most_blocked: {
         Args: { p_limit?: number }
@@ -1903,6 +2025,10 @@ export type Database = {
         Args: { p_restaurant: string }
         Returns: undefined
       }
+      admin_review_claim: {
+        Args: { p_approve: boolean; p_claim_id: string; p_reason?: string }
+        Returns: undefined
+      }
       admin_set_plan: {
         Args: {
           p_action: string
@@ -1916,6 +2042,10 @@ export type Database = {
       admin_set_restaurant_boost: {
         Args: { p_days: number; p_restaurant_id: string }
         Returns: string
+      }
+      admin_set_restaurant_categories: {
+        Args: { p_category_ids: number[]; p_restaurant_id: string }
+        Returns: undefined
       }
       admin_set_restaurant_status: {
         Args: { p_action: string; p_reason?: string; p_restaurant_id: string }
@@ -1952,6 +2082,10 @@ export type Database = {
       admin_void_payment: {
         Args: { p_payment_id: string; p_reason?: string }
         Returns: string
+      }
+      app_heartbeat: {
+        Args: { p_install_id: string; p_platform: string; p_version: string }
+        Returns: undefined
       }
       apply_payment_plan: {
         Args: { p_plan: string; p_restaurant_id: string }
@@ -2124,6 +2258,20 @@ export type Database = {
       extend_boost: {
         Args: { p_days: number; p_restaurant_id: string }
         Returns: undefined
+      }
+      find_claimable_matches: {
+        Args: {
+          p_exclude?: string
+          p_lat: number
+          p_lng: number
+          p_name: string
+        }
+        Returns: {
+          address: string
+          distance_m: number
+          id: string
+          name: string
+        }[]
       }
       generate_referral_code: { Args: never; Returns: string }
       geometry: { Args: { "": string }; Returns: unknown }
@@ -2308,6 +2456,7 @@ export type Database = {
       is_not_banned: { Args: never; Returns: boolean }
       is_trusted_writer: { Args: never; Returns: boolean }
       level_for_xp: { Args: { p_xp: number }; Returns: number }
+      locale_core_name: { Args: { p_name: string }; Returns: string }
       longtransactionsenabled: { Args: never; Returns: boolean }
       mission_title: { Args: { p_mission: string }; Returns: string }
       mission_xp: { Args: { p_mission: string }; Returns: number }
@@ -2380,6 +2529,7 @@ export type Database = {
       }
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
+      public_install_count: { Args: never; Returns: number }
       push_setting_key: { Args: { p_type: string }; Returns: string }
       rank_for_level: { Args: { p_level: number }; Returns: string }
       restaurant_has_plan: { Args: { p_id: string }; Returns: boolean }
@@ -2998,6 +3148,16 @@ export type Database = {
       st_wrapx: {
         Args: { geom: unknown; move: number; wrap: number }
         Returns: unknown
+      }
+      submit_restaurant_claim: {
+        Args: {
+          p_full_name: string
+          p_photo_path: string
+          p_restaurant_id: string
+          p_rif: string
+          p_whatsapp: string
+        }
+        Returns: string
       }
       track_restaurant_event: {
         Args: { p_restaurant_id: string; p_type: string }

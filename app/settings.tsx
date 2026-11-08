@@ -1,7 +1,7 @@
 import { Icon } from '@/components/ui/Icon';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, Switch, View } from 'react-native';
+import { Linking, Pressable, ScrollView, Switch, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QA_MODE } from '@/lib/qa';
 import { PAYMENTS_IN_APP } from '@/lib/billing';
@@ -350,6 +350,22 @@ export default function SettingsScreen() {
                 </View>
                 <AppText variant="bodyStrong" style={{ flex: 1 }}>Política de Privacidad</AppText>
                 <Icon name="chevron-right" size={20} color={C.outline} />
+              </Pressable>
+              <Divider />
+              <Pressable
+                onPress={() => Linking.openURL('https://www.openstreetmap.org/copyright')}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 18 }}
+              >
+                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryFixed, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.border }}>
+                  <Icon name="map-outline" size={20} color={C.primary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <AppText variant="bodyStrong">Datos de locales</AppText>
+                  <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                    Parte de los locales viene de © colaboradores de OpenStreetMap (ODbL).
+                  </AppText>
+                </View>
+                <Icon name="open-in-new" size={18} color={C.outline} />
               </Pressable>
             </SectionCard>
           </View>
