@@ -7,6 +7,8 @@ import {
   daysUntil,
   useLocalDetail,
   useLocalStats,
+  useCategories,
+  useSetLocalCategories,
   useSetLocalStatus,
   type LocalPayment,
   type LocalStatus,
@@ -122,6 +124,65 @@ function StatusCard({ id, status, reason, name }: { id: string; status: LocalSta
             Ir a Locales pendientes
           </Link>
         </p>
+      )}
+    </Section>
+  );
+}
+
+function CategoriesCard({ id, current }: { id: string; current: number[] }) {
+  const cats = useCategories();
+  const mut = useSetLocalCategories();
+  const [picked, setPicked] = useState<number[] | null>(null);
+  const sel = picked ?? current;
+  const dirty = picked != null && [...picked].sort().join() !== [...current].sort().join();
+
+  function toggle(c: number) {
+    setPicked((p) => {
+      const s = p ?? current;
+      return s.includes(c) ? s.filter((x) => x !== c) : s.length >= 3 ? s : [...s, c];
+    });
+  }
+
+  return (
+    <Section title="Categorías" aside={<span className="text-xs text-text-soft">{sel.length} de 3</span>}>
+      {cats.isLoading ? (
+        <p className="text-sm text-text-soft">Cargando…</p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {(cats.data ?? []).map((c) => {
+            const on = sel.includes(c.id);
+            const full = !on && sel.length >= 3;
+            return (
+              <button
+                key={c.id}
+                type="button"
+                aria-pressed={on}
+                disabled={full}
+                onClick={() => toggle(c.id)}
+                className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+                  on ? "border-brand bg-brand/10 font-semibold text-brand" : "border-border text-text-soft hover:border-text-soft"
+                } ${full ? "cursor-not-allowed opacity-40" : ""}`}
+              >
+                {c.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {mut.isError && <p className="text-sm text-danger">{(mut.error as Error).message}</p>}
+      {dirty && (
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" onClick={() => setPicked(null)}>
+            Deshacer
+          </Button>
+          <Button
+            loading={mut.isPending}
+            disabled={sel.length === 0}
+            onClick={() => mut.mutate({ id, categoryIds: sel }, { onSuccess: () => setPicked(null) })}
+          >
+            Guardar categorías
+          </Button>
+        </div>
       )}
     </Section>
   );
@@ -249,6 +310,7 @@ export function LocalDetail() {
         </div>
       </Section>
       <StatusCard id={l.id} status={l.status} reason={l.status_reason} name={l.name} />
+      <CategoriesCard key={l.category_ids.join()} id={l.id} current={l.category_ids} />
       <Section
         title="Pagos"
         aside={
@@ -278,7 +340,6 @@ export function LocalDetail() {
           <Fact label="Instagram">{contact.instagram ? `@${contact.instagram}` : "—"}</Fact>
           <Fact label="RIF">{contact.rif ?? "—"}</Fact>
           <Fact label={l.ghost_kitchen ? "Zona" : "Dirección"}>{(l.ghost_kitchen ? l.zone_label : l.address) ?? "—"}</Fact>
-          <Fact label="Categorías">{l.categories.length ? l.categories.join(", ") : "—"}</Fact>
         </dl>
         {l.description && <p className="border-t border-border pt-3 text-sm text-text-soft">{l.description}</p>}
       </Section>

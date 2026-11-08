@@ -59,7 +59,7 @@ export const PLAN_LABEL: Record<PlanState, string> = {
 const COLUMNS = `id, name, status, status_reason, is_active, founder_rank, paid_until, boost_until,
   ghost_kitchen, address, zone_label, rating_avg, rating_count, created_at,
   owner:profiles!owner_id ( username, full_name ),
-  restaurant_categories ( categories ( label ) )`;
+  restaurant_categories ( categories ( id, label ) )`;
 
 function ownerName(o: any): string {
   return o?.username ? `@${o.username}` : (o?.full_name ?? "Sin dueño");
@@ -117,7 +117,7 @@ export type TimelineEvent = {
 };
 
 export type LocalDetail = {
-  local: LocalRow & { description: string | null; accepts_orders: boolean; reviewed_at: string | null };
+  local: LocalRow & { description: string | null; accepts_orders: boolean; reviewed_at: string | null; category_ids: number[] };
   contact: { whatsapp: string | null; phone: string | null; instagram: string | null; rif: string | null };
   payments: LocalPayment[];
   timeline: TimelineEvent[];
@@ -130,6 +130,7 @@ const ACTION_TITLE: Record<string, string> = {
   remove_boost: "Destacado quitado",
   suspend: "Local suspendido",
   reactivate: "Local reactivado",
+  set_categories: "Categorías cambiadas",
 };
 
 function fmt(iso: string | null): string {
@@ -219,6 +220,7 @@ export function useLocalDetail(id: string | undefined) {
           created_at: r.created_at,
           owner_name: ownerName(r.owner),
           categories: ((r.restaurant_categories ?? []) as any[]).map((rc) => rc.categories?.label).filter(Boolean),
+          category_ids: ((r.restaurant_categories ?? []) as any[]).map((rc) => rc.categories?.id).filter((x) => x != null),
           plan: planState(r.founder_rank ?? null, r.paid_until ?? null),
           description: r.description ?? null,
           accepts_orders: !!r.accepts_orders,
@@ -273,6 +275,39 @@ export function useSetLocalStatus() {
       qc.invalidateQueries({ queryKey: ["admin-local", v.id] });
       qc.invalidateQueries({ queryKey: ["admin-restaurant-reports"] });
       qc.invalidateQueries({ queryKey: ["admin-counts"] });
+    },
+  });
+}
+
+export type Category = { id: number; label: string };
+
+/** Catálogo de categorías, en el orden de la app. */
+export function useCategories() {
+  return useQuery({
+    queryKey: ["admin-categories"],
+    staleTime: Infinity,
+    queryFn: async (): Promise<Category[]> => {
+      const { data, error } = await supabase.from("categories").select("id, label").order("sort_order");
+      if (error) throw error;
+      return (data ?? []) as Category[];
+    },
+  });
+}
+
+/** Cambiar las categorías de un local (de 1 a 3). Queda en el historial. */
+export function useSetLocalCategories() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, categoryIds }: { id: string; categoryIds: number[] }) => {
+      const { error } = await supabase.rpc("admin_set_restaurant_categories", {
+        p_restaurant_id: id,
+        p_category_ids: categoryIds,
+      });
+      if (error) throw error;
+    },
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ["admin-locales"] });
+      qc.invalidateQueries({ queryKey: ["admin-local", v.id] });
     },
   });
 }
