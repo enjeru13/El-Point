@@ -20,7 +20,7 @@ El Point: dónde comer
 **Descripción breve (80 caracteres máx.)**
 
 ```
-Qué está abierto cerca, con menú y precios en Bs, $ y pesos. Rankea y sube.
+Qué está abierto cerca, con su menú y precios en bolívares, dólares y pesos
 ```
 
 **Descripción completa**
@@ -118,6 +118,11 @@ Nada de esto se usa para publicidad ni se vende.
 6. Pasados los 14 días: Panel › **Solicitar acceso a producción**. Google pregunta cómo fue la prueba y suele responder en unos días.
 
 ## 6. Google Sign-In en Android (no olvidar)
+
+Huellas SHA-1 de El Point (copiadas de Play Console el 2026-11-08):
+
+- Clave de firma de la app (Google): `A6:96:E4:93:C9:C1:F2:DF:01:67:A9:4F:ED:28:3D:EC:A2:15:20:4A`
+- Clave de subida (EAS): `F2:8C:E3:74:F2:B7:69:16:EC:D3:CA:9F:20:DD:C5:33:14:1A:30:89`
 
 Cuando Play firme la app, copia el **SHA-1 de la clave de firma de la app** (Configuración › Integridad de la app › Firma de apps). En Google Cloud Console › Credenciales, crea un cliente OAuth tipo **Android** con el paquete `com.elpoint.app` y ese SHA-1. Sin eso, "Continuar con Google" falla en la versión de la tienda.
 
