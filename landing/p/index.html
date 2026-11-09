@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es-VE">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Publicación en Comunidad de El Point</title>
+  <meta name="description" content="Mira esta publicación de Comunidad en El Point, la app para descubrir dónde comer en San Cristóbal." />
+  <meta property="og:title" content="Publicación en Comunidad de El Point" />
+  <meta property="og:description" content="Únete a la conversación sobre dónde comer en San Cristóbal." />
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#c8451f" />
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --brand:#c8451f; --bg:#fdf8f6; --surface:#fff; --text:#241a16; --soft:#6b5b52; --border:#e6d8d0; --tint:#fbe9e2; color-scheme: light dark; }
+    @media (prefers-color-scheme: dark) { :root { --brand:#ff7043; --bg:#0b0b0d; --surface:#141417; --text:#f4f4f5; --soft:#a9a9b0; --border:#34343b; --tint:#2a1a14; } }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:"Plus Jakarta Sans",system-ui,sans-serif; padding:20px max(16px, env(safe-area-inset-right)) 40px max(16px, env(safe-area-inset-left)); }
+    .wrap { width:min(560px,100%); margin:0 auto; display:grid; gap:16px; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    header img { height:34px; width:auto; display:block; }
+    .open { font-weight:700; color:var(--brand); text-decoration:none; font-size:.95rem; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:22px; padding:18px; display:grid; gap:12px; }
+    .who { display:flex; align-items:center; gap:10px; }
+    .avatar { width:42px; height:42px; border-radius:50%; background:var(--tint); object-fit:cover; flex:none; display:grid; place-items:center; color:var(--brand); font-weight:800; }
+    .name { font-weight:700; }
+    .meta { color:var(--soft); font-size:.85rem; margin:0; }
+    .body { font-size:1.05rem; line-height:1.55; white-space:pre-wrap; overflow-wrap:anywhere; margin:0; }
+    .photos { display:grid; gap:8px; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); }
+    .photos img { width:100%; aspect-ratio:1; object-fit:cover; border-radius:14px; border:1px solid var(--border); }
+    .tag { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:99px; border:1px solid var(--border); font-weight:600; font-size:.9rem; width:max-content; max-width:100%; }
+    .poll { display:grid; gap:8px; }
+    .opt { position:relative; border:1px solid var(--border); border-radius:12px; padding:10px 12px; overflow:hidden; display:flex; justify-content:space-between; gap:10px; font-weight:600; }
+    .opt .bar { position:absolute; top:0; bottom:0; left:0; background:var(--tint); }
+    .opt span { position:relative; }
+    .stats { display:flex; gap:18px; color:var(--soft); font-size:.9rem; }
+    .reply { display:flex; gap:10px; padding-top:12px; border-top:1px solid var(--border); }
+    .reply .avatar { width:32px; height:32px; font-size:.8rem; }
+    .cta { text-align:center; display:grid; gap:10px; justify-items:center; padding:8px 0; }
+    .cta h2 { font-family:Outfit,system-ui,sans-serif; font-weight:800; margin:0; font-size:1.35rem; }
+    .cta p { margin:0; color:var(--soft); }
+    .btn { display:inline-block; padding:13px 22px; border-radius:99px; background:var(--brand); color:#fff; font-weight:700; text-decoration:none; }
+    .soon { color:var(--soft); font-weight:600; }
+    .hidden { display:none !important; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <a href="../" aria-label="El Point"><picture><source srcset="../assets/logo-pin-dark.png" media="(prefers-color-scheme: dark)" /><img src="../assets/logo-pin.png" alt="El Point" /></picture></a>
+      <a id="open" class="open" href="#">Abrir en la app</a>
+    </header>
+
+    <article id="card" class="card" aria-live="polite">
+      <p class="meta">Cargando publicación…</p>
+    </article>
+
+    <section class="cta">
+      <h2>Únete a la conversación</h2>
+      <p>Descubre dónde comer en San Cristóbal y cuéntalo en Comunidad.</p>
+      <a id="store" class="btn" href="https://apps.apple.com/ve/app/el-point/id6826337907">Descargar en App Store</a>
+      <span id="android" class="soon hidden">Muy pronto en Android</span>
+    </section>
+  </main>
+
+  <script>
+  (function () {
+    // Valores públicos de la app (la misma llave que trae la app; solo puede
+    // llamar a get_public_post, que devuelve publicaciones visibles).
+    var SUPABASE_URL = "https://iurcnijyywmwsfdvysck.supabase.co";
+    var SUPABASE_KEY = "sb_publishable_ymfSJwu8cSA_xxvUcDLa0A_kK8kjMeO";
+    var TOPICS = { recomiendame: "Recomiéndame", locales_nuevos: "Locales nuevos", recetas: "Recetas", antojos: "Antojos", novedades: "Novedades" };
+    var card = document.getElementById("card");
+    var id = new URLSearchParams(location.search).get("id") || "";
+    var valid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+    if (/android/i.test(navigator.userAgent)) {
+      document.getElementById("store").classList.add("hidden");
+      document.getElementById("android").classList.remove("hidden");
+    }
+
+    function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+    function avatar(url, name) {
+      if (url) { var i = el("img", "avatar"); i.src = url; i.alt = ""; return i; }
+      return el("div", "avatar", (name || "?").replace("@", "").charAt(0).toUpperCase());
+    }
+    function ago(iso) {
+      var m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+      if (m < 60) return "hace " + Math.max(1, m) + " min";
+      var h = Math.floor(m / 60); if (h < 24) return "hace " + h + " h";
+      var d = Math.floor(h / 24); return "hace " + d + (d === 1 ? " día" : " días");
+    }
+    function unavailable() {
+      card.textContent = "";
+      card.appendChild(el("p", "body", "Esta publicación ya no está disponible."));
+      document.getElementById("open").classList.add("hidden");
+    }
+
+    if (!valid) return unavailable();
+
+    var link = "elpoint://community/" + id;
+    document.getElementById("open").href = link;
+    // Se intenta abrir la app después de cargar la publicación: si se intenta
+    // antes, el navegador puede cortar la carga y, sin la app, no se vería nada.
+    function tryApp() { setTimeout(function () { window.location.href = link; }, 400); }
+
+    fetch(SUPABASE_URL + "/rest/v1/rpc/get_public_post", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: SUPABASE_KEY },
+      body: JSON.stringify({ p_post_id: id })
+    }).then(function (r) { return r.ok ? r.json() : null; }).then(function (p) {
+      if (!p) return unavailable();
+      card.textContent = "";
+      var a = p.author || {};
+      var name = a.username ? "@" + a.username : (a.name || "Alguien");
+      var who = el("div", "who");
+      who.appendChild(avatar(a.avatar_url, name));
+      var col = el("div");
+      col.appendChild(el("div", "name", name));
+      col.appendChild(el("p", "meta", (TOPICS[p.topic] || "Comunidad") + " · " + ago(p.created_at) + (a.level ? " · Nivel " + a.level : "")));
+      who.appendChild(col);
+      card.appendChild(who);
+      card.appendChild(el("p", "body", p.body));
+
+      if (p.restaurant || p.suggested_name) {
+        card.appendChild(el("span", "tag", p.restaurant ? p.restaurant.name : p.suggested_name + " · aún no está en El Point"));
+      }
+      if (p.photos && p.photos.length) {
+        var ph = el("div", "photos");
+        p.photos.forEach(function (path) {
+          var i = el("img"); i.loading = "lazy"; i.alt = "";
+          i.src = SUPABASE_URL + "/storage/v1/object/public/post-photos/" + path;
+          ph.appendChild(i);
+        });
+        card.appendChild(ph);
+      }
+      if (p.poll && p.poll.options) {
+        var poll = el("div", "poll");
+        var total = p.poll.total || 0;
+        p.poll.options.forEach(function (o) {
+          var pct = total ? Math.round(100 * (o.votes || 0) / total) : 0;
+          var row = el("div", "opt");
+          var bar = el("div", "bar"); bar.style.width = pct + "%"; row.appendChild(bar);
+          row.appendChild(el("span", null, o.label || (o.restaurant && o.restaurant.name) || "—"));
+          row.appendChild(el("span", null, pct + "%"));
+          poll.appendChild(row);
+        });
+        poll.appendChild(el("p", "meta", total + (total === 1 ? " voto" : " votos") + (p.poll.closed ? " · Encuesta cerrada" : "")));
+        card.appendChild(poll);
+      }
+      var stats = el("div", "stats");
+      stats.appendChild(el("span", null, (p.like_count || 0) + " me gusta"));
+      stats.appendChild(el("span", null, (p.reply_count || 0) + (p.reply_count === 1 ? " respuesta" : " respuestas")));
+      card.appendChild(stats);
+      (p.replies || []).forEach(function (r) {
+        var ra = r.author || {};
+        var rn = ra.username ? "@" + ra.username : (ra.name || "Alguien");
+        var row = el("div", "reply");
+        row.appendChild(avatar(ra.avatar_url, rn));
+        var c = el("div");
+        c.appendChild(el("div", "name", rn));
+        c.appendChild(el("p", "body", r.body));
+        row.appendChild(c);
+        card.appendChild(row);
+      });
+      document.title = name + " en Comunidad de El Point";
+      tryApp();
+    }).catch(unavailable);
+  })();
+  </script>
+</body>
+</html>
