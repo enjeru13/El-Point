@@ -12,6 +12,7 @@ import { memo, useMemo } from "react";
 import { Pressable, Share, View } from "react-native";
 import { sharePostText } from "@/lib/community/share";
 import { MentionText } from "@/components/community/MentionText";
+import { PollCard } from "@/components/community/PollCard";
 import { useRouter } from "expo-router";
 import Animated, {
   useAnimatedStyle,
@@ -137,6 +138,8 @@ export const FeedRow = memo(function FeedRow({
             {tags.map((t) => `#${t.toLowerCase()}`).join("  ")}
           </AppText>
         )}
+
+        {item.poll && <PollCard postId={item.id} poll={item.poll} disabled={pending} />}
 
         <PlacePill item={item} onOpenRestaurant={onOpenRestaurant} />
 

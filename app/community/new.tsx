@@ -12,7 +12,8 @@ import { clearDraft, loadDraft, saveDraft } from "@/lib/community/draft";
 import { CUSTOMER_TOPICS, errorMessage, topicLabel, type TopicKey } from "@/lib/community/topics";
 import { impact, notify } from "@/lib/haptics";
 import { useCategories } from "@/lib/queries/categories";
-import { errorCode, useCreatePost } from "@/lib/queries/community";
+import { errorCode, useCreatePost, type NewPoll } from "@/lib/queries/community";
+import { PollEditor, pollReady } from "@/components/community/PollEditor";
 import { useMyProfile } from "@/lib/queries/me";
 import { useMyRestaurant } from "@/lib/queries/owner";
 import { capWidth, useIsTablet } from "@/lib/responsive";
@@ -91,6 +92,9 @@ export default function NewPostScreen() {
   const [categoryIds, setCategoryIds] = useState<number[]>([]);
   const [uploaded, setUploaded] = useState<{ done: number; total: number } | null>(null);
   const restaurantSheet = useRef<RestaurantPickerHandle>(null);
+  const pollPickerSheet = useRef<RestaurantPickerHandle>(null);
+  const pollPickIndex = useRef(0);
+  const [poll, setPoll] = useState<NewPoll | null>(null);
   const categorySheet = useRef<CategoryPickerHandle>(null);
 
   // Recuperar el borrador al abrir y guardarlo mientras escribes.
@@ -123,7 +127,7 @@ export default function NewPostScreen() {
   }, [loaded, body, topic, photos, restaurant, suggested, categoryIds, asRestaurantId]);
 
   const hasTag = !!asRestaurantId || !!restaurant || !!suggested || categoryIds.length > 0;
-  const canPublish = body.trim().length > 0 && hasTag && !createPost.isPending;
+  const canPublish = body.trim().length > 0 && hasTag && pollReady(poll) && !createPost.isPending;
   const pickedCategories = categoryIds
     .map((cid) => categories.find((c) => c.id === cid))
     .filter((c): c is NonNullable<typeof c> => !!c);
@@ -154,6 +158,7 @@ export default function NewPostScreen() {
         categoryIds,
         asRestaurantId,
         photos,
+        poll,
         onPhotoUploaded: (done, total) => setUploaded({ done, total }),
       },
       {
@@ -355,6 +360,18 @@ export default function NewPostScreen() {
                 }}
               />
 
+              {poll && (
+                <PollEditor
+                  poll={poll}
+                  onChange={setPoll}
+                  onRemove={() => setPoll(null)}
+                  onPickRestaurant={(i) => {
+                    pollPickIndex.current = i;
+                    pollPickerSheet.current?.present();
+                  }}
+                />
+              )}
+
               {photos.length > 0 && (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
                   {photos.map((uri) => (
@@ -438,6 +455,13 @@ export default function NewPostScreen() {
                 />
               )}
               <ToolButton
+                icon="mdi:poll"
+                label="Encuesta"
+                active={!!poll}
+                disabled={createPost.isPending}
+                onPress={() => setPoll((p) => p ?? { days: 1, options: [{ label: "" }, { label: "" }] })}
+              />
+              <ToolButton
                 icon="silverware-fork-knife"
                 label="Comida"
                 active={categoryIds.length > 0}
@@ -460,6 +484,17 @@ export default function NewPostScreen() {
           )}
         </ScrollView>
 
+      <RestaurantPickerSheet
+        ref={pollPickerSheet}
+        allowSuggest={false}
+        onPick={(r) =>
+          setPoll((p) =>
+            p
+              ? { ...p, options: p.options.map((o, j) => (j === pollPickIndex.current ? { restaurantId: r.id, name: r.name } : o)) }
+              : p,
+          )
+        }
+      />
       <RestaurantPickerSheet
         ref={restaurantSheet}
         onPick={(r) => {

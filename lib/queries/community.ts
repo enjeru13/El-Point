@@ -31,7 +31,30 @@ export type FeedItem = {
   likeCount: number;
   replyCount: number;
   viewerLiked: boolean;
+  poll: PollState | null;
 };
+
+export type PollOption = { id: string; label: string | null; restaurant: { id: string; name: string } | null; votes: number | null };
+export type PollState = {
+  closes_at: string;
+  closed: boolean;
+  total: number;
+  my_option: string | null;
+  options: PollOption[];
+};
+
+export type NewPollOption = { label: string } | { restaurantId: string; name: string };
+export type NewPoll = { days: 1 | 3 | 7; options: NewPollOption[] };
+
+/** Encuestas de varias filas del feed, en una sola llamada. */
+async function attachPolls(items: FeedItem[]): Promise<FeedItem[]> {
+  const ids = items.filter((i) => i.kind === "post").map((i) => i.id);
+  if (!ids.length) return items;
+  const { data, error } = await supabase.rpc("poll_states", { p_post_ids: ids });
+  if (error) return items;
+  const map = (data ?? {}) as Record<string, PollState>;
+  return items.map((i) => (map[i.id] ? { ...i, poll: map[i.id] } : i));
+}
 
 export type FeedFilters = {
   topic?: TopicKey;
@@ -93,6 +116,7 @@ function toFeedItem(r: FeedRow): FeedItem {
     likeCount: r.like_count,
     replyCount: r.reply_count,
     viewerLiked: r.viewer_liked,
+    poll: null,
   };
 }
 
@@ -111,7 +135,7 @@ async function fetchFeedPage(filters: FeedFilters, cursor: Cursor): Promise<Feed
     p_limit: PAGE_SIZE,
   });
   if (error) throw error;
-  return ((data ?? []) as FeedRow[]).map(toFeedItem);
+  return attachPolls(((data ?? []) as FeedRow[]).map(toFeedItem));
 }
 
 export function useCommunityFeed(filters: FeedFilters = {}, enabled = true) {
@@ -136,7 +160,7 @@ export function usePost(postId: string | undefined) {
       const { data, error } = await supabase.rpc("community_feed", { p_post: postId, p_limit: 1 });
       if (error) throw error;
       const row = ((data ?? []) as FeedRow[])[0];
-      return row ? toFeedItem(row) : null;
+      return row ? (await attachPolls([toFeedItem(row)]))[0] : null;
     },
   });
 }
@@ -274,6 +298,7 @@ export type NewPost = {
   categoryIds: number[];
   asRestaurantId?: string | null;
   photos: string[];
+  poll?: NewPoll | null;
   onPhotoUploaded?: (done: number, total: number) => void;
 };
 
@@ -321,6 +346,18 @@ export function useCreatePost() {
           if (phErr) throw phErr;
         }
       }
+
+      if (p.poll && p.poll.options.length >= 2) {
+        const { error: pollErr } = await supabase.rpc("create_poll", {
+          p_post_id: postId,
+          p_days: p.poll.days,
+          p_options: p.poll.options.map((o) =>
+            "label" in o ? { label: o.label.trim() } : { restaurant_id: o.restaurantId },
+          ),
+        });
+        // En un reintento la encuesta ya puede existir.
+        if (pollErr && !errorCode(pollErr).includes("poll_exists")) throw pollErr;
+      }
       return postId;
     },
     // El post propio aparece arriba al momento; si falla, se quita.
@@ -350,6 +387,20 @@ export function useCreatePost() {
         categoryIds: p.categoryIds,
         photoPaths: [],
         likeCount: 0,
+        poll: p.poll
+          ? {
+              closes_at: new Date(Date.now() + p.poll.days * 86400000).toISOString(),
+              closed: false,
+              total: 0,
+              my_option: null,
+              options: p.poll.options.map((o, i) => ({
+                id: `pending-${i}`,
+                label: "label" in o ? o.label : null,
+                restaurant: "label" in o ? null : { id: o.restaurantId, name: o.name },
+                votes: null,
+              })),
+            }
+          : null,
         replyCount: 0,
         viewerLiked: false,
       };
@@ -531,6 +582,19 @@ export function useDeleteReply(postId: string) {
       qc.invalidateQueries({ queryKey: repliesKey(postId) });
       qc.invalidateQueries({ queryKey: ["community-feed"] });
     },
+  });
+}
+
+/** Votar en una encuesta (o cambiar el voto). Muestra los resultados al instante. */
+export function useVotePoll() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ postId, optionId }: { postId: string; optionId: string }) => {
+      const { data, error } = await supabase.rpc("vote_poll", { p_post_id: postId, p_option_id: optionId });
+      if (error) throw error;
+      return data as unknown as PollState;
+    },
+    onSuccess: (state, { postId }) => patchFeedItem(qc, postId, (it) => ({ ...it, poll: state })),
   });
 }
 
