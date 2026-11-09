@@ -68,7 +68,9 @@ import {
 import {
   Alert,
   Animated,
+  Keyboard,
   Linking,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -187,6 +189,16 @@ const ReviewSheet = forwardRef<
   ];
   const sheetRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ["65%"], []);
+  // Con el teclado abierto el botón va pegado al teclado: sin el margen del home indicator.
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  useEffect(() => {
+    const show = Keyboard.addListener(Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow", () => setKeyboardOpen(true));
+    const hide = Keyboard.addListener(Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide", () => setKeyboardOpen(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
@@ -264,7 +276,7 @@ const ReviewSheet = forwardRef<
           style={{
             paddingHorizontal: 20,
             paddingTop: 12,
-            paddingBottom: insets.bottom + 12,
+            paddingBottom: keyboardOpen ? 12 : insets.bottom + 12,
             backgroundColor: C.surface,
             borderTopWidth: 1,
             borderTopColor: C.outlineVariant,
@@ -300,7 +312,7 @@ const ReviewSheet = forwardRef<
         </View>
       </BottomSheetFooter>
     ),
-    [C, insets.bottom, editing, submitting, rating, comment, photos, canSubmit, onSubmit],
+    [C, insets.bottom, keyboardOpen, editing, submitting, rating, comment, photos, canSubmit, onSubmit],
   );
 
   return (
@@ -308,6 +320,7 @@ const ReviewSheet = forwardRef<
       ref={sheetRef}
       snapPoints={snapPoints}
       enableDynamicSizing={false}
+      topInset={insets.top}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustResize"
