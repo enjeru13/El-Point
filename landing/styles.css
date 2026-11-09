@@ -406,8 +406,8 @@ p { text-wrap: pretty; }
 
 .footer nav a { display: inline-flex; align-items: center; min-height: 44px; }
 
-.news-list { list-style: none; padding: 0; margin: 0 0 8px; display: grid; gap: 14px; }
-.news-list li { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; color: var(--text-soft); }
+.doc .news-list, .news-list { list-style: none; padding: 0; margin: 0 0 8px; display: grid; gap: 14px; }
+.news-list li { margin: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; color: var(--text-soft); }
 .news-list b { color: var(--text); font-family: var(--font-display); }
 
 
