@@ -21,6 +21,42 @@ export type Release = {
  */
 export const CHANGELOG: Release[] = [
   {
+    version: "1.1.0",
+    date: "Noviembre de 2026",
+    headline: "Llegó Comunidad, y ahora armas tu pedido desde el menú y lo mandas por WhatsApp.",
+    sections: [
+      {
+        title: "Comunidad",
+        icon: "comment-text-multiple",
+        notes: [
+          "Nueva pestaña Comunidad: pide recomendaciones, cuenta tus descubrimientos, comparte recetas y responde a otros comensales.",
+          "Filtra por tema o por tipo de comida, busca publicaciones y etiqueta locales de la app.",
+          "Participar te da XP, con misiones nuevas como tu primer post.",
+          "Cada local muestra lo que la comunidad dice de él.",
+        ],
+      },
+      {
+        title: "Pedidos y menú",
+        icon: "shopping-bag",
+        notes: [
+          "Arma tu pedido desde el menú: agrega platos, ajusta cantidades y mándalo listo por WhatsApp.",
+          "Elige si pasas a buscarlo o es delivery, y marca en el mapa dónde te lo llevan.",
+          "La tasa del local se ve grande arriba del menú, con su fecha, y eliges ver los precios en dólares, bolívares o pesos.",
+          "Al compartir un local, el enlace abre la app o lleva a descargarla.",
+        ],
+      },
+      {
+        title: "Para dueños de locales",
+        icon: "storefront-outline",
+        notes: [
+          "Recibe pedidos armados desde tu menú y configura el costo del delivery: precio fijo o según la zona.",
+          "¿Tu local ya aparece en El Point? Reclámalo desde su perfil y hazlo tuyo.",
+          "Responde en Comunidad como tu local.",
+        ],
+      },
+    ],
+  },
+  {
     version: "1.0.0",
     date: "Octubre de 2026",
     headline: "Llegó El Point: encuentra dónde comer en San Cristóbal y deja tu rank.",
