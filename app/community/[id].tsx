@@ -2,6 +2,9 @@ import { FeedRow } from "@/components/community/FeedRow";
 import { FeedSkeleton } from "@/components/community/FeedSkeleton";
 import { ReplyRow } from "@/components/community/ReplyRow";
 import { buildThreads } from "@/lib/community/threads";
+import { activeMentionQuery, insertMention } from "@/lib/community/mentions";
+import { MentionText } from "@/components/community/MentionText";
+import { MentionSuggestions } from "@/components/community/MentionSuggestions";
 import {
   RestaurantPickerSheet,
   type PickedRestaurant,
@@ -63,6 +66,8 @@ export default function PostDetailScreen() {
   const [text, setText] = useState("");
   const [tagged, setTagged] = useState<PickedRestaurant | null>(null);
   const [replyTo, setReplyTo] = useState<Reply | null>(null);
+  const [caret, setCaret] = useState(0);
+  const mentionQuery = activeMentionQuery(text, caret);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const inputRef = useRef<TextInput>(null);
   const toggleReplyLike = useToggleReplyLike(id ?? "");
@@ -205,6 +210,8 @@ export default function PostDetailScreen() {
                 const shown = open ? t.children : t.children.slice(0, 2);
                 const hidden = t.children.length - shown.length;
                 const rowProps = {
+                  onOpenAuthor: (r: Reply) => router.push(`/user/${r.authorId}` as never),
+                  renderBody: (b: string) => <MentionText body={b} variant="body" />,
                   onOpenRestaurant: actions.onOpenRestaurant,
                   onMenu: onReplyMenu,
                   onReply: ownerCanReply ? startReply : undefined,
@@ -262,6 +269,15 @@ export default function PostDetailScreen() {
                 backgroundColor: C.background,
               }}
             >
+              <MentionSuggestions
+                query={mentionQuery}
+                postId={id}
+                onPick={(u) => {
+                  const next = insertMention(text, caret, u);
+                  setText(next.text);
+                  setCaret(next.caret);
+                }}
+              />
               {replyTo && (
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingLeft: 48 }}>
                   <Icon name="message-circle" size={14} color={C.primary} />
@@ -308,6 +324,7 @@ export default function PostDetailScreen() {
                     ref={inputRef}
                     value={text}
                     onChangeText={(t) => setText(t.slice(0, 500))}
+                    onSelectionChange={(e) => setCaret(e.nativeEvent.selection.end)}
                     placeholder={`Responde a ${item.asRestaurantName ?? item.authorName ?? "este post"}…`}
                     placeholderTextColor={C.outline}
                     multiline

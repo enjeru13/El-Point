@@ -11,6 +11,8 @@ import { useTheme } from "@/lib/ThemeContext";
 import { memo, useMemo } from "react";
 import { Pressable, Share, View } from "react-native";
 import { sharePostText } from "@/lib/community/share";
+import { MentionText } from "@/components/community/MentionText";
+import { useRouter } from "expo-router";
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,
@@ -43,6 +45,7 @@ export const FeedRow = memo(function FeedRow({
   detail?: boolean;
 }) {
   const { C } = useTheme();
+  const router = useRouter();
   const pending = item.id.startsWith("pending-");
   const asLocal = !!item.asRestaurantId;
   const name = asLocal ? item.asRestaurantName : item.authorName;
@@ -69,7 +72,14 @@ export const FeedRow = memo(function FeedRow({
         opacity: pending ? 0.6 : 1,
       }}
     >
-      <Avatar uri={avatar} size={40} icon={asLocal ? "storefront-outline" : "account"} bordered={false} />
+      <Pressable
+        onPress={() => router.push(`/user/${item.authorId}` as never)}
+        disabled={asLocal || pending}
+        accessibilityRole="button"
+        accessibilityLabel={`Ver perfil de ${name ?? "esta persona"}`}
+      >
+        <Avatar uri={avatar} size={40} icon={asLocal ? "storefront-outline" : "account"} bordered={false} />
+      </Pressable>
 
       <View style={{ flex: 1, minWidth: 0 }}>
         {/* Nombre · hora …… menú */}
@@ -120,9 +130,7 @@ export const FeedRow = memo(function FeedRow({
           )}
         </View>
 
-        <AppText variant="body" style={{ marginTop: 6 }} numberOfLines={detail ? undefined : 8}>
-          {item.body}
-        </AppText>
+        <MentionText body={item.body} variant="body" style={{ marginTop: 6 }} numberOfLines={detail ? undefined : 8} />
 
         {tags.length > 0 && (
           <AppText variant="caption" color={C.onSurfaceVariant} style={{ marginTop: 6 }}>

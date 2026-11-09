@@ -31,6 +31,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { activeMentionQuery, insertMention } from "@/lib/community/mentions";
+import { MentionSuggestions } from "@/components/community/MentionSuggestions";
 
 const MAX_BODY = 500;
 const MAX_PHOTOS = 4;
@@ -80,6 +82,8 @@ export default function NewPostScreen() {
   const publishing = useRef(false);
   const [loaded, setLoaded] = useState(false);
   const [body, setBody] = useState("");
+  const [caret, setCaret] = useState(0);
+  const mentionQuery = asRestaurantId ? null : activeMentionQuery(body, caret);
   const [topic, setTopic] = useState<TopicKey>(asRestaurantId ? "novedades" : "antojos");
   const [photos, setPhotos] = useState<string[]>([]);
   const [restaurant, setRestaurant] = useState<PickedRestaurant | null>(null);
@@ -320,6 +324,7 @@ export default function NewPostScreen() {
               <TextInput
                 value={body}
                 onChangeText={(t) => setBody(t.slice(0, MAX_BODY))}
+                onSelectionChange={(e) => setCaret(e.nativeEvent.selection.end)}
                 placeholder={
                   asRestaurantId
                     ? "Plato del día, una promo, horario especial…"
@@ -338,6 +343,15 @@ export default function NewPostScreen() {
                   lineHeight: 25,
                   textAlignVertical: "top",
                   padding: 0,
+                }}
+              />
+
+              <MentionSuggestions
+                query={mentionQuery}
+                onPick={(u) => {
+                  const next = insertMention(body, caret, u);
+                  setBody(next.text.slice(0, MAX_BODY));
+                  setCaret(next.caret);
                 }}
               />
 
