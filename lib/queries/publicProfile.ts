@@ -84,9 +84,8 @@ export function useUserReviews(userId: string | undefined) {
 
 /** Id de un usuario por su @nombre (para tocar una mención). */
 export async function resolveUsername(username: string): Promise<string | null> {
-  const { data } = await supabase.rpc("search_mention_users", { p_query: username, p_post_id: undefined as any });
-  const hit = (data ?? []).find((u: { username: string | null }) => u.username?.toLowerCase() === username.toLowerCase());
-  return hit?.id ?? null;
+  const { data } = await supabase.rpc("user_id_by_username" as any, { p_username: username });
+  return (data as string | null) ?? null;
 }
 
 export function useMentionSuggestions(query: string | null, postId?: string) {

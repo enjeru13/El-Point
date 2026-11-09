@@ -252,7 +252,28 @@ export function usePostReplies(postId: string | undefined, blockedIds?: Set<stri
         removed: !!r.author_deleted_at,
       }));
     },
-    select: (rows) => (blockedIds?.size ? rows.filter((r) => !blockedIds.has(r.authorId)) : rows),
+    select: (rows) => {
+      const list = blockedIds?.size ? rows.filter((r) => !blockedIds.has(r.authorId)) : rows;
+      // Una respuesta oculta por moderación (o de alguien bloqueado) que tiene
+      // respuestas debajo se muestra como "Respuesta eliminada" para no romper el hilo.
+      const ids = new Set(list.map((r) => r.id));
+      const ghosts = new Map<string, Reply>();
+      for (const r of list) {
+        if (r.parentReplyId && !ids.has(r.parentReplyId) && !ghosts.has(r.parentReplyId)) {
+          ghosts.set(r.parentReplyId, {
+            ...r,
+            id: r.parentReplyId,
+            parentReplyId: null,
+            body: "",
+            removed: true,
+            likeCount: 0,
+            likedByMe: false,
+            createdAt: new Date(new Date(r.createdAt).getTime() - 1).toISOString(),
+          });
+        }
+      }
+      return ghosts.size ? [...list, ...ghosts.values()] : list;
+    },
   });
 }
 

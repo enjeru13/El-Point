@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { activeMentionQuery, insertMention, mentionSegments } from "./mentions.ts";
+import { activeMentionQuery, caretAfterEdit, insertMention, mentionSegments } from "./mentions.ts";
 
 test("segmentos_mencion", () => {
   assert.deepEqual(mentionSegments("hola @ana!"), [
@@ -17,6 +17,12 @@ test("consulta_activa", () => {
   assert.equal(activeMentionQuery("hey @", 5), "");
   assert.equal(activeMentionQuery("mail a@b", 8), null);
   assert.equal(activeMentionQuery("hey @ana listo", 14), null);
+});
+
+test("cursor_tras_editar", () => {
+  assert.equal(caretAfterEdit("hey ", "hey @a"), 6);
+  assert.equal(caretAfterEdit("hola mundo", "hola @ mundo"), 7);
+  assert.equal(caretAfterEdit("abc", "ab"), 2);
 });
 
 test("insertar_mencion", () => {

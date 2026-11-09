@@ -2,7 +2,7 @@ import { FeedRow } from "@/components/community/FeedRow";
 import { FeedSkeleton } from "@/components/community/FeedSkeleton";
 import { ReplyRow } from "@/components/community/ReplyRow";
 import { buildThreads } from "@/lib/community/threads";
-import { activeMentionQuery, insertMention } from "@/lib/community/mentions";
+import { activeMentionQuery, caretAfterEdit, insertMention } from "@/lib/community/mentions";
 import { MentionText } from "@/components/community/MentionText";
 import { MentionSuggestions } from "@/components/community/MentionSuggestions";
 import {
@@ -67,7 +67,8 @@ export default function PostDetailScreen() {
   const [tagged, setTagged] = useState<PickedRestaurant | null>(null);
   const [replyTo, setReplyTo] = useState<Reply | null>(null);
   const [caret, setCaret] = useState(0);
-  const mentionQuery = activeMentionQuery(text, caret);
+  const [forcedSel, setForcedSel] = useState<{ start: number; end: number } | undefined>();
+  const mentionQuery = asRestaurantId ? null : activeMentionQuery(text, caret);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const inputRef = useRef<TextInput>(null);
   const toggleReplyLike = useToggleReplyLike(id ?? "");
@@ -276,6 +277,7 @@ export default function PostDetailScreen() {
                   const next = insertMention(text, caret, u);
                   setText(next.text);
                   setCaret(next.caret);
+                  setForcedSel({ start: next.caret, end: next.caret });
                 }}
               />
               {replyTo && (
@@ -323,8 +325,16 @@ export default function PostDetailScreen() {
                   <TextInput
                     ref={inputRef}
                     value={text}
-                    onChangeText={(t) => setText(t.slice(0, 500))}
-                    onSelectionChange={(e) => setCaret(e.nativeEvent.selection.end)}
+                    onChangeText={(t) => {
+                      const next = t.slice(0, 500);
+                      setCaret(caretAfterEdit(text, next));
+                      setText(next);
+                    }}
+                    selection={forcedSel}
+                    onSelectionChange={(e) => {
+                      setCaret(e.nativeEvent.selection.end);
+                      if (forcedSel) setForcedSel(undefined);
+                    }}
                     placeholder={`Responde a ${item.asRestaurantName ?? item.authorName ?? "este post"}…`}
                     placeholderTextColor={C.outline}
                     multiline

@@ -27,6 +27,13 @@ export function activeMentionQuery(text: string, caret: number): string | null {
   return m ? m[2] : null;
 }
 
+/** Posición del cursor después de escribir: fin de lo que cambió entre `prev` y `next`. */
+export function caretAfterEdit(prev: string, next: string): number {
+  let i = 0;
+  while (i < prev.length && i < next.length && prev[i] === next[i]) i++;
+  return i + Math.max(0, next.length - prev.length);
+}
+
 /** Cambia la @consulta antes del cursor por "@usuario " y devuelve el texto y el cursor nuevos. */
 export function insertMention(text: string, caret: number, username: string): { text: string; caret: number } {
   const before = text.slice(0, caret);

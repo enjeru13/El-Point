@@ -23,6 +23,11 @@ test("arbol_con_padre_borrado", () => {
   assert.deepEqual(out.map((t) => t.root.id), ["r1", "c1"]);
 });
 
+test("hijo_eliminado_sin_respuestas", () => {
+  const out = buildThreads([r("r1", null, 1), r("c1", "r1", 2, true), r("c2", "r1", 3), r("c3", "c2", 4)]);
+  assert.deepEqual(out[0].children.map((c) => c.id), ["c2", "c3"]);
+});
+
 test("raiz_eliminada_sin_hijos", () => {
   const out = buildThreads([r("r1", null, 1, true), r("r2", null, 2, true), r("c1", "r2", 3)]);
   assert.deepEqual(out.map((t) => t.root.id), ["r2"]);

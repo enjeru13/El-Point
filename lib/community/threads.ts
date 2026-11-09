@@ -36,6 +36,8 @@ export function buildThreads<T extends ThreadReply>(replies: T[]): Thread<T>[] {
     if (!threads.has(root.id)) threads.set(root.id, { root, children: [] });
     threads.get(root.id)!.children.push({ ...r, replyingTo: r.parentId === root.id ? null : r.parentId });
   }
+  const pointedTo = new Set(replies.map((r) => r.parentId).filter((x): x is string => !!x));
+  for (const t of threads.values()) t.children = t.children.filter((c) => !c.removed || pointedTo.has(c.id));
   return [...threads.values()]
     .filter((t) => !(t.root.removed && t.children.length === 0))
     .sort((a, b) => a.root.createdAt.localeCompare(b.root.createdAt));

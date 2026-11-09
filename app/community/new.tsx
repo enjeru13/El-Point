@@ -32,7 +32,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { activeMentionQuery, insertMention } from "@/lib/community/mentions";
+import { activeMentionQuery, caretAfterEdit, insertMention } from "@/lib/community/mentions";
 import { MentionSuggestions } from "@/components/community/MentionSuggestions";
 
 const MAX_BODY = 500;
@@ -84,6 +84,7 @@ export default function NewPostScreen() {
   const [loaded, setLoaded] = useState(false);
   const [body, setBody] = useState("");
   const [caret, setCaret] = useState(0);
+  const [forcedSel, setForcedSel] = useState<{ start: number; end: number } | undefined>();
   const mentionQuery = asRestaurantId ? null : activeMentionQuery(body, caret);
   const [topic, setTopic] = useState<TopicKey>(asRestaurantId ? "novedades" : "antojos");
   const [photos, setPhotos] = useState<string[]>([]);
@@ -328,8 +329,16 @@ export default function NewPostScreen() {
 
               <TextInput
                 value={body}
-                onChangeText={(t) => setBody(t.slice(0, MAX_BODY))}
-                onSelectionChange={(e) => setCaret(e.nativeEvent.selection.end)}
+                onChangeText={(t) => {
+                  const next = t.slice(0, MAX_BODY);
+                  setCaret(caretAfterEdit(body, next));
+                  setBody(next);
+                }}
+                selection={forcedSel}
+                onSelectionChange={(e) => {
+                  setCaret(e.nativeEvent.selection.end);
+                  if (forcedSel) setForcedSel(undefined);
+                }}
                 placeholder={
                   asRestaurantId
                     ? "Plato del día, una promo, horario especial…"
@@ -357,6 +366,7 @@ export default function NewPostScreen() {
                   const next = insertMention(body, caret, u);
                   setBody(next.text.slice(0, MAX_BODY));
                   setCaret(next.caret);
+                  setForcedSel({ start: next.caret, end: next.caret });
                 }}
               />
 
