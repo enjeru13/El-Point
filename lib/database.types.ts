@@ -583,6 +583,52 @@ export type Database = {
           },
         ]
       }
+      post_mentions: {
+        Row: {
+          created_at: string
+          id: number
+          post_id: string
+          reply_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          post_id: string
+          reply_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          post_id?: string
+          reply_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_mentions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_mentions_reply_id_fkey"
+            columns: ["reply_id"]
+            isOneToOne: false
+            referencedRelation: "post_replies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_mentions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_photos: {
         Row: {
           position: number
@@ -609,37 +655,157 @@ export type Database = {
           },
         ]
       }
+      post_poll_options: {
+        Row: {
+          id: string
+          label: string | null
+          position: number
+          post_id: string
+          restaurant_id: string | null
+        }
+        Insert: {
+          id?: string
+          label?: string | null
+          position: number
+          post_id: string
+          restaurant_id?: string | null
+        }
+        Update: {
+          id?: string
+          label?: string | null
+          position?: number
+          post_id?: string
+          restaurant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_poll_options_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "post_polls"
+            referencedColumns: ["post_id"]
+          },
+          {
+            foreignKeyName: "post_poll_options_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_poll_votes: {
+        Row: {
+          created_at: string
+          option_id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          option_id: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          option_id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "post_poll_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_poll_votes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "post_polls"
+            referencedColumns: ["post_id"]
+          },
+          {
+            foreignKeyName: "post_poll_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_polls: {
+        Row: {
+          closes_at: string
+          created_at: string
+          ended_notified: boolean
+          post_id: string
+        }
+        Insert: {
+          closes_at: string
+          created_at?: string
+          ended_notified?: boolean
+          post_id: string
+        }
+        Update: {
+          closes_at?: string
+          created_at?: string
+          ended_notified?: boolean
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_polls_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_replies: {
         Row: {
           as_restaurant_id: string | null
+          author_deleted_at: string | null
           author_id: string
           body: string
           created_at: string
           id: string
+          like_count: number
           moderated_at: string | null
           moderation: string
+          parent_reply_id: string | null
           post_id: string
           restaurant_id: string | null
         }
         Insert: {
           as_restaurant_id?: string | null
+          author_deleted_at?: string | null
           author_id: string
           body: string
           created_at?: string
           id?: string
+          like_count?: number
           moderated_at?: string | null
           moderation?: string
+          parent_reply_id?: string | null
           post_id: string
           restaurant_id?: string | null
         }
         Update: {
           as_restaurant_id?: string | null
+          author_deleted_at?: string | null
           author_id?: string
           body?: string
           created_at?: string
           id?: string
+          like_count?: number
           moderated_at?: string | null
           moderation?: string
+          parent_reply_id?: string | null
           post_id?: string
           restaurant_id?: string | null
         }
@@ -659,6 +825,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "post_replies_parent_reply_id_fkey"
+            columns: ["parent_reply_id"]
+            isOneToOne: false
+            referencedRelation: "post_replies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "post_replies_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
@@ -670,6 +843,39 @@ export type Database = {
             columns: ["restaurant_id"]
             isOneToOne: false
             referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_reply_likes: {
+        Row: {
+          created_at: string
+          reply_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          reply_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          reply_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_reply_likes_reply_id_fkey"
+            columns: ["reply_id"]
+            isOneToOne: false
+            referencedRelation: "post_replies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_reply_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2123,6 +2329,7 @@ export type Database = {
         Returns: undefined
       }
       clear_expired_promos: { Args: never; Returns: undefined }
+      close_due_polls: { Args: never; Returns: number }
       community_feed: {
         Args: {
           p_before_at?: string
@@ -2206,6 +2413,10 @@ export type Database = {
             }
             Returns: string
           }
+      create_poll: {
+        Args: { p_days: number; p_options: Json; p_post_id: string }
+        Returns: undefined
+      }
       create_post: {
         Args: {
           p_as_restaurant_id?: string
@@ -2219,6 +2430,7 @@ export type Database = {
         }
         Returns: string
       }
+      delete_my_reply: { Args: { p_reply_id: string }; Returns: undefined }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {
@@ -2271,6 +2483,7 @@ export type Database = {
         Args: { p_days: number; p_restaurant_id: string }
         Returns: undefined
       }
+      extract_mentions: { Args: { p_body: string }; Returns: string[] }
       find_claimable_matches: {
         Args: {
           p_exclude?: string
@@ -2441,6 +2654,8 @@ export type Database = {
           whatsapp: string
         }[]
       }
+      get_public_post: { Args: { p_post_id: string }; Returns: Json }
+      get_public_profile: { Args: { p_user_id: string }; Returns: Json }
       get_restaurant_contact: {
         Args: { p_restaurant_id: string }
         Returns: {
@@ -2501,6 +2716,12 @@ export type Database = {
       owns_post_path: { Args: { object_name: string }; Returns: boolean }
       owns_restaurant_path: { Args: { object_name: string }; Returns: boolean }
       owns_review_path: { Args: { object_name: string }; Returns: boolean }
+      poll_state: { Args: { p_post_id: string }; Returns: Json }
+      poll_state_for: {
+        Args: { p_post_id: string; p_reveal: boolean; p_user: string }
+        Returns: Json
+      }
+      poll_states: { Args: { p_post_ids: string[] }; Returns: Json }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
         | { Args: { use_typmod?: boolean }; Returns: string }
@@ -2542,8 +2763,19 @@ export type Database = {
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
       public_install_count: { Args: never; Returns: number }
+      push_setting_default: { Args: { p_key: string }; Returns: string }
       push_setting_key: { Args: { p_type: string }; Returns: string }
       rank_for_level: { Args: { p_level: number }; Returns: string }
+      record_mentions: {
+        Args: {
+          p_author: string
+          p_body: string
+          p_post_id: string
+          p_reply_id: string
+          p_skip: string[]
+        }
+        Returns: undefined
+      }
       restaurant_has_plan: { Args: { p_id: string }; Returns: boolean }
       restaurant_profile_complete: { Args: { p_id: string }; Returns: boolean }
       resubmit_restaurant: {
@@ -2557,6 +2789,14 @@ export type Database = {
       revert_community_xp_for_post: {
         Args: { p_post: string; p_user: string }
         Returns: undefined
+      }
+      search_mention_users: {
+        Args: { p_post_id?: string; p_query: string }
+        Returns: {
+          avatar_url: string
+          id: string
+          username: string
+        }[]
       }
       send_subscription_reminders: { Args: never; Returns: undefined }
       send_weekly_owner_reports: { Args: never; Returns: undefined }
@@ -3185,6 +3425,10 @@ export type Database = {
           table_name: string
         }
         Returns: string
+      }
+      vote_poll: {
+        Args: { p_option_id: string; p_post_id: string }
+        Returns: Json
       }
       xp_for_level: { Args: { p_level: number }; Returns: number }
     }
