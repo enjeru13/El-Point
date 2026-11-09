@@ -10,6 +10,9 @@ export const SETTING_DEFAULTS = {
   notifReplies: true,
   notifLevelup: true,
   notifPromos: false,
+  notifAchievements: true,
+  // comensales y dueños
+  notifCommunity: true,
   haptics: true,
   compactCards: false,
   showDistance: true,

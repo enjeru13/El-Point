@@ -1,20 +1,13 @@
 import { useEffect, useRef } from "react";
 import * as Notifications from "expo-notifications";
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
+import { notifRoute } from "@/lib/notifRoute";
 import { getSessionUser, supabase } from "@/lib/supabase";
 import { registerForPush, unregisterPush } from "@/lib/push";
 
-/** Where a tapped push takes you (mirror of NotificationsSheet.notifTarget). */
+/** Where a tapped push takes you: the same rule as the notifications list. */
 function targetFor(data: Record<string, any> | undefined) {
-  const kind = data?.kind;
-  if (kind === "review_report") return "/admin/reviews" as const;
-  if (kind === "restaurant_report") return "/admin/restaurant-reports" as const;
-  if (kind === "new_restaurant") return "/admin/restaurants" as const;
-  if (kind === "mission" || kind === "streak") return "/(customer)/profile" as const;
-  if (kind === "owner_boost") return "/(owner)" as const;
-  const rid = data?.restaurant_id;
-  if (typeof rid === "string" && rid) return `/restaurant/${rid}` as const;
-  return null;
+  return notifRoute(String(data?.type ?? ""), data) as Href | null;
 }
 
 /**

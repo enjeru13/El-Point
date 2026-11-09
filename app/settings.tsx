@@ -166,6 +166,8 @@ export default function SettingsScreen() {
                   <ToggleRow icon="star" label="Nuevas reseñas" sublabel="Cuando alguien califica tu local" value={s('notifReviews')} onChange={set('notifReviews')} />
                   <Divider />
                   <ToggleRow icon="analytics" label="Reporte semanal" sublabel="Resumen de métricas cada semana" value={s('notifWeekly')} onChange={set('notifWeekly')} />
+                  <Divider />
+                  <ToggleRow icon="message-circle" label="Comunidad" sublabel="Me gusta, respuestas y menciones" value={s('notifCommunity')} onChange={set('notifCommunity')} />
                 </>
               ) : (
                 <>
@@ -173,7 +175,11 @@ export default function SettingsScreen() {
                   <Divider />
                   <ToggleRow icon="reply-outline" label="Respuestas" sublabel="Cuando responden tu reseña" value={s('notifReplies')} onChange={set('notifReplies')} />
                   <Divider />
+                  <ToggleRow icon="message-circle" label="Comunidad" sublabel="Me gusta, respuestas, menciones y encuestas" value={s('notifCommunity')} onChange={set('notifCommunity')} />
+                  <Divider />
                   <ToggleRow icon="trophy-outline" label="Subida de nivel" sublabel="Cuando alcanzas un nuevo nivel" value={s('notifLevelup')} onChange={set('notifLevelup')} />
+                  <Divider />
+                  <ToggleRow icon="fire" label="Logros y rachas" sublabel="Misiones cumplidas y semanas seguidas" value={s('notifAchievements')} onChange={set('notifAchievements')} />
                   <Divider />
                   <ToggleRow icon="tag-outline" label="Promos y novedades" sublabel="Ofertas de locales cercanos" value={s('notifPromos')} onChange={set('notifPromos')} />
                 </>

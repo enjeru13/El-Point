@@ -23,39 +23,13 @@ import {
   useState,
 } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
+import type { Href } from "expo-router";
+import { notifRoute } from "@/lib/notifRoute";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-/** Where a notification takes you when tapped (null = just mark read). */
+/** Where a notification takes you when tapped (null = just mark read). Same rule as the push. */
 function notifTarget(notif: AppNotification) {
-  const kind = notif.data?.kind;
-  if (kind === "review_report") {
-    return { pathname: "/admin/reviews" as const };
-  }
-  if (kind === "restaurant_report") {
-    return { pathname: "/admin/restaurant-reports" as const };
-  }
-  if (kind === "new_restaurant") {
-    return { pathname: "/admin/restaurants" as const };
-  }
-  if (kind === "mission" || kind === "streak") {
-    return { pathname: "/(customer)/profile" as const };
-  }
-  if (kind === "owner_boost") {
-    return { pathname: "/(owner)" as const };
-  }
-  if (kind === "subscription") {
-    return { pathname: "/subscription" as const };
-  }
-  // Comunidad: me gusta, respuestas, menciones a tu local y moderación de un post.
-  const postId = notif.data?.post_id;
-  if ((kind === "post" || kind === "post_mention") && typeof postId === "string" && postId) {
-    return { pathname: "/community/[id]" as const, params: { id: postId } };
-  }
-  const rid = notif.data?.restaurant_id;
-  if (typeof rid === "string" && rid) {
-    return { pathname: "/restaurant/[id]" as const, params: { id: rid } };
-  }
-  return null;
+  return notifRoute(notif.type, notif.data) as Href | null;
 }
 
 function timeAgo(iso: string): string {
@@ -156,6 +130,12 @@ function NotifCard({
     post_like: { icon: "heart", bg: C.primaryFixed, color: C.primary },
     post_reply: { icon: "comment-text", bg: C.secondaryContainer, color: C.secondary },
     post_mention: { icon: "comment-text-multiple", bg: C.primaryFixed, color: C.primary },
+    mission: { icon: "trophy-outline", bg: C.primaryFixed, color: C.primary },
+    streak: { icon: "fire", bg: C.primaryFixed, color: C.primary },
+    reply_like: { icon: "heart", bg: C.primaryFixed, color: C.primary },
+    reply_reply: { icon: "message-circle", bg: C.secondaryContainer, color: C.secondary },
+    user_mention: { icon: "at-sign", bg: C.primaryFixed, color: C.primary },
+    poll_ended: { icon: "mdi:poll", bg: C.secondaryContainer, color: C.secondary },
   };
   const cfg = CONFIG[notif.type] ?? CONFIG.like;
 

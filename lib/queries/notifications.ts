@@ -19,7 +19,13 @@ export type AppNotification = {
     | "plan_active"
     | "post_like"
     | "post_reply"
-    | "post_mention";
+    | "post_mention"
+    | "mission"
+    | "streak"
+    | "reply_like"
+    | "reply_reply"
+    | "user_mention"
+    | "poll_ended";
   title: string;
   body: string | null;
   data: Record<string, any> | null;
@@ -38,8 +44,14 @@ const TYPE_SETTING: Partial<Record<AppNotification["type"], SettingKey>> = {
   levelup: "notifLevelup",
   promo: "notifPromos",
   weekly: "notifWeekly",
-  post_like: "notifRanks",
-  post_reply: "notifReplies",
+  mission: "notifAchievements",
+  streak: "notifAchievements",
+  post_like: "notifCommunity",
+  post_reply: "notifCommunity",
+  reply_like: "notifCommunity",
+  reply_reply: "notifCommunity",
+  user_mention: "notifCommunity",
+  poll_ended: "notifCommunity",
   post_mention: "notifReviews",
 };
 
