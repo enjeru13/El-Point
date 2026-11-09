@@ -1258,6 +1258,8 @@ export type Database = {
           community_removals: number
           cover_url: string | null
           created_at: string
+          delivery_fee: number | null
+          delivery_fee_mode: string | null
           description: string | null
           founder_rank: number | null
           ghost_kitchen: boolean
@@ -1272,7 +1274,9 @@ export type Database = {
           longitude: number | null
           menu_base_currency: string
           menu_bs_rate: number | null
+          menu_bs_rate_updated_at: string | null
           menu_cop_rate: number | null
+          menu_cop_rate_updated_at: string | null
           menu_currencies: string[]
           menu_pdf_url: string | null
           name: string
@@ -1308,6 +1312,8 @@ export type Database = {
           community_removals?: number
           cover_url?: string | null
           created_at?: string
+          delivery_fee?: number | null
+          delivery_fee_mode?: string | null
           description?: string | null
           founder_rank?: number | null
           ghost_kitchen?: boolean
@@ -1322,7 +1328,9 @@ export type Database = {
           longitude?: number | null
           menu_base_currency?: string
           menu_bs_rate?: number | null
+          menu_bs_rate_updated_at?: string | null
           menu_cop_rate?: number | null
+          menu_cop_rate_updated_at?: string | null
           menu_currencies?: string[]
           menu_pdf_url?: string | null
           name: string
@@ -1358,6 +1366,8 @@ export type Database = {
           community_removals?: number
           cover_url?: string | null
           created_at?: string
+          delivery_fee?: number | null
+          delivery_fee_mode?: string | null
           description?: string | null
           founder_rank?: number | null
           ghost_kitchen?: boolean
@@ -1372,7 +1382,9 @@ export type Database = {
           longitude?: number | null
           menu_base_currency?: string
           menu_bs_rate?: number | null
+          menu_bs_rate_updated_at?: string | null
           menu_cop_rate?: number | null
+          menu_cop_rate_updated_at?: string | null
           menu_currencies?: string[]
           menu_pdf_url?: string | null
           name?: string
