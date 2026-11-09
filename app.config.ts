@@ -14,7 +14,7 @@ const googleIosUrlScheme = googleIosClientId
 const config: ExpoConfig = {
   name: "El Point",
   slug: "El-Point",
-  version: "1.1.0",
+  version: "1.2.0",
   // Unlocked at the native level — RootLayout locks phones to portrait at
   // runtime and leaves tablets free to rotate (see expo-screen-orientation
   // call in app/_layout.tsx).

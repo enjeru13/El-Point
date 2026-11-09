@@ -21,6 +21,49 @@ export type Release = {
  */
 export const CHANGELOG: Release[] = [
   {
+    version: "1.2.0",
+    date: "Noviembre de 2026",
+    headline: "Comunidad se vuelve conversación: responde a otros, menciona, vota en encuestas y comparte afuera.",
+    sections: [
+      {
+        title: "Conversaciones",
+        icon: "message-circle",
+        notes: [
+          "Responde a otras respuestas: los hilos se ven ordenados, con “Respondiendo a @usuario”.",
+          "Dale me gusta a las respuestas que te gusten.",
+          "Menciona a cualquiera con @ y le llega el aviso.",
+          "Toca la foto o el @ de alguien para ver su perfil: nivel, rango, ranks y lo que publicó.",
+        ],
+      },
+      {
+        title: "Encuestas",
+        icon: "mdi:poll",
+        notes: [
+          "Crea encuestas de 2 a 4 opciones: texto libre o locales de El Point.",
+          "Duran 1, 3 o 7 días; votar es anónimo, puedes cambiar tu voto y suma XP.",
+          "Al cerrar te avisamos qué opción ganó.",
+        ],
+      },
+      {
+        title: "Comparte",
+        icon: "send",
+        notes: [
+          "Comparte cualquier publicación fuera de la app: quien no tiene El Point la ve completa en la web.",
+          "Íconos nuevos y más redondos en Comunidad.",
+        ],
+      },
+      {
+        title: "Avisos",
+        icon: "bell-outline",
+        notes: [
+          "Tocar un aviso te lleva justo a donde pasó.",
+          "Nuevo ajuste “Comunidad” y “Logros y rachas” en Ajustes.",
+          "Las promos solo llegan si las activas.",
+        ],
+      },
+    ],
+  },
+  {
     version: "1.1.0",
     date: "Noviembre de 2026",
     headline: "Llegó Comunidad, y ahora armas tu pedido desde el menú y lo mandas por WhatsApp.",
