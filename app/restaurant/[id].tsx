@@ -40,6 +40,8 @@ import { useMyProfile } from "@/lib/queries/me";
 import { usePaymentMethods } from "@/lib/queries/paymentMethods";
 import { menuSettings, useMenu } from "@/lib/queries/menu";
 import { MenuSection } from "@/components/restaurant/MenuSection";
+import { useEffectiveRates } from "@/lib/queries/exchangeRate";
+import { useMenuCurrency } from "@/lib/orderCart";
 import { GalleryStrip } from "@/components/restaurant/GalleryStrip";
 import { useGallery } from "@/lib/queries/gallery";
 import { useFavoriteIds, useToggleFavorite } from "@/lib/queries/feed";
@@ -464,6 +466,10 @@ export default function RestaurantProfileScreen() {
   // Menú con precios: solo se pide si el local tiene plan (sin plan el servidor tampoco lo entrega).
   const menuQ = useMenu(id, !!restaurantQ.data?.has_plan);
   const galleryQ = useGallery(id, !!restaurantQ.data?.has_plan);
+  // Moneda y tasas del menú: las comparten el menú, la barra y la hoja del pedido.
+  const menuSet = useMemo(() => menuSettings(restaurantQ.data ?? {}), [restaurantQ.data]);
+  const effRates = useEffectiveRates(menuSet);
+  const menuCur = useMenuCurrency(menuSet, effRates.rates);
 
   // Una visita por apertura del local (el servidor descarta al dueño y repeticiones).
   const viewedId = restaurantQ.data?.id;
@@ -657,8 +663,11 @@ export default function RestaurantProfileScreen() {
   // Distribución sólo con reseñas visibles (una oculta propia no debe sesgarla).
   const ratedReviews = reviews.filter((r) => r.moderation === "visible");
   const isOwnerHere = !!myProfileQ.data?.id && myProfileQ.data.id === restaurant.owner_id;
-  // Botón "Pedir" para locales con plan que lo activaron (la cocina fantasma lo tiene siempre).
-  const canOrder = !!restaurant.whatsapp && !restaurant.ghost_kitchen && restaurant.has_plan && restaurant.accepts_orders;
+  // Botón "Pedir" para locales con plan que lo activaron (la cocina fantasma con plan lo tiene siempre).
+  const canOrder =
+    !!restaurant.whatsapp && restaurant.has_plan && (restaurant.ghost_kitchen || restaurant.accepts_orders);
+  // Carrito: además hace falta al menos un plato disponible en el menú.
+  const orderable = canOrder && (menuQ.data ?? []).some((i) => i.available);
   const orderUrl = whatsappUrl(restaurant.whatsapp, orderMessage(restaurant.name, restaurant.order_greeting));
   // reviews viene ordenado created_at desc -- el primero que matchea es el más reciente.
   const myReview = myProfileQ.data?.id
@@ -1364,7 +1373,18 @@ export default function RestaurantProfileScreen() {
 
           {/* ── Menú con precios ── */}
           {restaurant.has_plan && (menuQ.data?.length ?? 0) > 0 && (
-            <MenuSection items={menuQ.data!} settings={menuSettings(restaurant)} />
+            <MenuSection
+              items={menuQ.data!}
+              settings={menuSet}
+              rates={effRates.rates}
+              bsLocal={effRates.bsLocal}
+              copLocal={effRates.copLocal}
+              currency={menuCur.currency}
+              available={menuCur.available}
+              onCurrencyChange={menuCur.setCurrency}
+              restaurantId={restaurant.id}
+              orderable={orderable}
+            />
           )}
 
           {/* ── Menú PDF ── */}

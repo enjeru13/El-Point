@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { Cur } from "@/lib/money";
+import { availableCurrencies, initialCurrency, type Cur, type Rates } from "@/lib/money";
 import type { CartItem, LatLng } from "@/lib/order";
 
 // Un carrito por local, solo en memoria: sobrevive a salir y volver al local,
@@ -91,4 +91,19 @@ export function useLastDelivery() {
     AsyncStorage.setItem(DELIVERY_KEY, JSON.stringify(v)).catch(() => {});
   }, []);
   return { value, save };
+}
+
+/**
+ * Moneda en que el comensal ve el menú de un local: la que eligió la última
+ * vez si el local la tiene, si no dólares, si no la base. Al cambiarla se
+ * recuerda para todos los locales.
+ */
+export function useMenuCurrency(settings: { base: Cur; currencies: Cur[] }, rates: Rates) {
+  const [preferred, setPreferred] = usePreferredCurrency();
+  const available = useMemo(
+    () => availableCurrencies(settings.currencies, settings.base, rates),
+    [settings.currencies, settings.base, rates],
+  );
+  const currency = initialCurrency(available, settings.base, preferred);
+  return { currency, available, setCurrency: setPreferred };
 }
