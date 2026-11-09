@@ -139,7 +139,7 @@ export function MenuSection({
   if (items.length === 0) return null;
 
   const control = (i: MenuItem) =>
-    orderable && i.available ? (
+    orderable && i.available && !(i.is_daily_special && !isSpecialActive(i)) ? (
       <AddControl name={i.name} qty={cart.qty(i.id)} onAdd={() => cart.add(i.id)} onRemove={() => cart.remove(i.id)} />
     ) : null;
 

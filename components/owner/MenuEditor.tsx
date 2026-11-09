@@ -230,12 +230,25 @@ function CurrencySheet({
   async function persist(convertPrices: boolean) {
     setSaving(true);
     try {
+      // El costo fijo del delivery está en la moneda base: se convierte con los precios.
+      const fixedFee =
+        restaurant.delivery_fee_mode === "fixed" && restaurant.delivery_fee ? Number(restaurant.delivery_fee) : null;
+      const baseChanged = base !== saved.base;
+      let feePatch = {};
+      if (baseChanged && fixedFee != null && convertPrices) {
+        const v = convertAmount(fixedFee, saved.base, base, rates);
+        if (v != null && v > 0) feePatch = { delivery_fee: base === "cop" ? Math.max(50, Math.round(v / 50) * 50) : Math.round(v * 100) / 100 };
+      }
       await updateRestaurant.mutateAsync({
         menu_base_currency: base,
         menu_currencies: ordered,
         menu_bs_rate: bsCustom ? bsRateDraft : null,
         menu_cop_rate: copCustom ? copRateDraft : null,
+        ...feePatch,
       });
+      if (baseChanged && fixedFee != null && !("delivery_fee" in feePatch)) {
+        toast.error("Revisa el costo del delivery en Pedidos: sigue escrito en la moneda anterior.");
+      }
       if (convertPrices) {
         const updates = items.map((i) => {
           const v = convertAmount(i.price, saved.base, base, rates) ?? i.price;

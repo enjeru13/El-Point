@@ -7,36 +7,42 @@ import type { CartItem, LatLng } from "@/lib/order";
 // se pierde al cerrar la app. No se sube a ningún lado.
 type Carts = Record<string, CartItem[]>;
 
-const CartContext = createContext<{ carts: Carts; setCart: (restaurantId: string, items: CartItem[]) => void } | null>(null);
+type Updater = (items: CartItem[]) => CartItem[];
+
+const CartContext = createContext<{ carts: Carts; update: (restaurantId: string, fn: Updater) => void } | null>(null);
 
 export function OrderCartProvider({ children }: { children: ReactNode }) {
   const [carts, setCarts] = useState<Carts>({});
-  const setCart = useCallback((restaurantId: string, items: CartItem[]) => {
-    setCarts((prev) => ({ ...prev, [restaurantId]: items.filter((i) => i.qty > 0) }));
+  const update = useCallback((restaurantId: string, fn: Updater) => {
+    setCarts((prev) => ({ ...prev, [restaurantId]: fn(prev[restaurantId] ?? []).filter((i) => i.qty > 0) }));
   }, []);
-  const value = useMemo(() => ({ carts, setCart }), [carts, setCart]);
+  const value = useMemo(() => ({ carts, update }), [carts, update]);
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+}
+
+function setQty(items: CartItem[], id: string, n: number): CartItem[] {
+  if (n <= 0) return items.filter((i) => i.id !== id);
+  return items.some((i) => i.id === id) ? items.map((i) => (i.id === id ? { id, qty: n } : i)) : [...items, { id, qty: n }];
 }
 
 export function useCart(restaurantId: string) {
   const ctx = useContext(CartContext);
   if (!ctx) throw new Error("useCart fuera de OrderCartProvider");
-  const { carts, setCart } = ctx;
+  const { carts, update } = ctx;
   const items = useMemo(() => carts[restaurantId] ?? [], [carts, restaurantId]);
 
   const qty = useCallback((id: string) => items.find((i) => i.id === id)?.qty ?? 0, [items]);
-  const set = useCallback(
-    (id: string, n: number) => {
-      const rest = items.filter((i) => i.id !== id);
-      const next = n > 0 ? [...items.map((i) => (i.id === id ? { id, qty: n } : i))] : rest;
-      if (n > 0 && !items.some((i) => i.id === id)) next.push({ id, qty: n });
-      setCart(restaurantId, next);
-    },
-    [items, restaurantId, setCart],
+  const current = (list: CartItem[], id: string) => list.find((i) => i.id === id)?.qty ?? 0;
+  const set = useCallback((id: string, n: number) => update(restaurantId, (list) => setQty(list, id, n)), [restaurantId, update]);
+  const add = useCallback(
+    (id: string) => update(restaurantId, (list) => setQty(list, id, current(list, id) + 1)),
+    [restaurantId, update],
   );
-  const add = useCallback((id: string) => set(id, qty(id) + 1), [set, qty]);
-  const remove = useCallback((id: string) => set(id, qty(id) - 1), [set, qty]);
-  const clear = useCallback(() => setCart(restaurantId, []), [restaurantId, setCart]);
+  const remove = useCallback(
+    (id: string) => update(restaurantId, (list) => setQty(list, id, current(list, id) - 1)),
+    [restaurantId, update],
+  );
+  const clear = useCallback(() => update(restaurantId, () => []), [restaurantId, update]);
 
   return { items, qty, add, remove, set, clear };
 }

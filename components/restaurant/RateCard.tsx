@@ -40,7 +40,7 @@ export function RateCard({
     notes.push(rateNote("bs", bsLocal, bsLocal ? rateAgeDays(bsUpdatedAt, now) : null));
   }
   if (available.includes("cop") && rates.cop) {
-    parts.push(formatMoney(rates.cop, "cop"));
+    parts.push(formatMoney(rates.cop, "cop", copLocal));
     notes.push(rateNote("cop", copLocal, copLocal ? rateAgeDays(copUpdatedAt, now) : null));
   }
   // Las dos automáticas dicen lo mismo de forma distinta; con propias, cada una lleva su fecha.

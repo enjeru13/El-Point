@@ -25,7 +25,8 @@ import {
   type BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import { Pressable, View } from "react-native";
+import { Keyboard, Pressable, View } from "react-native";
+import { useToast } from "@/lib/toast";
 import MapView, { Marker } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -57,6 +58,7 @@ export const OrderSheet = forwardRef<OrderSheetHandle, Props>((p, ref) => {
   const sheetRef = useRef<BottomSheetModal>(null);
   const cart = useCart(p.restaurantId);
   const last = useLastDelivery();
+  const toast = useToast();
 
   const options = fulfillmentOptions(p.hasDelivery, p.hasTakeaway);
   const [chosen, setChosen] = useState<Fulfillment>(null);
@@ -120,7 +122,10 @@ export const OrderSheet = forwardRef<OrderSheetHandle, Props>((p, ref) => {
       note,
     });
     const url = whatsappUrl(p.whatsapp, text);
-    if (!url) return;
+    if (!url) {
+      toast.error("El WhatsApp de este local no es válido.");
+      return;
+    }
     if (fulfillment === "delivery" && location) last.save({ ...location, references: references.trim() });
     sheetRef.current?.dismiss();
     p.onSend(url);
@@ -152,6 +157,7 @@ export const OrderSheet = forwardRef<OrderSheetHandle, Props>((p, ref) => {
       <BottomSheetModal
         ref={sheetRef}
         enableDynamicSizing
+        topInset={insets.top}
         backdropComponent={renderBackdrop}
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"
@@ -251,7 +257,10 @@ export const OrderSheet = forwardRef<OrderSheetHandle, Props>((p, ref) => {
                     <Marker coordinate={{ latitude: location.lat, longitude: location.lng }} pinColor={C.primary} />
                   </MapView>
                   <Pressable
-                    onPress={() => setPicking(true)}
+                    onPress={() => {
+                    Keyboard.dismiss();
+                    setPicking(true);
+                  }}
                     style={{ flexDirection: "row", alignItems: "center", gap: 8, padding: 12, backgroundColor: C.surfaceContainerLow }}
                   >
                     <Icon name="map-marker" size={16} color={C.primary} />
@@ -265,7 +274,10 @@ export const OrderSheet = forwardRef<OrderSheetHandle, Props>((p, ref) => {
                 </View>
               ) : (
                 <Pressable
-                  onPress={() => setPicking(true)}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setPicking(true);
+                  }}
                   style={{
                     flexDirection: "row",
                     alignItems: "center",

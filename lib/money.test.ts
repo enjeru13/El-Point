@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { availableCurrencies, convertAmount, initialCurrency, rateAgeDays, rateNote } from "./money.ts";
+import { availableCurrencies, convertAmount, initialCurrency, parseMoneyInput, rateAgeDays, rateNote } from "./money.ts";
 
 test("selector_oculta_moneda_sin_tasa", () => {
   assert.deepEqual(availableCurrencies(["usd", "bs", "cop"], "usd", { bs: null, cop: 3200 }), ["usd", "cop"]);
@@ -35,4 +35,17 @@ test("edad_tasa", () => {
 test("convertir_base_bs", () => {
   assert.equal(convertAmount(5000, "bs", "usd", { bs: 1000, cop: null }), 5);
   assert.equal(convertAmount(5, "usd", "cop", { bs: 1000, cop: null }), null);
+});
+
+test("leer_monto_escrito", () => {
+  assert.equal(parseMoneyInput("1,50", "usd"), 1.5);
+  assert.equal(parseMoneyInput("1.50", "usd"), 1.5);
+  assert.equal(parseMoneyInput("1.500", "bs"), 1500);
+  assert.equal(parseMoneyInput("1.500", "cop"), 1500);
+  assert.equal(parseMoneyInput("1.500.000", "cop"), 1500000);
+  assert.equal(parseMoneyInput("1.500,50", "bs"), 1500.5);
+  assert.equal(parseMoneyInput("1,500.50", "usd"), 1500.5);
+  assert.equal(parseMoneyInput("0", "usd"), null);
+  assert.equal(parseMoneyInput("abc", "usd"), null);
+  assert.equal(parseMoneyInput("200000000", "bs"), null);
 });

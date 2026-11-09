@@ -77,3 +77,30 @@ export function rateNote(kind: "bs" | "cop", own: boolean, ageDays: number | nul
   if (ageDays === 1) return { text: "Tasa del local · actualizada ayer", stale: false };
   return { text: `Tasa del local · actualizada hace ${ageDays} días`, stale: false };
 }
+
+/**
+ * Monto escrito por el dueño ("1,50", "1.500", "1.500,50"). Con los dos
+ * separadores, el último es el decimal. Con solo puntos: varios o "1.500" en
+ * Bs/COP son miles; si no, decimal. Null si no es un monto válido (> 0).
+ */
+export function parseMoneyInput(raw: string, base: Cur): number | null {
+  const s = raw.trim().replace(/\s/g, "");
+  if (!/^[0-9.,]+$/.test(s)) return null;
+  const lastComma = s.lastIndexOf(",");
+  const lastDot = s.lastIndexOf(".");
+  let normalized: string;
+  if (lastComma > -1 && lastDot > -1) {
+    normalized = lastComma > lastDot ? s.replace(/\./g, "").replace(",", ".") : s.replace(/,/g, "");
+  } else if (lastComma > -1) {
+    normalized = s.split(",").length > 2 ? s.replace(/,/g, "") : s.replace(",", ".");
+  } else if (lastDot > -1) {
+    const parts = s.split(".");
+    const thousands = parts.length > 2 || (base !== "usd" && parts[1].length === 3);
+    normalized = thousands ? s.replace(/\./g, "") : s;
+  } else {
+    normalized = s;
+  }
+  const n = Number(normalized);
+  if (!Number.isFinite(n) || n <= 0 || n > 100000000) return null;
+  return n;
+}

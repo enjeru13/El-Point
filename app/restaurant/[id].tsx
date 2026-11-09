@@ -38,7 +38,7 @@ import { RestaurantCommunitySection } from "@/components/community/RestaurantCom
 import { whatsappUrl, instagramUrl, instagramHandle, orderMessage } from "@/lib/contact";
 import { useMyProfile } from "@/lib/queries/me";
 import { usePaymentMethods } from "@/lib/queries/paymentMethods";
-import { menuSettings, useMenu } from "@/lib/queries/menu";
+import { isSpecialActive, menuSettings, useMenu } from "@/lib/queries/menu";
 import { MenuSection } from "@/components/restaurant/MenuSection";
 import { useEffectiveRates } from "@/lib/queries/exchangeRate";
 import { useCart, useMenuCurrency } from "@/lib/orderCart";
@@ -680,7 +680,7 @@ export default function RestaurantProfileScreen() {
     name: i.name,
     price: i.price,
     available: i.available,
-    specialExpired: false,
+    specialExpired: i.is_daily_special && !isSpecialActive(i),
   }));
   const cartItems = orderable ? pruneCart(cart.items, menuLines) : [];
   const cartN = cartCount(cartItems);

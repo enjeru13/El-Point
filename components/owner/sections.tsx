@@ -9,6 +9,7 @@ import { DAY_LABELS, DAY_LABELS_LONG, DEFAULT_HOURS, OPEN_24H, caracasToday, gro
 import { activePromo, PROMO_DURATIONS, promoEndLabel, promoEndsAt, type PromoDuration } from "@/lib/promo";
 import { useAmenities } from "@/lib/queries/amenities";
 import { currencySymbol, type Currency } from "@/lib/queries/menu";
+import { parseMoneyInput } from "@/lib/money";
 import {
   useUpdateMyRestaurant,
   useUpdateRestaurantAmenities,
@@ -400,15 +401,14 @@ export function OrdersSection({ restaurant }: { restaurant: OwnerRestaurant }) {
   }, [restaurant.accepts_orders, restaurant.order_greeting, restaurant.delivery_fee_mode, restaurant.delivery_fee, editing]);
 
   function save() {
-    // "1,50" o "1.50"; con coma, los puntos son de miles ("1.500,00").
-    const feeNum = Number(fee.includes(",") ? fee.replace(/\./g, "").replace(",", ".") : fee);
-    if (hasDelivery && feeMode === "fixed" && !(Number.isFinite(feeNum) && feeNum > 0)) {
+    const feeNum = parseMoneyInput(fee, base);
+    if (hasDelivery && feeMode === "fixed" && feeNum == null) {
       toast.error("Escribe el precio del delivery");
       return;
     }
     const deliveryPatch = hasDelivery
       ? feeMode === "fixed"
-        ? { delivery_fee_mode: "fixed" as const, delivery_fee: Math.round(feeNum * 100) / 100 }
+        ? { delivery_fee_mode: "fixed" as const, delivery_fee: Math.round(feeNum! * 100) / 100 }
         : { delivery_fee_mode: "zone" as const, delivery_fee: null }
       : {};
     updateMut.mutate(
