@@ -523,7 +523,8 @@ export default function RestaurantProfileScreen() {
         : `${r.name}, San Cristóbal`,
     );
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
-    const appUrl = `elpoint://restaurant/${r.id}`;
+    // Enlace web: WhatsApp lo vuelve tocable, abre la app si está y si no ofrece descargarla.
+    const appUrl = `https://elpoint-app.netlify.app/l?id=${r.id}`;
 
     const cat = r.categories[0]?.label;
     const ratingLine =
@@ -537,7 +538,7 @@ export default function RestaurantProfileScreen() {
       r.address ? `📍 ${r.address}` : null,
       "",
       `Cómo llegar: ${mapsUrl}`,
-      `Abrir en El Point: ${appUrl}`,
+      `Ver en El Point: ${appUrl}`,
     ].filter((l) => l !== null);
 
     try {
