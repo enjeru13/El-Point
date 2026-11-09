@@ -18,7 +18,7 @@ import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Image,
@@ -29,10 +29,9 @@ import {
   ScrollView,
   View,
 } from "react-native";
-import MapView from "react-native-maps";
+import { LocationPicker } from "@/components/LocationPicker";
 
 // Centro por defecto: San Cristóbal, Táchira.
-const SAN_CRISTOBAL = { latitude: 7.7669, longitude: -72.2251 };
 import { AppText } from "@/components/ui/AppText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
@@ -47,8 +46,6 @@ export default function RegisterOwnerScreen() {
   const toast = useToast();
   const isTablet = useIsTablet();
   const [step, setStep] = useState(0);
-  const mapRef = useRef<MapView>(null);
-  const [locating, setLocating] = useState(false);
 
   // Step 0 — cuenta
   const [email, setEmail] = useState("");
@@ -102,34 +99,14 @@ export default function RegisterOwnerScreen() {
     });
   }
 
-  async function detectLocation() {
-    setLocating(true);
+  async function reverseFillAddress(c: Location.LocationObjectCoords) {
+    if (address.trim()) return;
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        toast.error("Permiso de ubicación denegado");
-        return;
-      }
-      const loc = await Location.getCurrentPositionAsync({});
-      const region = {
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-        latitudeDelta: 0.008,
-        longitudeDelta: 0.008,
-      };
-      setCoords({ lat: region.latitude, lng: region.longitude });
-      mapRef.current?.animateToRegion(region, 500);
-      if (!address.trim()) {
-        const [place] = await Location.reverseGeocodeAsync(loc.coords);
-        if (place)
-          setAddress(
-            `${place.street ?? ""} ${place.streetNumber ?? ""}, ${place.city ?? ""}`.trim(),
-          );
-      }
+      const [place] = await Location.reverseGeocodeAsync(c);
+      if (place)
+        setAddress(`${place.street ?? ""} ${place.streetNumber ?? ""}, ${place.city ?? ""}`.trim());
     } catch {
-      toast.error("No pudimos obtener tu ubicación");
-    } finally {
-      setLocating(false);
+      // sin dirección sugerida
     }
   }
 
@@ -688,83 +665,13 @@ export default function RegisterOwnerScreen() {
                   <AppText variant="bodySm" color={C.outline} style={{ marginLeft: 4 }}>
                     Mueve el mapa para dejar el pin justo en la entrada de tu local.
                   </AppText>
-                  <View
-                    style={{
-                      height: 220,
-                      borderRadius: 16,
-                      overflow: "hidden",
-                      borderWidth: 1,
-                      borderColor: coords ? C.secondary : C.outlineVariant,
-                    }}
-                  >
-                    <MapView
-                      ref={mapRef}
-                      style={{ flex: 1 }}
-                      initialRegion={{
-                        latitude: coords?.lat ?? SAN_CRISTOBAL.latitude,
-                        longitude: coords?.lng ?? SAN_CRISTOBAL.longitude,
-                        latitudeDelta: coords ? 0.008 : 0.05,
-                        longitudeDelta: coords ? 0.008 : 0.05,
-                      }}
-                      onMapReady={() =>
-                        setCoords((c) =>
-                          c ?? { lat: SAN_CRISTOBAL.latitude, lng: SAN_CRISTOBAL.longitude },
-                        )
-                      }
-                      onRegionChangeComplete={(r) =>
-                        setCoords({ lat: r.latitude, lng: r.longitude })
-                      }
-                    />
-                    {/* Pin fijo en el centro */}
-                    <View
-                      pointerEvents="none"
-                      style={{
-                        position: "absolute",
-                        left: 0,
-                        right: 0,
-                        top: 0,
-                        bottom: 0,
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Icon
-                        name="map-marker"
-                        size={40}
-                        color={C.primary}
-                        style={{ marginBottom: 40 }}
-                      />
-                    </View>
-                    {/* Botón: mi ubicación */}
-                    <Pressable
-                      onPress={detectLocation}
-                      disabled={locating}
-                      style={{
-                        position: "absolute",
-                        right: 10,
-                        bottom: 10,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 6,
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        borderRadius: 99,
-                        backgroundColor: C.surface,
-                        borderWidth: 1,
-                        borderColor: C.border,
-                        ...shadow.sm,
-                      }}
-                    >
-                      <Icon
-                        name="crosshairs-gps"
-                        size={15}
-                        color={C.primary}
-                      />
-                      <AppText variant="label" color={C.onSurface} style={{ fontSize: 13 }}>
-                        {locating ? "Ubicando…" : "Mi ubicación"}
-                      </AppText>
-                    </Pressable>
-                  </View>
+                  <LocationPicker
+                    value={coords}
+                    onChange={setCoords}
+                    onLocated={reverseFillAddress}
+                    style={{ height: 220 }}
+                    borderColor={coords ? C.secondary : C.outlineVariant}
+                  />
                   {coords && (
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginLeft: 4 }}>
                       <Icon name="check-circle" size={14} color={C.secondary} />

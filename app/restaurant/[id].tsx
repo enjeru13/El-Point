@@ -41,7 +41,11 @@ import { usePaymentMethods } from "@/lib/queries/paymentMethods";
 import { menuSettings, useMenu } from "@/lib/queries/menu";
 import { MenuSection } from "@/components/restaurant/MenuSection";
 import { useEffectiveRates } from "@/lib/queries/exchangeRate";
-import { useMenuCurrency } from "@/lib/orderCart";
+import { useCart, useMenuCurrency } from "@/lib/orderCart";
+import { cartCount, cartTotal, pruneCart, type MenuLine } from "@/lib/order";
+import { convertAmount, formatMoney } from "@/lib/money";
+import { OrderBar, ORDER_BAR_HEIGHT } from "@/components/restaurant/OrderBar";
+import { OrderSheet, type OrderSheetHandle } from "@/components/restaurant/OrderSheet";
 import { GalleryStrip } from "@/components/restaurant/GalleryStrip";
 import { useGallery } from "@/lib/queries/gallery";
 import { useFavoriteIds, useToggleFavorite } from "@/lib/queries/feed";
@@ -470,6 +474,8 @@ export default function RestaurantProfileScreen() {
   const menuSet = useMemo(() => menuSettings(restaurantQ.data ?? {}), [restaurantQ.data]);
   const effRates = useEffectiveRates(menuSet);
   const menuCur = useMenuCurrency(menuSet, effRates.rates);
+  const cart = useCart(id);
+  const orderSheetRef = useRef<OrderSheetHandle>(null);
 
   // Una visita por apertura del local (el servidor descarta al dueño y repeticiones).
   const viewedId = restaurantQ.data?.id;
@@ -668,6 +674,21 @@ export default function RestaurantProfileScreen() {
     !!restaurant.whatsapp && restaurant.has_plan && (restaurant.ghost_kitchen || restaurant.accepts_orders);
   // Carrito: además hace falta al menos un plato disponible en el menú.
   const orderable = canOrder && (menuQ.data ?? []).some((i) => i.available);
+  const menuLines: MenuLine[] = (menuQ.data ?? []).map((i) => ({
+    id: i.id,
+    name: i.name,
+    price: i.price,
+    available: i.available,
+    specialExpired: false,
+  }));
+  const cartItems = orderable ? pruneCart(cart.items, menuLines) : [];
+  const cartN = cartCount(cartItems);
+  const cartTotalText = (() => {
+    const t = cartTotal(cartItems, menuLines, null, null);
+    const v = convertAmount(t, menuSet.base, menuCur.currency, effRates.rates);
+    return v == null ? formatMoney(t, menuSet.base, true) : formatMoney(v, menuCur.currency, menuCur.currency === menuSet.base);
+  })();
+  const amenitySlugs = new Set(restaurant.amenities.map((a) => a.slug));
   const orderUrl = whatsappUrl(restaurant.whatsapp, orderMessage(restaurant.name, restaurant.order_greeting));
   // reviews viene ordenado created_at desc -- el primero que matchea es el más reciente.
   const myReview = myProfileQ.data?.id
@@ -807,7 +828,7 @@ export default function RestaurantProfileScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: C.background }}>
       <Animated.ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 100 + (cartN > 0 ? ORDER_BAR_HEIGHT + 12 : 0) }}
         showsVerticalScrollIndicator={false}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -2265,6 +2286,32 @@ export default function RestaurantProfileScreen() {
         submitting={reportRestaurant.isPending}
         onSubmit={handleReportRestaurant}
       />
+
+      {orderable && (
+        <>
+          <OrderBar count={cartN} total={cartTotalText} onPress={() => orderSheetRef.current?.present()} />
+          <OrderSheet
+            ref={orderSheetRef}
+            restaurantId={restaurant.id}
+            restaurantName={restaurant.name}
+            greeting={restaurant.order_greeting}
+            whatsapp={restaurant.whatsapp}
+            base={menuSet.base}
+            shown={menuSet.currencies}
+            rates={effRates.rates}
+            currency={menuCur.currency}
+            menu={menuLines}
+            delivery={
+              restaurant.delivery_fee_mode === "fixed" && restaurant.delivery_fee
+                ? { mode: "fixed", fee: Number(restaurant.delivery_fee) }
+                : { mode: "zone", fee: null }
+            }
+            hasDelivery={amenitySlugs.has("delivery")}
+            hasTakeaway={amenitySlugs.has("takeaway")}
+            onSend={(url) => openTracked("order", url)}
+          />
+        </>
+      )}
     </View>
   );
 }
