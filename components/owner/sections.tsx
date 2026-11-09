@@ -8,6 +8,7 @@ import { TimePickerSheet, type TimePickerHandle } from "@/components/ui/TimePick
 import { DAY_LABELS, DAY_LABELS_LONG, DEFAULT_HOURS, OPEN_24H, caracasToday, groupDays, is24h, to12h, type Hours } from "@/lib/hours";
 import { activePromo, PROMO_DURATIONS, promoEndLabel, promoEndsAt, type PromoDuration } from "@/lib/promo";
 import { useAmenities } from "@/lib/queries/amenities";
+import { currencySymbol, type Currency } from "@/lib/queries/menu";
 import {
   useUpdateMyRestaurant,
   useUpdateRestaurantAmenities,
@@ -381,17 +382,41 @@ export function OrdersSection({ restaurant }: { restaurant: OwnerRestaurant }) {
   const [editing, setEditing] = useState(false);
   const [accepts, setAccepts] = useState(restaurant.accepts_orders);
   const [greeting, setGreeting] = useState(restaurant.order_greeting ?? "");
+  const hasDelivery = restaurant.amenities.some((a) => a.slug === "delivery");
+  const base = (restaurant.menu_base_currency === "bs" || restaurant.menu_base_currency === "cop"
+    ? restaurant.menu_base_currency
+    : "usd") as Currency;
+  const feeText = (v: number | null) => (v == null ? "" : String(v).replace(".", ","));
+  const [feeMode, setFeeMode] = useState<"fixed" | "zone">(restaurant.delivery_fee_mode === "fixed" ? "fixed" : "zone");
+  const [fee, setFee] = useState(feeText(restaurant.delivery_fee));
 
   useEffect(() => {
     if (!editing) {
       setAccepts(restaurant.accepts_orders);
       setGreeting(restaurant.order_greeting ?? "");
+      setFeeMode(restaurant.delivery_fee_mode === "fixed" ? "fixed" : "zone");
+      setFee(feeText(restaurant.delivery_fee));
     }
-  }, [restaurant.accepts_orders, restaurant.order_greeting, editing]);
+  }, [restaurant.accepts_orders, restaurant.order_greeting, restaurant.delivery_fee_mode, restaurant.delivery_fee, editing]);
 
   function save() {
+    // "1,50" o "1.50"; con coma, los puntos son de miles ("1.500,00").
+    const feeNum = Number(fee.includes(",") ? fee.replace(/\./g, "").replace(",", ".") : fee);
+    if (hasDelivery && feeMode === "fixed" && !(Number.isFinite(feeNum) && feeNum > 0)) {
+      toast.error("Escribe el precio del delivery");
+      return;
+    }
+    const deliveryPatch = hasDelivery
+      ? feeMode === "fixed"
+        ? { delivery_fee_mode: "fixed" as const, delivery_fee: Math.round(feeNum * 100) / 100 }
+        : { delivery_fee_mode: "zone" as const, delivery_fee: null }
+      : {};
     updateMut.mutate(
-      { accepts_orders: accepts, order_greeting: greeting.trim() ? greeting.trim().slice(0, 200) : null },
+      {
+        accepts_orders: accepts,
+        order_greeting: greeting.trim() ? greeting.trim().slice(0, 200) : null,
+        ...deliveryPatch,
+      },
       {
         onSuccess: () => {
           setEditing(false);
@@ -410,14 +435,14 @@ export function OrdersSection({ restaurant }: { restaurant: OwnerRestaurant }) {
         <View style={{ padding: 18, gap: 14 }}>
           {restaurant.ghost_kitchen ? (
             <AppText variant="bodySm" color={C.onSurfaceVariant}>
-              Tu cocina fantasma siempre muestra el botón “Pedir”. Aquí puedes personalizar el saludo.
+              Tu cocina fantasma siempre recibe pedidos: el comensal arma su pedido desde tu menú y te llega listo por WhatsApp.
             </AppText>
           ) : (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
               <View style={{ flex: 1 }}>
                 <AppText variant="bodyStrong">Recibo pedidos por WhatsApp</AppText>
                 <AppText variant="bodySm" color={C.onSurfaceVariant}>
-                  Tu fila de WhatsApp dice “Pedir por WhatsApp” y abre el chat con el mensaje listo.
+                  El comensal arma su pedido desde tu menú y te llega listo por WhatsApp.
                 </AppText>
               </View>
               <Switch
@@ -459,6 +484,62 @@ export function OrdersSection({ restaurant }: { restaurant: OwnerRestaurant }) {
               ) : (
                 <AppText variant="bodySm" color={restaurant.order_greeting ? C.onSurface : C.outline}>
                   {restaurant.order_greeting ?? defaultMsg}
+                </AppText>
+              )}
+            </View>
+          )}
+
+          {(restaurant.ghost_kitchen || accepts) && hasDelivery && (
+            <View style={{ gap: 8 }}>
+              <AppText variant="overline" color={C.outline}>COSTO DEL DELIVERY</AppText>
+              {editing ? (
+                <>
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    {(["fixed", "zone"] as const).map((m) => (
+                      <Chip
+                        key={m}
+                        label={m === "fixed" ? "Precio fijo" : "Según la zona"}
+                        active={feeMode === m}
+                        onPress={() => setFeeMode(m)}
+                        tone="secondary"
+                      />
+                    ))}
+                  </View>
+                  {feeMode === "fixed" ? (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 6,
+                        backgroundColor: C.surfaceContainerLow,
+                        borderWidth: 1,
+                        borderColor: C.outlineVariant,
+                        borderRadius: 12,
+                        paddingHorizontal: 12,
+                        height: 48,
+                      }}
+                    >
+                      <AppText variant="bodyStrong" color={C.onSurfaceVariant}>
+                        {currencySymbol(base).trim()}
+                      </AppText>
+                      <AppTextInput
+                        value={fee}
+                        onChangeText={(t) => setFee(t.replace(/[^0-9.,]/g, "").slice(0, 12))}
+                        placeholder="1,50"
+                        keyboardType="decimal-pad"
+                      />
+                    </View>
+                  ) : (
+                    <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                      El comensal ve “+ delivery según tu zona, el local te confirma”.
+                    </AppText>
+                  )}
+                </>
+              ) : (
+                <AppText variant="bodySm" color={C.onSurface}>
+                  {restaurant.delivery_fee_mode === "fixed" && restaurant.delivery_fee
+                    ? `Precio fijo: ${currencySymbol(base)}${feeText(restaurant.delivery_fee)}`
+                    : "Según la zona: le confirmas el costo al comensal"}
                 </AppText>
               )}
             </View>

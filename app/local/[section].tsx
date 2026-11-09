@@ -44,8 +44,7 @@ const SECTIONS: Record<string, Def> = {
   },
   orders: {
     title: "Pedidos por WhatsApp",
-    lockBody: "Muestra un botón “Pedir” que abre tu WhatsApp con el mensaje listo.",
-    freeForGhost: true,
+    lockBody: "El comensal arma su pedido desde tu menú y te llega listo por WhatsApp.",
     render: (r) => <OrdersSection restaurant={r} />,
   },
   amenities: {

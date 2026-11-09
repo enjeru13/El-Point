@@ -7,8 +7,8 @@ import { DEFAULT_HOURS, caracasToday, formatRange } from "@/lib/hours";
 import { hasPlan } from "@/lib/plan";
 import { activePromo, promoEndLabel } from "@/lib/promo";
 import { GALLERY_LIMIT, useGallery } from "@/lib/queries/gallery";
-import { isSpecialActive, useMenu } from "@/lib/queries/menu";
-import { useMyRestaurant } from "@/lib/queries/owner";
+import { currencySymbol, isSpecialActive, useMenu } from "@/lib/queries/menu";
+import { useMyRestaurant, type OwnerRestaurant } from "@/lib/queries/owner";
 import { capWidth, useIsTablet } from "@/lib/responsive";
 import { useTheme } from "@/lib/ThemeContext";
 import { useToast } from "@/lib/toast";
@@ -135,8 +135,8 @@ export default function MyLocalScreen() {
       group: "carta",
       icon: "whatsapp",
       title: "Pedidos por WhatsApp",
-      summary: r.ghost_kitchen ? "Siempre activo" : !plan ? "Botón “Pedir” con mensaje listo" : r.accepts_orders ? "Activados" : "Desactivados",
-      locked: !plan && !r.ghost_kitchen,
+      summary: !plan ? "Pedidos armados desde tu menú" : r.ghost_kitchen || r.accepts_orders ? ordersSummary(r) : "Desactivados",
+      locked: !plan,
     },
     {
       key: "amenities",
@@ -300,4 +300,14 @@ export default function MyLocalScreen() {
       <TourGuide tourKey="owner_local" steps={tourSteps} scrollRef={scrollRef} scrollOffset={scrollY} />
     </View>
   );
+}
+
+/** "Activados · delivery $1,50" / "Activados · delivery según zona" / "Activados". */
+function ordersSummary(r: OwnerRestaurant): string {
+  if (!r.amenities.some((a) => a.slug === "delivery")) return "Activados";
+  if (r.delivery_fee_mode === "fixed" && r.delivery_fee) {
+    const base = r.menu_base_currency === "bs" || r.menu_base_currency === "cop" ? r.menu_base_currency : "usd";
+    return `Activados · delivery ${currencySymbol(base)}${String(r.delivery_fee).replace(".", ",")}`;
+  }
+  return "Activados · delivery según zona";
 }
