@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Icon } from "@/components/ui/Icon";
 import { NotificationBell } from "@/components/ui/NotificationBell";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { TourGuide, type TourStep } from "@/components/tour/TourGuide";
 import { SearchBar } from "@/components/ui/SearchBar";
 import type { TopicKey } from "@/lib/community/topics";
 import { impact } from "@/lib/haptics";
@@ -16,7 +17,7 @@ import { useCommunityFeed, type FeedItem } from "@/lib/queries/community";
 import { capWidth, useIsTablet } from "@/lib/responsive";
 import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, RefreshControl, View } from "react-native";
 import Animated, { FadeInUp, FadeOutUp, LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -84,8 +85,34 @@ export function CommunityFeed({
     );
   };
 
+  // Tour de la pestaña (solo en la pestaña, no en el feed de un local).
+  const tourTopicsRef = useRef<View>(null);
+  const tourSearchRef = useRef<View>(null);
+  const tourComposeRef = useRef<View>(null);
+  const tourSteps: TourStep[] = [
+    {
+      ref: tourTopicsRef,
+      icon: "comment-text-multiple",
+      title: "Elige un tema",
+      text: "Filtra por Recomiéndame, Recetas, Antojos y más, o por tipo de comida.",
+    },
+    {
+      ref: tourSearchRef,
+      icon: "magnify",
+      title: "Busca en Comunidad",
+      text: "Encuentra publicaciones por plato o por local.",
+    },
+    {
+      ref: tourComposeRef,
+      icon: "pencil-outline",
+      title: "Publica",
+      text: "Pide una recomendación o cuenta dónde comiste rico. Participar te da XP.",
+    },
+  ];
+
   const searchButton = (
     <Pressable
+      ref={header === "home" ? tourSearchRef : undefined}
       onPress={() => {
         setSearchOpen((o) => !o);
         if (searchOpen) setQueryText("");
@@ -150,7 +177,9 @@ export function CommunityFeed({
         contentContainerStyle={{ paddingBottom: insets.bottom + bottomInset, ...capWidth(isTablet) }}
         ListHeaderComponent={
           restaurantId ? null : (
-            <TopicFilters topic={topic} categoryId={categoryId} onTopic={setTopic} onCategory={setCategoryId} />
+            <View ref={tourTopicsRef} collapsable={false}>
+              <TopicFilters topic={topic} categoryId={categoryId} onTopic={setTopic} onCategory={setCategoryId} />
+            </View>
           )
         }
         renderItem={({ item }: { item: FeedItem }) => (
@@ -217,6 +246,7 @@ export function CommunityFeed({
 
       {canPost && (
         <Pressable
+          ref={tourComposeRef}
           onPress={openComposer}
           accessibilityRole="button"
           accessibilityLabel="Publicar en Comunidad"
@@ -239,6 +269,10 @@ export function CommunityFeed({
       )}
 
       {actions.reportSheet}
+
+      {header === "home" && !restaurantId && canPost && (
+        <TourGuide tourKey="community" ready={!feed.isLoading} steps={tourSteps} />
+      )}
     </View>
   );
 }
