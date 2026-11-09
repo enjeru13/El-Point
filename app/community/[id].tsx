@@ -1,6 +1,7 @@
 import { FeedRow } from "@/components/community/FeedRow";
 import { FeedSkeleton } from "@/components/community/FeedSkeleton";
 import { ReplyRow } from "@/components/community/ReplyRow";
+import { buildThreads } from "@/lib/community/threads";
 import {
   RestaurantPickerSheet,
   type PickedRestaurant,
@@ -19,6 +20,7 @@ import { useCategories } from "@/lib/queries/categories";
 import {
   errorCode,
   useCreateReply,
+  useToggleReplyLike,
   useDeleteReply,
   usePost,
   usePostReplies,
@@ -60,6 +62,10 @@ export default function PostDetailScreen() {
   const pickerRef = useRef<RestaurantPickerHandle>(null);
   const [text, setText] = useState("");
   const [tagged, setTagged] = useState<PickedRestaurant | null>(null);
+  const [replyTo, setReplyTo] = useState<Reply | null>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const inputRef = useRef<TextInput>(null);
+  const toggleReplyLike = useToggleReplyLike(id ?? "");
 
   const item = post.data;
   const ownerMentioned = item?.restaurantId != null && item.restaurantId === myRestaurant?.id;
@@ -77,12 +83,16 @@ export default function PostDetailScreen() {
     setText("");
     const pick = tagged;
     setTagged(null);
+    const parent = replyTo;
+    setReplyTo(null);
+    if (parent) setExpanded((prev) => new Set(prev).add(parent.id));
     createReply.mutate(
-      { body, restaurantId: pick?.id, restaurantName: pick?.name, asRestaurantId },
+      { body, restaurantId: pick?.id, restaurantName: pick?.name, asRestaurantId, parentReplyId: parent?.id ?? null },
       {
         onError: (e) => {
           setText(body);
           setTagged(pick);
+          setReplyTo(parent);
           toast.error(errorMessage(errorCode(e)));
         },
       },
@@ -108,6 +118,22 @@ export default function PostDetailScreen() {
   };
 
   const replyList = replies.data ?? [];
+  const byId = useMemo(() => new Map(replyList.map((r) => [r.id, r])), [replyList]);
+  const threads = useMemo(
+    () => buildThreads(replyList.map((r) => ({ ...r, parentId: r.parentReplyId }))),
+    [replyList],
+  );
+  const visibleCount = replyList.filter((r) => !r.removed).length;
+  const handleOf = (r: Reply | undefined) =>
+    r ? (r.asRestaurantName ?? (r.authorUsername ? r.authorUsername : (r.authorName ?? "alguien"))) : null;
+  const startReply = (r: Reply) => {
+    setReplyTo(r);
+    inputRef.current?.focus();
+  };
+  const likeReply = (r: Reply) => {
+    impact("light");
+    toggleReplyLike.mutate({ replyId: r.id, like: !r.likedByMe });
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: C.background }}>
@@ -170,19 +196,54 @@ export default function PostDetailScreen() {
                 color={C.onSurfaceVariant}
                 style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 }}
               >
-                {replyList.length === 0
+                {visibleCount === 0
                   ? "Sin respuestas todavía"
-                  : `${replyList.length} ${replyList.length === 1 ? "respuesta" : "respuestas"}`}
+                  : `${visibleCount} ${visibleCount === 1 ? "respuesta" : "respuestas"}`}
               </AppText>
-              {replyList.map((r, i) => (
-                <ReplyRow
-                  key={r.id}
-                  reply={r}
-                  last={i === replyList.length - 1}
-                  onOpenRestaurant={actions.onOpenRestaurant}
-                  onMenu={onReplyMenu}
-                />
-              ))}
+              {threads.map((t) => {
+                const open = expanded.has(t.root.id);
+                const shown = open ? t.children : t.children.slice(0, 2);
+                const hidden = t.children.length - shown.length;
+                const rowProps = {
+                  onOpenRestaurant: actions.onOpenRestaurant,
+                  onMenu: onReplyMenu,
+                  onReply: ownerCanReply ? startReply : undefined,
+                  onToggleLike: likeReply,
+                };
+                return (
+                  <View key={t.root.id}>
+                    <ReplyRow
+                      reply={t.root}
+                      last={shown.length === 0}
+                      isAuthor={t.root.authorId === item.authorId && !t.root.asRestaurantId}
+                      {...rowProps}
+                    />
+                    {shown.map((c, i) => (
+                      <ReplyRow
+                        key={c.id}
+                        reply={c}
+                        depth={1}
+                        last={i === shown.length - 1}
+                        replyingTo={c.replyingTo ? handleOf(byId.get(c.replyingTo)) : null}
+                        isAuthor={c.authorId === item.authorId && !c.asRestaurantId}
+                        {...rowProps}
+                      />
+                    ))}
+                    {hidden > 0 && (
+                      <Pressable
+                        onPress={() => setExpanded((prev) => new Set(prev).add(t.root.id))}
+                        hitSlop={8}
+                        accessibilityRole="button"
+                        style={{ paddingLeft: 68, paddingBottom: 14 }}
+                      >
+                        <AppText variant="label" color={C.primary}>
+                          Ver {hidden} {hidden === 1 ? "respuesta más" : "respuestas más"}
+                        </AppText>
+                      </Pressable>
+                    )}
+                  </View>
+                );
+              })}
             </>
           )}
         </ScrollView>
@@ -201,6 +262,18 @@ export default function PostDetailScreen() {
                 backgroundColor: C.background,
               }}
             >
+              {replyTo && (
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingLeft: 48 }}>
+                  <Icon name="message-circle" size={14} color={C.primary} />
+                  <AppText variant="caption" numberOfLines={1} style={{ flexShrink: 1 }}>
+                    Respondiendo a {handleOf(replyTo)?.startsWith("@") ? "" : "@"}
+                    {handleOf(replyTo)}
+                  </AppText>
+                  <Pressable onPress={() => setReplyTo(null)} hitSlop={10} accessibilityLabel="Cancelar respuesta">
+                    <Icon name="close-circle" size={16} color={C.outline} />
+                  </Pressable>
+                </View>
+              )}
               {tagged && (
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingLeft: 48 }}>
                   <Icon name="storefront" size={14} color={C.primary} />
@@ -232,6 +305,7 @@ export default function PostDetailScreen() {
                   }}
                 >
                   <TextInput
+                    ref={inputRef}
                     value={text}
                     onChangeText={(t) => setText(t.slice(0, 500))}
                     placeholder={`Responde a ${item.asRestaurantName ?? item.authorName ?? "este post"}…`}

@@ -152,8 +152,14 @@ export type Reply = {
   asRestaurantLogo: string | null;
   restaurantId: string | null;
   restaurantName: string | null;
+  authorUsername: string | null;
   body: string;
   createdAt: string;
+  parentReplyId: string | null;
+  likeCount: number;
+  likedByMe: boolean;
+  /** Borrada por su autor con respuestas debajo: se muestra "Respuesta eliminada". */
+  removed: boolean;
   pending?: boolean;
 };
 
@@ -167,7 +173,7 @@ export function usePostReplies(postId: string | undefined, blockedIds?: Set<stri
       const { data, error } = await supabase
         .from("post_replies")
         .select(
-          "id, post_id, author_id, as_restaurant_id, restaurant_id, body, created_at, " +
+          "id, post_id, author_id, as_restaurant_id, restaurant_id, body, created_at, parent_reply_id, like_count, author_deleted_at, " +
             "author:profiles!post_replies_author_id_fkey(full_name, username, avatar_url), " +
             "as_restaurant:restaurants!post_replies_as_restaurant_id_fkey(name, logo_url), " +
             "restaurant:restaurants!post_replies_restaurant_id_fkey(name)",
@@ -176,9 +182,23 @@ export function usePostReplies(postId: string | undefined, blockedIds?: Set<stri
         .eq("moderation", "visible")
         .order("created_at", { ascending: true });
       if (error) throw error;
+      const { data: u } = await getSessionUser();
+      const ids = (data ?? []).map((r: any) => r.id as string);
+      const liked = new Set<string>();
+      if (u.user && ids.length) {
+        const { data: likes } = await supabase
+          .from("post_reply_likes")
+          .select("reply_id")
+          .eq("user_id", u.user.id)
+          .in("reply_id", ids);
+        for (const l of likes ?? []) liked.add(l.reply_id);
+      }
       type Row = {
         id: string;
         post_id: string;
+        parent_reply_id: string | null;
+        like_count: number;
+        author_deleted_at: string | null;
         author_id: string;
         as_restaurant_id: string | null;
         restaurant_id: string | null;
@@ -194,13 +214,18 @@ export function usePostReplies(postId: string | undefined, blockedIds?: Set<stri
         authorId: r.author_id,
         authorName: r.author?.full_name ?? r.author?.username ?? null,
         authorAvatar: r.author?.avatar_url ?? null,
+        authorUsername: r.author?.username ?? null,
         asRestaurantId: r.as_restaurant_id,
         asRestaurantName: r.as_restaurant?.name ?? null,
         asRestaurantLogo: r.as_restaurant?.logo_url ?? null,
         restaurantId: r.restaurant_id,
         restaurantName: r.restaurant?.name ?? null,
-        body: r.body,
+        body: r.author_deleted_at ? "" : r.body,
         createdAt: r.created_at,
+        parentReplyId: r.parent_reply_id,
+        likeCount: r.like_count ?? 0,
+        likedByMe: liked.has(r.id),
+        removed: !!r.author_deleted_at,
       }));
     },
     select: (rows) => (blockedIds?.size ? rows.filter((r) => !blockedIds.has(r.authorId)) : rows),
@@ -357,11 +382,13 @@ export function useCreateReply(postId: string) {
       body,
       restaurantId,
       asRestaurantId,
+      parentReplyId,
     }: {
       body: string;
       restaurantId?: string | null;
       restaurantName?: string | null;
       asRestaurantId?: string | null;
+      parentReplyId?: string | null;
     }) => {
       const { data: u } = await getSessionUser();
       if (!u.user) throw new Error("not_authenticated");
@@ -371,6 +398,7 @@ export function useCreateReply(postId: string) {
         body,
         restaurant_id: asRestaurantId ? null : (restaurantId ?? null),
         as_restaurant_id: asRestaurantId ?? null,
+        parent_reply_id: parentReplyId ?? null,
       });
       if (error) throw error;
     },
@@ -386,6 +414,7 @@ export function useCreateReply(postId: string) {
         authorId: me?.id ?? "",
         authorName: (me?.user_metadata?.full_name as string | undefined) ?? null,
         authorAvatar: (me?.user_metadata?.avatar_url as string | undefined) ?? null,
+        authorUsername: null,
         asRestaurantId: v.asRestaurantId ?? null,
         asRestaurantName: null,
         asRestaurantLogo: null,
@@ -393,6 +422,10 @@ export function useCreateReply(postId: string) {
         restaurantName: v.restaurantName ?? null,
         body: v.body,
         createdAt: new Date().toISOString(),
+        parentReplyId: v.parentReplyId ?? null,
+        likeCount: 0,
+        likedByMe: false,
+        removed: false,
         pending: true,
       };
       qc.setQueryData<Reply[]>(repliesKey(postId), [...(prev ?? []), optimistic]);
@@ -484,7 +517,7 @@ export function useDeleteReply(postId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (replyId: string) => {
-      const { error } = await supabase.from("post_replies").delete().eq("id", replyId);
+      const { error } = await supabase.rpc("delete_my_reply", { p_reply_id: replyId });
       if (error) throw error;
     },
     onMutate: async (replyId) => {
@@ -498,6 +531,33 @@ export function useDeleteReply(postId: string) {
       qc.invalidateQueries({ queryKey: repliesKey(postId) });
       qc.invalidateQueries({ queryKey: ["community-feed"] });
     },
+  });
+}
+
+/** Me gusta en una respuesta. Optimista. */
+export function useToggleReplyLike(postId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ replyId, like }: { replyId: string; like: boolean }) => {
+      const { data: u } = await getSessionUser();
+      if (!u.user) throw new Error("not_authenticated");
+      const q = like
+        ? supabase.from("post_reply_likes").insert({ reply_id: replyId, user_id: u.user.id })
+        : supabase.from("post_reply_likes").delete().eq("reply_id", replyId).eq("user_id", u.user.id);
+      const { error } = await q;
+      if (error && !(like && (error as any).code === "23505")) throw error;
+    },
+    onMutate: async ({ replyId, like }) => {
+      await qc.cancelQueries({ queryKey: repliesKey(postId) });
+      const prev = qc.getQueryData<Reply[]>(repliesKey(postId));
+      qc.setQueryData<Reply[]>(repliesKey(postId), (list) =>
+        (list ?? []).map((r) =>
+          r.id === replyId ? { ...r, likedByMe: like, likeCount: Math.max(0, r.likeCount + (like ? 1 : -1)) } : r,
+        ),
+      );
+      return { prev };
+    },
+    onError: (_e, _v, ctx) => qc.setQueryData(repliesKey(postId), ctx?.prev),
   });
 }
 

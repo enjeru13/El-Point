@@ -9,7 +9,8 @@ import type { FeedItem } from "@/lib/queries/community";
 import { postPhotoUrl, reviewPhotoUrl } from "@/lib/storage";
 import { useTheme } from "@/lib/ThemeContext";
 import { memo, useMemo } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, Share, View } from "react-native";
+import { sharePostText } from "@/lib/community/share";
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,
@@ -272,12 +273,33 @@ function Actions({
           accessibilityLabel={`Responder, ${item.replyCount} respuestas`}
           style={{ flexDirection: "row", alignItems: "center", gap: 5, minHeight: 44, paddingHorizontal: 8 }}
         >
-          <Icon name="comment-text" size={20} color={C.onSurfaceVariant} />
+          <Icon name="message-circle" size={20} color={C.onSurfaceVariant} />
           {item.replyCount > 0 && (
             <AppText variant="caption" color={C.onSurfaceVariant}>
               {item.replyCount}
             </AppText>
           )}
+        </Pressable>
+      )}
+
+      {item.kind === "post" && (
+        <Pressable
+          disabled={pending}
+          onPress={() => {
+            impact("light");
+            Share.share({
+              message: sharePostText({
+                id: item.id,
+                body: item.body,
+                author: item.asRestaurantName ?? item.authorName,
+              }),
+            }).catch(() => {});
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="Compartir publicación"
+          style={{ flexDirection: "row", alignItems: "center", minHeight: 44, paddingHorizontal: 8 }}
+        >
+          <Icon name="send" size={20} color={C.onSurfaceVariant} />
         </Pressable>
       )}
     </View>
