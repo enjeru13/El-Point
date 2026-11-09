@@ -151,6 +151,9 @@ export type MenuSettings = {
   bsRate: number | null;
   /** COP por dólar propios; null = tasa automática del día. */
   copRate: number | null;
+  /** Cuándo cambió cada tasa propia (null si es automática o no se sabe). */
+  bsUpdatedAt: string | null;
+  copUpdatedAt: string | null;
 };
 
 export function menuSettings(r: {
@@ -158,13 +161,22 @@ export function menuSettings(r: {
   menu_currencies?: string[] | null;
   menu_bs_rate?: number | string | null;
   menu_cop_rate?: number | string | null;
+  menu_bs_rate_updated_at?: string | null;
+  menu_cop_rate_updated_at?: string | null;
 }): MenuSettings {
   const base: Currency = r.menu_base_currency === "bs" || r.menu_base_currency === "cop" ? r.menu_base_currency : "usd";
   const shown = normalizeCurrencies(r.menu_currencies);
   const currencies = CURRENCY_ORDER.filter((c) => c === base || shown.includes(c));
   const sorted = [base, ...currencies.filter((c) => c !== base)];
   const num = (v: unknown) => (v == null || v === "" || !Number.isFinite(Number(v)) || Number(v) <= 0 ? null : Number(v));
-  return { base, currencies: sorted, bsRate: num(r.menu_bs_rate), copRate: num(r.menu_cop_rate) };
+  return {
+    base,
+    currencies: sorted,
+    bsRate: num(r.menu_bs_rate),
+    copRate: num(r.menu_cop_rate),
+    bsUpdatedAt: r.menu_bs_rate_updated_at ?? null,
+    copUpdatedAt: r.menu_cop_rate_updated_at ?? null,
+  };
 }
 
 export function currencySymbol(c: Currency): string {

@@ -28,6 +28,7 @@ import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/query';
 import { useNotificationsRealtime } from '@/lib/queries/notifications';
 import { ToastProvider } from '@/lib/toast';
+import { OrderCartProvider } from '@/lib/orderCart';
 import { AppThemeProvider, useTheme } from '@/lib/ThemeContext';
 import { hasSeenOnboarding, markOnboardingSeen } from '@/lib/onboarding';
 import { isAuthFlowActive } from '@/lib/authFlow';
@@ -219,7 +220,9 @@ export default function RootLayout() {
       <AppThemeProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <BottomSheetModalProvider>
-            <NavShell />
+            <OrderCartProvider>
+              <NavShell />
+            </OrderCartProvider>
           </BottomSheetModalProvider>
         </GestureHandlerRootView>
       </AppThemeProvider>

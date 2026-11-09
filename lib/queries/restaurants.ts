@@ -66,6 +66,10 @@ export type RestaurantDetail = {
   menu_base_currency: string;
   menu_bs_rate: number | null;
   menu_cop_rate: number | null;
+  menu_bs_rate_updated_at: string | null;
+  menu_cop_rate_updated_at: string | null;
+  delivery_fee_mode: "fixed" | "zone" | null;
+  delivery_fee: number | null;
   categories: RestaurantCategory[];
   amenities: RestaurantAmenity[];
   payment_methods: PaymentMethod[];
@@ -86,6 +90,7 @@ async function fetchRestaurant(id: string): Promise<RestaurantDetail> {
        price_level, logo_url, cover_url, promo_text, promo_ends_at, hours, closed_today_date, is_active,
        status, status_reason, rating_avg, rating_count, boost_until, founder_rank, paid_until,
        ghost_kitchen, zone_label, accepts_orders, order_greeting, menu_currencies, menu_base_currency, menu_bs_rate, menu_cop_rate,
+       menu_bs_rate_updated_at, menu_cop_rate_updated_at, delivery_fee_mode, delivery_fee,
        restaurant_categories ( categories ( slug, label, icon ) ),
        restaurant_amenities ( amenities ( id, slug, label, icon ) ),
        restaurant_payment_methods ( payment_methods ( id, slug, label, icon ) )`,
