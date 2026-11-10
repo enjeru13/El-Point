@@ -127,6 +127,8 @@ export function PendingRestaurants() {
 
       {queueQ.isLoading ? (
         <PageLoading />
+      ) : queueQ.isError ? (
+        <p className="text-sm text-danger">No se pudo cargar la cola: {(queueQ.error as Error).message}</p>
       ) : (queueQ.data ?? []).length === 0 ? (
         <EmptyState title="Nada pendiente" body="Todos los locales enviados ya fueron revisados." />
       ) : (
