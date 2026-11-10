@@ -9,20 +9,26 @@ import { Modal, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 /**
- * Pantalla completa para marcar dónde se entrega el pedido. Arranca en el
- * último punto usado, si no en tu ubicación (si ya diste permiso), si no en
- * San Cristóbal. El punto no sale del teléfono.
+ * Pantalla completa para marcar un punto en el mapa (entrega de un pedido,
+ * ubicación de un local). Arranca en `initial`, si no en tu ubicación (si ya
+ * diste permiso), si no en San Cristóbal.
  */
-export function DeliveryLocationModal({
+export function LocationPickerModal({
   visible,
   initial,
   onConfirm,
   onClose,
+  title = "¿Dónde te lo llevamos?",
+  subtitle = "Mueve el mapa hasta dejar el pin en tu puerta.",
+  confirmLabel = "Confirmar ubicación",
 }: {
   visible: boolean;
   initial: LatLng | null;
   onConfirm: (p: LatLng) => void;
   onClose: () => void;
+  title?: string;
+  subtitle?: string;
+  confirmLabel?: string;
 }) {
   const { C } = useTheme();
   const insets = useSafeAreaInsets();
@@ -69,9 +75,9 @@ export function DeliveryLocationModal({
             <Icon name="close" size={24} color={C.onSurface} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <AppText variant="heading">¿Dónde te lo llevamos?</AppText>
+            <AppText variant="heading">{title}</AppText>
             <AppText variant="bodySm" color={C.onSurfaceVariant}>
-              Mueve el mapa hasta dejar el pin en tu puerta.
+              {subtitle}
             </AppText>
           </View>
         </View>
@@ -83,7 +89,7 @@ export function DeliveryLocationModal({
         )}
 
         <View style={{ padding: 16, paddingBottom: insets.bottom + 16 }}>
-          <Button label="Confirmar ubicación" disabled={!point} onPress={() => point && onConfirm(point)} />
+          <Button label={confirmLabel} disabled={!point} onPress={() => point && onConfirm(point)} />
         </View>
       </View>
     </Modal>

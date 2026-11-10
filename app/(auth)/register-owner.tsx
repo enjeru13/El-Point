@@ -29,7 +29,8 @@ import {
   ScrollView,
   View,
 } from "react-native";
-import { LocationPicker } from "@/components/LocationPicker";
+import { LocationPickerModal } from "@/components/LocationPickerModal";
+import MapView, { Marker } from "react-native-maps";
 
 // Centro por defecto: San Cristóbal, Táchira.
 import { AppText } from "@/components/ui/AppText";
@@ -78,6 +79,7 @@ export default function RegisterOwnerScreen() {
   const [checking, setChecking] = useState(false);
   const [claimTarget, setClaimTarget] = useState<ClaimMatch | null>(null);
   const [fullName, setFullName] = useState("");
+  const [pickingMap, setPickingMap] = useState(false);
   const [logoUri, setLogoUri] = useState<string | null>(null);
   const [coverUri, setCoverUri] = useState<string | null>(null);
   const [menuPdfName, setMenuPdfName] = useState<string | null>(null);
@@ -158,7 +160,7 @@ export default function RegisterOwnerScreen() {
 
   const canContinue =
     step === 0
-      ? emailValid && password.length >= 8 && password === confirm
+      ? fullName.trim().length >= 2 && emailValid && password.length >= 8 && password === confirm
       : step === 1
         ? !!(name.trim() && selectedCats.size > 0)
         : step === 2
@@ -200,7 +202,7 @@ export default function RegisterOwnerScreen() {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
-      options: { data: { role: "restaurant_owner" } },
+      options: { data: { role: "restaurant_owner", full_name: fullName.trim() } },
     });
 
     if (error) {
@@ -430,6 +432,15 @@ export default function RegisterOwnerScreen() {
               </View>
 
               <View style={{ gap: 20 }}>
+                <Field
+                  label="Tu nombre o apodo *"
+                  icon="account"
+                  placeholder="Ej. Carlos Pérez o El Chamo"
+                  autoCapitalize="words"
+                  value={fullName}
+                  onChangeText={(t) => setFullName(t.slice(0, 60))}
+                  hint="Así te verán en Comunidad cuando respondas como dueño"
+                />
                 {/* Correo */}
                 <Field
                   label="Correo electrónico *"
@@ -663,20 +674,65 @@ export default function RegisterOwnerScreen() {
                     UBICACIÓN EN EL MAPA *
                   </AppText>
                   <AppText variant="bodySm" color={C.outline} style={{ marginLeft: 4 }}>
-                    Mueve el mapa para dejar el pin justo en la entrada de tu local.
+                    Toca el mapa y deja el pin justo en la entrada de tu local.
                   </AppText>
-                  <LocationPicker
-                    value={coords}
-                    onChange={setCoords}
-                    onLocated={reverseFillAddress}
-                    style={{ height: 220 }}
-                    borderColor={coords ? C.secondary : C.outlineVariant}
-                  />
+                  <Pressable
+                    onPress={() => setPickingMap(true)}
+                    accessibilityRole="button"
+                    accessibilityLabel={coords ? "Cambiar la ubicación en el mapa" : "Elegir la ubicación en el mapa"}
+                    style={{
+                      height: 170,
+                      borderRadius: 16,
+                      overflow: "hidden",
+                      borderWidth: coords ? 1 : 1.5,
+                      borderStyle: coords ? "solid" : "dashed",
+                      borderColor: coords ? C.secondary : C.primary,
+                      backgroundColor: C.surfaceContainer,
+                    }}
+                  >
+                    {coords ? (
+                      <>
+                        <MapView
+                          key={`${coords.lat},${coords.lng}`}
+                          style={{ flex: 1 }}
+                          pointerEvents="none"
+                          scrollEnabled={false}
+                          zoomEnabled={false}
+                          rotateEnabled={false}
+                          pitchEnabled={false}
+                          liteMode
+                          initialRegion={{ latitude: coords.lat, longitude: coords.lng, latitudeDelta: 0.006, longitudeDelta: 0.006 }}
+                        >
+                          <Marker coordinate={{ latitude: coords.lat, longitude: coords.lng }} pinColor={C.primary} />
+                        </MapView>
+                        <View
+                          style={{
+                            position: "absolute",
+                            right: 10,
+                            bottom: 10,
+                            paddingHorizontal: 12,
+                            paddingVertical: 7,
+                            borderRadius: 99,
+                            backgroundColor: C.surface,
+                            borderWidth: 1,
+                            borderColor: C.border,
+                          }}
+                        >
+                          <AppText variant="label" color={C.primary}>Cambiar</AppText>
+                        </View>
+                      </>
+                    ) : (
+                      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 8 }}>
+                        <Icon name="map-marker" size={30} color={C.primary} />
+                        <AppText variant="bodyStrong" color={C.primary}>Elegir en el mapa</AppText>
+                      </View>
+                    )}
+                  </Pressable>
                   {coords && (
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginLeft: 4 }}>
                       <Icon name="check-circle" size={14} color={C.secondary} />
                       <AppText variant="caption" color={C.secondary}>
-                        Punto fijado ({coords.lat.toFixed(5)}, {coords.lng.toFixed(5)})
+                        Ubicación marcada
                       </AppText>
                     </View>
                   )}
@@ -1168,6 +1224,19 @@ export default function RegisterOwnerScreen() {
           </AppText>
         )}
       </View>
+      <LocationPickerModal
+        visible={pickingMap}
+        initial={coords}
+        title="¿Dónde queda tu local?"
+        subtitle="Mueve el mapa hasta dejar el pin en la entrada."
+        confirmLabel="Usar esta ubicación"
+        onClose={() => setPickingMap(false)}
+        onConfirm={(p) => {
+          setCoords(p);
+          setPickingMap(false);
+          reverseFillAddress({ latitude: p.lat, longitude: p.lng } as Location.LocationObjectCoords);
+        }}
+      />
     </View>
   );
 }

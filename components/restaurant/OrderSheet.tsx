@@ -1,4 +1,4 @@
-import { DeliveryLocationModal } from "@/components/restaurant/DeliveryLocationModal";
+import { LocationPickerModal } from "@/components/LocationPickerModal";
 import { AppText } from "@/components/ui/AppText";
 import { Icon } from "@/components/ui/Icon";
 import { whatsappUrl } from "@/lib/contact";
@@ -371,7 +371,7 @@ export const OrderSheet = forwardRef<OrderSheetHandle, Props>((p, ref) => {
         </BottomSheetScrollView>
       </BottomSheetModal>
 
-      <DeliveryLocationModal
+      <LocationPickerModal
         visible={picking}
         initial={location}
         onClose={() => setPicking(false)}

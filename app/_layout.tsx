@@ -197,7 +197,14 @@ export default function RootLayout() {
     if (isAuthFlowActive()) {
       // Registro en curso: él mismo termina en la pantalla de bienvenida.
     } else if (inAuth && !onWelcome) {
-      router.replace(role === 'restaurant_owner' ? '/(owner)' : '/(customer)');
+      // Cuenta recién creada con Google o Apple (no pasa por el registro):
+      // también ve la bienvenida.
+      const isNew = Date.now() - new Date(session.user.created_at).getTime() < 2 * 60 * 1000;
+      if (isNew) {
+        router.replace(role === 'restaurant_owner' ? '/(auth)/welcome?role=owner' : '/(auth)/welcome?role=customer');
+      } else {
+        router.replace(role === 'restaurant_owner' ? '/(owner)' : '/(customer)');
+      }
     } else if (!onWelcome && role === 'restaurant_owner' && inCustomer) {
       router.replace('/(owner)');
     } else if (role === 'customer' && inOwner) {
@@ -212,7 +219,9 @@ export default function RootLayout() {
   // re-medir: peso distinto y la "t" de "Point" cortada.
   if (!fontsLoaded) return null;
 
-  if (!ready || (session && role === null) || !navReady)
+  // Durante un registro el rol se resuelve en segundo plano: no desmontar la
+  // pantalla de registro (antes saltaba al login y luego a la bienvenida).
+  if (!ready || (session && role === null && !isAuthFlowActive()) || !navReady)
     return <SplashScreenView />;
 
   return (
