@@ -47,6 +47,7 @@ import { convertAmount, formatMoney } from "@/lib/money";
 import { OrderBar, ORDER_BAR_HEIGHT } from "@/components/restaurant/OrderBar";
 import { OrderSheet, type OrderSheetHandle } from "@/components/restaurant/OrderSheet";
 import { GalleryStrip } from "@/components/restaurant/GalleryStrip";
+import { PhotoViewer } from "@/components/ui/PhotoViewer";
 import { useGallery } from "@/lib/queries/gallery";
 import { useFavoriteIds, useToggleFavorite } from "@/lib/queries/feed";
 import { useToast } from "@/lib/toast";
@@ -87,6 +88,7 @@ import {
   type BottomSheetFooterProps,
 } from "@gorhom/bottom-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { KEYBOARD_DISMISS } from "@/lib/keyboard";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -342,7 +344,7 @@ const ReviewSheet = forwardRef<
           gap: 16,
           ...capWidth(isTablet),
         }}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="handled" keyboardDismissMode={KEYBOARD_DISMISS}
       >
         {/* Título */}
         <View style={{ gap: 2 }}>
@@ -459,6 +461,34 @@ const ReviewSheet = forwardRef<
 ReviewSheet.displayName = "ReviewSheet";
 
 // ─── Pantalla ─────────────────────────────────────────────────────────────────
+
+/** Fotos de una reseña dentro de la página del local: miniaturas que abren el visor con zoom. */
+function ReviewPhotos({ urls }: { urls: string[] }) {
+  const { C } = useTheme();
+  const [open, setOpen] = useState<number | null>(null);
+  return (
+    <>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+        {urls.map((uri, i) => (
+          <Pressable
+            key={uri}
+            onPress={() => setOpen(i)}
+            accessibilityRole="imagebutton"
+            accessibilityLabel={`Foto ${i + 1} de ${urls.length}. Toca para verla completa`}
+          >
+            <Image
+              source={{ uri }}
+              style={{ width: 96, height: 96, borderRadius: 12, borderWidth: 1, borderColor: C.border }}
+              contentFit="cover"
+              transition={150}
+            />
+          </Pressable>
+        ))}
+      </ScrollView>
+      <PhotoViewer urls={urls} startAt={open} onClose={() => setOpen(null)} title="Foto de reseña" />
+    </>
+  );
+}
 
 export default function RestaurantProfileScreen() {
   const { C, shadow } = useTheme();
@@ -1864,24 +1894,8 @@ export default function RestaurantProfileScreen() {
                     </View>
                   )}
 
-                  {/* Fotos */}
-                  {r.photos.length > 0 && (
-                    <ScrollView
-                      horizontal
-                      showsHorizontalScrollIndicator={false}
-                      contentContainerStyle={{ gap: 8 }}
-                    >
-                      {r.photos.map((uri) => (
-                        <Image
-                          key={uri}
-                          source={{ uri }}
-                          style={{ width: 96, height: 96, borderRadius: 12, borderWidth: 1, borderColor: C.border }}
-                          contentFit="cover"
-                          transition={150}
-                        />
-                      ))}
-                    </ScrollView>
-                  )}
+                  {/* Fotos: tocar abre el visor con zoom */}
+                  {r.photos.length > 0 && <ReviewPhotos urls={r.photos} />}
 
                   {/* Respuesta del local */}
                   {replyingId === r.id ? (

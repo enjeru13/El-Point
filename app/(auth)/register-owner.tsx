@@ -37,6 +37,7 @@ import { AppText } from "@/components/ui/AppText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
 import { beginAuthFlow, endAuthFlow } from "@/lib/authFlow";
+import { KEYBOARD_DISMISS } from "@/lib/keyboard";
 
 const STEPS = 4;
 
@@ -393,7 +394,7 @@ export default function RegisterOwnerScreen() {
             ...capWidth(isTablet, FORM_MAX_W),
           }}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps="handled" keyboardDismissMode={KEYBOARD_DISMISS}
         >
           {/* ════ STEP 0 — Tu cuenta ════ */}
           {step === 0 && (

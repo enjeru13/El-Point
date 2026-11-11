@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
+import { KEYBOARD_DISMISS } from "@/lib/keyboard";
 
 export default function ChangePasswordScreen() {
   const { C, shadow } = useTheme();
@@ -114,7 +115,7 @@ export default function ChangePasswordScreen() {
       >
         <ScrollView
           contentContainerStyle={{ padding: 20, gap: 18, ...capWidth(isTablet, FORM_MAX_W) }}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps="handled" keyboardDismissMode={KEYBOARD_DISMISS}
         >
           <AppText variant="body" color={C.onSurfaceVariant}>
             Escribe tu contraseña actual y elige una nueva de al menos 8

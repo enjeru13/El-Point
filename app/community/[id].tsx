@@ -39,6 +39,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useRef, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { KEYBOARD_DISMISS } from "@/lib/keyboard";
 
 export default function PostDetailScreen() {
   const { C } = useTheme();
@@ -169,7 +170,7 @@ export default function PostDetailScreen() {
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 24 }}>
+        <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode={KEYBOARD_DISMISS} contentContainerStyle={{ paddingBottom: 24 }}>
           {post.isLoading ? (
             <FeedSkeleton />
           ) : post.isError ? (

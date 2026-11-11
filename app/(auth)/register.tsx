@@ -26,6 +26,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { capWidth, FORM_MAX_W, useIsTablet } from '@/lib/responsive';
 import { beginAuthFlow, endAuthFlow } from '@/lib/authFlow';
+import { KEYBOARD_DISMISS } from "@/lib/keyboard";
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
 
@@ -237,7 +238,7 @@ export default function RegisterScreen() {
             ...capWidth(isTablet, FORM_MAX_W),
           }}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps="handled" keyboardDismissMode={KEYBOARD_DISMISS}
         >
 
           {/* ════ STEP 0 — Datos básicos ════ */}

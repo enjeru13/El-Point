@@ -38,6 +38,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { KEYBOARD_DISMISS } from "@/lib/keyboard";
 
 const OTHER = "__other__";
 
@@ -300,7 +301,7 @@ function CurrencySheet({
           </Pressable>
         </View>
 
-        <ScrollView contentContainerStyle={{ padding: 18, paddingTop: 4, gap: 18, paddingBottom: insets.bottom + 100 }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ padding: 18, paddingTop: 4, gap: 18, paddingBottom: insets.bottom + 100 }} keyboardShouldPersistTaps="handled" keyboardDismissMode={KEYBOARD_DISMISS}>
           <View style={{ gap: 8 }}>
             <AppText variant="overline" color={C.outline}>MIS PRECIOS ESTÁN EN</AppText>
             <Segmented
@@ -656,7 +657,7 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
           </View>
 
           {draft && (
-            <ScrollView contentContainerStyle={{ padding: 18, paddingTop: 4, gap: 16, paddingBottom: insets.bottom + 100 }} keyboardShouldPersistTaps="handled">
+            <ScrollView contentContainerStyle={{ padding: 18, paddingTop: 4, gap: 16, paddingBottom: insets.bottom + 100 }} keyboardShouldPersistTaps="handled" keyboardDismissMode={KEYBOARD_DISMISS}>
               <View style={{ gap: 6 }}>
                 <AppText variant="overline" color={C.outline}>NOMBRE</AppText>
                 <AppTextInput value={draft.name} onChangeText={(t) => setDraft({ ...draft, name: t.slice(0, 80) })} placeholder="Ej. Pizza margarita" style={inputStyle(C)} />

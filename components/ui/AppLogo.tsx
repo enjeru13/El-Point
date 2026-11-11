@@ -41,6 +41,7 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
     <View style={{ flexDirection: "row", alignItems: "center", gap: Math.round(6 * scale) }}>
       <View style={{ height: pointSize, justifyContent: "center" }}>
         <Text
+          allowFontScaling={false}
           style={{
             fontFamily: "Outfit_700Bold",
             fontSize: Math.round(13 * scale),
@@ -54,6 +55,7 @@ export function AppLogo({ size = "md", variant = "light" }: Props) {
 
       <View style={{ height: pointSize, justifyContent: "center" }}>
         <Text
+          allowFontScaling={false}
           style={{
             fontFamily: "Outfit_800ExtraBold",
             fontSize: pointSize,

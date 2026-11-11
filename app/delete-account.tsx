@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
+import { KEYBOARD_DISMISS } from "@/lib/keyboard";
 
 const CONFIRM_WORD = "ELIMINAR";
 
@@ -79,7 +80,7 @@ export default function DeleteAccountScreen() {
 
       <ScrollView
         contentContainerStyle={{ padding: 20, gap: 18, paddingBottom: insets.bottom + 40, ...capWidth(isTablet, FORM_MAX_W) }}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="handled" keyboardDismissMode={KEYBOARD_DISMISS}
       >
         <View
           style={{

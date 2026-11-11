@@ -8,6 +8,7 @@ import { createContext, useContext, useState, type ReactNode } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, View } from "react-native";
 import { ScrollViewContainer } from "react-native-reorderable-list";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { KEYBOARD_DISMISS } from "@/lib/keyboard";
 
 const ScrollLockContext = createContext<(locked: boolean) => void>(() => {});
 
@@ -66,7 +67,7 @@ export function SectionShell({ title, subtitle, children }: { title: string; sub
 
       <ScrollViewContainer
         scrollEnabled={!locked}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="handled" keyboardDismissMode={KEYBOARD_DISMISS}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 20, gap: 18, paddingBottom: insets.bottom + 60, ...capWidth(isTablet) }}
       >

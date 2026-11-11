@@ -13,6 +13,7 @@ import {
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { KEYBOARD_DISMISS } from "@/lib/keyboard";
 
 export type PickedRestaurant = { id: string; name: string; category: string | null };
 export type SuggestedPlace = { name: string; zone: string };
@@ -144,7 +145,7 @@ export const RestaurantPickerSheet = forwardRef<
         <BottomSheetFlatList
           data={results}
           keyExtractor={(r) => r.id}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps="handled" keyboardDismissMode={KEYBOARD_DISMISS}
           contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: insets.bottom + 20 }}
           ListHeaderComponent={
             allowSuggest ? (

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
 import { capWidth, FORM_MAX_W, useIsTablet } from "@/lib/responsive";
+import { KEYBOARD_DISMISS } from "@/lib/keyboard";
 
 /** "Reclama tu local": el dueño de un local sin dueño pide que se lo asignen. */
 export default function ClaimScreen() {
@@ -110,7 +111,7 @@ export default function ClaimScreen() {
 
       <ScrollView
         contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: insets.bottom + 40, ...capWidth(isTablet, FORM_MAX_W) }}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="handled" keyboardDismissMode={KEYBOARD_DISMISS}
         showsVerticalScrollIndicator={false}
       >
         <View style={{ gap: 6 }}>

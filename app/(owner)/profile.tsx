@@ -46,6 +46,7 @@ import { isFounder } from '@/lib/queries/restaurants';
 import { hasPlan } from '@/lib/plan';
 import { PlanLock } from '@/components/ui/PlanLock';
 import { FounderBadge } from '@/components/ui/FounderBadge';
+import { KEYBOARD_DISMISS } from "@/lib/keyboard";
 
 const MAX_CATEGORIES = 3;
 
@@ -662,7 +663,7 @@ export default function OwnerProfileScreen() {
         onScroll={(e) => { scrollY.current = e.nativeEvent.contentOffset.y; }}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="handled" keyboardDismissMode={KEYBOARD_DISMISS}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 96, gap: 20, ...capWidth(isTablet) }}
       >
 
