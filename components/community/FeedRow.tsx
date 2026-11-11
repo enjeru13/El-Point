@@ -62,7 +62,7 @@ export const FeedRow = memo(function FeedRow({
     <Pressable
       onPress={detail || pending ? undefined : () => onOpen?.(item)}
       accessibilityRole={detail ? undefined : "button"}
-      accessibilityHint={detail ? undefined : "Abre el post"}
+      accessibilityHint={detail ? undefined : item.kind === "review" ? "Abre la reseña y sus respuestas" : "Abre el post"}
       style={{
         flexDirection: "row",
         gap: 12,
@@ -276,22 +276,20 @@ function Actions({
         )}
       </Pressable>
 
-      {item.kind === "post" && (
-        <Pressable
-          disabled={pending || !onOpen}
-          onPress={() => onOpen?.(item)}
-          accessibilityRole="button"
-          accessibilityLabel={`Responder, ${item.replyCount} respuestas`}
-          style={{ flexDirection: "row", alignItems: "center", gap: 5, minHeight: 44, paddingHorizontal: 8 }}
-        >
-          <Icon name="message-circle" size={20} color={C.onSurfaceVariant} />
-          {item.replyCount > 0 && (
-            <AppText variant="caption" color={C.onSurfaceVariant}>
-              {item.replyCount}
-            </AppText>
-          )}
-        </Pressable>
-      )}
+      <Pressable
+        disabled={pending || !onOpen}
+        onPress={() => onOpen?.(item)}
+        accessibilityRole="button"
+        accessibilityLabel={`Responder, ${item.replyCount} respuestas`}
+        style={{ flexDirection: "row", alignItems: "center", gap: 5, minHeight: 44, paddingHorizontal: 8 }}
+      >
+        <Icon name="message-circle" size={20} color={C.onSurfaceVariant} />
+        {item.replyCount > 0 && (
+          <AppText variant="caption" color={C.onSurfaceVariant}>
+            {item.replyCount}
+          </AppText>
+        )}
+      </Pressable>
 
       {item.kind === "post" && (
         <Pressable

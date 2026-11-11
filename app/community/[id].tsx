@@ -166,7 +166,7 @@ export default function PostDetailScreen() {
         >
           <Icon name="arrow-left" size={24} color={C.onSurface} />
         </Pressable>
-        <AppText variant="subtitle">Post</AppText>
+        <AppText variant="subtitle">{post.data?.kind === "review" ? "Reseña" : "Post"}</AppText>
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>

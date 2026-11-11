@@ -1,7 +1,7 @@
 import { ReportSheet, type ReportSheetHandle } from "@/components/ui/ReportSheet";
 import { errorMessage } from "@/lib/community/topics";
 import { useBlockUser } from "@/lib/queries/blocks";
-import { errorCode, useDeletePost, useReportPost, useToggleLike, type FeedItem } from "@/lib/queries/community";
+import { errorCode, openReviewThread, useDeletePost, useReportPost, useToggleLike, type FeedItem } from "@/lib/queries/community";
 import { useMyProfile } from "@/lib/queries/me";
 import { REPORT_REASONS } from "@/lib/queries/reviews";
 import { useToast } from "@/lib/toast";
@@ -36,12 +36,16 @@ export function usePostActions({ onDeleted }: { onDeleted?: () => void } = {}) {
   const onOpen = useCallback(
     (item: FeedItem) => {
       if (item.kind === "review") {
-        if (item.restaurantId) router.push({ pathname: "/restaurant/[id]", params: { id: item.restaurantId } });
+        // Una reseña también es una conversación: se abre su hilo; el local queda en su tarjeta.
+        openReviewThread(item).then(
+          (postId) => router.push({ pathname: "/community/[id]", params: { id: postId } }),
+          () => toast.error("No pudimos abrir la reseña. Inténtalo de nuevo."),
+        );
       } else {
         router.push({ pathname: "/community/[id]", params: { id: item.id } });
       }
     },
-    [router],
+    [router, toast],
   );
 
   const onOpenRestaurant = useCallback(

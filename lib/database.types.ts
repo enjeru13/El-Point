@@ -945,6 +945,7 @@ export type Database = {
           moderation: string
           reply_count: number
           restaurant_id: string | null
+          review_id: string | null
           suggested_key: string | null
           suggested_name: string | null
           suggested_zone: string | null
@@ -962,6 +963,7 @@ export type Database = {
           moderation?: string
           reply_count?: number
           restaurant_id?: string | null
+          review_id?: string | null
           suggested_key?: string | null
           suggested_name?: string | null
           suggested_zone?: string | null
@@ -979,6 +981,7 @@ export type Database = {
           moderation?: string
           reply_count?: number
           restaurant_id?: string | null
+          review_id?: string | null
           suggested_key?: string | null
           suggested_name?: string | null
           suggested_zone?: string | null
@@ -2362,8 +2365,10 @@ export type Database = {
           restaurant_id: string
           restaurant_name: string
           restaurant_zone: string
+          review_id: string
           suggested_name: string
           suggested_zone: string
+          thread_post_id: string
           topic: string
           viewer_liked: boolean
         }[]
@@ -2655,6 +2660,7 @@ export type Database = {
         }[]
       }
       get_public_post: { Args: { p_post_id: string }; Returns: Json }
+      open_review_thread: { Args: { p_review: string }; Returns: string }
       get_public_profile: { Args: { p_user_id: string }; Returns: Json }
       get_restaurant_contact: {
         Args: { p_restaurant_id: string }

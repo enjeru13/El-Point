@@ -32,6 +32,10 @@ export type FeedItem = {
   replyCount: number;
   viewerLiked: boolean;
   poll: PollState | null;
+  /** Reseñas: su id real (en el detalle de un hilo, `id` es el del post-hilo). */
+  reviewId: string | null;
+  /** Reseñas: el post-hilo donde cuelgan las respuestas, si ya lo tiene. */
+  threadPostId: string | null;
 };
 
 export type PollOption = { id: string; label: string | null; restaurant: { id: string; name: string } | null; votes: number | null };
@@ -88,6 +92,8 @@ type FeedRow = {
   like_count: number;
   reply_count: number;
   viewer_liked: boolean;
+  review_id: string | null;
+  thread_post_id: string | null;
 };
 
 function toFeedItem(r: FeedRow): FeedItem {
@@ -117,6 +123,8 @@ function toFeedItem(r: FeedRow): FeedItem {
     replyCount: r.reply_count,
     viewerLiked: r.viewer_liked,
     poll: null,
+    reviewId: r.review_id ?? (r.kind === "review" ? r.id : null),
+    threadPostId: r.thread_post_id,
   };
 }
 
@@ -163,6 +171,18 @@ export function usePost(postId: string | undefined) {
       return row ? (await attachPolls([toFeedItem(row)]))[0] : null;
     },
   });
+}
+
+/**
+ * El post-hilo de una reseña, donde cuelgan sus respuestas. Si la reseña aún no
+ * lo tiene se crea (open_review_thread); si ya lo tiene en la fila, no hay
+ * llamada.
+ */
+export async function openReviewThread(item: Pick<FeedItem, "id" | "reviewId" | "threadPostId">): Promise<string> {
+  if (item.threadPostId) return item.threadPostId;
+  const { data, error } = await supabase.rpc("open_review_thread", { p_review: item.reviewId ?? item.id });
+  if (error) throw error;
+  return data as string;
 }
 
 export type Reply = {
@@ -301,11 +321,17 @@ export function errorCode(e: unknown): string {
 type FeedPages = InfiniteData<FeedItem[], Cursor>;
 
 /** Cambia una fila en todas las páginas de todos los feeds en caché. */
+/**
+ * Cambia una fila en el feed y en el detalle abierto. `id` puede ser el de un
+ * post, el de una reseña o el de su post-hilo: la reseña aparece con su id en el
+ * feed y con el del hilo en el detalle, y las dos son la misma.
+ */
 function patchFeedItem(qc: ReturnType<typeof useQueryClient>, id: string, fn: (it: FeedItem) => FeedItem) {
+  const hit = (it: FeedItem) => it.id === id || it.threadPostId === id || it.reviewId === id;
   qc.setQueriesData<FeedPages>({ queryKey: ["community-feed"] }, (old) =>
-    old ? { ...old, pages: old.pages.map((page) => page.map((it) => (it.id === id ? fn(it) : it))) } : old,
+    old ? { ...old, pages: old.pages.map((page) => page.map((it) => (hit(it) ? fn(it) : it))) } : old,
   );
-  qc.setQueriesData<FeedItem | null>({ queryKey: ["community-post", id] }, (old) => (old ? fn(old) : old));
+  qc.setQueriesData<FeedItem | null>({ queryKey: ["community-post"] }, (old) => (old && hit(old) ? fn(old) : old));
 }
 
 export type NewPost = {
@@ -408,6 +434,8 @@ export function useCreatePost() {
         categoryIds: p.categoryIds,
         photoPaths: [],
         likeCount: 0,
+        reviewId: null,
+        threadPostId: null,
         poll: p.poll
           ? {
               closes_at: new Date(Date.now() + p.poll.days * 86400000).toISOString(),
@@ -524,14 +552,15 @@ export function useToggleLike() {
   return useMutation({
     mutationKey: ["toggle-like"],
     scope: { id: "toggle-like" },
-    mutationFn: async ({ item, liked }: { item: Pick<FeedItem, "id" | "kind">; liked: boolean }) => {
+    mutationFn: async ({ item, liked }: { item: Pick<FeedItem, "id" | "kind" | "reviewId">; liked: boolean }) => {
       const { data: u } = await getSessionUser();
       if (!u.user) throw new Error("not_authenticated");
       const userId = u.user.id;
       if (item.kind === "review") {
+        const reviewId = item.reviewId ?? item.id;
         const q = liked
-          ? supabase.from("review_helpful").delete().eq("user_id", userId).eq("review_id", item.id)
-          : supabase.from("review_helpful").insert({ user_id: userId, review_id: item.id });
+          ? supabase.from("review_helpful").delete().eq("user_id", userId).eq("review_id", reviewId)
+          : supabase.from("review_helpful").insert({ user_id: userId, review_id: reviewId });
         const { error } = await q;
         if (error && error.code !== "23505") throw error;
       } else {
