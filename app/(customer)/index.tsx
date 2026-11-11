@@ -7,6 +7,7 @@ import { ChipRow } from "@/components/ui/ChipRow";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Icon } from "@/components/ui/Icon";
 import { useAuthGate } from "@/components/AuthGate";
+import { PreferencesCard } from "@/components/PreferencesCard";
 import { NotificationBell } from "@/components/ui/NotificationBell";
 import { QuickPickModal } from "@/components/ui/QuickPickModal";
 import { RankBadge } from "@/components/ui/RankBadge";
@@ -843,6 +844,9 @@ export default function HomeScreen() {
             <Icon name="arrow-right" size={18} color={C.primary} />
           </Pressable>
         </View>
+
+        {/* Gustos: solo si la cuenta no eligió categorías */}
+        <PreferencesCard />
 
         {/* ── 1: Filtros pegajosos (categorías + tabs) ── */}
         <View style={{ backgroundColor: C.background }}>

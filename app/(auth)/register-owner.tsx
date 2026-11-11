@@ -52,7 +52,6 @@ export default function RegisterOwnerScreen() {
   // Step 0 — cuenta
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [name, setName] = useState("");
@@ -84,6 +83,8 @@ export default function RegisterOwnerScreen() {
   const [logoUri, setLogoUri] = useState<string | null>(null);
   const [coverUri, setCoverUri] = useState<string | null>(null);
   const [menuPdfName, setMenuPdfName] = useState<string | null>(null);
+  // Logo, portada y menú son opcionales: van plegados para que el paso se vea corto.
+  const [showExtras, setShowExtras] = useState(false);
   const [menuPdfUri, setMenuPdfUri] = useState<string | null>(null);
 
   function toggleCat(id: number) {
@@ -161,7 +162,7 @@ export default function RegisterOwnerScreen() {
 
   const canContinue =
     step === 0
-      ? fullName.trim().length >= 2 && emailValid && password.length >= 8 && password === confirm
+      ? fullName.trim().length >= 2 && emailValid && password.length >= 8
       : step === 1
         ? !!(name.trim() && selectedCats.size > 0)
         : step === 2
@@ -462,18 +463,11 @@ export default function RegisterOwnerScreen() {
                   icon="lock-outline"
                   placeholder="••••••••"
                   secure
+                  autoComplete="new-password"
+                  textContentType="newPassword"
                   value={password}
                   onChangeText={setPassword}
                   hint="Mínimo 8 caracteres"
-                />
-                <Field
-                  label="Confirmar contraseña *"
-                  icon="lock-outline"
-                  placeholder="••••••••"
-                  secure
-                  value={confirm}
-                  onChangeText={setConfirm}
-                  error={confirm.length > 0 && password !== confirm ? 'Las contraseñas no coinciden.' : null}
                 />
               </View>
             </>
@@ -912,7 +906,35 @@ export default function RegisterOwnerScreen() {
                   </Pressable>
                 </View>
 
-                {!claimTarget && (<>
+                {!claimTarget && (
+                  <>
+                    {!showExtras ? (
+                      <Pressable
+                        onPress={() => setShowExtras(true)}
+                        accessibilityRole="button"
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 12,
+                          padding: 16,
+                          borderRadius: 16,
+                          borderWidth: 1,
+                          borderColor: C.outlineVariant,
+                          backgroundColor: C.surface,
+                        }}
+                      >
+                        <Icon name="image-plus" size={22} color={C.primary} />
+                        <View style={{ flex: 1 }}>
+                          <AppText variant="bodyStrong">Agregar logo, portada y menú</AppText>
+                          <AppText variant="bodySm" color={C.onSurfaceVariant}>
+                            Opcional. Puedes hacerlo ahora o después desde tu perfil.
+                          </AppText>
+                        </View>
+                        <Icon name="chevron-down" size={18} color={C.outline} />
+                      </Pressable>
+                    ) : (
+                      <>
+
                 {/* Logo */}
                 <View style={{ gap: 8 }}>
                   <AppText variant="bodyStrong" color={C.onSurfaceVariant} style={{ marginLeft: 4 }}>
@@ -1105,7 +1127,10 @@ export default function RegisterOwnerScreen() {
                     </View>
                   </Pressable>
                 </View>
-                </>)}
+                      </>
+                    )}
+                  </>
+                )}
               </View>
             </>
           )}
