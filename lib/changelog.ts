@@ -23,12 +23,23 @@ export const CHANGELOG: Release[] = [
   {
     version: "1.2.0",
     date: "Noviembre de 2026",
-    headline: "Comunidad se vuelve conversación: responde a otros, menciona, vota en encuestas y comparte afuera.",
+    headline: "Explora sin cuenta, y Comunidad se vuelve conversación: reseñas con respuestas, encuestas y fotos que se amplían.",
     sections: [
+      {
+        title: "Más fácil empezar",
+        icon: "rocket-launch-outline",
+        notes: [
+          "Mira locales, menús y Comunidad sin crear cuenta. Te pedimos la cuenta solo cuando quieras guardar o participar.",
+          "Crear tu cuenta toma una sola pantalla: usuario, correo y contraseña.",
+          "Tus categorías favoritas las eliges ya dentro, cuando quieras.",
+          "Una presentación más corta y menos tutoriales.",
+        ],
+      },
       {
         title: "Conversaciones",
         icon: "message-circle",
         notes: [
+          "Responde a las reseñas: cada reseña abre su conversación, con el local y las estrellas a la vista.",
           "Responde a otras respuestas: los hilos se ven ordenados, con “Respondiendo a @usuario”.",
           "Dale me gusta a las respuestas que te gusten.",
           "Menciona a cualquiera con @ y le llega el aviso.",
@@ -45,11 +56,28 @@ export const CHANGELOG: Release[] = [
         ],
       },
       {
+        title: "Fotos y menú",
+        icon: "image-multiple-outline",
+        notes: [
+          "Abre las fotos de las reseñas dentro de cada local y amplíalas con los dedos.",
+          "Amplía también las fotos que sube el local y las de Comunidad.",
+          "Los locales pueden subir su menú en imágenes (hasta 10), aparte de su galería.",
+        ],
+      },
+      {
         title: "Comparte",
         icon: "send",
         notes: [
           "Comparte cualquier publicación fuera de la app: quien no tiene El Point la ve completa en la web.",
           "Íconos nuevos y más redondos en Comunidad.",
+        ],
+      },
+      {
+        title: "Arreglos",
+        icon: "wrench-outline",
+        notes: [
+          "El teclado baja al arrastrar, sin buscar un espacio en blanco donde tocar.",
+          "El logo de arriba ya no se corta cuando usas el texto grande del teléfono.",
         ],
       },
       {

@@ -58,6 +58,100 @@ PARA DUEÑOS DE LOCALES
 El Point nace en San Cristóbal y crece con su gente. Descárgala y deja tu rank.
 ```
 
+## 3b. Ficha de la versión 1.2.0
+
+Los textos de la 1.0 de arriba quedaron como referencia. Para la 1.2.0 pega estos. Siguen sin mencionar planes, precios de suscripción ni otras plataformas.
+
+**Promotional Text (máx. 170, 146 usados). Se puede cambiar en cualquier momento sin revisión:**
+
+```
+Descubre dónde comer en San Cristóbal. Arma tu pedido desde el menú y envíalo por WhatsApp, mira los precios en $, Bs o COP y debate en Comunidad.
+```
+
+**Description (máx. 4000):**
+
+```
+El Point es la guía para descubrir dónde comer en San Cristóbal, Táchira. Encuentra el lugar que se te antoja, arma tu pedido y cuéntale a la comunidad cómo te fue.
+
+PARA COMENSALES
+• Explora sin crear cuenta: la cuenta solo hace falta para guardar favoritos, dejar un rank o participar.
+• Descubre locales por categoría, cercanía y si están abiertos ahora, en una lista o en el mapa.
+• Busca por nombre, categoría, comodidades y métodos de pago.
+• Mira fotos, menú, horario y promociones de cada local.
+• Ve los precios del menú en dólares, bolívares o pesos, con la tasa del local y la fecha en que se actualizó.
+• Arma tu pedido desde el menú: agrega platos, ajusta cantidades, elige si pasas a buscarlo o es delivery, marca en el mapa dónde te lo llevan y envíalo listo por WhatsApp.
+• Comunidad: pide recomendaciones, comparte tus descubrimientos, crea y vota en encuestas, responde a otros, menciona a alguien con @ y comparte publicaciones fuera de la app.
+• Deja tu rank con estrellas, fotos y comentario. Cada rank y cada participación te da XP: sube de nivel y de rango, y mira el perfil de otros comensales.
+• Guarda tus favoritos y recibe avisos de promociones y del plato del día, solo si los activas.
+• Cocinas fantasma: negocios sin local físico que venden por delivery o pickup.
+• Modo claro y oscuro.
+
+PARA DUEÑOS DE LOCALES
+• Registra tu local y aparece en el mapa y en las búsquedas.
+• Con el perfil completo, tus clientes ven tu contacto, tu menú con precios en dólares, bolívares o pesos, tu plato del día, tu galería de fotos, tu horario y tus promociones, y pueden armar su pedido y enviártelo por WhatsApp.
+• Configura si haces delivery o pasan a buscarlo, y cuánto cobras por el envío.
+• Sube tu menú en imágenes (hasta 10), aparte de tus fotos, o en PDF.
+• Responde las reseñas de tus clientes y consigue más con tu cartel QR "Rankéanos".
+• Mira cuántas personas te ven y te contactan, por qué canal y qué días funcionan mejor.
+
+El Point nace en San Cristóbal y crece con su gente. Descárgala y deja tu rank.
+```
+
+**What's New (Novedades de esta versión, máx. 4000):**
+
+```
+Explora sin cuenta y conversa en Comunidad.
+
+• Mira locales, menús y Comunidad sin crear cuenta. Te pedimos la cuenta solo cuando quieras guardar o participar.
+• Crear tu cuenta toma una sola pantalla: usuario, correo y contraseña.
+• Responde a las reseñas: cada reseña abre su conversación.
+• Responde a otras respuestas, dale me gusta y menciona a cualquiera con @.
+• Abre las fotos de las reseñas dentro de cada local y amplíalas con los dedos. También las de la galería del local y las de Comunidad.
+• Los locales pueden subir su menú en imágenes (hasta 10), aparte de su galería.
+• Crea encuestas de 2 a 4 opciones, con texto libre o con locales de El Point. Votar es anónimo y suma XP. Al cerrar te avisamos qué opción ganó.
+• Comparte cualquier publicación fuera de la app: quien no tiene El Point la ve completa en la web.
+• Tocar un aviso te lleva justo a donde pasó. Nuevos ajustes de avisos: "Comunidad" y "Logros y rachas".
+• El teclado baja al arrastrar y el logo ya no se corta con el texto grande del teléfono.
+```
+
+**Notas para el revisor (App Review Information) de la 1.2.0:**
+
+```
+El Point es una guía de restaurantes de San Cristóbal, Venezuela. Los usuarios descubren locales, ven su menú, arman su pedido y lo envían por WhatsApp, y participan en una comunidad. Los dueños registran su local y lo administran desde la pestaña "Mi local".
+
+SIN CUENTA (NUEVO EN ESTA VERSIÓN)
+Al terminar la presentación, la app abre en el inicio sin pedir cuenta: se pueden ver locales, mapa, búsqueda, menús, tasas, reseñas y Comunidad en lectura, y armar un pedido de WhatsApp. La cuenta se pide solo cuando la persona quiere guardar algo suyo (favoritos, dejar un rank, marcar una reseña como útil, publicar, responder, votar, reportar o ver avisos): aparece una hoja "Crea tu cuenta para…" con "Crear cuenta", "Ya tengo cuenta" y "Ahora no". Pestaña Perfil sin cuenta: explica qué se gana al crearla.
+
+Inicio de sesión: correo y contraseña, Google y Apple. Hay dos cuentas de prueba (datos abajo).
+
+La app no vende nada dentro de ella ni muestra precios de planes. Los pedidos no se pagan en la app: se envían como un mensaje de WhatsApp al local, y el pago se acuerda directamente con él. Las funciones del perfil completo de un local las activa nuestro equipo desde un panel administrativo.
+
+NOVEDADES DE ESTA VERSIÓN (pestaña Comunidad)
+- Responder a una reseña: tocar una reseña en el feed abre su conversación; también el botón de la burbuja.
+- Responder a otras respuestas y dar me gusta a una respuesta.
+- Mencionar a otro usuario escribiendo @ y su nombre.
+- Perfil público de otro usuario: toca su foto o su @.
+- Encuestas: en Comunidad, el botón del lápiz, "Encuesta" (2 a 4 opciones; el voto es anónimo y se puede cambiar).
+- Compartir una publicación fuera de la app (ícono de avión de papel): abre una página web con el contenido.
+- Fotos: las de las reseñas y las de la galería del local se abren a pantalla completa y se amplían con los dedos.
+- Menú en imágenes: los locales con plan pueden subir hasta 10 imágenes de su carta; se ven en la página del local, sobre el botón del PDF.
+- Avisos: al tocar uno, la app abre el lugar donde ocurrió. Ajustes tiene los interruptores "Comunidad" y "Logros y rachas".
+
+CONTENIDO GENERADO POR USUARIOS
+- Reportar: en cada publicación ("···", "Reportar post"), cada respuesta ("···", "Reportar respuesta"), cada reseña y cada local.
+- Bloquear: en esos mismos menús ("Bloquear a @usuario") y en el perfil público del usuario. Los bloqueados se gestionan en Ajustes, "Usuarios bloqueados". Quien está bloqueado deja de verse en publicaciones, respuestas, reseñas y encuestas.
+- Eliminar: cada usuario puede borrar sus propias publicaciones y respuestas.
+- Un equipo de moderación revisa los reportes. Contacto de soporte: atencion.elpoint@gmail.com y, en la app, Ajustes, "Ayuda y soporte".
+- Eliminar la cuenta: Ajustes, "Eliminar cuenta".
+
+Notificaciones: las promociones llegan solo si el usuario las activa en Ajustes.
+
+PARA PROBAR EL PEDIDO
+Con la cuenta de comensal (o sin cuenta), abre "Restaurante Demo" y agrega platos al pedido. Elige "Delivery" y marca una ubicación en el mapa, o "Paso a buscarlo". Al tocar "Enviar pedido por WhatsApp" se abre WhatsApp con el mensaje armado (si el dispositivo no tiene WhatsApp, el botón avisa).
+
+Cuentas de prueba: ver abajo.
+```
+
 **Keywords (máx. 100 caracteres, separadas por comas, sin espacios):**
 
 ```
