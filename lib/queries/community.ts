@@ -364,7 +364,6 @@ export function errorCode(e: unknown): string {
 
 type FeedPages = InfiniteData<FeedItem[], Cursor>;
 
-/** Cambia una fila en todas las páginas de todos los feeds en caché. */
 /**
  * Cambia una fila en el feed y en el detalle abierto. `id` puede ser el de un
  * post, el de una reseña o el de su post-hilo: la reseña aparece con su id en el

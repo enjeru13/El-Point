@@ -2,6 +2,7 @@ import { ReportSheet, type ReportSheetHandle } from "@/components/ui/ReportSheet
 import { errorMessage } from "@/lib/community/topics";
 import { useBlockUser } from "@/lib/queries/blocks";
 import { useAuthGate } from "@/components/AuthGate";
+import { useIsGuest } from "@/lib/session";
 import { errorCode, openReviewThread, useDeletePost, useReportPost, useToggleLike, type FeedItem } from "@/lib/queries/community";
 import { useMyProfile } from "@/lib/queries/me";
 import { REPORT_REASONS } from "@/lib/queries/reviews";
@@ -21,6 +22,7 @@ export function usePostActions({ onDeleted }: { onDeleted?: () => void } = {}) {
   const { data: me } = useMyProfile();
   const toggleLike = useToggleLike();
   const { requireAuth } = useAuthGate();
+  const isGuest = useIsGuest();
   const deletePost = useDeletePost();
   const reportPost = useReportPost();
   const blockUser = useBlockUser();
@@ -40,6 +42,12 @@ export function usePostActions({ onDeleted }: { onDeleted?: () => void } = {}) {
   const onOpen = useCallback(
     (item: FeedItem) => {
       if (item.kind === "review") {
+        // Sin cuenta no se puede crear el hilo: si la reseña aún no tiene
+        // respuestas, se abre el local como antes.
+        if (isGuest && !item.threadPostId) {
+          if (item.restaurantId) router.push({ pathname: "/restaurant/[id]", params: { id: item.restaurantId } });
+          return;
+        }
         // Una reseña también es una conversación: se abre su hilo; el local queda en su tarjeta.
         openReviewThread(item).then(
           (postId) => router.push({ pathname: "/community/[id]", params: { id: postId } }),
@@ -49,7 +57,7 @@ export function usePostActions({ onDeleted }: { onDeleted?: () => void } = {}) {
         router.push({ pathname: "/community/[id]", params: { id: item.id } });
       }
     },
-    [router, toast],
+    [router, toast, isGuest],
   );
 
   const onOpenRestaurant = useCallback(
