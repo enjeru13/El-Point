@@ -30,6 +30,13 @@ const SIDE_MARGIN = 20;
 const DIM = "rgba(12,9,7,0.62)";
 
 /**
+ * Tours que se muestran. Un tour en cada pestaña interrumpía demasiado a quien
+ * recién llega: quedan el del inicio, el de Comunidad y el panel del dueño. El
+ * resto de las pantallas se explican solas. Para volver a activar uno, súmalo aquí.
+ */
+export const ACTIVE_TOURS = new Set(["home", "community", "owner_home"]);
+
+/**
  * First-use guided tour for one screen: dims everything but the current
  * target, draws a pulsing ring around it, and shows a small card with
  * "Saltar" / "Siguiente". Shows once per device (see lib/tour.ts), and
@@ -144,7 +151,7 @@ export function TourGuide({
   }, [measure]);
 
   useEffect(() => {
-    if (!ready || steps.length === 0) return;
+    if (!ready || steps.length === 0 || !ACTIVE_TOURS.has(tourKey)) return;
     let cancelled = false;
     hasSeenTour(tourKey).then((seen) => {
       if (!cancelled && !seen) setTimeout(() => !cancelled && start(), 700);

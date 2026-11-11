@@ -105,166 +105,6 @@ function HeroDiscover() {
   );
 }
 
-function HeroRank() {
-  const { C, shadow } = useTheme();
-  return (
-    <View style={{ width: 260, height: 220, alignItems: "center", justifyContent: "center" }}>
-      <View
-        style={{
-          width: 230,
-          padding: 16,
-          borderRadius: 24,
-          gap: 12,
-          backgroundColor: C.surface,
-          borderWidth: 1,
-          borderColor: C.border,
-          ...shadow.md,
-        }}
-      >
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <View
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: 19,
-              backgroundColor: C.primaryFixed,
-              alignItems: "center",
-              justifyContent: "center",
-              borderWidth: 1,
-              borderColor: C.border,
-            }}
-          >
-            <Icon name="account" size={20} color={C.primary} />
-          </View>
-          <View style={{ gap: 5 }}>
-            <View style={{ width: 90, height: 8, borderRadius: 99, backgroundColor: C.surfaceContainerHighest }} />
-            <View style={{ flexDirection: "row", gap: 2 }}>
-              {[0, 1, 2, 3, 4].map((i) => (
-                <Icon key={i} name="star" size={13} color={C.primary} fill={C.primary} />
-              ))}
-            </View>
-          </View>
-        </View>
-        <View style={{ gap: 6 }}>
-          <View style={{ width: "100%", height: 7, borderRadius: 99, backgroundColor: C.surfaceContainerHighest }} />
-          <View style={{ width: "80%", height: 7, borderRadius: 99, backgroundColor: C.surfaceContainerHighest }} />
-        </View>
-        <View
-          style={{
-            alignSelf: "flex-start",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-            borderRadius: 99,
-            backgroundColor: C.primary + "1f",
-          }}
-        >
-          <Icon name="fire" size={13} color={C.primary} />
-          <AppText variant="caption" color={C.primary}>
-            +10 XP
-          </AppText>
-        </View>
-      </View>
-    </View>
-  );
-}
-
-function HeroFavorites() {
-  const { C, shadow } = useTheme();
-  return (
-    <View style={{ width: 260, height: 220, alignItems: "center", justifyContent: "center" }}>
-      {/* tarjeta del corazón (opaca, con la card "guardada" detrás) */}
-      <View
-        style={{
-          position: "absolute",
-          width: 150,
-          height: 110,
-          borderRadius: 24,
-          backgroundColor: C.surfaceContainerHigh,
-          borderWidth: 1,
-          borderColor: C.border,
-          transform: [{ rotate: "-8deg" }, { translateX: -14 }, { translateY: 10 }],
-          ...shadow.sm,
-        }}
-      />
-      <View
-        style={{
-          width: 158,
-          height: 118,
-          borderRadius: 26,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: C.surface,
-          borderWidth: 1,
-          borderColor: C.border,
-          ...shadow.md,
-        }}
-      >
-        <View
-          style={{
-            width: 76,
-            height: 76,
-            borderRadius: 26,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: C.primaryFixed,
-            borderWidth: 1,
-            borderColor: C.border,
-          }}
-        >
-          <Icon name="heart" size={40} color={C.primary} fill={C.primary} />
-        </View>
-
-        {/* promo tag — enganchada a la esquina superior derecha */}
-        <View
-          style={{
-            position: "absolute",
-            top: -12,
-            right: -18,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-            paddingHorizontal: 11,
-            paddingVertical: 6,
-            borderRadius: 99,
-            backgroundColor: C.primary,
-            borderWidth: 1,
-            borderColor: C.border,
-            ...shadow.sm,
-          }}
-        >
-          <Icon name="tag" size={13} color={C.onPrimary} />
-          <AppText variant="caption" color={C.onPrimary}>
-            2x1 hoy
-          </AppText>
-        </View>
-
-        {/* campana — enganchada a la esquina inferior izquierda */}
-        <View
-          style={{
-            position: "absolute",
-            bottom: -14,
-            left: -14,
-            width: 40,
-            height: 40,
-            borderRadius: 14,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: C.secondaryContainer,
-            borderWidth: 1,
-            borderColor: C.border,
-            ...shadow.sm,
-          }}
-        >
-          <Icon name="bell-outline" size={18} color={C.secondary} />
-        </View>
-      </View>
-    </View>
-  );
-}
-
 function HeroOrder() {
   const { C, shadow } = useTheme();
   const row = (name: string, price: string, qty: number | null) => (
@@ -416,19 +256,7 @@ const SLIDES = [
     Hero: HeroDiscover,
     kicker: "Tu ciudad, con hambre",
     title: "Encuentra dónde comer\nen San Cristóbal",
-    body: "Descubre locales por antojo, por lo que queda cerca o por lo que está abierto ahora mismo. De la arepa de la esquina a la cena que te vas a acordar.",
-  },
-  {
-    Hero: HeroRank,
-    kicker: "Tu opinión pesa",
-    title: "Deja tu rank y\nhazte leyenda",
-    body: "Califica con estrellas, sube tus fotos y cuenta cómo te fue. Cada rank te da XP: sube de nivel, desbloquea rangos y guía a la comunidad.",
-  },
-  {
-    Hero: HeroFavorites,
-    kicker: "No te lo pierdas",
-    title: "Guarda tus sitios,\nagarra las promos",
-    body: "Marca tus locales favoritos y te avisamos al toque cuando publiquen una promo o el plato del día. El plan de hoy se decide solo.",
+    body: "Descubre locales por antojo, por lo que queda cerca o por lo que está abierto ahora mismo. Guarda tus favoritos y entérate de sus promos.",
   },
   {
     Hero: HeroOrder,
@@ -439,8 +267,8 @@ const SLIDES = [
   {
     Hero: HeroCommunity,
     kicker: "Pregunta a los que saben",
-    title: "Únete a\nla Comunidad",
-    body: "Pide recomendaciones, cuenta tus descubrimientos y responde a otros comensales de San Cristóbal. Participar también te da XP.",
+    title: "Opina y gana XP\nen la Comunidad",
+    body: "Deja tu rank, pide recomendaciones, vota en encuestas y responde a otros comensales. Participar te da XP: sube de nivel y de rango.",
   },
 ];
 
