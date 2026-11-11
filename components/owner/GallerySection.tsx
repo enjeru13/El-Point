@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { impact } from "@/lib/haptics";
 import { GALLERY_LIMIT, useGallery, useGalleryMutations, type GalleryPhoto } from "@/lib/queries/gallery";
+import { MENU_IMAGES_LIMIT, useMenuImages, useMenuImageMutations } from "@/lib/queries/menuImages";
 import type { OwnerRestaurant } from "@/lib/queries/owner";
+import type { UseMutationResult } from "@tanstack/react-query";
 import { useTheme } from "@/lib/ThemeContext";
 import { useToast } from "@/lib/toast";
 import { Image } from "expo-image";
@@ -27,10 +29,12 @@ type CellProps = {
   onCommit: (ids: string[]) => void;
   onDelete: (photo: GalleryPhoto) => void;
   onLock: (locked: boolean) => void;
+  /** Texto de la insignia de la primera foto; sin texto, no se muestra. */
+  firstBadge?: string;
 };
 
 /** Una foto de la cuadrícula: se levanta con un toque largo y se arrastra a su nuevo lugar. */
-function Cell({ photo, initialIndex, tile, count, order, activeId, onCommit, onDelete, onLock }: CellProps) {
+function Cell({ photo, initialIndex, tile, count, order, activeId, onCommit, onDelete, onLock, firstBadge }: CellProps) {
   const { C } = useTheme();
   const [index, setIndex] = useState(initialIndex);
   const mounted = useSharedValue(false);
@@ -136,9 +140,9 @@ function Cell({ photo, initialIndex, tile, count, order, activeId, onCommit, onD
           <Icon name="close" size={14} color="#fff" />
         </Pressable>
 
-        {index === 0 && (
+        {index === 0 && !!firstBadge && (
           <View style={{ position: "absolute", left: 6, bottom: 6, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99, backgroundColor: C.primary }}>
-            <AppText variant="caption" color="#fff" style={{ fontSize: 11 }}>Primera</AppText>
+            <AppText variant="caption" color="#fff" style={{ fontSize: 11 }}>{firstBadge}</AppText>
           </View>
         )}
       </Animated.View>
@@ -146,14 +150,39 @@ function Cell({ photo, initialIndex, tile, count, order, activeId, onCommit, onD
   );
 }
 
-/** Galería de fotos del local: cuadrícula de 3 x 3 (hasta 9) que se reordena arrastrando. */
-export function GallerySection({ restaurant }: { restaurant: OwnerRestaurant }) {
+type GridLabels = {
+  title: string;
+  /** "foto" o "imagen": cómo se cuenta en "3 de 9 fotos". */
+  noun: string;
+  nouns: string;
+  limit: number;
+  tipTitle: string;
+  tip: string;
+  emptyTitle: string;
+  emptyHint: string;
+  addTitle: string;
+  deleteTitle: string;
+  deleteMessage: string;
+  deletedToast: string;
+  firstBadge?: string;
+  icon: string;
+};
+
+type GridData = {
+  photos: GalleryPhoto[];
+  loading: boolean;
+  add: UseMutationResult<void, Error, { uri: string; position: number }>;
+  remove: UseMutationResult<void, Error, GalleryPhoto>;
+  reorder: UseMutationResult<void, Error, GalleryPhoto[]>;
+};
+
+/** Cuadrícula de 3 en 3 que se reordena arrastrando; la usan la galería y el menú en imágenes. */
+function PhotoGridEditor({ data, labels }: { data: GridData; labels: GridLabels }) {
   const { C } = useTheme();
   const toast = useToast();
   const lockScroll = useScrollLock();
-  const galleryQ = useGallery(restaurant.id);
-  const { add, remove, reorder } = useGalleryMutations(restaurant.id);
-  const photos = galleryQ.data ?? [];
+  const { photos, add, remove, reorder } = data;
+  const limit = labels.limit;
 
   const [pending, setPending] = useState(0);
   const [gridW, setGridW] = useState(0);
@@ -165,7 +194,7 @@ export function GallerySection({ restaurant }: { restaurant: OwnerRestaurant }) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [photos.map((p) => p.id).join(",")]);
 
-  const remaining = GALLERY_LIMIT - photos.length - pending;
+  const remaining = limit - photos.length - pending;
   const tile = gridW > 0 ? (gridW - GAP * (COLS - 1)) / COLS : 0;
   const step = tile + GAP;
   const slots = photos.length + pending + (remaining > 0 ? 1 : 0);
@@ -179,7 +208,7 @@ export function GallerySection({ restaurant }: { restaurant: OwnerRestaurant }) 
       try {
         await add.mutateAsync({ uri, position: position++ });
       } catch (e: any) {
-        toast.error(e?.message ?? "No se pudo subir una foto");
+        toast.error(e?.message ?? `No se pudo subir una ${labels.noun}`);
       } finally {
         setPending((n) => n - 1);
       }
@@ -187,8 +216,8 @@ export function GallerySection({ restaurant }: { restaurant: OwnerRestaurant }) 
   }
 
   function addPhotos() {
-    if (remaining <= 0) return toast.info(`Ya tienes ${GALLERY_LIMIT} fotos. Elimina una para agregar otra.`);
-    Alert.alert("Agregar fotos", undefined, [
+    if (remaining <= 0) return toast.info(`Ya tienes ${limit} ${labels.nouns}. Elimina una para agregar otra.`);
+    Alert.alert(labels.addTitle, undefined, [
       {
         text: "Tomar foto",
         onPress: async () => {
@@ -219,12 +248,12 @@ export function GallerySection({ restaurant }: { restaurant: OwnerRestaurant }) 
   }
 
   function confirmDelete(photo: GalleryPhoto) {
-    Alert.alert("Eliminar foto", "Se borrará de tu galería. ¿Continuar?", [
+    Alert.alert(labels.deleteTitle, labels.deleteMessage, [
       { text: "Cancelar", style: "cancel" },
       {
         text: "Eliminar",
         style: "destructive",
-        onPress: () => remove.mutate(photo, { onSuccess: () => toast.success("Foto eliminada"), onError: (e) => toast.error((e as Error).message) }),
+        onPress: () => remove.mutate(photo, { onSuccess: () => toast.success(labels.deletedToast), onError: (e) => toast.error((e as Error).message) }),
       },
     ]);
   }
@@ -234,28 +263,26 @@ export function GallerySection({ restaurant }: { restaurant: OwnerRestaurant }) 
   return (
     <View style={{ gap: 12 }}>
       <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", paddingHorizontal: 4 }}>
-        <AppText variant="heading" style={{ fontSize: 18 }}>Galería</AppText>
-        <AppText variant="label" color={count >= GALLERY_LIMIT ? C.primary : C.onSurfaceVariant}>{count} de {GALLERY_LIMIT} fotos</AppText>
+        <AppText variant="heading" style={{ fontSize: 18 }}>{labels.title}</AppText>
+        <AppText variant="label" color={count >= limit ? C.primary : C.onSurfaceVariant}>{count} de {limit} {labels.nouns}</AppText>
       </View>
 
       <View style={{ flexDirection: "row", gap: 10, padding: 14, borderRadius: 16, backgroundColor: C.primaryFixed, borderWidth: 1, borderColor: C.border }}>
         <Icon name="lightbulb-on-outline" size={20} color={C.primary} />
         <View style={{ flex: 1, gap: 2 }}>
-          <AppText variant="bodyStrong">Que se te antoje</AppText>
-          <AppText variant="bodySm" color={C.onSurfaceVariant}>
-            Fotos de tus platos, de frente y con buena luz. Con 3 o más, tu perfil se ve completo. La primera es la que más se ve.
-          </AppText>
+          <AppText variant="bodyStrong">{labels.tipTitle}</AppText>
+          <AppText variant="bodySm" color={C.onSurfaceVariant}>{labels.tip}</AppText>
         </View>
       </View>
 
-      {galleryQ.isLoading ? (
+      {data.loading ? (
         <ActivityIndicator color={C.primary} style={{ paddingVertical: 24 }} />
       ) : count === 0 && pending === 0 ? (
         <View style={{ alignItems: "center", gap: 10, padding: 24, borderRadius: 20, borderWidth: 1.5, borderStyle: "dashed", borderColor: C.outlineVariant, backgroundColor: C.surface }}>
-          <Icon name="image-multiple-outline" size={34} color={C.primary} />
-          <AppText variant="bodyStrong" align="center">Aún no tienes fotos</AppText>
-          <AppText variant="bodySm" color={C.onSurfaceVariant} align="center">Agrega hasta {GALLERY_LIMIT}: tus platos, tu local, tu ambiente.</AppText>
-          <Button label="Agregar fotos" onPress={addPhotos} icon="plus" fullWidth={false} style={{ alignSelf: "center" }} />
+          <Icon name={labels.icon} size={34} color={C.primary} />
+          <AppText variant="bodyStrong" align="center">{labels.emptyTitle}</AppText>
+          <AppText variant="bodySm" color={C.onSurfaceVariant} align="center">{labels.emptyHint}</AppText>
+          <Button label={labels.addTitle} onPress={addPhotos} icon="plus" fullWidth={false} style={{ alignSelf: "center" }} />
         </View>
       ) : (
         <>
@@ -263,7 +290,7 @@ export function GallerySection({ restaurant }: { restaurant: OwnerRestaurant }) 
             {tile > 0 && (
               <>
                 {photos.map((p, i) => (
-                  <Cell key={p.id} photo={p} initialIndex={i} tile={tile} count={count} order={order} activeId={activeId} onCommit={commit} onDelete={confirmDelete} onLock={lockScroll} />
+                  <Cell key={p.id} photo={p} initialIndex={i} tile={tile} count={count} order={order} activeId={activeId} onCommit={commit} onDelete={confirmDelete} onLock={lockScroll} firstBadge={labels.firstBadge} />
                 ))}
                 {Array.from({ length: pending }).map((_, i) => (
                   <View key={`p${i}`} style={[{ position: "absolute", width: tile, height: tile, borderRadius: 14, backgroundColor: C.surfaceContainerHighest, alignItems: "center", justifyContent: "center", gap: 6 }, slotXY(count + i)]}>
@@ -292,5 +319,61 @@ export function GallerySection({ restaurant }: { restaurant: OwnerRestaurant }) 
         </>
       )}
     </View>
+  );
+}
+
+/** Galería de fotos del local: cuadrícula de 3 x 3 (hasta 9) que se reordena arrastrando. */
+export function GallerySection({ restaurant }: { restaurant: OwnerRestaurant }) {
+  const galleryQ = useGallery(restaurant.id);
+  const { add, remove, reorder } = useGalleryMutations(restaurant.id);
+  return (
+    <PhotoGridEditor
+      data={{ photos: galleryQ.data ?? [], loading: galleryQ.isLoading, add, remove, reorder }}
+      labels={{
+        title: "Galería",
+        noun: "foto",
+        nouns: "fotos",
+        limit: GALLERY_LIMIT,
+        tipTitle: "Que se te antoje",
+        tip: "Fotos de tus platos, de frente y con buena luz. Con 3 o más, tu perfil se ve completo. La primera es la que más se ve.",
+        emptyTitle: "Aún no tienes fotos",
+        emptyHint: `Agrega hasta ${GALLERY_LIMIT}: tus platos, tu local, tu ambiente.`,
+        addTitle: "Agregar fotos",
+        deleteTitle: "Eliminar foto",
+        deleteMessage: "Se borrará de tu galería. ¿Continuar?",
+        deletedToast: "Foto eliminada",
+        firstBadge: "Primera",
+        icon: "image-multiple-outline",
+      }}
+    />
+  );
+}
+
+/**
+ * Menú en imágenes: las páginas de tu carta (hasta 10), aparte de la galería.
+ * Sirve cuando manejas el menú por fotos y no por PDF.
+ */
+export function MenuImagesSection({ restaurant }: { restaurant: OwnerRestaurant }) {
+  const menuQ = useMenuImages(restaurant.id);
+  const { add, remove, reorder } = useMenuImageMutations(restaurant.id);
+  return (
+    <PhotoGridEditor
+      data={{ photos: menuQ.data ?? [], loading: menuQ.isLoading, add, remove, reorder }}
+      labels={{
+        title: "Menú en imágenes",
+        noun: "imagen",
+        nouns: "imágenes",
+        limit: MENU_IMAGES_LIMIT,
+        tipTitle: "Tu carta, página por página",
+        tip: "Sube una foto por página, derecha y con buena luz, para que se lea. Se ven aparte de tu galería y se pueden ampliar con los dedos.",
+        emptyTitle: "Aún no tienes menú en imágenes",
+        emptyHint: `Agrega hasta ${MENU_IMAGES_LIMIT} imágenes de tu carta.`,
+        addTitle: "Agregar imágenes",
+        deleteTitle: "Eliminar imagen",
+        deleteMessage: "Se quitará de tu menú. ¿Continuar?",
+        deletedToast: "Imagen eliminada",
+        icon: "file-image-outline",
+      }}
+    />
   );
 }

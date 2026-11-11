@@ -3,6 +3,7 @@ import { AppTextInput } from "@/components/ui/AppTextInput";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { Icon } from "@/components/ui/Icon";
+import { MenuImagesSection } from "@/components/owner/GallerySection";
 import { ReorderSection } from "@/components/owner/ReorderSection";
 import { convertAmount, formatMoney, priceLines, useEffectiveRates } from "@/lib/queries/exchangeRate";
 import { useUpdateMyRestaurant, type OwnerRestaurant } from "@/lib/queries/owner";
@@ -643,6 +644,9 @@ export function MenuEditor({ restaurant }: { restaurant: OwnerRestaurant }) {
           )}
         </View>
       </View>
+
+      {/* Menú en imágenes: aparte de la galería */}
+      <MenuImagesSection restaurant={restaurant} />
 
       <CurrencySheet visible={currencyOpen} onClose={() => setCurrencyOpen(false)} restaurant={restaurant} items={items} />
 

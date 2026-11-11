@@ -63,7 +63,15 @@ export async function uploadGalleryPhoto(restaurantId: string, uri: string) {
   return { path, url: await publicUrl(RESTAURANT_BUCKET, path) };
 }
 
-/** Borra el archivo de una foto de la galería (la fila se borra aparte). */
+/** Una imagen del menú ("<local>/menu-pages/<archivo>.jpg"): carpeta aparte de la galería. */
+export async function uploadMenuImage(restaurantId: string, uri: string) {
+  const name = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  const path = `${restaurantId}/menu-pages/${name}.jpg`;
+  await putImage(RESTAURANT_BUCKET, path, uri);
+  return { path, url: await publicUrl(RESTAURANT_BUCKET, path) };
+}
+
+/** Borra el archivo de una foto de la galería o del menú (la fila se borra aparte). */
 export async function removeGalleryFile(path: string) {
   await supabase.storage.from(RESTAURANT_BUCKET).remove([path]);
 }

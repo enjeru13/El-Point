@@ -11,7 +11,17 @@ import { FlatList, Pressable, View, useWindowDimensions } from "react-native";
  * Fotos del local para el comensal: una tira que se desliza y, al tocar una,
  * un visor a pantalla completa con zoom y paso entre fotos deslizando.
  */
-export function GalleryStrip({ photos }: { photos: GalleryPhoto[] }) {
+export function GalleryStrip({
+  photos,
+  title = "Fotos",
+  icon = "image-multiple-outline",
+  viewerTitle = "Fotos del local",
+}: {
+  photos: GalleryPhoto[];
+  title?: string;
+  icon?: string;
+  viewerTitle?: string;
+}) {
   const { C } = useTheme();
   const { width: winW } = useWindowDimensions();
   const [open, setOpen] = useState<number | null>(null);
@@ -22,8 +32,8 @@ export function GalleryStrip({ photos }: { photos: GalleryPhoto[] }) {
   return (
     <View style={{ gap: 12 }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-        <Icon name="image-multiple-outline" size={18} color={C.primary} />
-        <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>Fotos</AppText>
+        <Icon name={icon} size={18} color={C.primary} />
+        <AppText variant="heading" style={{ fontSize: 20, lineHeight: 25 }}>{title}</AppText>
       </View>
 
       <FlatList
@@ -44,7 +54,7 @@ export function GalleryStrip({ photos }: { photos: GalleryPhoto[] }) {
         )}
       />
 
-      <PhotoViewer urls={photos.map((p) => p.url)} startAt={open} onClose={() => setOpen(null)} title="Fotos del local" />
+      <PhotoViewer urls={photos.map((p) => p.url)} startAt={open} onClose={() => setOpen(null)} title={viewerTitle} />
     </View>
   );
 }

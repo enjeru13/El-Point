@@ -49,6 +49,7 @@ import { OrderSheet, type OrderSheetHandle } from "@/components/restaurant/Order
 import { GalleryStrip } from "@/components/restaurant/GalleryStrip";
 import { PhotoViewer } from "@/components/ui/PhotoViewer";
 import { useGallery } from "@/lib/queries/gallery";
+import { useMenuImages } from "@/lib/queries/menuImages";
 import { useFavoriteIds, useToggleFavorite } from "@/lib/queries/feed";
 import { useToast } from "@/lib/toast";
 import { impact } from "@/lib/haptics";
@@ -513,6 +514,7 @@ export default function RestaurantProfileScreen() {
   // Menú con precios: solo se pide si el local tiene plan (sin plan el servidor tampoco lo entrega).
   const menuQ = useMenu(id, !!restaurantQ.data?.has_plan);
   const galleryQ = useGallery(id, !!restaurantQ.data?.has_plan);
+  const menuImagesQ = useMenuImages(id, !!restaurantQ.data?.has_plan);
   // Moneda y tasas del menú: las comparten el menú, la barra y la hoja del pedido.
   const menuSet = useMemo(() => menuSettings(restaurantQ.data ?? {}), [restaurantQ.data]);
   const effRates = useEffectiveRates(menuSet);
@@ -628,7 +630,7 @@ export default function RestaurantProfileScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await Promise.all([restaurantQ.refetch(), reviewsQ.refetch(), menuQ.refetch(), galleryQ.refetch()]);
+      await Promise.all([restaurantQ.refetch(), reviewsQ.refetch(), menuQ.refetch(), galleryQ.refetch(), menuImagesQ.refetch()]);
     } finally {
       setRefreshing(false);
     }
@@ -1450,6 +1452,11 @@ export default function RestaurantProfileScreen() {
               restaurantId={restaurant.id}
               orderable={orderable}
             />
+          )}
+
+          {/* ── Menú en imágenes ── */}
+          {restaurant.has_plan && (menuImagesQ.data?.length ?? 0) > 0 && (
+            <GalleryStrip photos={menuImagesQ.data!} title="Menú en imágenes" icon="file-image-outline" viewerTitle="Menú" />
           )}
 
           {/* ── Menú PDF ── */}

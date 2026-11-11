@@ -7,6 +7,7 @@ import { DEFAULT_HOURS, caracasToday, formatRange } from "@/lib/hours";
 import { hasPlan } from "@/lib/plan";
 import { activePromo, promoEndLabel } from "@/lib/promo";
 import { GALLERY_LIMIT, useGallery } from "@/lib/queries/gallery";
+import { useMenuImages } from "@/lib/queries/menuImages";
 import { currencySymbol, isSpecialActive, useMenu } from "@/lib/queries/menu";
 import { useMyRestaurant, type OwnerRestaurant } from "@/lib/queries/owner";
 import { capWidth, useIsTablet } from "@/lib/responsive";
@@ -39,6 +40,7 @@ export default function MyLocalScreen() {
   const plan = !!r && hasPlan(r);
   const menuQ = useMenu(r?.id, plan);
   const galleryQ = useGallery(r?.id, plan);
+  const menuImagesQ = useMenuImages(r?.id, plan);
   const { data: communitySettings } = useAppSettings();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -63,7 +65,7 @@ export default function MyLocalScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await Promise.all([restaurantQ.refetch(), menuQ.refetch(), galleryQ.refetch()]);
+      await Promise.all([restaurantQ.refetch(), menuQ.refetch(), galleryQ.refetch(), menuImagesQ.refetch()]);
     } finally {
       setRefreshing(false);
     }
@@ -111,7 +113,7 @@ export default function MyLocalScreen() {
         ? "Platos con precio, plato del día y PDF"
         : menuItems.length === 0
           ? "Aún sin platos"
-          : `${menuItems.length} ${menuItems.length === 1 ? "plato" : "platos"}${special ? ` · hoy: ${special.name}` : ""}${r.menu_pdf_url ? " · con PDF" : ""}`,
+          : `${menuItems.length} ${menuItems.length === 1 ? "plato" : "platos"}${special ? ` · hoy: ${special.name}` : ""}${r.menu_pdf_url ? " · con PDF" : ""}${menuImagesQ.data?.length ? ` · ${menuImagesQ.data.length} ${menuImagesQ.data.length === 1 ? "imagen" : "imágenes"}` : ""}`,
       locked: !plan,
     },
     {

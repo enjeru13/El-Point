@@ -15,11 +15,11 @@ Estado: `[ ]` pendiente · `[x]` hecho
 
 - [ ] **Más categorías de comida.** Ampliar la lista. Referencia: migraciones `20260910213000_categories_revamp.sql` y `20261009*`, y el ícono de cada una en `components/ui/Icon.tsx`. Hay que decidir cuáles (ver abajo).
 - [x] **Responder y abrir hilos en las reseñas de Comunidad.** Hecho en código (falta correr la migración `20261112000000_review_threads.sql` y probar en el teléfono). Cada reseña con respuestas tiene un "post-hilo" (`posts.review_id`); las respuestas reutilizan avisos, menciones, XP y moderación de los posts. Tocar una reseña en el feed abre su conversación; el local queda en su tarjeta. Pruebas SQL: `supabase/tests/review_threads.sql`.
-- [ ] **Menú en imágenes sin gastar las 9 fotos de la galería.** Si el local maneja el menú por imágenes y no por PDF, hoy tiene que subirlo en las mismas 9 fotos de la galería. Separar: una sección "Menú en imágenes" con su propio límite, y que se vea en la página del local. Archivos: Mi local → Fotos (`app/(owner)/profile.tsx`), `lib/plan.ts`, `lib/faq.ts`, y el almacenamiento de fotos del local. Necesita decidir el límite y probablemente migración.
+- [x] **Menú en imágenes sin gastar las 9 fotos de la galería.** Hecho en código (falta correr la migración `20261112010000_menu_images.sql` y probar en el teléfono). Tabla propia `restaurant_menu_images`, tope de 10, misma regla de plan que la galería. El dueño la edita al final de Mi local → Menú; el comensal la ve en una tira "Menú en imágenes" sobre el botón del PDF, con visor y zoom. Pruebas SQL: `supabase/tests/menu_images.sql`.
 
 ## Preguntas abiertas
 
 1. Categorías nuevas: ya van pasteles o desayunos y cachapas; el usuario pasa el resto de la lista.
-2. ¿Cuántas imágenes de menú por local? (propuesta: 10)
+2. Imágenes de menú por local: 10 (confirmado).
 3. ¿Video promocional del local? Idea aparte de las 9 fotos, ver conversación del 2026-11-11.
 4. En las reseñas de Comunidad, ¿las respuestas las ve solo quien abre la reseña o también salen en el feed como en los posts?
