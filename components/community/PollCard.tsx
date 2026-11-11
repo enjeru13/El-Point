@@ -1,6 +1,7 @@
 import { AppText } from "@/components/ui/AppText";
 import { Icon } from "@/components/ui/Icon";
 import { impact } from "@/lib/haptics";
+import { useAuthGate } from "@/components/AuthGate";
 import { errorCode, useVotePoll, type PollState } from "@/lib/queries/community";
 import { useTheme } from "@/lib/ThemeContext";
 import { useToast } from "@/lib/toast";
@@ -28,12 +29,14 @@ export function PollCard({ postId, poll, disabled }: { postId: string; poll: Pol
   const router = useRouter();
   const toast = useToast();
   const vote = useVotePoll();
+  const { requireAuth } = useAuthGate();
   const showResults = poll.closed || !!poll.my_option;
   const max = Math.max(0, ...poll.options.map((o) => o.votes ?? 0));
   const winner = poll.closed && poll.total > 0 ? poll.options.find((o) => (o.votes ?? 0) === max) : undefined;
 
   const onVote = (optionId: string) => {
     if (poll.closed || disabled || vote.isPending || optionId === poll.my_option) return;
+    if (!requireAuth("vote")) return;
     impact("light");
     vote.mutate(
       { postId, optionId },

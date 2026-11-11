@@ -1,3 +1,5 @@
+import { GuestProfile } from '@/components/GuestProfile';
+import { useIsGuest } from '@/lib/session';
 import { Icon } from '@/components/ui/Icon';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
@@ -59,7 +61,12 @@ function XPBar({ pct }: { pct: number }) {
   );
 }
 
+/** Con cuenta: el perfil completo. Sin cuenta: qué gana al crearla (components/GuestProfile). */
 export default function ProfileScreen() {
+  return useIsGuest() ? <GuestProfile /> : <MemberProfile />;
+}
+
+function MemberProfile() {
   const { C, shadow } = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();

@@ -2696,6 +2696,7 @@ export type Database = {
       }
       get_public_post: { Args: { p_post_id: string }; Returns: Json }
       open_review_thread: { Args: { p_review: string }; Returns: string }
+      public_post_replies: { Args: { p_post: string }; Returns: Json }
       get_public_profile: { Args: { p_user_id: string }; Returns: Json }
       get_restaurant_contact: {
         Args: { p_restaurant_id: string }

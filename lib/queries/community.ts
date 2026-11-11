@@ -209,11 +209,55 @@ export type Reply = {
 
 export const repliesKey = (postId: string) => ["community-replies", postId] as const;
 
+type GuestReplyRow = {
+  id: string;
+  post_id: string;
+  parent_reply_id: string | null;
+  like_count: number;
+  author_deleted_at: string | null;
+  body: string;
+  created_at: string;
+  restaurant_id: string | null;
+  restaurant: { name: string } | null;
+  as_restaurant: { name: string; logo_url: string | null } | null;
+  author: { full_name: string | null; username: string | null; avatar_url: string | null } | null;
+};
+
+/**
+ * Las respuestas de un post para quien no tiene cuenta. Las tablas siguen cerradas:
+ * public_post_replies devuelve solo lo visible y sin ids de personas.
+ */
+async function fetchGuestReplies(postId: string): Promise<Reply[]> {
+  const { data, error } = await supabase.rpc("public_post_replies", { p_post: postId });
+  if (error) throw error;
+  return ((data ?? []) as unknown as GuestReplyRow[]).map((r) => ({
+    id: r.id,
+    postId: r.post_id,
+    authorId: "",
+    authorName: r.author?.full_name ?? r.author?.username ?? null,
+    authorAvatar: r.author?.avatar_url ?? null,
+    authorUsername: r.author?.username ?? null,
+    asRestaurantId: r.as_restaurant ? "local" : null,
+    asRestaurantName: r.as_restaurant?.name ?? null,
+    asRestaurantLogo: r.as_restaurant?.logo_url ?? null,
+    restaurantId: r.restaurant_id,
+    restaurantName: r.restaurant?.name ?? null,
+    body: r.author_deleted_at ? "" : r.body,
+    createdAt: r.created_at,
+    parentReplyId: r.parent_reply_id,
+    likeCount: r.like_count ?? 0,
+    likedByMe: false,
+    removed: !!r.author_deleted_at,
+  }));
+}
+
 export function usePostReplies(postId: string | undefined, blockedIds?: Set<string>) {
   return useQuery({
     queryKey: repliesKey(postId ?? ""),
     enabled: !!postId,
     queryFn: async (): Promise<Reply[]> => {
+      const { data: session } = await getSessionUser();
+      if (!session.user) return fetchGuestReplies(postId!);
       const { data, error } = await supabase
         .from("post_replies")
         .select(

@@ -1,6 +1,7 @@
 import { ReportSheet, type ReportSheetHandle } from "@/components/ui/ReportSheet";
 import { errorMessage } from "@/lib/community/topics";
 import { useBlockUser } from "@/lib/queries/blocks";
+import { useAuthGate } from "@/components/AuthGate";
 import { errorCode, openReviewThread, useDeletePost, useReportPost, useToggleLike, type FeedItem } from "@/lib/queries/community";
 import { useMyProfile } from "@/lib/queries/me";
 import { REPORT_REASONS } from "@/lib/queries/reviews";
@@ -19,18 +20,21 @@ export function usePostActions({ onDeleted }: { onDeleted?: () => void } = {}) {
   const toast = useToast();
   const { data: me } = useMyProfile();
   const toggleLike = useToggleLike();
+  const { requireAuth } = useAuthGate();
   const deletePost = useDeletePost();
   const reportPost = useReportPost();
   const blockUser = useBlockUser();
   const reportRef = useRef<ReportSheetHandle>(null);
 
   const onToggleLike = useCallback(
-    (item: FeedItem) =>
+    (item: FeedItem) => {
+      if (!requireAuth("like")) return;
       toggleLike.mutate(
         { item, liked: item.viewerLiked },
         { onError: () => toast.error("No pudimos guardar tu me gusta. Revisa tu conexión.") },
-      ),
-    [toggleLike, toast],
+      );
+    },
+    [toggleLike, toast, requireAuth],
   );
 
   const onOpen = useCallback(
@@ -55,6 +59,7 @@ export function usePostActions({ onDeleted }: { onDeleted?: () => void } = {}) {
 
   const onMenu = useCallback(
     (item: FeedItem) => {
+      if (!requireAuth("report")) return;
       const mine = me?.id === item.authorId;
       const name = item.asRestaurantName ?? item.authorName ?? "esta persona";
       if (mine) {
@@ -108,7 +113,7 @@ export function usePostActions({ onDeleted }: { onDeleted?: () => void } = {}) {
         { text: "Cancelar", style: "cancel" as const },
       ]);
     },
-    [me?.id, deletePost, blockUser, toast, onDeleted],
+    [me?.id, deletePost, blockUser, toast, onDeleted, requireAuth],
   );
 
   const reportSheet = (

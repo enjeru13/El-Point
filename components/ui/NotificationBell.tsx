@@ -1,3 +1,4 @@
+import { useAuthGate } from "@/components/AuthGate";
 import { Icon } from "@/components/ui/Icon";
 import {
   NotificationsHandle,
@@ -12,11 +13,15 @@ export function NotificationBell() {
   const { C } = useTheme();
   const ref = useRef<NotificationsHandle>(null);
   const { unread } = useVisibleNotifications();
+  const { requireAuth } = useAuthGate();
 
   return (
     <>
       <Pressable
-        onPress={() => ref.current?.present()}
+        onPress={() => {
+          if (!requireAuth("notifications")) return;
+          ref.current?.present();
+        }}
         style={{
           width: 40,
           height: 40,

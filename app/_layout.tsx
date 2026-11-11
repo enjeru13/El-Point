@@ -32,6 +32,9 @@ import { OrderCartProvider } from '@/lib/orderCart';
 import { AppThemeProvider, useTheme } from '@/lib/ThemeContext';
 import { hasSeenOnboarding, markOnboardingSeen } from '@/lib/onboarding';
 import { isAuthFlowActive } from '@/lib/authFlow';
+import { guestMayStayOn } from '@/lib/guestAccess';
+import { SessionProvider } from '@/lib/session';
+import { AuthGateProvider } from '@/components/AuthGate';
 import { startHeartbeat } from '@/lib/heartbeat';
 import { SettingsBridge } from '@/components/SettingsBridge';
 import { PushBridge } from '@/components/PushBridge';
@@ -174,14 +177,14 @@ export default function RootLayout() {
     const inAuth = root === '(auth)';
     const inOwner = root === '(owner)';
     const inCustomer = root === '(customer)';
-    // Screens a signed-out user is allowed to sit on without being bounced.
-    const openWhileOut = inAuth || root === 'legal' || root === 'onboarding';
-
+    // Sin cuenta: la primera vez ve el onboarding; después puede explorar la app
+    // como visitante (inicio, mapa, búsqueda, locales y Comunidad en lectura).
+    // Lo que guarda algo suyo le pide cuenta en el momento (components/AuthGate).
     if (!session) {
       if (!onboardingSeen) {
-        if (!openWhileOut) router.replace('/onboarding');
-      } else if (!openWhileOut || root === 'onboarding') {
-        router.replace('/(auth)/login');
+        if (!(inAuth || root === 'legal' || root === 'onboarding')) router.replace('/onboarding');
+      } else if (root === 'onboarding' || !guestMayStayOn(root)) {
+        router.replace('/(customer)');
       }
       setNavReady(true);
       return;
@@ -229,9 +232,11 @@ export default function RootLayout() {
       <AppThemeProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <BottomSheetModalProvider>
-            <OrderCartProvider>
-              <NavShell />
-            </OrderCartProvider>
+            <SessionProvider value={session}>
+              <OrderCartProvider>
+                <NavShell />
+              </OrderCartProvider>
+            </SessionProvider>
           </BottomSheetModalProvider>
         </GestureHandlerRootView>
       </AppThemeProvider>
@@ -253,7 +258,9 @@ function NavShell() {
       <ToastProvider>
         <SettingsBridge />
         <PushBridge />
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: C.background } }} />
+        <AuthGateProvider>
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: C.background } }} />
+        </AuthGateProvider>
       </ToastProvider>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
     </ThemeProvider>

@@ -464,9 +464,15 @@ export default function OnboardingScreen() {
 
   const last = page === SLIDES.length - 1;
 
+  /** Ya tengo cuenta. */
   function finish() {
     markOnboardingSeen();
     router.replace("/(auth)/login");
+  }
+  /** Explorar sin cuenta: pide registro solo cuando haga falta. */
+  function explore() {
+    markOnboardingSeen();
+    router.replace("/(customer)");
   }
   function goRegister() {
     markOnboardingSeen();
@@ -475,7 +481,7 @@ export default function OnboardingScreen() {
     setTimeout(() => router.push("/(auth)/register"), 0);
   }
   function next() {
-    if (last) return goRegister();
+    if (last) return explore();
     scrollRef.current?.scrollTo({ x: W * (page + 1), animated: true });
   }
   function onScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
@@ -635,7 +641,8 @@ export default function OnboardingScreen() {
 
         {last ? (
           <View style={{ gap: 10 }}>
-            <Button label="Crear cuenta" onPress={goRegister} iconTrailing="arrow-right" />
+            <Button label="Explorar El Point" onPress={explore} iconTrailing="arrow-right" />
+            <Button label="Crear cuenta" onPress={goRegister} variant="secondary" />
             <Pressable onPress={finish} style={{ alignSelf: "center", paddingVertical: 6 }} hitSlop={8}>
               <AppText variant="bodyStrong" color={C.primary}>
                 Ya tengo cuenta

@@ -40,6 +40,8 @@ import { useMemo, useRef, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { KEYBOARD_DISMISS } from "@/lib/keyboard";
+import { useAuthGate } from "@/components/AuthGate";
+import { useIsGuest } from "@/lib/session";
 
 export default function PostDetailScreen() {
   const { C } = useTheme();
@@ -55,6 +57,8 @@ export default function PostDetailScreen() {
   const categoryLabels = useMemo(() => new Map(categories.map((c) => [c.id, c.label])), [categories]);
   const actions = usePostActions({ onDeleted: () => router.back() });
   const me = actions.me;
+  const { requireAuth } = useAuthGate();
+  const isGuest = useIsGuest();
   const { data: myRestaurant } = useMyRestaurant();
   const isOwner = me?.role === "restaurant_owner" && !!myRestaurant;
   const asRestaurantId = isOwner ? myRestaurant!.id : null;
@@ -107,6 +111,7 @@ export default function PostDetailScreen() {
   };
 
   const onReplyMenu = (r: Reply) => {
+    if (!requireAuth("report")) return;
     if (r.authorId === me?.id) {
       Alert.alert("Tu respuesta", undefined, [
         {
@@ -134,10 +139,12 @@ export default function PostDetailScreen() {
   const handleOf = (r: Reply | undefined) =>
     r ? (r.asRestaurantName ?? (r.authorUsername ? r.authorUsername : (r.authorName ?? "alguien"))) : null;
   const startReply = (r: Reply) => {
+    if (!requireAuth("reply")) return;
     setReplyTo(r);
     inputRef.current?.focus();
   };
   const likeReply = (r: Reply) => {
+    if (!requireAuth("like")) return;
     impact("light");
     toggleReplyLike.mutate({ replyId: r.id, like: !r.likedByMe });
   };
@@ -258,7 +265,39 @@ export default function PostDetailScreen() {
         </ScrollView>
 
         {/* Responder */}
+        {item && isGuest && (
+          <View
+            style={{
+              borderTopWidth: 1,
+              borderTopColor: C.outlineVariant,
+              paddingHorizontal: 16,
+              paddingTop: 12,
+              paddingBottom: insets.bottom + 12,
+            }}
+          >
+            <Pressable
+              onPress={() => requireAuth("reply")}
+              accessibilityRole="button"
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                minHeight: 48,
+                paddingHorizontal: 16,
+                borderRadius: 24,
+                backgroundColor: C.surfaceContainerHigh,
+              }}
+            >
+              <Icon name="message-circle" size={20} color={C.primary} />
+              <AppText variant="body" color={C.onSurfaceVariant} style={{ flex: 1 }}>
+                Crea tu cuenta para responder
+              </AppText>
+              <Icon name="chevron-right" size={18} color={C.outline} />
+            </Pressable>
+          </View>
+        )}
         {item &&
+          !isGuest &&
           (ownerCanReply ? (
             <View
               style={{

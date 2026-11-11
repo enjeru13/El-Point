@@ -46,6 +46,7 @@ import { cartCount, cartTotal, pruneCart, type MenuLine } from "@/lib/order";
 import { convertAmount, formatMoney } from "@/lib/money";
 import { OrderBar, ORDER_BAR_HEIGHT } from "@/components/restaurant/OrderBar";
 import { OrderSheet, type OrderSheetHandle } from "@/components/restaurant/OrderSheet";
+import { useAuthGate } from "@/components/AuthGate";
 import { GalleryStrip } from "@/components/restaurant/GalleryStrip";
 import { PhotoViewer } from "@/components/ui/PhotoViewer";
 import { useGallery } from "@/lib/queries/gallery";
@@ -534,6 +535,7 @@ export default function RestaurantProfileScreen() {
   }
   const favIdsQ = useFavoriteIds();
   const toggleFav = useToggleFavorite();
+  const { requireAuth } = useAuthGate();
   const toast = useToast();
   // Alto real del bloque nombre/categorías/estrellas sobre la foto, medido
   // -- el scrim debajo usa este valor en vez de un alto fijo adivinado, así
@@ -544,6 +546,7 @@ export default function RestaurantProfileScreen() {
   const saved = !!id && (favIdsQ.data?.has(id) ?? false);
   function onToggleSave() {
     if (!id) return;
+    if (!requireAuth("favorite")) return;
     impact("light");
     toggleFav.mutate(
       { restaurantId: id, favorited: saved },
@@ -777,6 +780,7 @@ export default function RestaurantProfileScreen() {
   }
 
   function startCreateReview() {
+    if (!requireAuth("rank")) return;
     setEditingReview(null);
     reviewSheetRef.current?.present();
   }
@@ -2045,6 +2049,7 @@ export default function RestaurantProfileScreen() {
                     ) : (
                       <Pressable
                         onPress={() => {
+                          if (!requireAuth("helpful")) return;
                           impact("light");
                           toggleHelpful.mutate({
                             reviewId: r.id,
@@ -2122,7 +2127,10 @@ export default function RestaurantProfileScreen() {
 
           {!restaurant.owner_id && !!myProfileQ.data && (
             <Pressable
-              onPress={() => router.push(`/claim/${restaurant.id}`)}
+              onPress={() => {
+                if (!requireAuth("claim")) return;
+                router.push(`/claim/${restaurant.id}`);
+              }}
               accessibilityRole="button"
               style={{
                 flexDirection: "row",
@@ -2149,7 +2157,10 @@ export default function RestaurantProfileScreen() {
 
           {!isOwnerHere && !!myProfileQ.data && (
             <Pressable
-              onPress={() => restaurantReportSheetRef.current?.present(restaurant.id)}
+              onPress={() => {
+                if (!requireAuth("report")) return;
+                restaurantReportSheetRef.current?.present(restaurant.id);
+              }}
               style={{
                 flexDirection: "row",
                 alignItems: "center",

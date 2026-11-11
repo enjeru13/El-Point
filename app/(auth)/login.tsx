@@ -187,6 +187,12 @@ export default function LoginScreen() {
               </Pressable>
             </View>
 
+            <Pressable onPress={() => router.replace("/(customer)")} hitSlop={8} style={{ alignSelf: "center", paddingVertical: 2 }}>
+              <AppText variant="bodyStrong" color={C.onSurfaceVariant}>
+                Explorar sin cuenta
+              </AppText>
+            </Pressable>
+
             <AppText variant="caption" color={C.outline} align="center" style={{ lineHeight: 16 }}>
               <AppText
                 variant="caption"

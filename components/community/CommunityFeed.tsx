@@ -1,3 +1,4 @@
+import { useAuthGate } from "@/components/AuthGate";
 import { FeedRow } from "@/components/community/FeedRow";
 import { FeedSkeleton } from "@/components/community/FeedSkeleton";
 import { TopicFilters } from "@/components/community/TopicFilters";
@@ -74,9 +75,11 @@ export function CommunityFeed({
   const { data: categories = [] } = useCategories();
   const categoryLabels = useMemo(() => new Map(categories.map((c) => [c.id, c.label])), [categories]);
   const actions = usePostActions();
+  const { requireAuth } = useAuthGate();
   const filtered = !!topic || !!categoryId || !!query || !!restaurantId;
 
   const openComposer = () => {
+    if (!requireAuth("post")) return;
     impact("light");
     router.push(
       asRestaurantId

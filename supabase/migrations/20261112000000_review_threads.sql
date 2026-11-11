@@ -278,7 +278,8 @@ as $$
     pg.topic,
     pg.body,
     pg.rating,
-    pg.author_id,
+    -- Sin cuenta no se entregan ids de personas (el visitante solo lee).
+    case when (select auth.uid()) is null then null else pg.author_id end,
     coalesce(au.full_name, au.username),
     au.avatar_url,
     au.level,
@@ -323,8 +324,9 @@ as $$
   order by pg.created_at desc, pg.id desc;
 $$;
 
-revoke execute on function public.community_feed(text, smallint, uuid, text, timestamptz, uuid, int, uuid) from public, anon;
-grant execute on function public.community_feed(text, smallint, uuid, text, timestamptz, uuid, int, uuid) to authenticated;
+-- Un visitante sin cuenta puede leer Comunidad (sin ids de personas ni "me gusta" propios).
+revoke execute on function public.community_feed(text, smallint, uuid, text, timestamptz, uuid, int, uuid) from public;
+grant execute on function public.community_feed(text, smallint, uuid, text, timestamptz, uuid, int, uuid) to anon, authenticated;
 
 -- ─── Avisos, enlace público y perfil: ahora conocen los hilos ──────────────
 create or replace function public.after_post_reply_insert()

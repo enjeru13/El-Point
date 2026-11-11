@@ -6,6 +6,7 @@ import { Chip } from "@/components/ui/Chip";
 import { ChipRow } from "@/components/ui/ChipRow";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Icon } from "@/components/ui/Icon";
+import { useAuthGate } from "@/components/AuthGate";
 import { NotificationBell } from "@/components/ui/NotificationBell";
 import { QuickPickModal } from "@/components/ui/QuickPickModal";
 import { RankBadge } from "@/components/ui/RankBadge";
@@ -574,6 +575,7 @@ export default function HomeScreen() {
   const favIdsQ = useFavoriteIds();
   const favoritesQ = useFavorites();
   const toggleFav = useToggleFavorite();
+  const { requireAuth } = useAuthGate();
   const profileQ = useMyProfile();
   const categoriesQ = useCategories();
 
@@ -877,7 +879,10 @@ export default function HomeScreen() {
             ).map((tab) => (
               <Pressable
                 key={tab.key}
-                onPress={() => setActiveTab(tab.key)}
+                onPress={() => {
+                  if (tab.key === "favorites" && !requireAuth("favorite")) return;
+                  setActiveTab(tab.key);
+                }}
                 style={{
                   paddingBottom: 10,
                   paddingTop: 4,
@@ -967,6 +972,7 @@ export default function HomeScreen() {
                 compact={compactCards}
                 userLoc={userLoc}
                 onToggleFavorite={() => {
+                  if (!requireAuth("favorite")) return;
                   impact("light");
                   toggleFav.mutate({
                     restaurantId: item.restaurant.id,
