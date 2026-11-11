@@ -54,7 +54,7 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function StatusCard({ id, status, reason, name }: { id: string; status: LocalStatus; reason: string | null; name: string }) {
+function StatusCard({ id, status, reason, name, isActive }: { id: string; status: LocalStatus; reason: string | null; name: string; isActive: boolean }) {
   const mut = useSetLocalStatus();
   const [open, setOpen] = useState(false);
   const [why, setWhy] = useState("");
@@ -68,11 +68,16 @@ function StatusCard({ id, status, reason, name }: { id: string; status: LocalSta
       <div className="flex flex-wrap items-center gap-2">
         <Badge tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Badge>
         {status === "suspended" && reason && <span className="text-sm text-text-soft">{reason}</span>}
+        {status === "approved" && !isActive && <Badge tone="warn">Pausado por el dueño</Badge>}
       </div>
 
       {status === "approved" && !open && (
         <div className="flex flex-col gap-2">
-          <p className="text-sm text-text-soft">Visible en la app. Si lo suspendes, deja de verse ya y el dueño recibe un aviso con el motivo.</p>
+          <p className="text-sm text-text-soft">
+            {isActive
+              ? "Visible en la app. Si lo suspendes, deja de verse ya y el dueño recibe un aviso con el motivo."
+              : "No se ve en la app: el dueño lo pausó en Perfil, Ajustes. Vuelve a verse cuando lo active. Si lo suspendes, recibe un aviso con el motivo."}
+          </p>
           <div>
             <Button variant="danger" onClick={() => setOpen(true)}>
               Suspender local
@@ -309,7 +314,7 @@ export function LocalDetail() {
           <PlanActions id={l.id} plan={l.plan} boosted={boosted} />
         </div>
       </Section>
-      <StatusCard id={l.id} status={l.status} reason={l.status_reason} name={l.name} />
+      <StatusCard id={l.id} status={l.status} reason={l.status_reason} name={l.name} isActive={l.is_active} />
       <CategoriesCard key={l.category_ids.join()} id={l.id} current={l.category_ids} />
       <Section
         title="Pagos"

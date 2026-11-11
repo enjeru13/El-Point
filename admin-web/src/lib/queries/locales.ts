@@ -61,8 +61,10 @@ const COLUMNS = `id, name, status, status_reason, is_active, founder_rank, paid_
   owner:profiles!owner_id ( username, full_name ),
   restaurant_categories ( categories ( id, label ) )`;
 
+/** "Sin dueño" solo si no hay cuenta; un dueño que no puso nombre ni usuario sale como tal. */
 function ownerName(o: any): string {
-  return o?.username ? `@${o.username}` : (o?.full_name ?? "Sin dueño");
+  if (!o) return "Sin dueño";
+  return o.username ? `@${o.username}` : (o.full_name ?? "Dueño sin nombre");
 }
 
 export function useAllLocales() {
