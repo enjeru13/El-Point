@@ -12,7 +12,13 @@ select pg_temp.as_admin_db();
 insert into public.posts (id, author_id, topic, body, client_id)
 values ((select p1 from _g), (select a from _g), 'antojos', 'Post para el visitante', gen_random_uuid());
 insert into public.post_replies (post_id, author_id, body) values ((select p1 from _g), (select b from _g), 'Respuesta visible');
-insert into public.post_replies (post_id, author_id, body, moderation) values ((select p1 from _g), (select b from _g), 'Respuesta oculta', 'hidden');
+insert into public.post_replies (post_id, author_id, body) values ((select p1 from _g), (select b from _g), 'Respuesta oculta');
+select set_config('app.elpoint_privileged', 'on', true);
+update public.post_replies set moderation = 'hidden' where post_id = (select p1 from _g) and body = 'Respuesta oculta';
+select set_config('app.elpoint_privileged', 'off', true);
+select pg_temp.ok(
+  (select count(*) = 1 from public.post_replies where post_id = (select p1 from _g) and moderation = 'hidden'),
+  'preparacion: una respuesta oculta y una visible');
 insert into public.restaurants (id, name, status, is_active, location)
 values ((select rid from _g), 'Local G', 'approved', true, st_point(-71.50000, 8.50000)::geography);
 insert into public.reviews (id, restaurant_id, author_id, rating, body)
@@ -45,7 +51,7 @@ select pg_temp.as_admin_db();
 set local role anon;
 select pg_temp.ok(
   (select jsonb_array_length(public.public_post_replies((select p1 from _g))) = 1),
-  'respuestas_del_visitante: solo la visible');
+  'respuestas_del_visitante: solo la visible (n=' || (select jsonb_array_length(public.public_post_replies((select p1 from _g))))::text || ')');
 select pg_temp.ok(
   (select (public.public_post_replies((select p1 from _g)) -> 0 ->> 'body') = 'Respuesta visible'),
   'respuestas_del_visitante: texto');
