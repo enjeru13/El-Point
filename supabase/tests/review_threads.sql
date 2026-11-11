@@ -105,11 +105,17 @@ exception when sqlstate '42501' then
   null;
 end $$;
 select pg_temp.ok(true, 'bloqueado_no_abre_hilo');
-select pg_temp.ok(
-  (select count(*) = 0 from public.community_feed(p_post => (select p from _h))),
-  'bloqueado_no_ve_el_detalle');
 select pg_temp.as_admin_db();
 delete from public.user_blocks where blocker_id = (select a from _t);
+
+-- quien bloquea a la autora deja de ver el detalle del hilo (como en los posts)
+insert into public.user_blocks (blocker_id, blocked_id) values ((select c from _t), (select a from _t));
+select pg_temp.act_as((select c from _t));
+select pg_temp.ok(
+  (select count(*) = 0 from public.community_feed(p_post => (select p from _h))),
+  'bloqueador_no_ve_el_detalle');
+select pg_temp.as_admin_db();
+delete from public.user_blocks where blocker_id = (select c from _t);
 
 -- sin_sesion
 set local role anon;
