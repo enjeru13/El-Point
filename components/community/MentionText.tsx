@@ -1,3 +1,4 @@
+import { useAuthGate } from "@/components/AuthGate";
 import { AppText } from "@/components/ui/AppText";
 import { mentionSegments } from "@/lib/community/mentions";
 import { resolveUsername } from "@/lib/queries/publicProfile";
@@ -9,6 +10,7 @@ import type { ComponentProps } from "react";
 export function MentionText({ body, ...rest }: { body: string } & Omit<ComponentProps<typeof AppText>, "children">) {
   const { C } = useTheme();
   const router = useRouter();
+  const { requireAuth } = useAuthGate();
   const parts = mentionSegments(body);
   if (parts.length === 1 && !parts[0].username) return <AppText {...rest}>{body}</AppText>;
   return (
@@ -22,6 +24,7 @@ export function MentionText({ body, ...rest }: { body: string } & Omit<Component
             suppressHighlighting
             accessibilityRole="link"
             onPress={async () => {
+              if (!requireAuth("profile")) return;
               const id = await resolveUsername(p.username!);
               if (id) router.push(`/user/${id}` as never);
             }}

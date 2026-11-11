@@ -1,3 +1,4 @@
+import { useAuthGate } from "@/components/AuthGate";
 import { PhotoCarousel } from "@/components/community/PhotoCarousel";
 import { AppText } from "@/components/ui/AppText";
 import { Avatar } from "@/components/ui/Avatar";
@@ -47,6 +48,7 @@ export const FeedRow = memo(function FeedRow({
 }) {
   const { C } = useTheme();
   const router = useRouter();
+  const { requireAuth } = useAuthGate();
   const pending = item.id.startsWith("pending-");
   const asLocal = !!item.asRestaurantId;
   const name = asLocal ? item.asRestaurantName : item.authorName;
@@ -74,7 +76,9 @@ export const FeedRow = memo(function FeedRow({
       }}
     >
       <Pressable
-        onPress={() => router.push(`/user/${item.authorId}` as never)}
+        onPress={() => {
+          if (requireAuth("profile")) router.push(`/user/${item.authorId}` as never);
+        }}
         disabled={asLocal || pending}
         accessibilityRole="button"
         accessibilityLabel={`Ver perfil de ${name ?? "esta persona"}`}

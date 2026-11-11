@@ -219,7 +219,9 @@ export default function PostDetailScreen() {
                 const shown = open ? t.children : t.children.slice(0, 2);
                 const hidden = t.children.length - shown.length;
                 const rowProps = {
-                  onOpenAuthor: (r: Reply) => router.push(`/user/${r.authorId}` as never),
+                  onOpenAuthor: (r: Reply) => {
+                    if (requireAuth("profile")) router.push(`/user/${r.authorId}` as never);
+                  },
                   renderBody: (b: string) => <MentionText body={b} variant="body" />,
                   onOpenRestaurant: actions.onOpenRestaurant,
                   onMenu: onReplyMenu,
