@@ -611,16 +611,17 @@ export default function SearchScreen() {
   const best = hasQuery ? (results[0] ?? null) : null;
   const rest = best ? results.slice(1) : results;
 
+  function resetFilters() { setSort(null); setPrice(null); setOnlyOpen(false); setOnlyGhost(false); setAmenitySlugs(new Set()); setPaymentSlugs(new Set()); }
+  /** "Limpiar" del estado sin resultados: quita la búsqueda, la categoría y todos los filtros. */
   function clear() {
     setQuery('');
     setActiveCat(null);
     setFilter(false);
-    setSort(null);
-    setPrice(null);
-    setOnlyOpen(false);
+    // Antes solo quitaba orden, precio y "abiertos": con una comodidad, un método de
+    // pago o "cocina fantasma" activos, el botón no hacía nada.
+    resetFilters();
     inputRef.current?.blur();
   }
-  function resetFilters() { setSort(null); setPrice(null); setOnlyOpen(false); setOnlyGhost(false); setAmenitySlugs(new Set()); setPaymentSlugs(new Set()); }
   function goToPlace(id: string) {
     if (query.trim()) pushRecent(query);
     router.push(`/restaurant/${id}`);
