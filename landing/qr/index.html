@@ -89,15 +89,15 @@
     <section class="poster" id="poster">
       <div class="band">
         <div class="brand"><img src="../assets/logo-pin-dark.png" alt="" /><span>el Point</span></div>
-        <h2>¡Rankéanos!</h2>
-        <p class="sub">Escanea el código y cuéntanos qué tal la pasaste</p>
+        <h2 data-title>¡Rankéanos!</h2>
+        <p class="sub" data-sub>Escanea el código y cuéntanos qué tal la pasaste</p>
       </div>
       <div class="qrbox"><div class="qr" data-qr></div></div>
       <p class="name" data-name></p>
       <div class="steps">
-        <div class="step"><b>1</b>Escanea el código con la cámara</div>
-        <div class="step"><b>2</b>Dale tus estrellas y escribe tu opinión</div>
-        <div class="step"><b>3</b>Gana XP y sube de nivel</div>
+        <div class="step"><b>1</b><span data-step>Escanea el código con la cámara</span></div>
+        <div class="step"><b>2</b><span data-step>Dale tus estrellas y escribe tu opinión</span></div>
+        <div class="step"><b>3</b><span data-step>Gana XP y sube de nivel</span></div>
       </div>
       <div class="foot">elpoint-app.netlify.app · San Cristóbal, Táchira</div>
     </section>
@@ -113,6 +113,30 @@
       var name = (params.get("n") || "").slice(0, 60);
       var valid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
       var url = "https://elpoint-app.netlify.app/r/?id=" + id;
+
+      // Sin local (?app): cartel para descargar la app. El QR va a /descargar/,
+      // que manda a cada teléfono a su tienda.
+      var app = params.has("app");
+      var text = app
+        ? {
+            title: "¡Descárgala!",
+            sub: "Escanea el código y descubre dónde comer en San Cristóbal",
+            name: "Gratis en el App Store",
+            steps: ["Escanea el código con la cámara", "Descarga El Point gratis", "Encuentra tu próximo antojo"],
+            card: "Escanea y descarga la app",
+            bar: "Cartel QR · Descarga la app",
+          }
+        : null;
+      if (app) {
+        valid = true;
+        name = text.name;
+        url = "https://elpoint-app.netlify.app/descargar/";
+        document.querySelector("[data-title]").textContent = text.title;
+        document.querySelector("[data-sub]").textContent = text.sub;
+        document.querySelectorAll("[data-step]").forEach(function (el, i) { el.textContent = text.steps[i]; });
+        document.querySelector(".bar h1").textContent = text.bar;
+        document.title = text.bar + " · El Point";
+      }
 
       function qrSvg() {
         var q = qrcode(0, "M");
@@ -138,8 +162,8 @@
         c.className = "tcard";
         c.innerHTML =
           '<div class="brand"><img src="../assets/logo-pin.png" alt="" /><span>el Point</span></div>' +
-          "<h3>¡Rankéanos!</h3>" +
-          '<p class="sub">Escanea y deja tu rank</p>' +
+          "<h3>" + (app ? text.title : "¡Rankéanos!") + "</h3>" +
+          '<p class="sub">' + (app ? text.card : "Escanea y deja tu rank") + "</p>" +
           '<div class="qr">' + svg + "</div>" +
           '<div class="name"></div>' +
           '<div class="url">elpoint-app.netlify.app</div>';
