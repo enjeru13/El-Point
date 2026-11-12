@@ -75,22 +75,23 @@ El Point es la guía para descubrir dónde comer en San Cristóbal, Táchira. En
 
 PARA COMENSALES
 • Explora sin crear cuenta: la cuenta solo hace falta para guardar favoritos, dejar un rank o participar.
-• Descubre locales por categoría, cercanía y si están abiertos ahora, en una lista o en el mapa.
-• Busca por nombre, categoría, comodidades y métodos de pago.
-• Mira fotos, menú, horario y promociones de cada local.
+• Descubre locales por antojo: arepas, cachapas, parrilla, pollo en brasa, hamburguesas, pizza, sushi, comida andina, panaderías, cafés y más.
+• Filtra por cercanía, por lo que está abierto ahora, por comodidades y por métodos de pago, en una lista o en el mapa.
+• Mira fotos, menú, horario y promociones de cada local, y amplía las fotos con los dedos.
 • Ve los precios del menú en dólares, bolívares o pesos, con la tasa del local y la fecha en que se actualizó.
 • Arma tu pedido desde el menú: agrega platos, ajusta cantidades, elige si pasas a buscarlo o es delivery, marca en el mapa dónde te lo llevan y envíalo listo por WhatsApp.
-• Comunidad: pide recomendaciones, comparte tus descubrimientos, crea y vota en encuestas, responde a otros, menciona a alguien con @ y comparte publicaciones fuera de la app.
-• Deja tu rank con estrellas, fotos y comentario. Cada rank y cada participación te da XP: sube de nivel y de rango, y mira el perfil de otros comensales.
+• Deja tu rank con estrellas, fotos y comentario. Cada rank y cada participación te da XP: sube de nivel y de rango.
+• Comunidad: pide recomendaciones, comparte tus descubrimientos, crea y vota en encuestas, responde a las reseñas y a otros comensales, y menciona a cualquiera con @.
+• Mira el perfil de otros comensales y comparte cualquier publicación fuera de la app.
 • Guarda tus favoritos y recibe avisos de promociones y del plato del día, solo si los activas.
 • Cocinas fantasma: negocios sin local físico que venden por delivery o pickup.
 • Modo claro y oscuro.
 
 PARA DUEÑOS DE LOCALES
-• Registra tu local y aparece en el mapa y en las búsquedas.
+• Registra tu local y aparece en las búsquedas y en el mapa. Si ya está en El Point, reclámalo desde su perfil.
 • Con el perfil completo, tus clientes ven tu contacto, tu menú con precios en dólares, bolívares o pesos, tu plato del día, tu galería de fotos, tu horario y tus promociones, y pueden armar su pedido y enviártelo por WhatsApp.
-• Configura si haces delivery o pasan a buscarlo, y cuánto cobras por el envío.
 • Sube tu menú en imágenes (hasta 10), aparte de tus fotos, o en PDF.
+• Configura si haces delivery o pasan a buscarlo, y cuánto cobras por el envío.
 • Responde las reseñas de tus clientes y consigue más con tu cartel QR "Rankéanos".
 • Mira cuántas personas te ven y te contactan, por qué canal y qué días funcionan mejor.
 
