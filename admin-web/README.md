@@ -40,7 +40,7 @@ mismo repo de GitHub, pero:
    `VITE_SUPABASE_KEY` (los mismos valores del `.env` de la app / landing).
 6. **Importante para el login con Google**: Supabase → Authentication → URL
    Configuration → Redirect URLs — agregá la URL final de este sitio (ej.
-   `https://elpoint-admin.netlify.app/**`). Sin esto Google redirige de
+   `https://panel-admin-elpoint.netlify.app/**`). Sin esto Google redirige de
    vuelta y Supabase rechaza la sesión. `localhost:5183` ya funciona sin
    tocar nada (Supabase lo permite por defecto en desarrollo).
 7. Opcional: poné el sitio en modo "Password protection" (Netlify → Site
