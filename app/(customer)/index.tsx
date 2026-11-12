@@ -843,10 +843,12 @@ export default function HomeScreen() {
             </AppText>
             <Icon name="arrow-right" size={18} color={C.primary} />
           </Pressable>
-        </View>
 
-        {/* Gustos: solo si la cuenta no eligió categorías */}
-        <PreferencesCard />
+          {/* Gustos: solo si la cuenta no eligió categorías. Va dentro de la
+              sección 0: como hijo propio del ScrollView corría los índices y
+              quedaba como cabecera pegajosa en lugar de los filtros. */}
+          <PreferencesCard />
+        </View>
 
         {/* ── 1: Filtros pegajosos (categorías + tabs) ── */}
         <View style={{ backgroundColor: C.background }}>

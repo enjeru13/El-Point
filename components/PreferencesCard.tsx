@@ -9,9 +9,18 @@ import { useTheme } from "@/lib/ThemeContext";
 import { useToast } from "@/lib/toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 
 const DISMISSED_KEY = "elpoint.prefsCardDismissed";
+const ROWS = 3;
+
+/** Reparte la lista en `rows` filas seguidas, conservando el orden. */
+function chunkRows<T>(items: T[], rows: number): T[][] {
+  const size = Math.ceil(items.length / rows);
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  return out;
+}
 
 /**
  * "¿Qué te gusta comer?" en el inicio, para quien creó su cuenta sin elegir
@@ -60,8 +69,6 @@ export function PreferencesCard() {
   return (
     <View
       style={{
-        marginHorizontal: 20,
-        marginBottom: 16,
         padding: 16,
         gap: 12,
         borderRadius: 20,
@@ -85,23 +92,34 @@ export function PreferencesCard() {
         </Pressable>
       </View>
 
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-        {categories.map((c) => (
-          <Chip
-            key={c.id}
-            label={c.label}
-            icon={c.icon}
-            active={picked.has(c.id)}
-            onPress={() =>
-              setPicked((prev) => {
-                const next = new Set(prev);
-                if (!next.delete(c.id)) next.add(c.id);
-                return next;
-              })
-            }
-          />
+      {/* Tres filas que se deslizan de lado: con todas las categorías en
+          bloque la tarjeta ocupaba la pantalla entera. */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ marginHorizontal: -16 }}
+        contentContainerStyle={{ flexDirection: "column", paddingHorizontal: 16, gap: 8 }}
+      >
+        {chunkRows(categories, ROWS).map((row, i) => (
+          <View key={i} style={{ flexDirection: "row", gap: 8 }}>
+            {row.map((c) => (
+              <Chip
+                key={c.id}
+                label={c.label}
+                icon={c.icon}
+                active={picked.has(c.id)}
+                onPress={() =>
+                  setPicked((prev) => {
+                    const next = new Set(prev);
+                    if (!next.delete(c.id)) next.add(c.id);
+                    return next;
+                  })
+                }
+              />
+            ))}
+          </View>
         ))}
-      </View>
+      </ScrollView>
 
       <Button
         label={picked.size > 0 ? `Guardar (${picked.size})` : "Guardar"}
