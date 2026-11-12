@@ -62,10 +62,10 @@ El Point nace en San Cristóbal y crece con su gente. Descárgala y deja tu rank
 
 Los textos de la 1.0 de arriba quedaron como referencia. Para la 1.2.0 pega estos. Siguen sin mencionar planes, precios de suscripción ni otras plataformas.
 
-**Promotional Text (máx. 170, 146 usados). Se puede cambiar en cualquier momento sin revisión:**
+**Promotional Text (máx. 170, 145 usados). Se puede cambiar en cualquier momento sin revisión:**
 
 ```
-Descubre dónde comer en San Cristóbal. Arma tu pedido desde el menú y envíalo por WhatsApp, mira los precios en $, Bs o COP y debate en Comunidad.
+Descubre dónde comer en San Cristóbal, sin crear cuenta. Mira el menú en $, Bs o COP, pide por WhatsApp y conversa en Comunidad sobre cada lugar.
 ```
 
 **Description (máx. 4000):**
