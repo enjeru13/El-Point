@@ -130,37 +130,40 @@ No repiten palabras del nombre ("El Point") ni del subtítulo ("Dónde comer en 
 ```
 El Point es una guía de restaurantes de San Cristóbal, Venezuela. Los usuarios descubren locales, ven su menú, arman su pedido y lo envían por WhatsApp, y participan en una comunidad. Los dueños registran su local y lo administran desde la pestaña "Mi local".
 
+CUENTAS DE PRUEBA
+- Comensal: la de los campos de inicio de sesión de arriba.
+- Dueño de local (con plan activo, local "Hamburguesas El Felipe"):
+  Usuario: atencion.elpoint+dueno@gmail.com
+  Contraseña: [ESCRIBIR AQUÍ]
+
 SIN CUENTA (NUEVO EN ESTA VERSIÓN)
 Al terminar la presentación, la app abre en el inicio sin pedir cuenta: se pueden ver locales, mapa, búsqueda, menús, tasas, reseñas y Comunidad en lectura, y armar un pedido de WhatsApp. La cuenta se pide solo cuando la persona quiere guardar algo suyo (favoritos, dejar un rank, marcar una reseña como útil, publicar, responder, votar, reportar o ver avisos): aparece una hoja "Crea tu cuenta para…" con "Crear cuenta", "Ya tengo cuenta" y "Ahora no". Pestaña Perfil sin cuenta: explica qué se gana al crearla.
 
-Inicio de sesión: correo y contraseña, Google y Apple. Hay dos cuentas de prueba (datos abajo).
+Inicio de sesión: correo y contraseña, Google y Apple. Quien entra con Google o Apple elige su @usuario una sola vez.
 
 La app no vende nada dentro de ella ni muestra precios de planes. Los pedidos no se pagan en la app: se envían como un mensaje de WhatsApp al local, y el pago se acuerda directamente con él. Las funciones del perfil completo de un local las activa nuestro equipo desde un panel administrativo.
 
-NOVEDADES DE ESTA VERSIÓN (pestaña Comunidad)
-- Responder a una reseña: tocar una reseña en el feed abre su conversación; también el botón de la burbuja.
-- Responder a otras respuestas y dar me gusta a una respuesta.
-- Mencionar a otro usuario escribiendo @ y su nombre.
+NOVEDADES DE ESTA VERSIÓN
+- Responder a una reseña: en Comunidad, tocar una reseña abre su conversación (también el botón de la burbuja).
+- Responder a otras respuestas, dar me gusta y mencionar con @.
 - Perfil público de otro usuario: toca su foto o su @.
-- Encuestas: en Comunidad, el botón del lápiz, "Encuesta" (2 a 4 opciones; el voto es anónimo y se puede cambiar).
+- Encuestas: en Comunidad, el botón del lápiz, "Encuesta" (2 a 4 opciones; voto anónimo que se puede cambiar).
 - Compartir una publicación fuera de la app (ícono de avión de papel): abre una página web con el contenido.
 - Fotos: las de las reseñas y las de la galería del local se abren a pantalla completa y se amplían con los dedos.
-- Menú en imágenes: los locales con plan pueden subir hasta 10 imágenes de su carta; se ven en la página del local, sobre el botón del PDF.
+- Menú en imágenes: en "Hamburguesas El Felipe", sobre el botón del PDF. El dueño lo edita en Mi local, Menú.
 - Avisos: al tocar uno, la app abre el lugar donde ocurrió. Ajustes tiene los interruptores "Comunidad" y "Logros y rachas".
 
 CONTENIDO GENERADO POR USUARIOS
 - Reportar: en cada publicación ("···", "Reportar post"), cada respuesta ("···", "Reportar respuesta"), cada reseña y cada local.
-- Bloquear: en esos mismos menús ("Bloquear a @usuario") y en el perfil público del usuario. Los bloqueados se gestionan en Ajustes, "Usuarios bloqueados". Quien está bloqueado deja de verse en publicaciones, respuestas, reseñas y encuestas.
+- Bloquear: en esos mismos menús ("Bloquear a @usuario") y en el perfil público del usuario. Los bloqueados se gestionan en Ajustes, "Usuarios bloqueados".
 - Eliminar: cada usuario puede borrar sus propias publicaciones y respuestas.
-- Un equipo de moderación revisa los reportes. Contacto de soporte: atencion.elpoint@gmail.com y, en la app, Ajustes, "Ayuda y soporte".
+- Un equipo de moderación revisa los reportes. Soporte: atencion.elpoint@gmail.com y, en la app, Ajustes, "Ayuda y soporte".
 - Eliminar la cuenta: Ajustes, "Eliminar cuenta".
 
 Notificaciones: las promociones llegan solo si el usuario las activa en Ajustes.
 
 PARA PROBAR EL PEDIDO
 Con la cuenta de comensal (o sin cuenta), abre "Hamburguesas El Felipe" y agrega platos al pedido. Elige "Delivery" y marca una ubicación en el mapa, o "Paso a buscarlo". Al tocar "Enviar pedido por WhatsApp" se abre WhatsApp con el mensaje armado (si el dispositivo no tiene WhatsApp, el botón avisa).
-
-Cuentas de prueba: ver abajo.
 ```
 
 **Keywords (máx. 100 caracteres, separadas por comas, sin espacios):**
