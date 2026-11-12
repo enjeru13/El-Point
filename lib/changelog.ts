@@ -32,6 +32,8 @@ export const CHANGELOG: Release[] = [
           "Mira locales, menús y Comunidad sin crear cuenta. Te pedimos la cuenta solo cuando quieras guardar o participar.",
           "Crear tu cuenta toma una sola pantalla: usuario, correo y contraseña.",
           "Tus categorías favoritas las eliges ya dentro, cuando quieras.",
+          "Si entras con Google o Apple, eliges tu @usuario una sola vez.",
+          "Nueva categoría Cachapas, y Empanadas ahora es Pasteles y empanadas.",
           "Una presentación más corta y menos tutoriales.",
         ],
       },
@@ -78,6 +80,8 @@ export const CHANGELOG: Release[] = [
         notes: [
           "El teclado baja al arrastrar, sin buscar un espacio en blanco donde tocar.",
           "El logo de arriba ya no se corta cuando usas el texto grande del teléfono.",
+          "Tu sesión se mantiene abierta aunque cierres la app.",
+          "“Limpiar” en Explorar quita todos los filtros.",
         ],
       },
       {

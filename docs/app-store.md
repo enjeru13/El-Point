@@ -104,15 +104,17 @@ El Point nace en San Cristóbal y crece con su gente. Descárgala y deja tu rank
 Explora sin cuenta y conversa en Comunidad.
 
 • Mira locales, menús y Comunidad sin crear cuenta. Te pedimos la cuenta solo cuando quieras guardar o participar.
-• Crear tu cuenta toma una sola pantalla: usuario, correo y contraseña.
+• Crear tu cuenta toma una sola pantalla: usuario, correo y contraseña. Si entras con Google o Apple, eliges tu @usuario una sola vez.
 • Responde a las reseñas: cada reseña abre su conversación.
 • Responde a otras respuestas, dale me gusta y menciona a cualquiera con @.
-• Abre las fotos de las reseñas dentro de cada local y amplíalas con los dedos. También las de la galería del local y las de Comunidad.
+• Crea encuestas de 2 a 4 opciones, con texto libre o con locales de El Point. Votar es anónimo y suma XP.
+• Abre las fotos de las reseñas dentro de cada local y amplíalas con los dedos, igual que las de la galería y las de Comunidad.
 • Los locales pueden subir su menú en imágenes (hasta 10), aparte de su galería.
-• Crea encuestas de 2 a 4 opciones, con texto libre o con locales de El Point. Votar es anónimo y suma XP. Al cerrar te avisamos qué opción ganó.
+• Nueva categoría: Cachapas. Y Empanadas ahora es Pasteles y empanadas.
 • Comparte cualquier publicación fuera de la app: quien no tiene El Point la ve completa en la web.
 • Tocar un aviso te lleva justo a donde pasó. Nuevos ajustes de avisos: "Comunidad" y "Logros y rachas".
-• El teclado baja al arrastrar y el logo ya no se corta con el texto grande del teléfono.
+• Tu sesión se mantiene abierta aunque cierres la app.
+• Arreglos: el teclado baja al arrastrar, el logo ya no se corta con el texto grande y "Limpiar" en Explorar quita todos los filtros.
 ```
 
 **Notas para el revisor (App Review Information) de la 1.2.0:**
