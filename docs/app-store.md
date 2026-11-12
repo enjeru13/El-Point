@@ -147,7 +147,7 @@ CONTENIDO GENERADO POR USUARIOS
 Notificaciones: las promociones llegan solo si el usuario las activa en Ajustes.
 
 PARA PROBAR EL PEDIDO
-Con la cuenta de comensal (o sin cuenta), abre "Restaurante Demo" y agrega platos al pedido. Elige "Delivery" y marca una ubicación en el mapa, o "Paso a buscarlo". Al tocar "Enviar pedido por WhatsApp" se abre WhatsApp con el mensaje armado (si el dispositivo no tiene WhatsApp, el botón avisa).
+Con la cuenta de comensal (o sin cuenta), abre "Hamburguesas El Felipe" y agrega platos al pedido. Elige "Delivery" y marca una ubicación en el mapa, o "Paso a buscarlo". Al tocar "Enviar pedido por WhatsApp" se abre WhatsApp con el mensaje armado (si el dispositivo no tiene WhatsApp, el botón avisa).
 
 Cuentas de prueba: ver abajo.
 ```
