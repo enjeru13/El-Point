@@ -117,6 +117,14 @@ Explora sin cuenta y conversa en Comunidad.
 • Arreglos: el teclado baja al arrastrar, el logo ya no se corta con el texto grande y "Limpiar" en Explorar quita todos los filtros.
 ```
 
+**Keywords de la 1.2 (máx. 100, 100 usados; sin espacios después de las comas):**
+
+```
+restaurantes,comida,delivery,menu,arepas,cachapas,hamburguesas,pizza,sushi,panaderia,Tachira,pedidos
+```
+
+No repiten palabras del nombre ("El Point") ni del subtítulo ("Dónde comer en San Cristóbal"), que la App Store ya usa para la búsqueda. Sin marcas de otras apps (por ejemplo, WhatsApp), por la regla 2.3.7.
+
 **Notas para el revisor (App Review Information) de la 1.2.0:**
 
 ```
